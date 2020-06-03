@@ -1,0 +1,2 @@
+admin:
+  endpoint: dns:///flyte.lyft.net

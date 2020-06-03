@@ -1,0 +1,5 @@
+admin:
+  endpoint: dns:///flyte.lyft.net
+logger:
+  show-source: true
+  level: 5
