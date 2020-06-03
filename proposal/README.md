@@ -1,4 +1,4 @@
-#Introduction
+# Introduction
 
 This document proposes, **flytectl** as one singular CLI that interacts with flyteadmin service. It is proposed to write the CLI in **Golang** and would support both gRPC and REST endpoints of
 FlyteAdmin. We will start with gRPC endpoint as the client is easily generated and in future we should investigate generation of a Swagger based REST client from the gRPC specification. As we build
@@ -8,14 +8,14 @@ flytekit), but the intention is that we will eventually replace **flytekit/flyte
 We also recommend that the design of flytectl is careful and it could helps us with delivering user features faster without having to rely on the UI. flytectl with follow standard oauth2 for
 authentication already supported by flyteAdmin. Moreover, flytectl should be readily available on almost any platform - OSX, Linux and Windows. We will strive to keep it relatively lean and fast.
 
-#Why One CLI?
+# Why One CLI?
 
 As we build multiple SDK's they need a native way of interacting with the API. Having multiple CLI's makes it hard to keep all of them in sync as we rapidly evolve the API and add more features.
 
 *Diagram here*
 
 
-#Why Golang?
+# Why Golang?
 - Most of Flytebackend is written in golang
 - Golang offers great CLI tooling support with viper and cobra
 - Golang toolchain to create cross-compiled small, light weight binary is really efficient and easy to use
@@ -23,7 +23,7 @@ As we build multiple SDK's they need a native way of interacting with the API. H
 - we have multiple common libraries available to ease the development of this tool
 - kubectl is a stellar example of a cli done well
 
-#API
+# API
 
 ## Top level commands
 
