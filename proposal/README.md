@@ -23,6 +23,9 @@ As we build multiple SDK's they need a native way of interacting with the API. H
 - we have multiple common libraries available to ease the development of this tool
 - kubectl is a stellar example of a cli done well
 
+## Generating Swagger code
+We started exploring this (flytetools)[https://github.com/lyft/flytetools#tools] has some work. We also got approached by the swagger code gen maintainer to see if they can help.
+
 # API
 
 ## Top level commands
