@@ -3,23 +3,19 @@ package cmd
 import (
 	"context"
 
-	"github.com/lyft/flytestdlib/config"
+	"github.com/lyft/flytectl/cmd/config"
+
+	stdConfig "github.com/lyft/flytestdlib/config"
 	"github.com/lyft/flytestdlib/config/viper"
 	"github.com/spf13/cobra"
 )
 
 var (
 	cfgFile        string
-	configAccessor = viper.NewAccessor(config.Options{StrictMode: true})
+	configAccessor = viper.NewAccessor(stdConfig.Options{StrictMode: true})
 )
 
-type persistentFlags struct {
-	Project *string
-	Domain  *string
-}
-
 func newRootCmd() *cobra.Command {
-	persistentFlags := persistentFlags{}
 	rootCmd := &cobra.Command{
 		PersistentPreRunE: initConfig,
 	}
@@ -29,15 +25,20 @@ func newRootCmd() *cobra.Command {
 
 	configAccessor.InitializePflags(rootCmd.PersistentFlags())
 
-	persistentFlags.Project = rootCmd.PersistentFlags().String("project", "", "Specifies the Flyte project.")
-	persistentFlags.Domain = rootCmd.PersistentFlags().String("domain", "", "Specifies the Flyte project's domain.")
+	// Due to https://github.com/lyft/flyte/issues/341, project flag will have to be specified as
+	// --root.project, this adds a convenience on top to allow --project to be used
+	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Project), "project", "p", "", "Specifies the Flyte project.")
+	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Domain), "domain", "d", "", "Specifies the Flyte project's domain.")
 
-	rootCmd.AddCommand(newTimelineCmd(persistentFlags))
+	rootCmd.AddCommand(viper.GetConfigCommand())
+	rootCmd.AddCommand(versionCmd)
+	config.GetConfig()
+
 	return rootCmd
 }
 
 func initConfig(_ *cobra.Command, _ []string) error {
-	configAccessor = viper.NewAccessor(config.Options{
+	configAccessor = viper.NewAccessor(stdConfig.Options{
 		StrictMode:  true,
 		SearchPaths: []string{cfgFile},
 	})

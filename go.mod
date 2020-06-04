@@ -15,6 +15,7 @@ require (
 	github.com/lyft/flytestdlib v0.2.31
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/spf13/cobra v0.0.5
+	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/objx v0.2.0 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/wcharczuk/go-chart v2.0.1+incompatible

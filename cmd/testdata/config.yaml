@@ -1,2 +1,3 @@
 admin:
-  endpoint: dns:///flyte.lyft.net
+  endpoint: http://localhost:30082
+  insecure: true
