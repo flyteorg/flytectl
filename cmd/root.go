@@ -2,8 +2,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
+
+	"github.com/lyft/flytectl/cmd/get"
 
 	"github.com/lyft/flytectl/cmd/config"
+	"github.com/lyft/flyteidl/clients/go/admin"
 
 	stdConfig "github.com/lyft/flytestdlib/config"
 	"github.com/lyft/flytestdlib/config/viper"
@@ -14,6 +18,8 @@ var (
 	cfgFile        string
 	configAccessor = viper.NewAccessor(stdConfig.Options{StrictMode: true})
 )
+
+type CmdFunc func(ctx context.Context, args []string, cmdCtx CommandContext) error
 
 func newRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
@@ -32,6 +38,7 @@ func newRootCmd() *cobra.Command {
 
 	rootCmd.AddCommand(viper.GetConfigCommand())
 	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(get.CreateGetCommand())
 	config.GetConfig()
 
 	return rootCmd
@@ -51,6 +58,33 @@ func initConfig(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
+func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CmdFunc) {
+	for resource, getFunc := range cmdFuncs {
+		cmd := &cobra.Command{
+			Use:   resource,
+			Short: fmt.Sprintf("Retrieves %v resources.", resource),
+			RunE:  generateCommandFunc(getFunc),
+		}
+
+		rootCmd.AddCommand(cmd)
+	}
+}
+
 func ExecuteCmd() error {
 	return newRootCmd().Execute()
+}
+
+func generateCommandFunc(cmdFunc CmdFunc) func(cmd *cobra.Command, args []string) error {
+	return func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		adminClient, err := admin.InitializeAdminClientFromConfig(ctx)
+		if err != nil {
+			return err
+		}
+
+		return cmdFunc(ctx, args, CommandContext{
+			out:         cmd.OutOrStdout(),
+			adminClient: adminClient,
+		})
+	}
 }

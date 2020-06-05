@@ -1,5 +1,6 @@
 admin:
-  endpoint: dns:///flyte.lyft.net
+  endpoint: http://localhost:30082
+  insecure: true
 logger:
   show-source: true
-  level: 5
+  level: 1
