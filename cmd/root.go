@@ -19,7 +19,7 @@ var (
 	configAccessor = viper.NewAccessor(stdConfig.Options{StrictMode: true})
 )
 
-type CmdFunc func(ctx context.Context, args []string, cmdCtx CommandContext) error
+type CommandFunc func(ctx context.Context, args []string, cmdCtx CommandContext) error
 
 func newRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
@@ -58,7 +58,7 @@ func initConfig(_ *cobra.Command, _ []string) error {
 	return nil
 }
 
-func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CmdFunc) {
+func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CommandFunc) {
 	for resource, getFunc := range cmdFuncs {
 		cmd := &cobra.Command{
 			Use:   resource,
@@ -74,7 +74,7 @@ func ExecuteCmd() error {
 	return newRootCmd().Execute()
 }
 
-func generateCommandFunc(cmdFunc CmdFunc) func(cmd *cobra.Command, args []string) error {
+func generateCommandFunc(cmdFunc CommandFunc) func(cmd *cobra.Command, args []string) error {
 	return func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		adminClient, err := admin.InitializeAdminClientFromConfig(ctx)

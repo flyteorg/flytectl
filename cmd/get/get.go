@@ -18,7 +18,7 @@ func CreateGetCommand() *cobra.Command {
 		Short: "Retrieve various resource.",
 	}
 
-	getResourcesFuncs := map[string]cmd.CmdFunc{
+	getResourcesFuncs := map[string]cmd.CommandFunc{
 		"projects": getProjectsFunc,
 	}
 
