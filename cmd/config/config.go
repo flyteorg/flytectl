@@ -1,6 +1,8 @@
 package config
 
-import "github.com/lyft/flytestdlib/config"
+import (
+	"github.com/lyft/flytestdlib/config"
+)
 
 //go:generate pflags Config
 

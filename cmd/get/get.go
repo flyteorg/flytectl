@@ -3,7 +3,7 @@ package get
 import (
 	"context"
 
-	"github.com/lyft/flytectl/cmd"
+	"github.com/lyft/flytectl/cmd/core"
 
 	"github.com/lyft/flytestdlib/logger"
 
@@ -18,16 +18,16 @@ func CreateGetCommand() *cobra.Command {
 		Short: "Retrieve various resource.",
 	}
 
-	getResourcesFuncs := map[string]cmd.CommandFunc{
+	getResourcesFuncs := map[string]core.CommandFunc{
 		"projects": getProjectsFunc,
 	}
 
-	cmd.AddCommands(getCmd, getResourcesFuncs)
+	core.AddCommands(getCmd, getResourcesFuncs)
 
 	return getCmd
 }
 
-func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmd.CommandContext) error {
+func getProjectsFunc(ctx context.Context, args []string, cmdCtx core.CommandContext) error {
 	projects, err := cmdCtx.AdminClient().ListProjects(ctx, &admin.ProjectListRequest{})
 	if err != nil {
 		return err
