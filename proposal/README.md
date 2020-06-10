@@ -71,9 +71,13 @@ $ flytectl --endpoint "example.flyte.net" --project "p" --domain "d" delete work
 Create may need more information than can be easily passed in command line and we recommend using files to create an entity. The file could be in protobuf, jsonpb (json) or jsonpb (yaml) form.
 Eventually we may want to simplify the json and yaml representations but that is not required in first pass. We may also want to create just a separate option for that.
 
+The create for Task and Workflow is essential what is encompassed in the pyflyte as the registration process. We will decouple the registration process such that pyflyte, jflyte (other native cli's or
+code methods) can dump a serialized representations of the workflows and tasks that are directly consumed by **flytectl**. Thus flytectl is essential in every flow for the user.
+
+![Registration process](flytectl_interaction.png)
+
 ### update
-This is a lower priority option as most entities in flyte are immutable and do not support updates. For the ones where update is supported, we should look into retrieving the existing and allow
-editing in an editor, like kubectl edit does.
+This is a lower priority option as most entities in flyte are immutable and do not support updates. For the ones where update is supported, we should look into retrieving the existing and allow editing in an editor, like kubectl edit does.
 
 **To be specified**
 
