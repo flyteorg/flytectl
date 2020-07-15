@@ -1,4 +1,4 @@
-DEVELOPING FLYTECTL:
+# Developing FlyteCtl
 
 A local cluster can be setup via --> https://lyft.github.io/flyte/administrator/install/getting_started.html#getting-started
 
