@@ -16,7 +16,6 @@ var (
 	configAccessor = viper.NewAccessor(stdConfig.Options{StrictMode: true})
 )
 
-
 func newRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		PersistentPreRunE: initConfig,

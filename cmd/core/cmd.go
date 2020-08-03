@@ -27,7 +27,6 @@ func generateCommandFunc(cmdFunc CommandFunc) func(cmd *cobra.Command, args []st
 		if err != nil {
 			return err
 		}
-
 		return cmdFunc(ctx, args, CommandContext{
 			out:         cmd.OutOrStdout(),
 			adminClient: adminClient,
