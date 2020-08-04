@@ -6,6 +6,7 @@ import (
 	"github.com/lyft/flytectl/cmd/config"
 	"github.com/lyft/flytectl/cmd/core"
 
+	core "github.com/lyft/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/lyft/flytestdlib/logger"
 
 	"github.com/landoop/tableprinter"
@@ -19,19 +20,19 @@ func CreateGetCommand() *cobra.Command {
 		Short: "Retrieve various resource.",
 	}
 
-	getResourcesFuncs := map[string]core.CommandFunc{
+	getResourcesFuncs := map[string]cmdCore.CommandFunc{
 		"projects": getProjectsFunc,
-		"domains":  getDomainFuc,
+		"domains":  getDomainFunc,
 		"tasks":    getTaskFunc,
 		"workflows":    getWorkflowFunc,
 	}
 
-	core.AddCommands(getCmd, getResourcesFuncs)
+	cmdCore.AddCommands(getCmd, getResourcesFuncs)
 
 	return getCmd
 }
 
-func getProjectsFunc(ctx context.Context, args []string, cmdCtx core.CommandContext) error {
+func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	projects, err := cmdCtx.AdminClient().ListProjects(ctx, &admin.ProjectListRequest{})
 	if err != nil {
 		return err
@@ -42,23 +43,47 @@ func getProjectsFunc(ctx context.Context, args []string, cmdCtx core.CommandCont
 	return nil
 }
 
-func getTaskFunc(ctx context.Context, args []string, cmdCtx core.CommandContext) error {
+func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
+	if config.GetConfig().Project == "" {
+		return fmt.Errorf("Please set project name to get domain")
+	}
+	if config.GetConfig().Domain == "" {
+		return fmt.Errorf("Please set project name to get workflow")
+	}
+	if len(args) == 1 {
+		task, err := cmdCtx.AdminClient().ListTasks(ctx, &admin.ResourceListRequest{
+			Id : &admin.NamedEntityIdentifier{
+				Project: config.GetConfig().Project,
+				Domain:  config.GetConfig().Domain,
+				Name: args[0],
+			},
+			Limit:   3,
+		})
+		if err != nil {
+			return err
+		}
+		logger.Debugf(ctx, "Retrieved Task",)
+		printer := tableprinter.New(cmdCtx.OutputPipe())
+		printer.Print(toPrintableGetTask(task.Tasks))
+		return nil
+	}
+
 	tasks, err := cmdCtx.AdminClient().ListTaskIds(ctx, &admin.NamedEntityIdentifierListRequest{
 		Project: config.GetConfig().Project,
 		Domain:  config.GetConfig().Domain,
-		Limit:   3,
+		Limit: 10,
 	})
 	if err != nil {
 		return err
 	}
-
 	logger.Debugf(ctx, "Retrieved %v Task", len(tasks.Entities))
+
 	printer := tableprinter.New(cmdCtx.OutputPipe())
 	printer.Print(toPrintableTask(tasks.Entities))
 	return nil
 }
 
-func getWorkflowFunc(ctx context.Context, args []string, cmdCtx core.CommandContext) error {
+func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	if config.GetConfig().Project == "" {
 		return fmt.Errorf("Please set project name to get domain")
 	}
@@ -66,9 +91,21 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx core.CommandCont
 		return fmt.Errorf("Please set project name to get workflow")
 	}
 	if len(args) > 0 {
-		//workflows, err := cmdCtx.AdminClient().GetWorkflow(ctx, &admin.ObjectGetRequest{
-		//	Id : args[0],
-		//})
+		workflows, err := cmdCtx.AdminClient().ListWorkflows(ctx, &admin.ResourceListRequest{
+			Id : &admin.NamedEntityIdentifier{
+				Project: config.GetConfig().Project,
+				Domain:  config.GetConfig().Domain,
+				Name: args[0],
+			},
+			Limit:   3,
+		})
+		if err != nil {
+			return err
+		}
+		logger.Debugf(ctx, "Retrieved %v workflows", len(workflows.Workflows))
+		printer := tableprinter.New(cmdCtx.OutputPipe())
+		printer.Print(toPrintableListWorkflow(workflows.Workflows))
+		return nil
 	}
 	workflows, err := cmdCtx.AdminClient().ListWorkflowIds(ctx, &admin.NamedEntityIdentifierListRequest{
 		Project: config.GetConfig().Project,
@@ -84,7 +121,7 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx core.CommandCont
 	return nil
 }
 
-func getDomainFuc(ctx context.Context, args []string, cmdCtx core.CommandContext) error {
+func getDomainFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	if config.GetConfig().Project == "" {
 		return fmt.Errorf("Please set project name to get domain")
 	}
@@ -118,7 +155,7 @@ func toPrintableProjects(projects []*admin.Project) []interface{} {
 }
 
 func toPrintableTask(tasks []*admin.NamedEntityIdentifier) []interface{} {
-	type printableTask struct {
+	type printableTasks struct {
 		Name    string `header:"Name"`
 		Project string `header:"Project"`
 		Domain  string `header:"Domain"`
@@ -126,13 +163,34 @@ func toPrintableTask(tasks []*admin.NamedEntityIdentifier) []interface{} {
 
 	res := make([]interface{}, 0, len(tasks))
 	for _, p := range tasks {
-		res = append(res, printableTask{
+		res = append(res, printableTasks{
 			Name:    p.Name,
 			Domain:  p.Domain,
 			Project: p.Project,
 		})
 	}
 
+	return res
+}
+
+func toPrintableGetTask(tasks []*admin.Task) []interface{} {
+	type printableTask struct {
+		Version    string `header:"Version"`
+		Name    string `header:"Name"`
+		Type  string `header:"Type"`
+		Discoverable  bool `header:"Discoverable"`
+		ResourceType core.ResourceType `header:"ResourceType"`
+	}
+	res := make([]interface{}, 0, len(tasks))
+	for _,task := range tasks {
+		res = append(res,printableTask{
+		Version:    task.Id.Version,
+			Name: task.Id.Name,
+				ResourceType: task.Id.ResourceType,
+				Type : task.Closure.CompiledTask.Template.Type,
+				Discoverable : task.Closure.CompiledTask.Template.Metadata.Discoverable,
+		})
+	}
 	return res
 }
 
@@ -174,5 +232,22 @@ func toPrintableWorkflow(workflows []*admin.NamedEntityIdentifier) []interface{}
 		})
 	}
 
+	return res
+}
+
+func toPrintableListWorkflow(workflows []*admin.Workflow) []interface{} {
+	type printableWorkflow struct {
+		Version    string `header:"Version"`
+		Name   string `header:"Name"`
+		ResourceType core.ResourceType `header:"ResourceType"`
+	}
+	res := make([]interface{}, 0, len(workflows))
+	for _,workflow := range workflows {
+		res = append(res,printableWorkflow{
+			Version:    workflow.Id.Version,
+			Name: workflow.Id.Name,
+			ResourceType: workflow.Id.ResourceType,
+		})
+	}
 	return res
 }
