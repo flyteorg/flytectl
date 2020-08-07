@@ -30,6 +30,7 @@ func newRootCmd() *cobra.Command {
 	// --root.project, this adds a convenience on top to allow --project to be used
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Project), "project", "p", "", "Specifies the Flyte project.")
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Domain), "domain", "d", "", "Specifies the Flyte project's domain.")
+	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Domain), "output", "o", "", "Specifies the output type")
 
 	rootCmd.AddCommand(viper.GetConfigCommand())
 	rootCmd.AddCommand(versionCmd)
