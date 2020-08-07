@@ -2,8 +2,8 @@ package get
 
 import (
 	"context"
-	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flytectl/cmd/config"
+	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flytectl/pkg/printer"
 	"github.com/lyft/flytestdlib/logger"
 
@@ -17,12 +17,12 @@ func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v projects", len(projects.Projects))
-		for _,v := range projects.Projects {
+		for _, v := range projects.Projects {
 			if v.Name == args[0] {
 				adminPrinter := printer.ProjectList{
 					Ctx: cmdCtx,
 				}
-				adminPrinter.Print(config.GetConfig().Output,projects.Projects)
+				adminPrinter.Print(config.GetConfig().Output, projects.Projects)
 			}
 		}
 	}
@@ -34,6 +34,6 @@ func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 	adminPrinter := printer.ProjectList{
 		Ctx: cmdCtx,
 	}
-	adminPrinter.Print(config.GetConfig().Output,projects.Projects)
+	adminPrinter.Print(config.GetConfig().Output, projects.Projects)
 	return nil
 }

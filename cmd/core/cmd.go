@@ -1,4 +1,4 @@
-package cmdCore
+package cmdcore
 
 import (
 	"context"

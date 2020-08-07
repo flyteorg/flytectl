@@ -12,15 +12,13 @@ func CreateGetCommand() *cobra.Command {
 		Short: "Retrieve various resource.",
 	}
 
-	getResourcesFuncs := map[string]cmdCore.CommandFunc{
-		"projects": getProjectsFunc,
-		"tasks":    getTaskFunc,
-		"workflows":    getWorkflowFunc,
+	getResourcesFuncs := map[string]cmdcore.CommandFunc{
+		"projects":  getProjectsFunc,
+		"tasks":     getTaskFunc,
+		"workflows": getWorkflowFunc,
 	}
 
-	cmdCore.AddCommands(getCmd, getResourcesFuncs)
+	cmdcore.AddCommands(getCmd, getResourcesFuncs)
 
 	return getCmd
 }
-
-

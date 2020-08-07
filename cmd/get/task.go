@@ -20,28 +20,28 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 	}
 	if len(args) == 1 {
 		task, err := cmdCtx.AdminClient().ListTasks(ctx, &admin.ResourceListRequest{
-			Id : &admin.NamedEntityIdentifier{
+			Id: &admin.NamedEntityIdentifier{
 				Project: config.GetConfig().Project,
 				Domain:  config.GetConfig().Domain,
-				Name: args[0],
+				Name:    args[0],
 			},
-			Limit:   3,
+			Limit: 3,
 		})
 		if err != nil {
 			return err
 		}
-		logger.Debugf(ctx, "Retrieved Task",task.Tasks)
+		logger.Debugf(ctx, "Retrieved Task", task.Tasks)
 		taskPrinter := printer.AdminTasksList{
 			Ctx: cmdCtx,
 		}
-		taskPrinter.Print(config.GetConfig().Output,task.Tasks)
+		taskPrinter.Print(config.GetConfig().Output, task.Tasks)
 		return nil
 	}
 
 	tasks, err := cmdCtx.AdminClient().ListTaskIds(ctx, &admin.NamedEntityIdentifierListRequest{
 		Project: config.GetConfig().Project,
 		Domain:  config.GetConfig().Domain,
-		Limit: 10,
+		Limit:   10,
 	})
 	if err != nil {
 		return err
@@ -50,6 +50,6 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 	taskPrinter := printer.AdminTasksList{
 		Ctx: cmdCtx,
 	}
-	taskPrinter.Print(config.GetConfig().Output,tasks.Entities)
+	taskPrinter.Print(config.GetConfig().Output, tasks.Entities)
 	return nil
 }
