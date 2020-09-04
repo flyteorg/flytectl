@@ -1,9 +1,11 @@
 package printer
 
 import (
+	"encoding/json"
 	"github.com/landoop/tableprinter"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/yalp/jsonpath"
 )
 
 type Printer struct{}
@@ -90,21 +92,22 @@ type ProjectList struct {
 }
 
 func (p ProjectList) Print(output string, i interface{}) {
-	projects := i.(map[int]interface{})
-	res := make([]interface{}, 0, len(projects))
-
-	for _, project := range projects {
-		switch project.(type) {
-		case *admin.Project:
-			p := project.(*admin.Project)
+	var projects interface{}
+	byte, _ := json.Marshal(i)
+	_ = json.Unmarshal(byte, &projects)
+	obj := projects.([]interface{})
+	res := make([]interface{}, 0, len(obj))
+	for _, p := range obj {
+		id, _ := jsonpath.Read(p, "$.id")
+		name, _ := jsonpath.Read(p, "$.name")
+		description, _ := jsonpath.Read(p, "$.description")
 			res = append(res, PrintableProject{
-				Id:          p.Id,
-				Name:        p.Name,
-				Description: p.Description,
+				Id:          id.(string),
+				Name:        name.(string),
+				Description: description.(string),
 			})
-			break
-		}
 	}
+
 	p.Printer.Print(output, res, p.Ctx)
 }
 
@@ -114,19 +117,18 @@ type DomainList struct {
 }
 
 func (d DomainList) Print(output string, i interface{}) {
-	domains := i.(map[int]interface{})
-	res := make([]interface{}, 0, len(domains))
-
-	for _, domain := range domains {
-		switch domain.(type) {
-		case *admin.Project:
-			p := domain.(*admin.Domain)
+	var domains interface{}
+	byte, _ := json.Marshal(i)
+	_ = json.Unmarshal(byte, &domains)
+	obj := domains.([]interface{})
+	res := make([]interface{}, 0, len(obj))
+	for _, domain := range obj {
+		id, _ := jsonpath.Read(domain, "$.id")
+		name, _ := jsonpath.Read(domain, "$.name")
 			res = append(res, PrintableDomain{
-				Id:   p.Id,
-				Name: p.Name,
+				Id:   id.(string),
+				Name: name.(string),
 			})
-			break
-		}
 	}
 	d.Printer.Print(output, res, d.Ctx)
 }
