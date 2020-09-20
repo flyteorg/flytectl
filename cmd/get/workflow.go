@@ -39,7 +39,7 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		}
 		logger.Debugf(ctx, "Retrieved %v workflows", len(workflows.Workflows))
 
-		adminPrinter.PrintBuildNamedEntityIdentifier(config.GetConfig().Output, workflows.Workflows,workflowStructure)
+		adminPrinter.Print(config.GetConfig().Output,"PrintableNamedEntityIdentifier", workflows.Workflows,workflowStructure)
 		return nil
 	}
 	workflows, err := cmdCtx.AdminClient().ListWorkflowIds(ctx, &admin.NamedEntityIdentifierListRequest{
@@ -52,6 +52,6 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 	}
 	logger.Debugf(ctx, "Retrieved %v workflows", len(workflows.Entities))
 
-	adminPrinter.PrintWorkflow(config.GetConfig().Output, workflows.Entities,workflowStructure)
+	adminPrinter.Print(config.GetConfig().Output,"PrintableWorkflow", workflows.Entities,workflowStructure)
 	return nil
 }

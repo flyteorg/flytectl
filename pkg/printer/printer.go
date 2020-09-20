@@ -9,7 +9,7 @@ import (
 
 type Printer struct{}
 
-func (p Printer) Print(output string, i interface{}) {
+func (p Printer) PrintOutput(output string, i interface{}) {
 	// Factory Method for all printer
 	switch output {
 	case "json": // Print protobuf to json
@@ -23,129 +23,62 @@ func (p Printer) Print(output string, i interface{}) {
 	}
 }
 
-func (p Printer) PrintBuildNamedEntityIdentifier(output string, i interface{},column map[string]string) error {
-	var entity interface{}
-	byte, _ := json.Marshal(i)
-	_ = json.Unmarshal(byte, &entity)
-	obj := entity.([]interface{})
-	res := make([]interface{}, 0, len(obj))
-	for _, data := range obj {
-		var results PrintableNamedEntityIdentifier
-		entityTable := make(map[string]interface{})
+
+func(p Printer) BuildOutput(input []interface{},column map[string]string,resultType string) ([]interface{},error) {
+	response := make([]interface{}, 0, len(input))
+	for _, data := range input {
+
+		tableData := make(map[string]interface{})
 		for k := range column {
 			data, _ := jsonpath.Read(data, column[k])
-			entityTable[k] = data.(string)
+			tableData[k] = data.(string)
 		}
-		jsonbody, err := json.Marshal(entityTable)
+		jsonbody, err := json.Marshal(tableData)
 		if err != nil {
-			return err
+			return response,err
 		}
-		if err := json.Unmarshal(jsonbody, &results); err != nil {
-			return err
+		switch resultType {
+			case "PrintableTask":
+				results := PrintableTask{}
+				if err := json.Unmarshal(jsonbody, &results); err != nil {
+					return response,err
+				}
+				response = append(response, results)
+				break;
+			case "PrintableWorkflow":
+				results := PrintableWorkflow{}
+				if err := json.Unmarshal(jsonbody, &results); err != nil {
+					return response,err
+				}
+				response = append(response, results)
+				break;
+			case "PrintableProject":
+				results := PrintableProject{}
+				if err := json.Unmarshal(jsonbody, &results); err != nil {
+					return response,err
+				}
+				response = append(response, results)
+				break;
+			case "PrintableNamedEntityIdentifier":
+				results := PrintableNamedEntityIdentifier{}
+				if err := json.Unmarshal(jsonbody, &results); err != nil {
+					return response,err
+				}
+				response = append(response, results)
+				break;
 		}
-		res = append(res, results)
+
 	}
-	return nil
+	return response,nil
 }
-
-func (p Printer) PrintTask(output string, i interface{},column map[string]string) {
-	var task interface{}
+func (p Printer) Print(output,resultType string, i interface{},column map[string]string) {
+	var data interface{}
 	byte, _ := json.Marshal(i)
-	_ = json.Unmarshal(byte, &task)
-	obj := task.([]interface{})
-	res := make([]interface{}, 0, len(obj))
-	for _, data := range obj {
-			var results PrintableTask
-			taskTable := make(map[string]interface{})
-			for k := range column {
-				data, _ := jsonpath.Read(data, column[k])
-				taskTable[k] = data.(string)
-			}
-			jsonbody, err := json.Marshal(taskTable)
-			if err != nil {
-				return
-			}
-			if err := json.Unmarshal(jsonbody, &results); err != nil {
-				return
-			}
-			res = append(res, results)
+	_ = json.Unmarshal(byte, &data)
+	input := data.([]interface{})
+	response,err := p.BuildOutput(input,column,resultType)
+	if err != nil {
+		os.Exit(1)
 	}
-	p.Print(output, res)
-}
-
-func (p Printer) PrintWorkflow(output string, i interface{},column map[string]string) {
-	var task []interface{}
-	byte, _ := json.Marshal(i)
-	_ = json.Unmarshal(byte, &task)
-	res := make([]interface{}, 0, len(task))
-	for _, data := range task {
-			var results PrintableWorkflow
-			workflowTable := make(map[string]interface{})
-			for k := range column {
-				data, _ := jsonpath.Read(data, column[k])
-				workflowTable[k] = data.(string)
-			}
-			jsonbody, err := json.Marshal(workflowTable)
-			if err != nil {
-				return
-			}
-			if err := json.Unmarshal(jsonbody, &results); err != nil {
-				return
-			}
-			res = append(res, results)
-	}
-	p.Print(output, res)
-}
-
-func (p Printer) PrintProject(output string, i interface{},column map[string]string) {
-	var projects interface{}
-	byte, _ := json.Marshal(i)
-	_ = json.Unmarshal(byte, &projects)
-	obj := projects.([]interface{})
-	res := make([]interface{}, 0, len(obj))
-	for _, p := range obj {
-		var results PrintableProject
-		projectTable := make(map[string]interface{})
-		for k := range column {
-			data, _ := jsonpath.Read(p, column[k])
-			projectTable[k] = data.(string)
-        }
-		jsonbody, err := json.Marshal(projectTable)
-		if err != nil {
-			return
-		}
-		if err := json.Unmarshal(jsonbody, &results); err != nil {
-			return
-		}
-
-		res = append(res, results)
-	}
-	p.Print(output, res)
-}
-
-func (p Printer) PrintDomain(output string, i interface{},column map[string]string) {
-	var domains interface{}
-	byte, _ := json.Marshal(i)
-	_ = json.Unmarshal(byte, &domains)
-	obj := domains.([]interface{})
-	res := make([]interface{}, 0, len(obj))
-	for _, p := range obj {
-		var results PrintableDomain
-		projectTable := make(map[string]interface{})
-		for k := range column {
-			data, _ := jsonpath.Read(p, column[k])
-			projectTable[k] = data.(string)
-		}
-
-		jsonbody, err := json.Marshal(projectTable)
-		if err != nil {
-			return
-		}
-		if err := json.Unmarshal(jsonbody, &results); err != nil {
-			return
-		}
-
-		res = append(res, results)
-	}
-	p.Print(output, res)
+	p.PrintOutput(output, response)
 }

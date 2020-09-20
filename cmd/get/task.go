@@ -48,7 +48,7 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 		}
 		logger.Debugf(ctx, "Retrieved Task", task.Tasks)
 
-		taskPrinter.PrintBuildNamedEntityIdentifier(config.GetConfig().Output, task.Tasks,taskStructure)
+		taskPrinter.Print(config.GetConfig().Output,"PrintableNamedEntityIdentifier", task.Tasks,taskStructure)
 		return nil
 	}
 
@@ -62,6 +62,6 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 	}
 	logger.Debugf(ctx, "Retrieved %v Task", len(tasks.Entities))
 
-	taskPrinter.PrintTask(config.GetConfig().Output, tasks.Entities,taskStructure)
+	taskPrinter.Print(config.GetConfig().Output,"PrintableTask", tasks.Entities,taskStructure)
 	return nil
 }
