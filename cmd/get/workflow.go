@@ -11,12 +11,19 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
+var workflowStructure = map[string]string{
+	"Version" : "$.id.version",
+	"Name" : "$.name",
+}
+
 func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	if config.GetConfig().Project == "" {
 		return fmt.Errorf("Please set project name to get domain")
 	}
 	if config.GetConfig().Domain == "" {
 		return fmt.Errorf("Please set project name to get workflow")
+	}
+	adminPrinter := printer.Printer{
 	}
 	if len(args) > 0 {
 		workflows, err := cmdCtx.AdminClient().ListWorkflows(ctx, &admin.ResourceListRequest{
@@ -25,16 +32,14 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 				Domain:  config.GetConfig().Domain,
 				Name:    args[0],
 			},
-			Limit: 3,
+			Limit: 10,
 		})
 		if err != nil {
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v workflows", len(workflows.Workflows))
-		adminPrinter := printer.AdminWorkflowsList{
-			Ctx: cmdCtx,
-		}
-		adminPrinter.Print(config.GetConfig().Output, workflows.Workflows)
+
+		adminPrinter.PrintBuildNamedEntityIdentifier(config.GetConfig().Output, workflows.Workflows,workflowStructure)
 		return nil
 	}
 	workflows, err := cmdCtx.AdminClient().ListWorkflowIds(ctx, &admin.NamedEntityIdentifierListRequest{
@@ -46,9 +51,7 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		return err
 	}
 	logger.Debugf(ctx, "Retrieved %v workflows", len(workflows.Entities))
-	adminPrinter := printer.AdminWorkflowsList{
-		Ctx: cmdCtx,
-	}
-	adminPrinter.Print(config.GetConfig().Output, workflows.Entities)
+
+	adminPrinter.PrintWorkflow(config.GetConfig().Output, workflows.Entities,workflowStructure)
 	return nil
 }

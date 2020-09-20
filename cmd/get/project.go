@@ -8,8 +8,21 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/lyft/flytestdlib/logger"
 )
+var tableStructure = map[string]string{
+	"Id" : "$.id",
+	"Name" : "$.name",
+	"Description" : "$.description",
+}
+
+var entityStructure = map[string]string{
+	"Domain" : "$.domain",
+	"Name" : "$.name",
+	"Project" : "$.project",
+}
 
 func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
+	adminPrinter := printer.Printer{
+	}
 	if len(args) == 1 {
 		projects, err := cmdCtx.AdminClient().ListProjects(ctx, &admin.ProjectListRequest{})
 		if err != nil {
@@ -18,10 +31,8 @@ func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		logger.Debugf(ctx, "Retrieved %v projects", len(projects.Projects))
 		for _, v := range projects.Projects {
 			if v.Name == args[0] {
-				adminPrinter := printer.ProjectList{
-					Ctx: cmdCtx,
-				}
-				adminPrinter.Print(config.GetConfig().Output, projects.Projects)
+
+				adminPrinter.PrintProject(config.GetConfig().Output, projects.Projects,tableStructure)
 			}
 		}
 	}
@@ -30,9 +41,6 @@ func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		return err
 	}
 	logger.Debugf(ctx, "Retrieved %v projects", len(projects.Projects))
-	adminPrinter := printer.ProjectList{
-		Ctx: cmdCtx,
-	}
-	adminPrinter.Print(config.GetConfig().Output, projects.Projects)
+	adminPrinter.PrintProject(config.GetConfig().Output, projects.Projects,tableStructure)
 	return nil
 }
