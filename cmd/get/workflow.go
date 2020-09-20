@@ -45,7 +45,7 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 	workflows, err := cmdCtx.AdminClient().ListWorkflowIds(ctx, &admin.NamedEntityIdentifierListRequest{
 		Project: config.GetConfig().Project,
 		Domain:  config.GetConfig().Domain,
-		Limit:   3,
+		Limit:   10,
 	})
 	if err != nil {
 		return err

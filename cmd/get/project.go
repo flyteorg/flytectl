@@ -26,7 +26,6 @@ func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		logger.Debugf(ctx, "Retrieved %v projects", len(projects.Projects))
 		for _, v := range projects.Projects {
 			if v.Name == args[0] {
-
 				adminPrinter.Print(config.GetConfig().Output,"PrintableProject", projects.Projects,tableStructure)
 			}
 		}
@@ -36,6 +35,7 @@ func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		return err
 	}
 	logger.Debugf(ctx, "Retrieved %v projects", len(projects.Projects))
+
 	adminPrinter.Print(config.GetConfig().Output,"PrintableProject", projects.Projects,tableStructure)
 	return nil
 }

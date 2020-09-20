@@ -2,6 +2,7 @@ package printer
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/landoop/tableprinter"
 	"github.com/yalp/jsonpath"
 	"os"
@@ -11,12 +12,20 @@ type Printer struct{}
 
 func (p Printer) PrintOutput(output string, i interface{}) {
 	// Factory Method for all printer
+	fmt.Println("==",output)
 	switch output {
 	case "json": // Print protobuf to json
+		result, err := json.Marshal(i)
+		if err != nil {
+			os.Exit(1)
+		}
+		fmt.Println(string(result))
 		break
 	case "yaml": // Print protobuf to yaml
+	    
 		break
 	default: // Print table
+
 		printer := tableprinter.New(os.Stdout)
 		printer.Print(i)
 		break

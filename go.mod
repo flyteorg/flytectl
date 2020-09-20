@@ -15,6 +15,7 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.4.0
+	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0
 	golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975 // indirect
 	k8s.io/apimachinery v0.18.3 // indirect
 )
