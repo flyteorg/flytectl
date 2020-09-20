@@ -19,6 +19,12 @@ var taskStructure = map[string]string{
 	"DiscoveryVersion" : "$.closure.compiledTask.template.metadata.discoverable",
 }
 
+var entityStructure = map[string]string{
+	"Domain" : "$.domain",
+	"Name" : "$.name",
+	"Project" : "$.project",
+}
+
 func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	if config.GetConfig().Project == "" {
 		return fmt.Errorf("Please set project name to get domain")

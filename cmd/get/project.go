@@ -14,11 +14,6 @@ var tableStructure = map[string]string{
 	"Description" : "$.description",
 }
 
-var entityStructure = map[string]string{
-	"Domain" : "$.domain",
-	"Name" : "$.name",
-	"Project" : "$.project",
-}
 
 func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{
