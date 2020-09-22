@@ -14,7 +14,7 @@ import (
 
 var workflowStructure = map[string]string{
 	"Version" : "$.id.version",
-	"Name" : "$.name",
+	"Name" : "$.id.name",
 }
 
 type PrintableWorkflow struct {
@@ -54,7 +54,7 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		}
 		logger.Debugf(ctx, "Retrieved %v workflows", len(workflows.Workflows))
 
-		adminPrinter.Print(config.GetConfig().Output, workflows.Workflows,workflowStructure,transformTaskEntity)
+		adminPrinter.Print(config.GetConfig().Output, workflows.Workflows,workflowStructure,transformWorkflow)
 		return nil
 	}
 	workflows, err := cmdCtx.AdminClient().ListWorkflowIds(ctx, &admin.NamedEntityIdentifierListRequest{
@@ -67,6 +67,6 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 	}
 	logger.Debugf(ctx, "Retrieved %v workflows", len(workflows.Entities))
 
-	adminPrinter.Print(config.GetConfig().Output, workflows.Entities,workflowStructure,transformWorkflow)
+	adminPrinter.Print(config.GetConfig().Output, workflows.Entities,entityStructure,transformTaskEntity)
 	return nil
 }

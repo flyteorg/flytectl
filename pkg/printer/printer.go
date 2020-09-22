@@ -1,6 +1,7 @@
 package printer
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/landoop/tableprinter"
@@ -10,19 +11,25 @@ import (
 
 type Printer struct{}
 
+const (
+	empty = ""
+	tab   = "\t"
+)
+
 func (p Printer) PrintOutput(output string, i interface{}) {
 	// Factory Method for all printer
-	fmt.Println("==",output)
 	switch output {
 	case "json": // Print protobuf to json
-		result, err := json.Marshal(i)
+		buffer := new(bytes.Buffer)
+		encoder := json.NewEncoder(buffer)
+		encoder.SetIndent(empty, tab)
+
+		err := encoder.Encode(i)
 		if err != nil {
 			os.Exit(1)
 		}
-		fmt.Println(string(result))
-		break
-	case "yaml": // Print protobuf to yaml
-	    
+
+		fmt.Println(buffer.String())
 		break
 	default: // Print table
 
@@ -36,9 +43,10 @@ func(p Printer) BuildOutput(input []interface{},column map[string]string,printTr
 	responses := make([]interface{}, 0, len(input))
 	for _, data := range input {
 		tableData := make(map[string]interface{})
+
 		for k := range column {
-			data, _ := jsonpath.Read(data, column[k])
-			tableData[k] = data.(string)
+			out, _ := jsonpath.Read(data, column[k])
+			tableData[k] = out.(string)
 		}
 		jsonbody, err := json.Marshal(tableData)
 		if err != nil {
@@ -54,9 +62,13 @@ func(p Printer) BuildOutput(input []interface{},column map[string]string,printTr
 }
 
 func (p Printer) Print(output string, i interface{},column map[string]string,printTransform func(data []byte)(interface{},error)) {
+
 	var data interface{}
 	byte, _ := json.Marshal(i)
 	_ = json.Unmarshal(byte, &data)
+	if data == nil {
+		os.Exit(1)
+	}
 	input := data.([]interface{})
 	response,err := p.BuildOutput(input,column,printTransform)
 	if err != nil {

@@ -44,6 +44,7 @@ func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 				adminPrinter.Print(config.GetConfig().Output, projects.Projects,tableStructure,transformProject)
 			}
 		}
+		return nil
 	}
 	projects, err := cmdCtx.AdminClient().ListProjects(ctx, &admin.ProjectListRequest{})
 	if err != nil {

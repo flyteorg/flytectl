@@ -22,10 +22,10 @@ type PrintableTask struct {
 
 var taskStructure = map[string]string{
 	"Version" : "$.id.version",
-	"Name" : "$.name",
+	"Name" : "$.id.name",
 	"Type" : "$.closure.compiledTask.template.type",
 	"Discoverable" : "$.closure.compiledTask.template.metadata.discoverable",
-	"DiscoveryVersion" : "$.closure.compiledTask.template.metadata.discoverable",
+	"DiscoveryVersion" : "$.closure.compiledTask.template.metadata.discovery_version",
 }
 
 var transformTask = func(jsonbody [] byte)(interface{},error){
@@ -60,20 +60,19 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 		}
 		logger.Debugf(ctx, "Retrieved Task", task.Tasks)
 
-		taskPrinter.Print(config.GetConfig().Output, task.Tasks,taskStructure,transformTaskEntity)
+		taskPrinter.Print(config.GetConfig().Output, task.Tasks,taskStructure,transformTask)
 		return nil
 	}
 
 	tasks, err := cmdCtx.AdminClient().ListTaskIds(ctx, &admin.NamedEntityIdentifierListRequest{
 		Project: config.GetConfig().Project,
 		Domain:  config.GetConfig().Domain,
-		Limit:   10,
+		Limit:   3,
 	})
 	if err != nil {
 		return err
 	}
 	logger.Debugf(ctx, "Retrieved %v Task", len(tasks.Entities))
-
-	taskPrinter.Print(config.GetConfig().Output, tasks.Entities,taskStructure,transformTask)
+	taskPrinter.Print(config.GetConfig().Output, tasks.Entities,entityStructure,transformTaskEntity)
 	return nil
 }
