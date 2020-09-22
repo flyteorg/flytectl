@@ -32,11 +32,9 @@ func (p Printer) PrintOutput(output string, i interface{}) {
 	}
 }
 
-
-func(p Printer) BuildOutput(input []interface{},column map[string]string,resultType string) ([]interface{},error) {
-	response := make([]interface{}, 0, len(input))
+func(p Printer) BuildOutput(input []interface{},column map[string]string,printTransform func(data []byte)(interface{},error)) ([]interface{},error) {
+	responses := make([]interface{}, 0, len(input))
 	for _, data := range input {
-
 		tableData := make(map[string]interface{})
 		for k := range column {
 			data, _ := jsonpath.Read(data, column[k])
@@ -44,48 +42,23 @@ func(p Printer) BuildOutput(input []interface{},column map[string]string,resultT
 		}
 		jsonbody, err := json.Marshal(tableData)
 		if err != nil {
-			return response,err
+			return responses,err
 		}
-		switch resultType {
-			case "PrintableTask":
-				results := PrintableTask{}
-				if err := json.Unmarshal(jsonbody, &results); err != nil {
-					return response,err
-				}
-				response = append(response, results)
-				break;
-			case "PrintableWorkflow":
-				results := PrintableWorkflow{}
-				if err := json.Unmarshal(jsonbody, &results); err != nil {
-					return response,err
-				}
-				response = append(response, results)
-				break;
-			case "PrintableProject":
-				results := PrintableProject{}
-				if err := json.Unmarshal(jsonbody, &results); err != nil {
-					return response,err
-				}
-				response = append(response, results)
-				break;
-			case "PrintableNamedEntityIdentifier":
-				results := PrintableNamedEntityIdentifier{}
-				if err := json.Unmarshal(jsonbody, &results); err != nil {
-					return response,err
-				}
-				response = append(response, results)
-				break;
+		response,err := printTransform(jsonbody)
+		if err != nil {
+			return responses,err
 		}
-
+		responses = append(responses, response)
 	}
-	return response,nil
+	return responses,nil
 }
-func (p Printer) Print(output,resultType string, i interface{},column map[string]string) {
+
+func (p Printer) Print(output string, i interface{},column map[string]string,printTransform func(data []byte)(interface{},error)) {
 	var data interface{}
 	byte, _ := json.Marshal(i)
 	_ = json.Unmarshal(byte, &data)
 	input := data.([]interface{})
-	response,err := p.BuildOutput(input,column,resultType)
+	response,err := p.BuildOutput(input,column,printTransform)
 	if err != nil {
 		os.Exit(1)
 	}

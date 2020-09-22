@@ -2,6 +2,7 @@ package get
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
@@ -15,6 +16,20 @@ var workflowStructure = map[string]string{
 	"Version" : "$.id.version",
 	"Name" : "$.name",
 }
+
+type PrintableWorkflow struct {
+	Name    string `header:"Name"`
+	Version string `header:"Version"`
+}
+
+var transformWorkflow = func(jsonbody [] byte)(interface{},error){
+	results := PrintableWorkflow{}
+	if err := json.Unmarshal(jsonbody, &results); err != nil {
+		return results,err
+	}
+	return results,nil
+}
+
 
 func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	if config.GetConfig().Project == "" {
@@ -39,7 +54,7 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		}
 		logger.Debugf(ctx, "Retrieved %v workflows", len(workflows.Workflows))
 
-		adminPrinter.Print(config.GetConfig().Output,"PrintableNamedEntityIdentifier", workflows.Workflows,workflowStructure)
+		adminPrinter.Print(config.GetConfig().Output, workflows.Workflows,workflowStructure,transformTaskEntity)
 		return nil
 	}
 	workflows, err := cmdCtx.AdminClient().ListWorkflowIds(ctx, &admin.NamedEntityIdentifierListRequest{
@@ -52,6 +67,6 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 	}
 	logger.Debugf(ctx, "Retrieved %v workflows", len(workflows.Entities))
 
-	adminPrinter.Print(config.GetConfig().Output,"PrintableWorkflow", workflows.Entities,workflowStructure)
+	adminPrinter.Print(config.GetConfig().Output, workflows.Entities,workflowStructure,transformWorkflow)
 	return nil
 }
