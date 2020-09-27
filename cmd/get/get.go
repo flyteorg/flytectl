@@ -16,6 +16,8 @@ func CreateGetCommand() *cobra.Command {
 		"projects":  getProjectsFunc,
 		"tasks":     getTaskFunc,
 		"workflows": getWorkflowFunc,
+		"execution" : getExecutionFunc,
+		"launchplan" : getLaunchPlanFunc,
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)
