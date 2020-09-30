@@ -9,7 +9,7 @@ import (
 
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
-	"github.com/lyft/flytectl/pkg/printer"
+	"github.com/lyft/flytectl/printer"
 )
 
 type PrintableProject struct {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/lyft/flytectl/cmd/get"
-	"github.com/lyft/flytectl/pkg/printer"
+	"github.com/lyft/flytectl/printer"
 
 	stdConfig "github.com/lyft/flytestdlib/config"
 	"github.com/lyft/flytestdlib/config/viper"

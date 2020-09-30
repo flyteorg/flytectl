@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/ghodss/yaml"
+	"github.com/kataras/tablewriter"
 	"github.com/landoop/tableprinter"
 	"github.com/yalp/jsonpath"
 )
@@ -101,9 +102,11 @@ func (p Printer) Print(format OutputFormat, i interface{}, column map[string]str
 		printer.BorderLeft = true
 		printer.BorderRight = true
 		printer.ColumnSeparator = "|"
+		printer.HeaderBgColor = tablewriter.BgHiWhiteColor
 		if printer.Print(response) == -1 {
 			return fmt.Errorf("failed to print table data")
 		}
+		fmt.Printf("%d rows\n", len(rows))
 	}
 	return nil
 }

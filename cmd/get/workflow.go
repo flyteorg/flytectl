@@ -6,9 +6,10 @@ import (
 
 	"github.com/lyft/flytestdlib/logger"
 
+	"github.com/lyft/flytectl/adminutils"
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
-	"github.com/lyft/flytectl/pkg/printer"
+	"github.com/lyft/flytectl/printer"
 
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 )
@@ -49,15 +50,11 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 
 		return adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflows.Workflows, workflowStructure, transformWorkflow)
 	}
-	workflows, err := cmdCtx.AdminClient().ListWorkflowIds(ctx, &admin.NamedEntityIdentifierListRequest{
-		Project: config.GetConfig().Project,
-		Domain:  config.GetConfig().Domain,
-		Limit:   10,
-	})
+
+	workflows, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListWorkflowIds, adminutils.ListRequest{Project: config.GetConfig().Project, Domain: config.GetConfig().Domain})
 	if err != nil {
 		return err
 	}
-	logger.Debugf(ctx, "Retrieved %v workflows", len(workflows.Entities))
-
-	return adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflows.Entities, entityStructure, transformTaskEntity)
+	logger.Debugf(ctx, "Retrieved %v workflows", len(workflows))
+	return adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflows, entityStructure, transformTaskEntity)
 }

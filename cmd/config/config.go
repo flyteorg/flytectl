@@ -6,7 +6,7 @@ import (
 
 	"github.com/lyft/flytestdlib/config"
 
-	"github.com/lyft/flytectl/pkg/printer"
+	"github.com/lyft/flytectl/printer"
 )
 
 //go:generate pflags Config

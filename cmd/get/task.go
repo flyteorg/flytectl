@@ -6,9 +6,11 @@ import (
 
 	"github.com/lyft/flytestdlib/logger"
 
+	"github.com/lyft/flytectl/adminutils"
+	"github.com/lyft/flytectl/printer"
+
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
-	"github.com/lyft/flytectl/pkg/printer"
 
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 )
@@ -57,15 +59,10 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 
 		return taskPrinter.Print(config.GetConfig().MustOutputFormat(), task.Tasks, taskStructure, transformTask)
 	}
-
-	tasks, err := cmdCtx.AdminClient().ListTaskIds(ctx, &admin.NamedEntityIdentifierListRequest{
-		Project: config.GetConfig().Project,
-		Domain:  config.GetConfig().Domain,
-		Limit:   10,
-	})
+	tasks, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListTaskIds, adminutils.ListRequest{Project: config.GetConfig().Project, Domain: config.GetConfig().Domain})
 	if err != nil {
 		return err
 	}
-	logger.Debugf(ctx, "Retrieved %v Task", len(tasks.Entities))
-	return taskPrinter.Print(config.GetConfig().MustOutputFormat(), tasks.Entities, entityStructure, transformTaskEntity)
+	logger.Debugf(ctx, "Retrieved %v Task", len(tasks))
+	return taskPrinter.Print(config.GetConfig().MustOutputFormat(), tasks, entityStructure, transformTaskEntity)
 }
