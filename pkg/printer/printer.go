@@ -6,17 +6,27 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ghodss/yaml"
 	"github.com/landoop/tableprinter"
 	"github.com/yalp/jsonpath"
 )
 
-type OutputFormat string
+//go:generate enumer --type=OutputFormat -json -yaml -trimprefix=OutputFormat
+type OutputFormat uint8
 
 const (
-	OutputFormatTable OutputFormat = "table"
-	OutputFormatJSON  OutputFormat = "json"
-	OutputFormatYAML  OutputFormat = "yaml"
+	OutputFormatTABLE OutputFormat = iota
+	OutputFormatJSON
+	OutputFormatYAML
 )
+
+func OutputFormats() []string {
+	var v []string
+	for _, o := range OutputFormatValues() {
+		v = append(v, o.String())
+	}
+	return v
+}
 
 type Printer struct{}
 
@@ -25,37 +35,17 @@ const (
 	tab   = "\t"
 )
 
-func (p Printer) PrintOutput(output string, i interface{}) {
-	// Factory Method for all printer
-	switch output {
-	case "json": // Print protobuf to json
-		buffer := new(bytes.Buffer)
-		encoder := json.NewEncoder(buffer)
-		encoder.SetIndent(empty, tab)
-
-		err := encoder.Encode(i)
-		if err != nil {
-			os.Exit(1)
-		}
-
-		fmt.Println(buffer.String())
-		break
-	default: // Print table
-
-		printer := tableprinter.New(os.Stdout)
-		printer.Print(i)
-		break
-	}
-}
-
-func (p Printer) BuildOutput(input []interface{}, column map[string]string, printTransform func(data []byte) (interface{}, error)) ([]interface{}, error) {
+func (p Printer) projectColumns(input []interface{}, column map[string]string, printTransform func(data []byte) (interface{}, error)) ([]interface{}, error) {
 	responses := make([]interface{}, 0, len(input))
 	for _, data := range input {
 		tableData := make(map[string]interface{})
 
 		for k := range column {
-			out, _ := jsonpath.Read(data, column[k])
-			tableData[k] = out.(string)
+			out, err := jsonpath.Read(data, column[k])
+			if err != nil {
+				out = nil
+			}
+			tableData[k] = out
 		}
 		jsonbody, err := json.Marshal(tableData)
 		if err != nil {
@@ -70,18 +60,50 @@ func (p Printer) BuildOutput(input []interface{}, column map[string]string, prin
 	return responses, nil
 }
 
-func (p Printer) Print(output string, i interface{}, column map[string]string, printTransform func(data []byte) (interface{}, error)) {
+func (p Printer) Print(format OutputFormat, i interface{}, column map[string]string, printTransform func(data []byte) (interface{}, error)) error {
 
-	var data interface{}
-	byte, _ := json.Marshal(i)
-	_ = json.Unmarshal(byte, &data)
-	if data == nil {
-		os.Exit(1)
-	}
-	input := data.([]interface{})
-	response, err := p.BuildOutput(input, column, printTransform)
+	buf := new(bytes.Buffer)
+	encoder := json.NewEncoder(buf)
+	encoder.SetIndent(empty, tab)
+
+	err := encoder.Encode(i)
 	if err != nil {
-		os.Exit(1)
+		return err
 	}
-	p.PrintOutput(output, response)
+
+	// Factory Method for all printer
+	switch format {
+	case OutputFormatJSON: // Print protobuf to json
+		fmt.Println(buf.String())
+		break
+	case OutputFormatYAML:
+		v, err := yaml.JSONToYAML(buf.Bytes())
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(v))
+		break
+	default: // Print table
+		var rows []interface{}
+		err := json.Unmarshal(buf.Bytes(), &rows)
+		if err != nil {
+			return err
+		}
+		if rows == nil {
+			return nil
+		}
+		response, err := p.projectColumns(rows, column, printTransform)
+		if err != nil {
+			return err
+		}
+		printer := tableprinter.New(os.Stdout)
+		printer.AutoWrapText = false
+		printer.BorderLeft = true
+		printer.BorderRight = true
+		printer.ColumnSeparator = "|"
+		if printer.Print(response) == -1 {
+			return fmt.Errorf("failed to print table data")
+		}
+	}
+	return nil
 }
