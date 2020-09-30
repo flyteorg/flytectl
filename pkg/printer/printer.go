@@ -4,9 +4,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/landoop/tableprinter"
 	"github.com/yalp/jsonpath"
-	"os"
+)
+
+type OutputFormat string
+
+const (
+	OutputFormatTable OutputFormat = "table"
+	OutputFormatJSON  OutputFormat = "json"
+	OutputFormatYAML  OutputFormat = "yaml"
 )
 
 type Printer struct{}
@@ -39,7 +48,7 @@ func (p Printer) PrintOutput(output string, i interface{}) {
 	}
 }
 
-func(p Printer) BuildOutput(input []interface{},column map[string]string,printTransform func(data []byte)(interface{},error)) ([]interface{},error) {
+func (p Printer) BuildOutput(input []interface{}, column map[string]string, printTransform func(data []byte) (interface{}, error)) ([]interface{}, error) {
 	responses := make([]interface{}, 0, len(input))
 	for _, data := range input {
 		tableData := make(map[string]interface{})
@@ -50,18 +59,18 @@ func(p Printer) BuildOutput(input []interface{},column map[string]string,printTr
 		}
 		jsonbody, err := json.Marshal(tableData)
 		if err != nil {
-			return responses,err
+			return responses, err
 		}
-		response,err := printTransform(jsonbody)
+		response, err := printTransform(jsonbody)
 		if err != nil {
-			return responses,err
+			return responses, err
 		}
 		responses = append(responses, response)
 	}
-	return responses,nil
+	return responses, nil
 }
 
-func (p Printer) Print(output string, i interface{},column map[string]string,printTransform func(data []byte)(interface{},error)) {
+func (p Printer) Print(output string, i interface{}, column map[string]string, printTransform func(data []byte) (interface{}, error)) {
 
 	var data interface{}
 	byte, _ := json.Marshal(i)
@@ -70,7 +79,7 @@ func (p Printer) Print(output string, i interface{},column map[string]string,pri
 		os.Exit(1)
 	}
 	input := data.([]interface{})
-	response,err := p.BuildOutput(input,column,printTransform)
+	response, err := p.BuildOutput(input, column, printTransform)
 	if err != nil {
 		os.Exit(1)
 	}

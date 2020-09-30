@@ -22,17 +22,17 @@ var tableStructure = map[string]string{
 	"Description" : "$.description",
 }
 
+func transformProject(jsonbody [] byte)(interface{},error){
+	results := PrintableProject{}
+	if err := json.Unmarshal(jsonbody, &results); err != nil {
+		return results,err
+	}
+	return results,nil
+}
 
 func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
 
-	transformProject := func(jsonbody [] byte)(interface{},error){
-		results := PrintableProject{}
-		if err := json.Unmarshal(jsonbody, &results); err != nil {
-			return results,err
-		}
-		return results,nil
-	}
 	if len(args) == 1 {
 		projects, err := cmdCtx.AdminClient().ListProjects(ctx, &admin.ProjectListRequest{})
 		if err != nil {
