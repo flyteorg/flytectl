@@ -13,13 +13,13 @@ import (
 )
 
 type PrintableProject struct {
-	Id          string `header:"Id"`
+	ID          string `header:"Id"`
 	Name        string `header:"Name"`
 	Description string `header:"Description"`
 }
 
 var tableStructure = map[string]string{
-	"Id":          "$.id",
+	"ID":          "$.id",
 	"Name":        "$.name",
 	"Description": "$.description",
 }

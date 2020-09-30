@@ -30,7 +30,7 @@ func IterateThroughAllNamedEntities(ctx context.Context, lister NamedEntityIDLis
 	}
 
 	i := 0
-	for ; i < GetConfig().MaxRecords; {
+	for i < GetConfig().MaxRecords {
 		res, err := lister(ctx, adminReq, opts...)
 		if err != nil {
 			return err

@@ -76,14 +76,12 @@ func (p Printer) Print(format OutputFormat, i interface{}, column map[string]str
 	switch format {
 	case OutputFormatJSON: // Print protobuf to json
 		fmt.Println(buf.String())
-		break
 	case OutputFormatYAML:
 		v, err := yaml.JSONToYAML(buf.Bytes())
 		if err != nil {
 			return err
 		}
 		fmt.Println(string(v))
-		break
 	default: // Print table
 		var rows []interface{}
 		err := json.Unmarshal(buf.Bytes(), &rows)
