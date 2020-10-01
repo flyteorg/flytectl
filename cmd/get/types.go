@@ -2,6 +2,7 @@ package get
 
 import "encoding/json"
 
+// PrintableNamedEntityIdentifier
 type PrintableNamedEntityIdentifier struct {
 	Name    string `header:"Name"`
 	Project string `header:"Project"`
@@ -9,15 +10,15 @@ type PrintableNamedEntityIdentifier struct {
 }
 
 var entityStructure = map[string]string{
-	"Domain" : "$.domain",
-	"Name" : "$.name",
-	"Project" : "$.project",
+	"Domain":  "$.domain",
+	"Name":    "$.name",
+	"Project": "$.project",
 }
 
-var transformTaskEntity = func(jsonbody [] byte)(interface{},error){
+var transformTaskEntity = func(jsonbody []byte) (interface{}, error) {
 	results := PrintableNamedEntityIdentifier{}
 	if err := json.Unmarshal(jsonbody, &results); err != nil {
-		return results,err
+		return results, err
 	}
-	return results,nil
+	return results, nil
 }

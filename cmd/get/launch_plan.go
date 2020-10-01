@@ -10,6 +10,7 @@ import (
 	"github.com/lyft/flytestdlib/logger"
 )
 
+// PrintableLaunchPlan is the structure for printing Launch Plan
 type PrintableLaunchPlan struct {
 	Version          string `header:"Version"`
 	Name             string `header:"Name"`
@@ -26,18 +27,18 @@ var launchPlanStructure = map[string]string{
 	"DiscoveryVersion" : "$.closure.compiledTask.template.metadata.discovery_version",
 }
 
+func transformLaunchPlan(jsonbody [] byte)(interface{},error){
+	results := PrintableExcution{}
+	if err := json.Unmarshal(jsonbody, &results); err != nil {
+		return results,err
+	}
+	return results,nil
+}
 
 func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	adminPrinter := printer.Printer{}
+	launchPlanPrinter := printer.Printer{}
 
-	transformLaunchPlan := func(jsonbody [] byte)(interface{},error){
-		results := PrintableExcution{}
-		if err := json.Unmarshal(jsonbody, &results); err != nil {
-			return results,err
-		}
-		return results,nil
-	}
-	launchPlan, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, &admin.ResourceListRequest{
+	launchPlans, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, &admin.ResourceListRequest{
 		Limit: 10,
 		Id : &admin.NamedEntityIdentifier{
 			Project: config.GetConfig().Project,
@@ -48,7 +49,7 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 	if err != nil {
 		return err
 	}
-	logger.Debugf(ctx, "Retrieved %v launch plan", len(launchPlan.LaunchPlans))
-	adminPrinter.Print(config.GetConfig().Output,launchPlan.LaunchPlans,launchPlanStructure,transformLaunchPlan)
+	logger.Debugf(ctx, "Retrieved %v launch plan", len(launchPlans.LaunchPlans))
+	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchPlans, launchPlanStructure, transformLaunchPlan)
 	return nil
 }

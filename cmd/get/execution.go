@@ -10,6 +10,7 @@ cmdCore "github.com/lyft/flytectl/cmd/core"
 "github.com/lyft/flytestdlib/logger"
 )
 
+// PrintableExcution is the structure for printing Excution
 type PrintableExcution struct {
 	Version          string `header:"Version"`
 	Name             string `header:"Name"`
@@ -26,17 +27,16 @@ var excutionStructure = map[string]string{
 	"DiscoveryVersion" : "$.closure.compiledTask.template.metadata.discovery_version",
 }
 
+func transformExcution(jsonbody [] byte)(interface{},error){
+	results := PrintableExcution{}
+	if err := json.Unmarshal(jsonbody, &results); err != nil {
+		return results,err
+	}
+	return results,nil
+}
 
 func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	adminPrinter := printer.Printer{}
-
-	transformExcution := func(jsonbody [] byte)(interface{},error){
-		results := PrintableExcution{}
-		if err := json.Unmarshal(jsonbody, &results); err != nil {
-			return results,err
-		}
-		return results,nil
-	}
+	executionPrinter := printer.Printer{}
 	excution, err := cmdCtx.AdminClient().ListExecutions(ctx, &admin.ResourceListRequest{
 		Limit: 10,
 		Id : &admin.NamedEntityIdentifier{
@@ -49,6 +49,6 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 		return err
 	}
 	logger.Debugf(ctx, "Retrieved %v excution", len(excution.Executions))
-	adminPrinter.Print(config.GetConfig().Output,excution.Executions,excutionStructure,transformExcution)
+	executionPrinter.Print(config.GetConfig().MustOutputFormat(),excution.Executions,excutionStructure,transformExcution)
 	return nil
 }
