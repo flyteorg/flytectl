@@ -10,6 +10,7 @@ import (
 
 func getVersion(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	version.LogBuildInformation("flytectl")
+	
 	return nil
 }
 
