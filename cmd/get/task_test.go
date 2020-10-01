@@ -2,6 +2,7 @@ package get
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -15,11 +16,13 @@ func Test_transformTask(t *testing.T) {
 			"Description": "description",
 		})
 		assert.NoError(t, err)
-		row, err := transformProject(v)
+		row, err := transformTask(v)
 		assert.NoError(t, err)
 		typedRow, ok := row.(PrintableTask)
+		fmt.Println(typedRow)
+		fmt.Println(ok)
 		assert.True(t, ok)
 		assert.NotNil(t, typedRow)
-		assert.Equal(t, "Name", typedRow.Name)
+		assert.Equal(t, "name", typedRow.Name)
 	})
 }

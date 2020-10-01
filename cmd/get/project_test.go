@@ -20,6 +20,6 @@ func Test_transformProject(t *testing.T) {
 		typedRow, ok := row.(PrintableProject)
 		assert.True(t, ok)
 		assert.NotNil(t, typedRow)
-		assert.Equal(t, "Name", typedRow.Name)
+		assert.Equal(t, "name", typedRow.Name)
 	})
 }

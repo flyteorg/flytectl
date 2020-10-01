@@ -10,9 +10,10 @@ import (
 func Test_transformExcution(t *testing.T) {
 	t.Run("happy", func(t *testing.T) {
 		v, err := json.Marshal(map[string]string{
-			"Id":          "id",
-			"Name":        "name",
-			"Description": "description",
+			"Version":          "id",
+			"Name":             "name",
+			"Type":             "type",
+			"DiscoveryVersion": "discoveryVersion",
 		})
 		assert.NoError(t, err)
 		row, err := transformExcution(v)
@@ -20,6 +21,6 @@ func Test_transformExcution(t *testing.T) {
 		typedRow, ok := row.(PrintableExcution)
 		assert.True(t, ok)
 		assert.NotNil(t, typedRow)
-		assert.Equal(t, "Name", typedRow.Name)
+		assert.Equal(t, "name", typedRow.Name)
 	})
 }
