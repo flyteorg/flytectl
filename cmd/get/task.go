@@ -2,8 +2,6 @@ package get
 
 import (
 	"context"
-	"encoding/json"
-
 	"github.com/lyft/flytestdlib/logger"
 
 	"github.com/lyft/flytectl/pkg/adminutils"
@@ -14,31 +12,6 @@ import (
 
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 )
-
-// PrintableTask is the structure for printing Task
-type PrintableTask struct {
-	Version          string `header:"Version"`
-	Name             string `header:"Name"`
-	Type             string `header:"Type"`
-	Discoverable     bool   `header:"Discoverable"`
-	DiscoveryVersion string `header:"DiscoveryVersion"`
-}
-
-var taskStructure = map[string]string{
-	"Version":          "$.id.version",
-	"Name":             "$.id.name",
-	"Type":             "$.closure.compiledTask.template.type",
-	"Discoverable":     "$.closure.compiledTask.template.metadata.discoverable",
-	"DiscoveryVersion": "$.closure.compiledTask.template.metadata.discovery_version",
-}
-
-var transformTask = func(jsonbody []byte) (interface{}, error) {
-	results := PrintableTask{}
-	if err := json.Unmarshal(jsonbody, &results); err != nil {
-		return results, err
-	}
-	return results, nil
-}
 
 func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_transformExcution(t *testing.T) {
+func Test_transformExecution(t *testing.T) {
 	t.Run("happy", func(t *testing.T) {
 		v, err := json.Marshal(map[string]string{
 			"Version":          "id",
