@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/lyft/flytestdlib/version"
 	"github.com/spf13/cobra"
+	"github.com/lyft/flytestdlib/blob/master/version"
 )
 
 var (
