@@ -85,45 +85,86 @@ This is a lower priority option as most entities in flyte are immutable and do n
 # Details of each resource
 
 ## Projects
-Support
+Projects are top level entity in Flyte. You can fetch multiple projects or one project using the CLI. Think about projects like namespaces.
+
  - create
+```bash
+$ flytectl create projects --name "Human readable Name of project" --id project-id --labels key=value --labels key=value --description "long string"
+Alternatively
+$ flytectl create project -f project.yaml
+```
+
+```yaml
+project.yaml
+name: Human readable project name
+id: project-x
+labels:
+  - k: v
+  - k1: v1
+description: |
+  Long description
+```
  - get
+```bash
+$ flytectl get projects [project-name] [-o yaml | -o json | default -o table]
+```
  - update
+```bash
+$ flytectl update projects --id project-x ...
+# You can only update one project at a time
+```
 
 ## Tasks
-Support
- - create
  - get
+```bash
+$ flytectl get tasks [task-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
+```
+ - create
  - update
 
 ## Workflows
 Support
- - create
  - get
+```bash
+$ flytectl get workflows [workflow-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
+```
+ - create
  - update
 
 ## Launch Plans
 Support
- - create
  - get
+```bash
+$ flytectl get launch-plans [launchplan-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
+```
+ - create
  - update
 
 ## Execution
-Support
- - create
+Create or retrieve an execution. 
  - get
+Get all executions or get a single execution.
+```bash
+$ flytectl get execution [exec-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
+```
+An interesting feature in get-execution might be to filter within the execution only the execution of a node, or quickly find the ones that have failed. 
+Visualizing the execution is also challenging. We may want to visualize
+We could use https://graphviz.org/ to visualize the DAG.
+Within the DAG, NodeExecutions and corresponding task executions need to be fetched.
+ - create
+   Create an execution for a LaunchPlan or a Task.
  - update
  - delete - here refers to terminate
 
 ## MatchableEntity
-Support
- - create
+Ability to retrieve matchable entity and edit its details
  - get
+ - create
  - update
 
 ## Outputs
 Support
- - create
  - get
+ - create
  - update
 
