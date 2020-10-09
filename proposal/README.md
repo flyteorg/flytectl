@@ -168,3 +168,26 @@ Support
  - create
  - update
 
+# No resource interactions
+
+## Install all examples
+Today Flytesnacks houses a few examples for Flyte usage in python. When a user wants to get started with Flyte quickly it would be preferable that all Flytesnacks examples are serialized and stored as artifacts in flytesnacks for every checkin. This can be done for python flytekit using `pyflyte serialize` command. Once they are posted as serialized blobs, flytectl could easily retrieve them and register them in a specific project as desired by the user.
+
+```bash
+$ flytectl get examples [--semver semantic-version-of-flytesnacks-examples] -o ./dir
+```
+Once the examples are retrived users could easily register these examples
+```bash
+$ flytectl create -f diabetes.pb 
+or 
+$ flytectl create -f ./dir/*
+```
+
+## Setup a repository with dockerfile for writing code for Flyte
+```bash
+$ flytectl init project --archetype tensorflow-2.0
+$ flytectl init project --archetype spark-3.0
+$ flytectl init project --archetype xgboost
+...
+```
+For this to work, all these archetypes should be available in a separate repository. An archetype is essentially a template with dockerfile and folder setup with flytekit.config
