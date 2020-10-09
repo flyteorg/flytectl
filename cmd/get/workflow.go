@@ -2,7 +2,7 @@ package get
 
 import (
 	"context"
-
+	"encoding/json"
 	"github.com/lyft/flytestdlib/logger"
 
 	"github.com/lyft/flytectl/cmd/config"
@@ -12,6 +12,19 @@ import (
 
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 )
+
+var workflowStructure = map[string]string{
+	"Version": "$.id.version",
+	"Name":    "$.id.name",
+}
+
+var transformWorkflow = func(jsonbody []byte) (interface{}, error) {
+	results := PrintableWorkflow{}
+	if err := json.Unmarshal(jsonbody, &results); err != nil {
+		return results, err
+	}
+	return results, nil
+}
 
 func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}

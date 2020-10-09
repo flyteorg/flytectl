@@ -34,7 +34,6 @@ type Printer struct{}
 const (
 	empty = ""
 	tab   = "\t"
-)
 
 func (p Printer) projectColumns(input []interface{}, column map[string]string, printTransform func(data []byte) (interface{}, error)) ([]interface{}, error) {
 	responses := make([]interface{}, 0, len(input))
@@ -62,7 +61,7 @@ func (p Printer) projectColumns(input []interface{}, column map[string]string, p
 }
 
 func (p Printer) Print(format OutputFormat, i interface{}, column map[string]string, printTransform func(data []byte) (interface{}, error)) error {
-
+	fmt.Println(i)
 	buf := new(bytes.Buffer)
 	encoder := json.NewEncoder(buf)
 	encoder.SetIndent(empty, tab)
@@ -83,6 +82,7 @@ func (p Printer) Print(format OutputFormat, i interface{}, column map[string]str
 		}
 		fmt.Println(string(v))
 	default: // Print table
+
 		var rows []interface{}
 		err := json.Unmarshal(buf.Bytes(), &rows)
 		if err != nil {
@@ -104,7 +104,6 @@ func (p Printer) Print(format OutputFormat, i interface{}, column map[string]str
 		if printer.Print(response) == -1 {
 			return fmt.Errorf("failed to print table data")
 		}
-		fmt.Printf("%d rows\n", len(rows))
 	}
 	return nil
 }

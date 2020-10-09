@@ -1,6 +1,9 @@
 package get
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/core"
+)
 
 // PrintableWorkflow is the structure for printing workflow
 type PrintableWorkflow struct {
@@ -43,11 +46,13 @@ type PrintableLaunchPlan struct {
 	Type    string `header:"Type"`
 }
 
-// PrintableExecution is the structure for printing Excution
+// PrintableExecution is the structure for printing Execution
 type PrintableExecution struct {
 	Version string `header:"Version"`
 	Name    string `header:"Name"`
-	Type    string `header:"Type"`
+	WorkflowName string `header:"WorkflowName"`
+	Launchplan string `header:"Launchplan"`
+	Phase core.WorkflowExecution_Phase `header:"Phase"`
 }
 
 // PrintableNamedEntityIdentifier

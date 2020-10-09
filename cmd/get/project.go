@@ -2,7 +2,7 @@ package get
 
 import (
 	"context"
-
+	"encoding/json"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/lyft/flytestdlib/logger"
 
@@ -10,6 +10,20 @@ import (
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flytectl/pkg/printer"
 )
+
+var tableStructure = map[string]string{
+	"ID":          "$.id",
+	"Name":        "$.name",
+	"Description": "$.description",
+}
+
+func transformProject(jsonbody []byte) (interface{}, error) {
+	results := PrintableProject{}
+	if err := json.Unmarshal(jsonbody, &results); err != nil {
+		return results, err
+	}
+	return results, nil
+}
 
 func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
