@@ -39,6 +39,7 @@ type Printer struct{}
 const (
 	empty = ""
 	tab   = "\t"
+)
 
 // Projects the columns in one row of data from the given JSON using the []Column map
 func extractRow(data interface{}, columns []Column) []string {
