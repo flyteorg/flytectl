@@ -20,6 +20,15 @@ var executionColumns = []printer.Column{
 	{"Metadata", "$.spec.metadata"},
 }
 
+var executionSingleColumns = []printer.Column{
+	{"TaskID", "$.id.taskID"},
+	{"NodeExecutionID", "$.id.nodeExecutionID"},
+	{"Phase", "$.spec.phase"},
+	{"Duration", "$.closure.duration"},
+	{"StartedAt", "$.closure.started_at"},
+}
+
+
 func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	executionPrinter := printer.Printer{}
 
@@ -37,7 +46,7 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 		if err != nil {
 			return err
 		}
-		err = executionPrinter.Print(config.GetConfig().MustOutputFormat(), excution, executionColumns)
+		err = executionPrinter.Print(config.GetConfig().MustOutputFormat(), excution, executionSingleColumns)
 		if err != nil {
 					return err
 				}
