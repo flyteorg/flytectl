@@ -2,7 +2,6 @@ package get
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flytectl/pkg/printer"
@@ -10,23 +9,15 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/core"
 )
 
-var executionSingleStructure = map[string]string{
-	"Version":    "$.id.version",
-	"Name":       "$.id.name",
-	"LaunchPlan": "$.spec.launchplan.name",
-	"Phase":      "$.spec.phase",
-	"Duration":   "$.closure.duration",
-	"StartedAt":  "$.closure.started_at",
-	"Workflow":   "$.closure.workflow_id.name",
-	"Metadata":   "$.spec.metadata",
-}
-
-func transformSingleExecution(jsonbody []byte) (interface{}, error) {
-	results := PrintableSingleExecution{}
-	if err := json.Unmarshal(jsonbody, &results); err != nil {
-		return results, err
-	}
-	return results, nil
+var executionColumns = []printer.Column{
+	{"Version", "$.id.version"},
+	{"Name", "$.id.name"},
+	{"LaunchPlan", "$.spec.launchplan.name"},
+	{"Phase", "$.spec.phase"},
+	{"Duration", "$.closure.duration"},
+	{"StartedAt", "$.closure.started_at"},
+	{"Workflow", "$.closure.workflow_id.name"},
+	{"Metadata", "$.spec.metadata"},
 }
 
 func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
@@ -46,7 +37,7 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 		if err != nil {
 			return err
 		}
-		err = executionPrinter.Print(config.GetConfig().MustOutputFormat(), excution, executionSingleStructure, transformSingleExecution)
+		err = executionPrinter.Print(config.GetConfig().MustOutputFormat(), excution, executionColumns)
 		if err != nil {
 					return err
 				}
@@ -63,7 +54,7 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 	if err != nil {
 		return err
 	}
-	err = executionPrinter.Print(config.GetConfig().MustOutputFormat(), excution, executionSingleStructure, transformSingleExecution)
+	err = executionPrinter.Print(config.GetConfig().MustOutputFormat(), excution, executionColumns)
 	if err != nil {
 		return err
 	}

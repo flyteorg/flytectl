@@ -2,7 +2,6 @@ package get
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flytectl/pkg/adminutils"
@@ -11,18 +10,10 @@ import (
 	"github.com/lyft/flytestdlib/logger"
 )
 
-var launchPlanStructure = map[string]string{
-	"Version": "$.id.version",
-	"Name":    "$.id.name",
-	"Type":    "$.closure.compiledTask.template.type",
-}
-
-func transformLaunchPlan(jsonbody []byte) (interface{}, error) {
-	results := PrintableLaunchPlan{}
-	if err := json.Unmarshal(jsonbody, &results); err != nil {
-		return results, err
-	}
-	return results, nil
+var launchplanColumns = []printer.Column{
+	{"Version", "$.id.version"},
+	{"Name", "$.id.name"},
+	{"Type", "$.closure.compiledTask.template.type"},
 }
 
 func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
@@ -43,7 +34,7 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v excutions", len(launchPlan.LaunchPlans))
-		err = launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchPlan, launchPlanStructure, transformLaunchPlan)
+		err = launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchPlan,launchplanColumns)
 		if err != nil {
 					return err
 				}
@@ -54,6 +45,6 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		return err
 	}
 	logger.Debugf(ctx, "Retrieved %v launch plan", len(launchPlans))
-	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchPlans, launchPlanStructure, transformLaunchPlan)
+	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchPlans, launchplanColumns)
 	return nil
 }
