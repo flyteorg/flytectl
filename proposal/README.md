@@ -119,6 +119,15 @@ $ flytectl update projects --id project-x ...
 ```bash
 $ flytectl get tasks [task-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
 ```
+ - get specific version and get a template to launch
+   Create an execution is complicated as the user needs to know all the input types and  way to simplify this could be to create a YAML template locally from the launchplan (the interface, etc)
+```bash
+$ flytectl get task task-name --execution-template -o YAML
+yaml.template (TBD)
+This is a special version of get launch-plan which can be executed by passing it to create execution.
+
+```
+ - create
  - create
  - update
 
@@ -136,6 +145,14 @@ Support
  - get
 ```bash
 $ flytectl get launch-plans [launchplan-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
+```
+ - get specific version and get a template to launch
+   Create an execution is complicated as the user needs to know all the input types and  way to simplify this could be to create a YAML template locally from the launchplan (the interface, etc)
+```bash
+$ flytectl get launch-plans launch-plan-name --execution-template -o YAML
+yaml.template (TBD)
+This is a special version of get launch-plan which can be executed by passing it to create execution.
+
 ```
  - create
  - update
@@ -157,13 +174,6 @@ Within the DAG, NodeExecutions and corresponding task executions need to be fetc
 $ flytectl create execution -f template.yaml (see get-template command)
 OR
 $ flytectl create execution --launch-plan "name" --inputs "key=value"
-```
- - get-template
-   Create is complicated as the user needs to know all the input types and  way to simplify this could be to create a YAML template locally from the launchplan (the interface, etc)
-```bash
-$ flytectl get-template execution --for-launch-plan="launch-plan-name" [--origin-project=... --origin-domain=...] -o YAML
-yaml.template (TBD)
-
 ```
  - delete - here refers to terminate
 
