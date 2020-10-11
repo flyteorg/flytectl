@@ -152,8 +152,19 @@ Visualizing the execution is also challenging. We may want to visualize
 We could use https://graphviz.org/ to visualize the DAG.
 Within the DAG, NodeExecutions and corresponding task executions need to be fetched.
  - create
-   Create an execution for a LaunchPlan or a Task.
- - update
+   Create an execution for a LaunchPlan or a Task. This is very interesting as it should accept inputs for the execution.
+```bash
+$ flytectl create execution -f template.yaml (see get-template command)
+OR
+$ flytectl create execution --launch-plan "name" --inputs "key=value"
+```
+ - get-template
+   Create is complicated as the user needs to know all the input types and  way to simplify this could be to create a YAML template locally from the launchplan (the interface, etc)
+```bash
+$ flytectl get-template execution --for-launch-plan="launch-plan-name" [--origin-project=... --origin-domain=...] -o YAML
+yaml.template (TBD)
+
+```
  - delete - here refers to terminate
 
 ## MatchableEntity
@@ -174,16 +185,12 @@ Support
 Today Flytesnacks houses a few examples for Flyte usage in python. When a user wants to get started with Flyte quickly it would be preferable that all Flytesnacks examples are serialized and stored as artifacts in flytesnacks for every checkin. This can be done for python flytekit using `pyflyte serialize` command. Once they are posted as serialized blobs, flytectl could easily retrieve them and register them in a specific project as desired by the user.
 
 ```bash
-$ flytectl get examples [--semver semantic-version-of-flytesnacks-examples] -o ./dir
+$ flytectl examples register-all [cookbook|plugins|--custom-path=remote-path] [--semver semantic-version-of-flytesnacks-examples] --target-project --target-domain
 ```
-Once the examples are retrived users could easily register these examples
-```bash
-$ flytectl create -f diabetes.pb 
-or 
-$ flytectl create -f ./dir/*
-```
+The remote has to follow a protocol. It should be an archive - `tar.gz` with two folders `example-set/ -tasks/*.pb -workflows/*.pb` All the workflows in this path will be installed to the target project / domain
 
 ## Setup a repository with dockerfile for writing code for Flyte
+Maybe we should look at `boilr` or some other existing framework to do this
 ```bash
 $ flytectl init project --archetype tensorflow-2.0
 $ flytectl init project --archetype spark-3.0
