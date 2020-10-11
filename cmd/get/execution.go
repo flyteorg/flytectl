@@ -31,7 +31,6 @@ var executionSingleColumns = []printer.Column{
 
 func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	executionPrinter := printer.Printer{}
-
 	if len(args) == 1 {
 		name := args[0]
 		excution, err := cmdCtx.AdminClient().GetTaskExecution(ctx, &admin.TaskExecutionGetRequest{

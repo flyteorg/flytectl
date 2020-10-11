@@ -13,6 +13,7 @@ import (
 type CommandEntry struct {
 	ProjectDomainNotRequired bool
 	CmdFunc                  CommandFunc
+	Aliases []string
 }
 
 func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CommandEntry) {
@@ -20,6 +21,7 @@ func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CommandEntry) {
 		cmd := &cobra.Command{
 			Use:   resource,
 			Short: fmt.Sprintf("Retrieves %v resources.", resource),
+			Aliases : cmdEntry.Aliases,
 			RunE:  generateCommandFunc(cmdEntry),
 		}
 
