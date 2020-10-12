@@ -16,6 +16,7 @@ import (
 var workflowColumns = []printer.Column{
 	{"Version", "$.id.version"},
 	{"Name", "$.id.name"},
+	{"CreatedAt", "$.closure.created_at"},
 }
 
 func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
@@ -27,7 +28,7 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 				Domain:  config.GetConfig().Domain,
 				Name:    args[0],
 			},
-			Limit: 1,
+			Limit: 100,
 		})
 		if err != nil {
 			return err
