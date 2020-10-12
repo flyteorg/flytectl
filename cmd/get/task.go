@@ -17,9 +17,9 @@ import (
 var taskColumns = []printer.Column{
 	{"Version", "$.id.version"},
 	{"Name", "$.id.name"},
-	{"Type", "$.closure.compiledTask.template.type"},
-	{"Discoverable", "$.closure.compiledTask.template.metadata.discoverable"},
-	{"DiscoveryVersion", "$.closure.compiledTask.template.metadata.discovery_version"},
+	{"Type", "$.closure.compiled_task.template.type"},
+	{"Discoverable", "$.closure.compiled_task.template.metadata.discoverable"},
+	{"DiscoveryVersion", "$.closure.compiled_task.template.metadata.discovery_version"},
 }
 
 func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
