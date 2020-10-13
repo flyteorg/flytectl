@@ -43,6 +43,7 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 				Domain:  config.GetConfig().Domain,
 				Name:    args[0],
 			},
+			// TODO Sorting and limits should be parameters
 			SortBy: &admin.Sort{
 				Key: "created_at",
 				Direction: admin.Sort_DESCENDING,
