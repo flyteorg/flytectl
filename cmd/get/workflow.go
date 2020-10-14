@@ -13,7 +13,6 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
-
 var workflowColumns = []printer.Column{
 	{"Version", "$.id.version"},
 	{"Name", "$.id.name"},
@@ -39,7 +38,7 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 			},
 			// TODO Sorting and limits should be parameters
 			SortBy: &admin.Sort{
-				Key: "created_at",
+				Key:       "created_at",
 				Direction: admin.Sort_DESCENDING,
 			},
 			Limit: 100,

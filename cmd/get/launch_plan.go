@@ -28,7 +28,6 @@ func LaunchplanToProtoMessages(l []*admin.LaunchPlan) []proto.Message {
 func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	launchPlanPrinter := printer.Printer{}
 
-
 	if len(args) == 1 {
 		name := args[0]
 		launchPlan, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, &admin.ResourceListRequest{
@@ -36,17 +35,17 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 			Id: &admin.NamedEntityIdentifier{
 				Project: config.GetConfig().Project,
 				Domain:  config.GetConfig().Domain,
-				Name : name,
+				Name:    name,
 			},
 		})
 		if err != nil {
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v excutions", len(launchPlan.LaunchPlans))
-		err = launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(),launchplanColumns,LaunchplanToProtoMessages(launchPlan.LaunchPlans)...)
+		err = launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplanColumns, LaunchplanToProtoMessages(launchPlan.LaunchPlans)...)
 		if err != nil {
-					return err
-				}
+			return err
+		}
 		return nil
 	}
 

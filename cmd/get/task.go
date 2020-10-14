@@ -31,7 +31,6 @@ func TaskToProtoMessages(l []*admin.Task) []proto.Message {
 	return messages
 }
 
-
 func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 
 	taskPrinter := printer.Printer{}
@@ -45,7 +44,7 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 			},
 			// TODO Sorting and limits should be parameters
 			SortBy: &admin.Sort{
-				Key: "created_at",
+				Key:       "created_at",
 				Direction: admin.Sort_DESCENDING,
 			},
 			Limit: 100,

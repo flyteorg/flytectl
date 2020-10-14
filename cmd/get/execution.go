@@ -7,7 +7,6 @@ import (
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flytectl/pkg/printer"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
-	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/core"
 )
 
 var executionColumns = []printer.Column{
@@ -37,60 +36,23 @@ func ExecutionToProtoMessages(l []*admin.Execution) []proto.Message {
 	return messages
 }
 
-
-
 func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	executionPrinter := printer.Printer{}
-	if config.GetConfig().Filters == "" {
-		excution, err := cmdCtx.AdminClient().ListExecutions(ctx, &admin.ResourceListRequest{
-			Limit: 10,
-			Id: &admin.NamedEntityIdentifier{
-				Project: config.GetConfig().Project,
-				Domain:  config.GetConfig().Domain,
-			},
-		})
-		if err != nil {
-			return err
-		}
-		err = executionPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns, ExecutionToProtoMessages(excution.Executions)...)
-		if err != nil {
-			return err
-		}
-		return nil
-	}else if config.GetConfig().Filters == "workflow" {
-		if len(args) == 1 {
-			excution, err := cmdCtx.AdminClient().GetExecution(ctx, &admin.WorkflowExecutionGetRequest{
-				Id: &core.WorkflowExecutionIdentifier{
-					Project: config.GetConfig().Project,
-					Domain:  config.GetConfig().Domain,
-				},
-			})
-			if err != nil {
-				return err
-			}
-			err = executionPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns, ExecutionToProtoMessages([]*admin.Execution{excution})...)
-			if err != nil {
-				return err
-			}
-			return nil
-		}
-	}else if config.GetConfig().Filters == "launchplan" {
-		if len(args) == 1 {
-			excution, err := cmdCtx.AdminClient().GetExecution(ctx, &admin.WorkflowExecutionGetRequest{
-				Id: &core.WorkflowExecutionIdentifier{
-					Project: config.GetConfig().Project,
-					Domain:  config.GetConfig().Domain,
-				},
-			})
-			if err != nil {
-				return err
-			}
-			err = executionPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns, ExecutionToProtoMessages([]*admin.Execution{excution})...)
-			if err != nil {
-				return err
-			}
-			return nil
-		}
+	excution, err := cmdCtx.AdminClient().ListExecutions(ctx, &admin.ResourceListRequest{
+		Limit: 10,
+		Id: &admin.NamedEntityIdentifier{
+			Project: config.GetConfig().Project,
+			Domain:  config.GetConfig().Domain,
+		},
+	})
+	if err != nil {
+		return err
 	}
+	err = executionPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns, ExecutionToProtoMessages(excution.Executions)...)
+	if err != nil {
+		return err
+	}
+	return nil
 
+	return nil
 }
