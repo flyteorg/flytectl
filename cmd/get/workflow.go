@@ -2,11 +2,7 @@ package get
 
 import (
 	"context"
-<<<<<<< HEAD
-=======
-
 	"github.com/golang/protobuf/proto"
->>>>>>> 140ce13ab1f8364bf8b4b8f4ba6cdf1d171afb91
 	"github.com/lyft/flytestdlib/logger"
 
 	"github.com/lyft/flytectl/cmd/config"
