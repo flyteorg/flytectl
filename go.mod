@@ -12,13 +12,12 @@ require (
 	github.com/lyft/flytestdlib v0.3.10-0.20200619054107-45f341b716fa
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/mapstructure v1.1.2
-	github.com/sirupsen/logrus v1.4.2
+	github.com/pborman/uuid v1.2.1
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.4.0
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0
-	go.uber.org/zap v1.10.0
 	golang.org/x/crypto v0.0.0-20200220183623-bac4c82f6975 // indirect
 	google.golang.org/grpc v1.26.0
 	k8s.io/apimachinery v0.18.3 // indirect
