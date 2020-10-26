@@ -10,10 +10,19 @@ import (
 	"github.com/lyft/flytectl/cmd/config"
 )
 
+type CustomFlags struct {
+	P *string
+	Name string
+	Shorthand string
+	Value string
+	Usage string
+}
+
 type CommandEntry struct {
 	ProjectDomainNotRequired bool
 	CmdFunc                  CommandFunc
 	Aliases                  []string
+	CustomFlags              []CustomFlags
 }
 
 func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CommandEntry) {
@@ -24,7 +33,9 @@ func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CommandEntry) {
 			Aliases: cmdEntry.Aliases,
 			RunE:    generateCommandFunc(cmdEntry),
 		}
-
+		for _, f := range cmdEntry.CustomFlags {
+			rootCmd.PersistentFlags().StringVarP(f.P, f.Name, f.Shorthand,f.Value, f.Usage)
+		}
 		rootCmd.AddCommand(cmd)
 	}
 }
