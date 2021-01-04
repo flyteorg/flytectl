@@ -76,7 +76,15 @@ code methods) can dump a serialized representations of the workflows and tasks t
 
 
 #### Create Templatization
-User-facing SDKs can serialize workflow code to protobuf representations but these will be incomplete. Specifically, the _project_, _domain_, and _version_ parameters must be supplied at create time since these are attributes of the registerable, rather than serialized object. Placeholder template variables such as `{{ .project }}`, `{{ .domain }}`, and `{{ .version }}` will be included in the serialized protobuf that must be substituted at **create** time.  Eventually the hope is that substitution will be done server-side.
+User-facing SDKs can serialize workflow code to protobuf representations but these will be incomplete. Specifically, the _project_, _domain_, and _version_ parameters must be supplied at create time since these are attributes of the registerable, rather than serialized object. Placeholder template variables including:
+
+* `{{ .project }}`
+* `{{ .domain }}`
+* `{{ .version }}`
+* [auth](https://github.com/lyft/flyteidl/blob/c3baba8983019680ef57b6244cea36ba951233ed/protos/flyteidl/admin/common.proto#L241): including the assumable_iam_role and/or kubernetes_service_account
+* the [output_location_prefix](https://github.com/lyft/flyteidl/blob/c3baba8983019680ef57b6244cea36ba951233ed/protos/flyteidl/admin/common.proto#L250)
+
+will be included in the serialized protobuf that must be substituted at **create** time.  Eventually the hope is that substitution will be done server-side.
 
 Furthermore, to reproduce the equivalent **fast-register** code path for the flyte-cli defined in flytekit an equivalent _fast-create_ command must fill in additional template variables in the [task container args](https://github.com/lyft/flyteidl/blob/master/protos/flyteidl/core/tasks.proto#L142). These serialized, templatized args will appear like so:
 
