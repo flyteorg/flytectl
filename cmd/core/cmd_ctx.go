@@ -16,6 +16,10 @@ func (c CommandContext) AdminClient() service.AdminServiceClient {
 	return c.adminClient
 }
 
+func (c *CommandContext) SetAdminClient(adminClient service.AdminServiceClient) {
+	c.adminClient = adminClient
+}
+
 func (c CommandContext) OutputPipe() io.Writer {
 	return c.out
 }
