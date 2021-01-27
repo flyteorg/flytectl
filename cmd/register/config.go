@@ -6,13 +6,12 @@ import "github.com/lyft/flytestdlib/config"
 
 var (
 	defaultConfig = &Config{
-		Files:  [] string{},
 	}
 	section = config.MustRegisterSection("register", defaultConfig)
 )
 
 type Config struct {
-	Files []string `json:"files" pflag:",List of serialized files used for registering to flyte."`
+	version string `json:"version" pflag:",version of the entity to be registered with flyte."`
 }
 
 func GetConfig() *Config {

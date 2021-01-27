@@ -1,7 +1,7 @@
 package register
+
 import (
 	cmdcore "github.com/lyft/flytectl/cmd/core"
-
 	"github.com/spf13/cobra"
 )
 
@@ -17,6 +17,6 @@ func RegisterCommand() *cobra.Command {
 	}
 
 	cmdcore.AddCommands(registerCmd, registerResourcesFuncs)
-
+	registerCmd.PersistentFlags().StringVarP(&(GetConfig().version), "version", "v", "1", "Specifies the Version to use for registering the serialized files.")
 	return registerCmd
 }
