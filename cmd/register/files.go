@@ -23,17 +23,17 @@ func unMarshalContents(ctx context.Context, fileContents []byte, fname string) (
 	if err := proto.Unmarshal(fileContents, workflowSpec); err == nil {
 		return workflowSpec, nil
 	}
-	//logger.Infof(ctx, "Failed to unmarshal file %v for workflow type", fname)
+	logger.Debugf(ctx, "Failed to unmarshal file %v for workflow type", fname)
 	taskSpec := &admin.TaskSpec{}
 	if err := proto.Unmarshal(fileContents, taskSpec); err == nil {
 		return taskSpec, nil
 	}
-	//logger.Infof(ctx, "Failed to unmarshal  file %v for task type", fname)
+	logger.Debugf(ctx, "Failed to unmarshal  file %v for task type", fname)
 	launchPlanSpec := &admin.LaunchPlanSpec{}
 	if err := proto.Unmarshal(fileContents, launchPlanSpec); err == nil {
 		return launchPlanSpec, nil
 	}
-	//logger.Infof(ctx, "Failed to unmarshal file %v for launch plan type", fname)
+	logger.Debugf(ctx, "Failed to unmarshal file %v for launch plan type", fname)
 	return nil, errors.New(fmt.Sprintf("Failed unmarshalling file %v", fname))
 
 }
@@ -81,165 +81,47 @@ func register(ctx context.Context, message proto.Message, name string, cmdCtx cm
 	}
 }
 
-func hydrateWorkflowNode_LaunchplanRef(launchPlanNodeReference *core.WorkflowNode_LaunchplanRef) *core.WorkflowNode_LaunchplanRef {
-	return &core.WorkflowNode_LaunchplanRef{
-		LaunchplanRef: &core.Identifier{
-			ResourceType: launchPlanNodeReference.LaunchplanRef.ResourceType,
-			Project:      config.GetConfig().Project,
-			Domain:       config.GetConfig().Domain,
-			Name:         launchPlanNodeReference.LaunchplanRef.Name,
-			Version:      GetConfig().version,
-		},
-	}
-}
-
-func hydrateWorkflowNode_SubWorkflowRef(subWorkflowNodeReference *core.WorkflowNode_SubWorkflowRef) *core.WorkflowNode_SubWorkflowRef {
-	return &core.WorkflowNode_SubWorkflowRef{
-		SubWorkflowRef: &core.Identifier{
-			ResourceType: subWorkflowNodeReference.SubWorkflowRef.ResourceType,
-			Project:      config.GetConfig().Project,
-			Domain:       config.GetConfig().Domain,
-			Name:         subWorkflowNodeReference.SubWorkflowRef.Name,
-			Version:      GetConfig().version,
-		},
-	}
-}
-
-func hydrateNode(node *core.Node) *core.Node {
+func hydrateNode(node *core.Node) {
 	targetNode := node.Target
 	switch targetNode.(type) {
 	case *core.Node_TaskNode:
 		taskNodeWrapper := targetNode.(*core.Node_TaskNode)
 		taskNodeReference := taskNodeWrapper.TaskNode.Reference.(*core.TaskNode_ReferenceId)
-		hydratedTaskNodeReferenceId := &core.TaskNode_ReferenceId{
-			ReferenceId: &core.Identifier{
-				ResourceType: taskNodeReference.ReferenceId.ResourceType,
-				Project:      config.GetConfig().Project,
-				Domain:       config.GetConfig().Domain,
-				Name:         taskNodeReference.ReferenceId.Name,
-				Version:      GetConfig().version,
-			},
-		}
-		hydratedTaskNode := &core.TaskNode{
-			Reference: hydratedTaskNodeReferenceId,
-		}
-		hydratedWrapperTaskNode := &core.Node_TaskNode{
-			TaskNode: hydratedTaskNode,
-		}
-		hydratedNode := &core.Node{
-			Id:              node.Id,
-			Metadata:        node.Metadata,
-			Inputs:          node.Inputs,
-			UpstreamNodeIds: node.UpstreamNodeIds,
-			OutputAliases:   node.OutputAliases,
-			Target:          hydratedWrapperTaskNode,
-		}
-		return hydratedNode
+		hydrateIdentifier(taskNodeReference.ReferenceId)
 	case *core.Node_WorkflowNode:
 		workflowNodeWrapper := targetNode.(*core.Node_WorkflowNode)
-		var hydratedWorkflowNode *core.WorkflowNode
 		switch workflowNodeWrapper.WorkflowNode.Reference.(type) {
 		case *core.WorkflowNode_SubWorkflowRef:
 			subWorkflowNodeReference := workflowNodeWrapper.WorkflowNode.Reference.(*core.WorkflowNode_SubWorkflowRef)
-			hydratedSubWorkflowNodeReference := hydrateWorkflowNode_SubWorkflowRef(subWorkflowNodeReference)
-			hydratedWorkflowNode = &core.WorkflowNode{
-				Reference: hydratedSubWorkflowNodeReference,
-			}
+			hydrateIdentifier(subWorkflowNodeReference.SubWorkflowRef)
 		case *core.WorkflowNode_LaunchplanRef:
 			launchPlanNodeReference := workflowNodeWrapper.WorkflowNode.Reference.(*core.WorkflowNode_LaunchplanRef)
-			hydratedlaunchPlanNodeReference := hydrateWorkflowNode_LaunchplanRef(launchPlanNodeReference)
-			hydratedWorkflowNode = &core.WorkflowNode{
-				Reference: hydratedlaunchPlanNodeReference,
-			}
+			hydrateIdentifier(launchPlanNodeReference.LaunchplanRef)
 		}
-		hydratedWrapperWorkflowNode := &core.Node_WorkflowNode{
-			WorkflowNode: hydratedWorkflowNode,
-		}
-		hydratedNode := &core.Node{
-			Id:              node.Id,
-			Metadata:        node.Metadata,
-			Inputs:          node.Inputs,
-			UpstreamNodeIds: node.UpstreamNodeIds,
-			OutputAliases:   node.OutputAliases,
-			Target:          hydratedWrapperWorkflowNode,
-		}
-		return hydratedNode
 	}
-	return nil
 }
 
-func hydrateSpec(ctx context.Context, message proto.Message) proto.Message {
+func hydrateIdentifier(identifier *core.Identifier) {
+	identifier.Project = config.GetConfig().Project
+	identifier.Domain = config.GetConfig().Domain
+	identifier.Version = GetConfig().version
+}
+
+func hydrateSpec(message proto.Message) {
 	switch message.(type) {
 	case *admin.LaunchPlanSpec:
 		launchSpec := message.(*admin.LaunchPlanSpec)
-		hydratedLaunchSpec := &admin.LaunchPlanSpec{
-			WorkflowId: &core.Identifier{
-				ResourceType: launchSpec.WorkflowId.ResourceType,
-				Project:      config.GetConfig().Project,
-				Domain:       config.GetConfig().Domain,
-				Name:         launchSpec.WorkflowId.Name,
-				Version:      GetConfig().version,
-			},
-			Auth:                launchSpec.Auth,
-			AuthRole:            launchSpec.AuthRole,
-			RawOutputDataConfig: launchSpec.RawOutputDataConfig,
-			EntityMetadata:      launchSpec.EntityMetadata,
-			DefaultInputs:       launchSpec.DefaultInputs,
-			FixedInputs:         launchSpec.FixedInputs,
-			Labels:              launchSpec.Labels,
-			Annotations:         launchSpec.Annotations,
-			QualityOfService:    launchSpec.QualityOfService,
-			Role:                launchSpec.Role,
-		}
-		return hydratedLaunchSpec
+		hydrateIdentifier(launchSpec.WorkflowId)
 	case *admin.WorkflowSpec:
 		workflowSpec := message.(*admin.WorkflowSpec)
-		hydrateNodes := make([]*core.Node, len(workflowSpec.Template.Nodes))
-		for index, Noderef := range workflowSpec.Template.Nodes {
-			hydrateNodes[index] = hydrateNode(Noderef)
+		for _, Noderef := range workflowSpec.Template.Nodes {
+			hydrateNode(Noderef)
 		}
-		hydratedWorkflowTemplate := &core.WorkflowTemplate{
-			Id: &core.Identifier{
-				ResourceType: workflowSpec.Template.Id.ResourceType,
-				Project:      config.GetConfig().Project,
-				Domain:       config.GetConfig().Domain,
-				Name:         workflowSpec.Template.Id.Name,
-				Version:      GetConfig().version,
-			},
-			Metadata:         workflowSpec.Template.Metadata,
-			Interface:        workflowSpec.Template.Interface,
-			Outputs:          workflowSpec.Template.Outputs,
-			FailureNode:      workflowSpec.Template.FailureNode,
-			MetadataDefaults: workflowSpec.Template.MetadataDefaults,
-			Nodes: hydrateNodes,
-		}
-
-		hydratedWorkflowSpec := &admin.WorkflowSpec{
-			Template: hydratedWorkflowTemplate,
-		}
-		return hydratedWorkflowSpec
+		hydrateIdentifier(workflowSpec.Template.Id)
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
-		hydratedTaskTemplate := &core.TaskTemplate{
-			Id: &core.Identifier{
-				ResourceType: taskSpec.Template.Id.ResourceType,
-				Project:      config.GetConfig().Project,
-				Domain:       config.GetConfig().Domain,
-				Name:         taskSpec.Template.Id.Name,
-				Version:      GetConfig().version,
-			},
-			Type: taskSpec.Template.Type,
-			Metadata: taskSpec.Template.Metadata,
-			Interface: taskSpec.Template.Interface,
-			Custom: taskSpec.Template.Custom,
-			Target: taskSpec.Template.Target,
-		}
-		hydratedTaskSpec := &admin.TaskSpec{
-			Template: hydratedTaskTemplate,
-		}
-		return hydratedTaskSpec
+		hydrateIdentifier(taskSpec.Template.Id)
 	}
-	return nil
 }
 
 func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
@@ -263,14 +145,14 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 			continue
 		}
 		name := getEntityNameFromPath(absFilePath)
-		hydratedSpec := hydrateSpec(ctx, spec)
-		err = register(ctx, hydratedSpec, name, cmdCtx)
+		logger.Debugf(ctx, "Spec : %v ", getJsonSpec(spec))
+		hydrateSpec(spec)
+		logger.Debugf(ctx, "Hydrated Spec : %v ", getJsonSpec(spec))
+		err = register(ctx, spec, name, cmdCtx)
 		if err != nil {
-			//logger.Errorf(ctx, "Error registering entity %v with spec %v due to : %v", name, getJsonSpec(hydratedSpec), err)
 			logger.Errorf(ctx, "Error registering entity %v due to : %v", name, err)
 			continue
 		}
-		//logger.Infof(ctx, "Registered successfully entity %v with spec %v", name, getJsonSpec(hydratedSpec))
 		logger.Infof(ctx, "Registered successfully entity %v", name)
 	}
 	return nil
