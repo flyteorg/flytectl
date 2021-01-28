@@ -19,6 +19,5 @@ func RegisterCommand() *cobra.Command {
 		"files":    {CmdFunc: registerFromFilesFunc, Aliases: []string{"file"}},
 	}
 	cmdcore.AddCommands(registerCmd, registerResourcesFuncs)
-	registerCmd.PersistentFlags().StringVarP(&(GetConfig().version), "version", "v", "v1", "Specifies the Version to use for registering the serialized files.")
 	return registerCmd
 }

@@ -169,6 +169,8 @@ func getJsonSpec(message proto.Message) string {
 	return jsonSpec
 }
 
+// Temporarily using file name for generating the enity name. This would be changed to use it directly from serialized
+// version of the entity protobuf files.
 func getEntityNameFromPath(absFilePath string) string {
 	pathComponents := strings.Split(absFilePath, "/")
 	fileName := strings.SplitAfterN(pathComponents[len(pathComponents)-1], "_", 2)

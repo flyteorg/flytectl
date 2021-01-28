@@ -49,9 +49,6 @@ func generateCommandFunc(cmdEntry CommandEntry) func(cmd *cobra.Command, args []
 		if err != nil {
 			return err
 		}
-		return cmdEntry.CmdFunc(ctx, args, CommandContext{
-			out:         cmd.OutOrStdout(),
-			adminClient: adminClient,
-		})
+		return cmdEntry.CmdFunc(ctx, args, NewCommandContext(adminClient, cmd.OutOrStdout()))
 	}
 }

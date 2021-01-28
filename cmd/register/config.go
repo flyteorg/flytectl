@@ -6,6 +6,7 @@ import "github.com/lyft/flytestdlib/config"
 
 var (
 	defaultConfig = &Config{
+		version : "v1",
 	}
 	section = config.MustRegisterSection("register", defaultConfig)
 )

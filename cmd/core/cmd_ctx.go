@@ -12,12 +12,12 @@ type CommandContext struct {
 	out         io.Writer
 }
 
-func (c CommandContext) AdminClient() service.AdminServiceClient {
-	return c.adminClient
+func NewCommandContext(adminClient service.AdminServiceClient, out io.Writer) CommandContext {
+	return CommandContext{adminClient: adminClient, out : out}
 }
 
-func (c *CommandContext) SetAdminClient(adminClient service.AdminServiceClient) {
-	c.adminClient = adminClient
+func (c CommandContext) AdminClient() service.AdminServiceClient {
+	return c.adminClient
 }
 
 func (c CommandContext) OutputPipe() io.Writer {
