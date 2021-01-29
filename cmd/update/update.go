@@ -14,10 +14,11 @@ func CreateUpdateCommand() *cobra.Command {
 	}
 
 	updateResourcesFuncs := map[string]cmdcore.CommandEntry{
-		"activate-project":    {CmdFunc: activateProjectFunc, Aliases: []string{"activate"}},
-		"archive-project":    {CmdFunc: archiveProjectFunc, Aliases: []string{"archive"}},
+		"project":    {CmdFunc: updateProjectsFunc, Aliases: []string{"projects"}, ProjectDomainNotRequired: true},
 	}
 
 	cmdcore.AddCommands(updateCmd, updateResourcesFuncs)
+	updateCmd.PersistentFlags().BoolVarP(&(GetConfig().ActivateProject), "activate", "t", false, "Activates the project specified as argument.")
+	updateCmd.PersistentFlags().BoolVarP(&(GetConfig().ArchiveProject), "archive", "a", false, "Activates the project specified as argument.")
 	return updateCmd
 }

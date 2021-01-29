@@ -2,22 +2,32 @@ package update
 
 import (
 	"context"
+	"errors"
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/lyft/flytestdlib/logger"
 )
 
-func archiveProjectFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	return updateProjectsFunc(ctx, admin.Project_ARCHIVED, cmdCtx)
-}
+var (
+	errProjectNotFound = errors.New("Specify id of the project to be updated")
+	errInvalidUpdate = errors.New("Specify either activate or archive")
+)
 
-func activateProjectFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	return updateProjectsFunc(ctx, admin.Project_ACTIVE, cmdCtx)
-}
-
-func updateProjectsFunc(ctx context.Context, projectState admin.Project_ProjectState, cmdCtx cmdCore.CommandContext) error {
+func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	id := config.GetConfig().Project
+	if len(id) == 0 {
+		return errProjectNotFound
+	}
+	archiveProject := GetConfig().ArchiveProject
+	activateProject := GetConfig().ActivateProject
+	if activateProject == archiveProject {
+		return errInvalidUpdate
+	}
+	projectState := admin.Project_ACTIVE
+	if archiveProject {
+		projectState = admin.Project_ARCHIVED
+	}
 	_, err := cmdCtx.AdminClient().UpdateProject(ctx, &admin.Project{
 		Id : id,
 		State : projectState,
