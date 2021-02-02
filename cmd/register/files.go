@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
@@ -145,7 +146,12 @@ func hydrateSpec(message proto.Message) error {
 		}
 		hydrateIdentifier(workflowSpec.Template.Id)
 		for _, subWorkflow := range workflowSpec.SubWorkflows {
-			hydrateSpec(subWorkflow)
+			for _, Noderef := range subWorkflow.Nodes {
+				if err := hydrateNode(Noderef); err != nil{
+					return err
+				}
+			}
+			hydrateIdentifier(subWorkflow.Id)
 		}
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
@@ -176,13 +182,10 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 			logger.Errorf(ctx, "Error unmarshalling file %v due to : %v", absFilePath, err)
 			return err
 		}
-		err = hydrateSpec(spec)
-		if err != nil {
-			return err
-		}
 		if err := hydrateSpec(spec); err != nil {
 			return err
 		}
+		logger.Debugf(ctx, "Hydrated spec : %v", getJsonSpec(spec))
 		if err := register(ctx, spec, cmdCtx); err != nil {
 			logger.Errorf(ctx, "Error registering file %v due to : %v", absFilePath, err)
 			return err
@@ -190,4 +193,15 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 		logger.Infof(ctx, "Registered successfully entity %v", absFilePath)
 	}
 	return nil
+}
+
+func getJsonSpec(message proto.Message) string {
+	marshaller := jsonpb.Marshaler{
+		EnumsAsInts:  false,
+		EmitDefaults: true,
+		Indent:       "  ",
+		OrigName:     true,
+	}
+	jsonSpec, _ := marshaller.MarshalToString(message)
+	return jsonSpec
 }
