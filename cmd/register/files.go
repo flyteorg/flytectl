@@ -17,6 +17,10 @@ import (
 )
 
 const identifierFileSuffix = "identifier"
+const registrationProjectPattern = "{{ registration.project }}"
+const registrationDomainPattern = "{{ registration.domain }}"
+const registrationVersionPattern = "{{ registration.version }}"
+
 
 func unMarshalContents(ctx context.Context, fileContents []byte, fname string) (proto.Message, error) {
 	workflowSpec := &admin.WorkflowSpec{}
@@ -127,9 +131,15 @@ func hydrateNode(node *core.Node) error {
 }
 
 func hydrateIdentifier(identifier *core.Identifier) {
-	identifier.Project = config.GetConfig().Project
-	identifier.Domain = config.GetConfig().Domain
-	identifier.Version = GetConfig().version
+	if len(identifier.Project) == 0 || identifier.Project == registrationProjectPattern {
+		identifier.Project = config.GetConfig().Project
+	}
+	if len(identifier.Domain) == 0 || identifier.Domain == registrationDomainPattern {
+		identifier.Domain = config.GetConfig().Domain
+	}
+	if len(identifier.Version) == 0 || identifier.Version == registrationVersionPattern {
+		identifier.Version = GetConfig().version
+	}
 }
 
 func hydrateSpec(message proto.Message) error {
