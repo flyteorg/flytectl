@@ -12,6 +12,7 @@ import (
 	"github.com/lyft/flytectl/pkg/printer"
 )
 
+
 var projectColumns = []printer.Column{
 	{"ID", "$.id"},
 	{"Name", "$.name"},

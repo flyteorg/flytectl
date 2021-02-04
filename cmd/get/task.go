@@ -14,6 +14,15 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
+//go:generate pflags Config
+
+var (
+	defaultConfig = Config{F: "hello"}
+)
+type Config struct {
+	F string `json:"f" pflag:",Blah blah"`
+}
+
 var taskColumns = []printer.Column{
 	{"Version", "$.id.version"},
 	{"Name", "$.id.name"},

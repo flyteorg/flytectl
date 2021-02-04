@@ -3,17 +3,22 @@ package cmdcore
 import (
 	"context"
 	"fmt"
-
 	"github.com/lyft/flyteidl/clients/go/admin"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/lyft/flytectl/cmd/config"
 )
+
+type PFlagProvider interface {
+	GetPFlagSet(prefix string) *pflag.FlagSet
+}
 
 type CommandEntry struct {
 	ProjectDomainNotRequired bool
 	CmdFunc                  CommandFunc
 	Aliases                  []string
+	PFlagProvider            PFlagProvider
 }
 
 func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CommandEntry) {
@@ -25,6 +30,9 @@ func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CommandEntry) {
 			RunE:    generateCommandFunc(cmdEntry),
 		}
 
+		if cmdEntry.PFlagProvider != nil {
+			cmd.Flags().AddFlagSet(cmdEntry.PFlagProvider.GetPFlagSet(""))
+		}
 		rootCmd.AddCommand(cmd)
 	}
 }

@@ -15,7 +15,7 @@ func CreateGetCommand() *cobra.Command {
 
 	getResourcesFuncs := map[string]cmdcore.CommandEntry{
 		"project":    {CmdFunc: getProjectsFunc, Aliases: []string{"projects"}, ProjectDomainNotRequired: true},
-		"task":       {CmdFunc: getTaskFunc, Aliases: []string{"tasks"}},
+		"task":       {CmdFunc: getTaskFunc, Aliases: []string{"tasks"}, PFlagProvider: defaultConfig},
 		"workflow":   {CmdFunc: getWorkflowFunc, Aliases: []string{"workflows"}},
 		"launchplan": {CmdFunc: getLaunchPlanFunc, Aliases: []string{"launchplans"}},
 	}
