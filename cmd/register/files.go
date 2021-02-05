@@ -2,21 +2,35 @@ package register
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
+	"github.com/lyft/flytectl/pkg/printer"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/lyft/flytestdlib/logger"
 	"io/ioutil"
 	"sort"
-	"strings"
 )
 
-const identifierFileSuffix = "identifier"
+//go:generate pflags RegisterFilesConfig
+
+var (
+	filesConfig = &RegisterFilesConfig{
+		version : "v1",
+		skipOnError :false,
+	}
+)
+
+type RegisterFilesConfig struct {
+	version string `json:"version" pflag:",version of the entity to be registered with flyte."`
+	skipOnError bool `json:"skipOnError" pflag:",fail fast when registering files."`
+}
+
 const registrationProjectPattern = "{{ registration.project }}"
 const registrationDomainPattern = "{{ registration.domain }}"
 const registrationVersionPattern = "{{ registration.version }}"
@@ -52,7 +66,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 				Project:      config.GetConfig().Project,
 				Domain:       config.GetConfig().Domain,
 				Name:         launchPlan.Id.Name,
-				Version:      GetConfig().version,
+				Version:      filesConfig.version,
 			},
 			Spec: launchPlan.Spec,
 		})
@@ -65,7 +79,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 				Project:      config.GetConfig().Project,
 				Domain:       config.GetConfig().Domain,
 				Name:         workflowSpec.Template.Id.Name,
-				Version:      GetConfig().version,
+				Version:      filesConfig.version,
 			},
 			Spec: workflowSpec,
 		})
@@ -78,7 +92,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 				Project:      config.GetConfig().Project,
 				Domain:       config.GetConfig().Domain,
 				Name:         taskSpec.Template.Id.Name,
-				Version:      GetConfig().version,
+				Version:      filesConfig.version,
 			},
 			Spec: taskSpec,
 		})
@@ -138,7 +152,7 @@ func hydrateIdentifier(identifier *core.Identifier) {
 		identifier.Domain = config.GetConfig().Domain
 	}
 	if len(identifier.Version) == 0 || identifier.Version == registrationVersionPattern {
-		identifier.Version = GetConfig().version
+		identifier.Version = filesConfig.version
 	}
 }
 
@@ -172,36 +186,64 @@ func hydrateSpec(message proto.Message) error {
 	return nil
 }
 
+type RegisterResult struct{
+	Name string
+	Status string
+	Info string
+}
+
+var projectColumns = []printer.Column{
+	{"Name", "$.Name"},
+	{"Status", "$.Status"},
+	{"Additional Info", "$.Info"},
+}
+
 func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	files := args
 	sort.Strings(files)
 	logger.Infof(ctx, "Parsing files... Total(%v)", len(files))
-	logger.Infof(ctx, "Params version %v", GetConfig().version)
-	for _, absFilePath := range files {
-		if strings.Contains(absFilePath, identifierFileSuffix) {
-			continue
-		}
+	logger.Infof(ctx, "Params version %v", filesConfig.version)
+	var registerResults [] RegisterResult
+	adminPrinter := printer.Printer{}
+	fastFail := !filesConfig.skipOnError
+	logger.Infof(ctx, "Fail fast %v", fastFail)
+	var _err error
+	for i := 0; i< len(files) && !(fastFail && _err != nil) ; i++ {
+		absFilePath := files[i]
+		var registerResult RegisterResult
 		logger.Infof(ctx, "Parsing  %v", absFilePath)
 		fileContents, err := ioutil.ReadFile(absFilePath)
 		if err != nil {
-			logger.Errorf(ctx, "Error reading file %v  due to : %v. Aborting", absFilePath, err)
-			return err
+			registerResult =  RegisterResult{Name: absFilePath, Status: "Failed", Info: fmt.Sprintf("Error reading file due to %v", err)}
+			registerResults = append(registerResults, registerResult)
+			_err = err
+			continue
 		}
 		spec, err := unMarshalContents(ctx, fileContents, absFilePath)
 		if err != nil {
-			logger.Errorf(ctx, "Error unmarshalling file %v due to : %v", absFilePath, err)
-			return err
+			registerResult =  RegisterResult{Name: absFilePath, Status: "Failed", Info: fmt.Sprintf("Error unmarshalling file due to %v", err)}
+			registerResults = append(registerResults, registerResult)
+			_err = err
+			continue
 		}
 		if err := hydrateSpec(spec); err != nil {
-			return err
+			registerResult =  RegisterResult{Name: absFilePath, Status: "Failed", Info: fmt.Sprintf("Error hydrating spec due to %v", err)}
+			registerResults = append(registerResults, registerResult)
+			_err = err
+			continue
 		}
 		logger.Debugf(ctx, "Hydrated spec : %v", getJsonSpec(spec))
 		if err := register(ctx, spec, cmdCtx); err != nil {
-			logger.Errorf(ctx, "Error registering file %v due to : %v", absFilePath, err)
-			return err
+			registerResult =  RegisterResult{Name: absFilePath, Status: "Failed", Info: fmt.Sprintf("Error registering file due to %v", err)}
+			registerResults = append(registerResults, registerResult)
+			_err = err
+			continue
 		}
-		logger.Infof(ctx, "Registered successfully entity %v", absFilePath)
+		registerResult =  RegisterResult{Name: absFilePath, Status: "Success", Info: "Successfully registered file"}
+		registerResults = append(registerResults, registerResult)
 	}
+	payload, _ := json.Marshal(registerResults)
+	adminPrinter.JSONToTable(payload, projectColumns)
 	return nil
 }
 

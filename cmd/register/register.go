@@ -16,9 +16,8 @@ func RegisterCommand() *cobra.Command {
 			  "If the entities are already registered with flyte for the same version then registration would fail.\n" ,
 	}
 	registerResourcesFuncs := map[string]cmdcore.CommandEntry{
-		"files":    {CmdFunc: registerFromFilesFunc, Aliases: []string{"file"}},
+		"files":    {CmdFunc: registerFromFilesFunc, Aliases: []string{"file"}, PFlagProvider: filesConfig},
 	}
 	cmdcore.AddCommands(registerCmd, registerResourcesFuncs)
-	registerCmd.PersistentFlags().StringVarP(&(GetConfig().version), "version", "v", "v1", "Specifies the Version to use for registering the serialized files.")
 	return registerCmd
 }
