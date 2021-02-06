@@ -145,13 +145,13 @@ func hydrateNode(node *core.Node) error {
 }
 
 func hydrateIdentifier(identifier *core.Identifier) {
-	if len(identifier.Project) == 0 || identifier.Project == registrationProjectPattern {
+	if identifier.Project == "" || identifier.Project == registrationProjectPattern {
 		identifier.Project = config.GetConfig().Project
 	}
-	if len(identifier.Domain) == 0 || identifier.Domain == registrationDomainPattern {
+	if identifier.Domain == "" || identifier.Domain == registrationDomainPattern {
 		identifier.Domain = config.GetConfig().Domain
 	}
-	if len(identifier.Version) == 0 || identifier.Version == registrationVersionPattern {
+	if identifier.Version == "" || identifier.Version == registrationVersionPattern {
 		identifier.Version = filesConfig.version
 	}
 }
