@@ -93,12 +93,12 @@ html_theme_options = {
     "google_analytics_account": "G-YQL24L5CKY",
     # Specify a base_url used to generate sitemap.xml. If not
     # specified, then no sitemap will be built.
-    "base_url": "https://github.com/lyft/flytectl",
+    "base_url": "https://github.com/flyteorg/flytectl",
     # Set the color and the accent color
     "color_primary": "deep-purple",
     "color_accent": "blue",
     # Set the repo location to get a badge with stats
-    "repo_url": "https://github.com/lyft/flyte/",
+    "repo_url": "https://github.com/flyteorg/flyte/",
     "repo_name": "flyte",
     # Visible levels of the global TOC; -1 means unlimited
     "globaltoc_depth": 1,
