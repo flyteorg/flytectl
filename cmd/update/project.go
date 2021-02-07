@@ -2,39 +2,51 @@ package update
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
-	"github.com/lyft/flytestdlib/logger"
 )
 
+//go:generate pflags ProjectConfig
+
+// Config hold configuration for project update flags.
+type ProjectConfig struct {
+	ActivateProject bool `json:"activateProject" pflag:",Activates the project specified as argument."`
+	ArchiveProject  bool `json:"archiveProject" pflag:",Archives the project specified as argument."`
+}
+
 var (
-	errProjectNotFound = errors.New("Specify id of the project to be updated")
-	errInvalidUpdate = errors.New("Specify either activate or archive")
+	projectConfig      = &ProjectConfig{}
+	errProjectNotFound = "Project %v not found\n"
+	errInvalidUpdate   = "Invalid state passed. Specify either activate or archive\n"
+	errFailedUpdate    = "Project %v failed to get updated to %v state due to %v\n"
 )
 
 func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	id := config.GetConfig().Project
-	if len(id) == 0 {
-		return errProjectNotFound
+	if id == "" {
+		fmt.Printf(errProjectNotFound, id)
+		return nil
 	}
-	archiveProject := GetConfig().ArchiveProject
-	activateProject := GetConfig().ActivateProject
+	archiveProject := projectConfig.ArchiveProject
+	activateProject := projectConfig.ActivateProject
 	if activateProject == archiveProject {
-		return errInvalidUpdate
+		fmt.Printf(errInvalidUpdate)
+		return nil
 	}
 	projectState := admin.Project_ACTIVE
 	if archiveProject {
 		projectState = admin.Project_ARCHIVED
 	}
 	_, err := cmdCtx.AdminClient().UpdateProject(ctx, &admin.Project{
-		Id : id,
-		State : projectState,
+		Id:    id,
+		State: projectState,
 	})
 	if err != nil {
-		return err
+		fmt.Printf(errFailedUpdate, id, projectState, err)
+		return nil
 	}
-	logger.Infof(ctx, "Project %v updated to %v state", id, projectState)
+	fmt.Printf("Project %v updated to %v state\n", id, projectState)
 	return nil
 }
