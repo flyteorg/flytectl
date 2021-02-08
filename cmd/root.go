@@ -3,7 +3,10 @@ package cmd
 import (
 	"context"
 	"fmt"
+
 	"github.com/lyft/flytectl/cmd/create"
+	"github.com/lyft/flytectl/cmd/register"
+	"github.com/lyft/flytectl/cmd/update"
 
 	"github.com/lyft/flytectl/cmd/get"
 	"github.com/lyft/flytectl/pkg/printer"
@@ -39,6 +42,8 @@ func newRootCmd() *cobra.Command {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(get.CreateGetCommand())
 	rootCmd.AddCommand(create.CreateCommand())
+	rootCmd.AddCommand(update.CreateUpdateCommand())
+	rootCmd.AddCommand(register.RegisterCommand())
 	config.GetConfig()
 
 	return rootCmd

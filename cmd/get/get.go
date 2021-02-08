@@ -18,10 +18,7 @@ func CreateGetCommand() *cobra.Command {
 		"task":       {CmdFunc: getTaskFunc, Aliases: []string{"tasks"}},
 		"workflow":   {CmdFunc: getWorkflowFunc, Aliases: []string{"workflows"}},
 		"launchplan": {CmdFunc: getLaunchPlanFunc, Aliases: []string{"launchplans"}},
-		//"execution": {CmdFunc: getExecutionFunc, Aliases: []string{"executions"},CustomFlags : []cmdcore.CustomFlags{},Subcommand: map[string]cmdcore.CommandEntry{
-		//	"node":       {CmdFunc: getExecutionFunc, Aliases: []string{""}},
-		//	"task":       {CmdFunc: getExecutionFunc, Aliases: []string{""}},
-		//}},
+		"execution":  {CmdFunc: getExecutionFunc, Aliases: []string{"executions"}},
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)
