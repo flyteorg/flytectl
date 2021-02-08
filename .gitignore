@@ -4,3 +4,5 @@ vendor
 bin
 .DS_Store
 _test
+./config.yaml
+docs/build/*

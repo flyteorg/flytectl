@@ -2,20 +2,24 @@ package cmd
 
 import (
 	"context"
+	"fmt"
+	"github.com/lyft/flytectl/cmd/update"
+	"github.com/lyft/flytectl/cmd/register"
 
 	"github.com/lyft/flytectl/cmd/get"
+	"github.com/lyft/flytectl/pkg/printer"
 
-	"github.com/lyft/flytectl/cmd/config"
 	stdConfig "github.com/lyft/flytestdlib/config"
 	"github.com/lyft/flytestdlib/config/viper"
 	"github.com/spf13/cobra"
+
+	"github.com/lyft/flytectl/cmd/config"
 )
 
 var (
 	cfgFile        string
 	configAccessor = viper.NewAccessor(stdConfig.Options{StrictMode: true})
 )
-
 
 func newRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
@@ -31,10 +35,12 @@ func newRootCmd() *cobra.Command {
 	// --root.project, this adds a convenience on top to allow --project to be used
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Project), "project", "p", "", "Specifies the Flyte project.")
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Domain), "domain", "d", "", "Specifies the Flyte project's domain.")
-
+	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Output), "output", "o", printer.OutputFormatTABLE.String(), fmt.Sprintf("Specifies the output type - supported formats %s", printer.OutputFormats()))
 	rootCmd.AddCommand(viper.GetConfigCommand())
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(get.CreateGetCommand())
+	rootCmd.AddCommand(update.CreateUpdateCommand())
+	rootCmd.AddCommand(register.RegisterCommand())
 	config.GetConfig()
 
 	return rootCmd
