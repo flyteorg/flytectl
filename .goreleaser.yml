@@ -98,8 +98,8 @@ brews:
     # Git author used to commit to the repository.
     # Defaults are shown.
     commit_author:
-      name: goreleaserbot
-      email: goreleaser@carlosbecker.com
+      name: flytebot
+      email: flytebot@flyte.org
 
     # Caveats for the user of your binary.
     # Default is empty.
@@ -107,7 +107,7 @@ brews:
 
     # Your app's homepage.
     # Default is empty.
-    homepage: "https://godoc.org/github.com/flyteorg/flytectl"
+    homepage: "https://flytectl.readthedocs.io/en/latest"
 
     # Your app's description.
     # Default is empty.
