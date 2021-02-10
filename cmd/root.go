@@ -3,15 +3,15 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"github.com/lyft/flytectl/cmd/update"
-	"github.com/lyft/flytectl/cmd/register"
-
 	"github.com/lyft/flytectl/cmd/get"
+	"github.com/lyft/flytectl/cmd/register"
+	"github.com/lyft/flytectl/cmd/update"
 	"github.com/lyft/flytectl/pkg/printer"
-
 	stdConfig "github.com/lyft/flytestdlib/config"
 	"github.com/lyft/flytestdlib/config/viper"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 
 	"github.com/lyft/flytectl/cmd/config"
 )
@@ -57,6 +57,16 @@ func initConfig(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
+	return nil
+}
+
+func GenerateDocs() error {
+	rootCmd := newRootCmd()
+	err := doc.GenReSTTree(rootCmd, ".")
+	if err != nil {
+		logrus.Fatal(err)
+		return err
+	}
 	return nil
 }
 
