@@ -2,9 +2,10 @@ package register
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"sort"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRegisterCommand(t *testing.T) {

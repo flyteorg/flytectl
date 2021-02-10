@@ -3,6 +3,7 @@ package update
 import (
 	"context"
 	"fmt"
+
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
@@ -32,7 +33,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	archiveProject := projectConfig.ArchiveProject
 	activateProject := projectConfig.ActivateProject
 	if activateProject == archiveProject {
-		fmt.Printf(errInvalidUpdate)
+		fmt.Println(errInvalidUpdate)
 		return nil
 	}
 	projectState := admin.Project_ACTIVE

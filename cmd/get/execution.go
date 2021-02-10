@@ -2,6 +2,7 @@ package get
 
 import (
 	"context"
+
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/core"
 
 	"github.com/golang/protobuf/proto"
@@ -32,7 +33,7 @@ func ExecutionToProtoMessages(l []*admin.Execution) []proto.Message {
 
 func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
-	var executions []* admin.Execution
+	var executions []*admin.Execution
 	if len(args) > 0 {
 		name := args[0]
 		execution, err := cmdCtx.AdminClient().GetExecution(ctx, &admin.WorkflowExecutionGetRequest{

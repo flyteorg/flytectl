@@ -14,7 +14,7 @@ func CreateUpdateCommand() *cobra.Command {
 	}
 
 	updateResourcesFuncs := map[string]cmdcore.CommandEntry{
-		"project":    {CmdFunc: updateProjectsFunc, Aliases: []string{"projects"}, ProjectDomainNotRequired: true, PFlagProvider: projectConfig},
+		"project": {CmdFunc: updateProjectsFunc, Aliases: []string{"projects"}, ProjectDomainNotRequired: true, PFlagProvider: projectConfig},
 	}
 
 	cmdcore.AddCommands(updateCmd, updateResourcesFuncs)

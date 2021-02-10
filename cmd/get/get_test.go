@@ -2,15 +2,16 @@ package get
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"sort"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCreateGetCommand(t *testing.T) {
 	getCommand := CreateGetCommand()
-	assert.Equal(t, getCommand.Use , "get")
-	assert.Equal(t, getCommand.Short , "Retrieve various resource.")
+	assert.Equal(t, getCommand.Use, "get")
+	assert.Equal(t, getCommand.Short, "Retrieve various resource.")
 	fmt.Println(getCommand.Commands())
 	assert.Equal(t, len(getCommand.Commands()), 5)
 	cmdNouns := getCommand.Commands()

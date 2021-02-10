@@ -114,7 +114,7 @@ func TestRegisterFilesConfig_SetFlags(t *testing.T) {
 
 			cmdFlags.Set("version", testValue)
 			if vString, err := cmdFlags.GetString("version"); err == nil {
-				testDecodeJson_RegisterFilesConfig(t, fmt.Sprintf("%v", vString), &actual.version)
+				testDecodeJson_RegisterFilesConfig(t, fmt.Sprintf("%v", vString), &actual.Version)
 
 			} else {
 				assert.FailNow(t, err.Error())
@@ -136,7 +136,7 @@ func TestRegisterFilesConfig_SetFlags(t *testing.T) {
 
 			cmdFlags.Set("skipOnError", testValue)
 			if vBool, err := cmdFlags.GetBool("skipOnError"); err == nil {
-				testDecodeJson_RegisterFilesConfig(t, fmt.Sprintf("%v", vBool), &actual.skipOnError)
+				testDecodeJson_RegisterFilesConfig(t, fmt.Sprintf("%v", vBool), &actual.SkipOnError)
 
 			} else {
 				assert.FailNow(t, err.Error())

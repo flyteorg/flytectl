@@ -2,6 +2,7 @@ package get
 
 import (
 	"context"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
@@ -57,5 +58,4 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 	}
 	logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
 	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), entityColumns, adminutils.NamedEntityToProtoMessage(launchPlans)...)
-	return nil
 }
