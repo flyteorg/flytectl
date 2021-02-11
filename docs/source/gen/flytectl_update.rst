@@ -3,13 +3,25 @@
 flytectl update
 ---------------
 
-Update various resources.
+
+Example update project to activate it.
+::
+
+ bin/flytectl update project -p flytesnacks --activateProject
+
+
 
 Synopsis
 ~~~~~~~~
 
 
-Update various resources.
+
+Example update project to activate it.
+::
+
+ bin/flytectl update project -p flytesnacks --activateProject
+
+
 
 Options
 ~~~~~~~

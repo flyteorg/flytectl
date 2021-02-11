@@ -45,15 +45,6 @@ Basic Configuration
 
 .. toctree::
    :maxdepth: 2
-   :caption: Flytectl docs - Entities
-   
-   flytectl_tasks
-   flytectl_workflow
-   flytectl_launchplan
-
-
-.. toctree::
-   :maxdepth: 2
    :caption: Flytectl verbs
    
    gen/flytectl_get

@@ -9,8 +9,37 @@ Synopsis
 ~~~~~~~~
 
 
-Registers all the serialized protobuf files including tasks, workflows and launchplans.
-bin/flytectl register file  _pb_output_new/* -d development  -p flytesnacks -v v2
+
+Registers all the serialized protobuf files including tasks, workflows and launchplans with default v1 version.
+If there are already registered entities with v1 version then the command will fail immediately on the first such encounter.
+::
+
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks
+
+If you want to continue executing registration on other files ignoring the errors including version conflicts then pass in
+the skipOnError flag.
+
+::
+
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks --skipOnError
+
+Using short format of skipOnError flag
+::
+
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks -s
+
+Overriding the default version v1 using version string 
+::
+
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks -v v2
+
+Change the o/p format has not effect on registration. The O/p is currently available only in table format.
+
+::
+
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks -s -o yaml
+
+Usage
 
 
 ::

@@ -9,6 +9,7 @@ Synopsis
 ~~~~~~~~
 
 
+
 Takes input files as serialized versions of the tasks/workflows/launchplans and registers them with flyteadmin.
 Currently these input files are protobuf files generated as output from flytekit serialize.
 Project & Domain are mandatory fields to be passed for registration and an optional version which defaults to v1
