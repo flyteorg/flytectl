@@ -10,6 +10,8 @@ Synopsis
 
 
 Registers all the serialized protobuf files including tasks, workflows and launchplans.
+bin/flytectl register file  _pb_output_new/* -d development  -p flytesnacks -v v2
+
 
 ::
 

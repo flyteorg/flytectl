@@ -9,7 +9,7 @@ Synopsis
 ~~~~~~~~
 
 
-Retrieves all the executions
+Retrieves all the executions bin/flytectl get executions -p flytesnacks -d development
 
 ::
 

@@ -54,7 +54,7 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - Hello
+* :doc:`flytectl` 	 - flyetcl CLI tool
 * :doc:`flytectl_config_discover` 	 - Searches for a config in one of the default search paths.
 * :doc:`flytectl_config_validate` 	 - Validates the loaded config.
 

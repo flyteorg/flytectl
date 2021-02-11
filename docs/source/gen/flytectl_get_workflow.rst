@@ -3,13 +3,14 @@
 flytectl get workflow
 ---------------------
 
-Gets workflow resources
+Gets task resources
 
 Synopsis
 ~~~~~~~~
 
 
 Retrieves all the workflows
+ bin/flytectl get workflows -p flytesnacks -d development
 
 ::
 

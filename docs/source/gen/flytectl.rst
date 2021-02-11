@@ -3,13 +3,13 @@
 flytectl
 --------
 
-Hello
+flyetcl CLI tool
 
 Synopsis
 ~~~~~~~~
 
 
-Hello world
+flytectl is CLI tool written in go to interact with flyteadmin service
 
 Options
 ~~~~~~~

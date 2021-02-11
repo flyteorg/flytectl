@@ -3,13 +3,14 @@
 flytectl get launchplan
 -----------------------
 
-Gets launchplan resources
+Gets launch plan resources
 
 Synopsis
 ~~~~~~~~
 
 
-Retrieves all the launchplans
+Retrieves all the launch plans
+ bin/flytectl get launchplans -p flytesnacks -d development
 
 ::
 

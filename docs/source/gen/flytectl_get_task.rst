@@ -10,6 +10,7 @@ Synopsis
 
 
 Retrieves all the tasks
+ bin/flytectl get tasks -p flytesnacks -d development
 
 ::
 

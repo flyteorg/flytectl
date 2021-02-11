@@ -9,7 +9,7 @@ Synopsis
 ~~~~~~~~
 
 
-Retrieves all the projects
+Retrieves all the projects\n bin/flytectl get project
 
 ::
 
