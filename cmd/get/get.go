@@ -6,6 +6,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	projectShort    = "Gets project resources"
+	projectLong     = "Retrieves all the projects"
+	taskShort       = "Gets task resources"
+	taskLong        = "Retrieves all the tasks"
+	workflowShort   = "Gets task resources"
+	workflowLong    = "Retrieves all the tasks"
+	launchPlanShort = "Gets launch plan resources"
+	launchPlanLong  = "Retrieves all the launch plans"
+	executionShort  = "Gets execution resources"
+	executionLong   = "Retrieves all the executions"
+)
+
 // CreateGetCommand will return get command
 func CreateGetCommand() *cobra.Command {
 	getCmd := &cobra.Command{
@@ -15,16 +28,16 @@ func CreateGetCommand() *cobra.Command {
 
 	getResourcesFuncs := map[string]cmdcore.CommandEntry{
 		"project": {CmdFunc: getProjectsFunc, Aliases: []string{"projects"}, ProjectDomainNotRequired: true,
-			Short: "Gets project resources",
-			Long:  "Retrieves all the projects"},
-		"task":       {CmdFunc: getTaskFunc, Aliases: []string{"tasks"},Short: "Gets task resources",
-			Long:  "Retrieves all the tasks"},
-		"workflow":   {CmdFunc: getWorkflowFunc, Aliases: []string{"workflows"}, Short: "Gets workflow resources",
-			Long:  "Retrieves all the workflows"},
-		"launchplan": {CmdFunc: getLaunchPlanFunc, Aliases: []string{"launchplans"}, Short: "Gets launchplan resources",
-			Long:  "Retrieves all the launchplans"},
-		"execution":  {CmdFunc: getExecutionFunc, Aliases: []string{"executions"}, Short: "Gets execution resources",
-			Long:  "Retrieves all the executions"},
+			Short: projectShort,
+			Long:  projectLong},
+		"task": {CmdFunc: getTaskFunc, Aliases: []string{"tasks"}, Short: taskShort,
+			Long: taskLong},
+		"workflow": {CmdFunc: getWorkflowFunc, Aliases: []string{"workflows"}, Short: workflowShort,
+			Long: workflowLong},
+		"launchplan": {CmdFunc: getLaunchPlanFunc, Aliases: []string{"launchplans"}, Short: launchPlanShort,
+			Long: launchPlanLong},
+		"execution": {CmdFunc: getExecutionFunc, Aliases: []string{"executions"}, Short: executionShort,
+			Long: executionLong},
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)
