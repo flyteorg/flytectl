@@ -8,12 +8,12 @@ import (
 
 // Long descriptions are whitespace sensitive when generating docs using sphinx.
 const (
-	getLong = `
+	getCmdShort = `Used for fetching various flyte resources including tasks/workflows/launchplans/executions/project.`
+	getCmdLong  = `
 Example get projects.
 ::
 
  bin/flytectl get project
-
 `
 	projectShort = "Gets project resources"
 	projectLong  = `
@@ -181,7 +181,8 @@ Usage
 func CreateGetCommand() *cobra.Command {
 	getCmd := &cobra.Command{
 		Use:   "get",
-		Short: getLong,
+		Short: getCmdShort,
+		Long: getCmdLong,
 	}
 
 	getResourcesFuncs := map[string]cmdcore.CommandEntry{

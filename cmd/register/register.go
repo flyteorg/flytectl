@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Long descriptions are whitespace sensitive when generating docs using sphinx.
 const (
 	registerCmdShort = "Registers tasks/workflows/launchplans from list of generated serialized files."
 	registercmdLong  = `

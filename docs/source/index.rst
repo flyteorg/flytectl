@@ -41,8 +41,9 @@ Basic Configuration
    :maxdepth: 1
    :caption: Flyte Core docs
 
-   Flyte Documentation <https://lyft.github.io/flyte/>
+   Flyte Documentation <https://flyte.readthedocs.io/en/latest/>
 
+   gen/flytectl
 .. toctree::
    :maxdepth: 2
    :caption: Flytectl verbs
