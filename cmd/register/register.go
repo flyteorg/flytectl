@@ -17,7 +17,8 @@ func RegisterCommand() *cobra.Command {
 	}
 	registerResourcesFuncs := map[string]cmdcore.CommandEntry{
 		"files": {CmdFunc: registerFromFilesFunc, Aliases: []string{"file"}, PFlagProvider: filesConfig, Short: "Registers file resources",
-			Long:  "Registers all the serialized protobuf files including tasks, workflows and launchplans."},
+			Long:  "Registers all the serialized protobuf files including tasks, workflows and launchplans.\n" +
+			"bin/flytectl register file  _pb_output_new/* -d development  -p flytesnacks -v v2\n"},
 	}
 	cmdcore.AddCommands(registerCmd, registerResourcesFuncs)
 	return registerCmd
