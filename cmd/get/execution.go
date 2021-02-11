@@ -14,7 +14,7 @@ import (
 	"github.com/lyft/flytectl/pkg/printer"
 )
 
-const(
+const (
 	executionShort = "Gets execution resources"
 	executionLong  = `
 Retrieves all the executions within project and domain.(execution,executions can be used interchangeably in these commands)

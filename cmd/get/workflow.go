@@ -14,7 +14,7 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
-const(
+const (
 	workflowShort = "Gets workflow resources"
 	workflowLong  = `
 Retrieves all the workflows within project and domain.(workflow,workflows can be used interchangeably in these commands)

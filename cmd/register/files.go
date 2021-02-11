@@ -12,7 +12,7 @@ import (
 	"github.com/lyft/flytestdlib/logger"
 )
 
-const(
+const (
 	registerFilesShort = "Registers file resources"
 	registerFilesLong  = `
 Registers all the serialized protobuf files including tasks, workflows and launchplans with default v1 version.

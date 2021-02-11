@@ -15,7 +15,7 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
-const(
+const (
 	taskShort = "Gets task resources"
 	taskLong  = `
 Retrieves all the task within project and domain.(task,tasks can be used interchangeably in these commands)

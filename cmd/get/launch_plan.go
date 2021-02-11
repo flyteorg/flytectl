@@ -12,8 +12,7 @@ import (
 	"github.com/lyft/flytestdlib/logger"
 )
 
-const(
-
+const (
 	launchPlanShort = "Gets launch plan resources"
 	launchPlanLong  = `
 Retrieves all the launch plans within project and domain.(launchplan,launchplans can be used interchangeably in these commands)

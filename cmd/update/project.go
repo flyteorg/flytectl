@@ -17,7 +17,7 @@ type ProjectConfig struct {
 	ArchiveProject  bool `json:"archiveProject" pflag:",Archives the project specified as argument."`
 }
 
-const(
+const (
 	projectShort = "Updates project resources"
 	projectLong  = `
 Updates the project according the flags passed.Allows you to archive or activate a project.
