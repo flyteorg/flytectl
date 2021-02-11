@@ -15,7 +15,7 @@ help:
 .PHONY: help Makefile
 
 gendocs:
-	go build -o ../bin/flytectl-docs ../generate_docs.go
+	go build -o ../bin/flytectl-docs $(SOURCEDIR)/generate_docs.go
 	rm -rf $(SOURCEDIR)/gen
 	mkdir gen
 	../bin/flytectl-docs
