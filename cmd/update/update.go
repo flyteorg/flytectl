@@ -14,7 +14,9 @@ func CreateUpdateCommand() *cobra.Command {
 	}
 
 	updateResourcesFuncs := map[string]cmdcore.CommandEntry{
-		"project":    {CmdFunc: updateProjectsFunc, Aliases: []string{"projects"}, ProjectDomainNotRequired: true, PFlagProvider: projectConfig},
+		"project":    {CmdFunc: updateProjectsFunc, Aliases: []string{"projects"}, ProjectDomainNotRequired: true, PFlagProvider: projectConfig,
+			Short: "Updates project resources",
+			Long:  "Updates the project according the flags passed.Allows you to archive or activate a project"},
 	}
 
 	cmdcore.AddCommands(updateCmd, updateResourcesFuncs)

@@ -24,6 +24,9 @@ var (
 func newRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		PersistentPreRunE: initConfig,
+		Long : "Hello world",
+		Short: "Hello",
+		Use : "flytectl",
 	}
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "",
@@ -62,12 +65,21 @@ func initConfig(_ *cobra.Command, _ []string) error {
 
 func GenerateDocs() error {
 	rootCmd := newRootCmd()
-	err := doc.GenReSTTree(rootCmd, ".")
+	err := GenReSTTree(rootCmd, "gen")
 	if err != nil {
 		logrus.Fatal(err)
 		return err
 	}
 	return nil
+}
+
+func GenReSTTree(cmd *cobra.Command, dir string) error {
+	emptyStr := func(s string) string { return "" }
+	// Sphinx cross-referencing format
+	linkHandler := func(name, ref string) string {
+		return fmt.Sprintf(":doc:`%s`", ref)
+	}
+	return doc.GenReSTTreeCustom(cmd, dir, emptyStr, linkHandler)
 }
 
 func ExecuteCmd() error {

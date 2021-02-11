@@ -17,10 +17,14 @@ func CreateGetCommand() *cobra.Command {
 		"project": {CmdFunc: getProjectsFunc, Aliases: []string{"projects"}, ProjectDomainNotRequired: true,
 			Short: "Gets project resources",
 			Long:  "Retrieves all the projects"},
-		"task":       {CmdFunc: getTaskFunc, Aliases: []string{"tasks"}},
-		"workflow":   {CmdFunc: getWorkflowFunc, Aliases: []string{"workflows"}},
-		"launchplan": {CmdFunc: getLaunchPlanFunc, Aliases: []string{"launchplans"}},
-		"execution":  {CmdFunc: getExecutionFunc, Aliases: []string{"executions"}},
+		"task":       {CmdFunc: getTaskFunc, Aliases: []string{"tasks"},Short: "Gets task resources",
+			Long:  "Retrieves all the tasks"},
+		"workflow":   {CmdFunc: getWorkflowFunc, Aliases: []string{"workflows"}, Short: "Gets workflow resources",
+			Long:  "Retrieves all the workflows"},
+		"launchplan": {CmdFunc: getLaunchPlanFunc, Aliases: []string{"launchplans"}, Short: "Gets launchplan resources",
+			Long:  "Retrieves all the launchplans"},
+		"execution":  {CmdFunc: getExecutionFunc, Aliases: []string{"executions"}, Short: "Gets execution resources",
+			Long:  "Retrieves all the executions"},
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)
