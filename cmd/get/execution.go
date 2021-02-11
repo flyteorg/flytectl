@@ -50,12 +50,12 @@ Usage
 )
 
 var executionColumns = []printer.Column{
-	{"Name", "$.id.name"},
-	{"Workflow Name", "$.closure.workflowId.name"},
-	{"Type", "$.closure.workflowId.resourceType"},
-	{"Phase", "$.closure.phase"},
-	{"Started", "$.closure.startedAt"},
-	{"Elapsed Time", "$.closure.duration"},
+	{Header: "Name", JSONPath: "$.id.name"},
+	{Header: "Workflow Name", JSONPath: "$.closure.workflowId.name"},
+	{Header: "Type", JSONPath: "$.closure.workflowId.resourceType"},
+	{Header: "Phase", JSONPath: "$.closure.phase"},
+	{Header: "Started", JSONPath: "$.closure.startedAt"},
+	{Header: "Elapsed Time", JSONPath: "$.closure.duration"},
 }
 
 func ExecutionToProtoMessages(l []*admin.Execution) []proto.Message {

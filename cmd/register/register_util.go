@@ -14,10 +14,10 @@ import (
 	"github.com/lyft/flytestdlib/logger"
 )
 
-//go:generate pflags RegisterFilesConfig
+//go:generate pflags FilesConfig
 
 var (
-	filesConfig = &RegisterFilesConfig{
+	filesConfig = &FilesConfig{
 		Version:     "v1",
 		SkipOnError: false,
 	}
@@ -27,22 +27,22 @@ const registrationProjectPattern = "{{ registration.project }}"
 const registrationDomainPattern = "{{ registration.domain }}"
 const registrationVersionPattern = "{{ registration.version }}"
 
-// RegisterFilesConfig
-type RegisterFilesConfig struct {
+// FilesConfig
+type FilesConfig struct {
 	Version     string `json:"version" pflag:",version of the entity to be registered with flyte."`
 	SkipOnError bool   `json:"skipOnError" pflag:",fail fast when registering files."`
 }
 
-type RegisterResult struct {
+type Result struct {
 	Name   string
 	Status string
 	Info   string
 }
 
 var projectColumns = []printer.Column{
-	{"Name", "$.Name"},
-	{"Status", "$.Status"},
-	{"Additional Info", "$.Info"},
+	{Header: "Name", JSONPath: "$.Name"},
+	{Header: "Status", JSONPath: "$.Status"},
+	{Header: "Additional Info", JSONPath: "$.Info"},
 }
 
 func unMarshalContents(ctx context.Context, fileContents []byte, fname string) (proto.Message, error) {
@@ -66,7 +66,7 @@ func unMarshalContents(ctx context.Context, fileContents []byte, fname string) (
 }
 
 func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.CommandContext) error {
-	switch message.(type) {
+	switch v := message.(type) {
 	case *admin.LaunchPlan:
 		launchPlan := message.(*admin.LaunchPlan)
 		_, err := cmdCtx.AdminClient().CreateLaunchPlan(ctx, &admin.LaunchPlanCreateRequest{
@@ -107,13 +107,13 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 		})
 		return err
 	default:
-		return fmt.Errorf("Failed registering unknown entity  %v", message)
+		return fmt.Errorf("Failed registering unknown entity  %v", v)
 	}
 }
 
 func hydrateNode(node *core.Node) error {
 	targetNode := node.Target
-	switch targetNode.(type) {
+	switch v := targetNode.(type) {
 	case *core.Node_TaskNode:
 		taskNodeWrapper := targetNode.(*core.Node_TaskNode)
 		taskNodeReference := taskNodeWrapper.TaskNode.Reference.(*core.TaskNode_ReferenceId)
@@ -158,7 +158,7 @@ func hydrateNode(node *core.Node) error {
 			return fmt.Errorf("Unknown type %T", branchNodeWrapper.BranchNode.IfElse.Default)
 		}
 	default:
-		return fmt.Errorf("Unknown type %T", targetNode)
+		return fmt.Errorf("Unknown type %T", v)
 	}
 	return nil
 }
@@ -176,7 +176,7 @@ func hydrateIdentifier(identifier *core.Identifier) {
 }
 
 func hydrateSpec(message proto.Message) error {
-	switch message.(type) {
+	switch v := message.(type) {
 	case *admin.LaunchPlan:
 		launchPlan := message.(*admin.LaunchPlan)
 		hydrateIdentifier(launchPlan.Spec.WorkflowId)
@@ -200,7 +200,7 @@ func hydrateSpec(message proto.Message) error {
 		taskSpec := message.(*admin.TaskSpec)
 		hydrateIdentifier(taskSpec.Template.Id)
 	default:
-		return fmt.Errorf("Unknown type %T", message)
+		return fmt.Errorf("Unknown type %T", v)
 	}
 	return nil
 }

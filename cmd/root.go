@@ -44,7 +44,7 @@ func newRootCmd() *cobra.Command {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(get.CreateGetCommand())
 	rootCmd.AddCommand(update.CreateUpdateCommand())
-	rootCmd.AddCommand(register.RegisterCommand())
+	rootCmd.AddCommand(register.FlyteRegisterCommand())
 	config.GetConfig()
 
 	return rootCmd

@@ -50,9 +50,9 @@ Usage
 )
 
 var workflowColumns = []printer.Column{
-	{"Version", "$.id.version"},
-	{"Name", "$.id.name"},
-	{"Created At", "$.closure.createdAt"},
+	{Header: "Version", JSONPath: "$.id.version"},
+	{Header: "Name", JSONPath: "$.id.name"},
+	{Header: "Created At", JSONPath: "$.closure.createdAt"},
 }
 
 func WorkflowToProtoMessages(l []*admin.Workflow) []proto.Message {

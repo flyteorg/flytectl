@@ -48,11 +48,11 @@ Usage
 )
 
 var launchplanColumns = []printer.Column{
-	{"Version", "$.id.version"},
-	{"Name", "$.id.name"},
-	{"Type", "$.closure.compiledTask.template.type"},
-	{"State", "$.spec.state"},
-	{"Schedule", "$.spec.entityMetadata.schedule"},
+	{Header: "Version", JSONPath: "$.id.version"},
+	{Header: "Name", JSONPath: "$.id.name"},
+	{Header: "Type", JSONPath: "$.closure.compiledTask.template.type"},
+	{Header: "State", JSONPath: "$.spec.state"},
+	{Header: "Schedule", JSONPath: "$.spec.entityMetadata.schedule"},
 }
 
 func LaunchplanToProtoMessages(l []*admin.LaunchPlan) []proto.Message {

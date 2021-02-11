@@ -9,7 +9,7 @@ import (
 )
 
 func TestRegisterCommand(t *testing.T) {
-	registerCommand := RegisterCommand()
+	registerCommand := FlyteRegisterCommand()
 	assert.Equal(t, registerCommand.Use, "register")
 	assert.Equal(t, registerCommand.Short, "Registers tasks/workflows/launchplans from list of generated serialized files.")
 	fmt.Println(registerCommand.Commands())
@@ -21,5 +21,5 @@ func TestRegisterCommand(t *testing.T) {
 	})
 	assert.Equal(t, cmdNouns[0].Use, "files")
 	assert.Equal(t, cmdNouns[0].Aliases, []string{"file"})
-	assert.Equal(t, cmdNouns[0].Short, "Retrieves files resources.")
+	assert.Equal(t, cmdNouns[0].Short, "Registers file resources")
 }
