@@ -11,11 +11,6 @@ generate:
 compile:
 	go build -o bin/flytectl main.go
 
-gendocs:
-	go build -o bin/flytectl-docs generate_docs.go
-	bin/flytectl-docs
-
-
 .PHONY: update_boilerplate
 update_boilerplate:
 	@boilerplate/update.sh
