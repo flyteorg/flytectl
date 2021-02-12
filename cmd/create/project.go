@@ -46,9 +46,8 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 		fmt.Printf("Project not found")
 		return nil
 	}
-	fmt.Printf("%v", projectConfig)
 
-	response, err := cmdCtx.AdminClient().RegisterProject(ctx, &admin.ProjectRegisterRequest{
+	_, err := cmdCtx.AdminClient().RegisterProject(ctx, &admin.ProjectRegisterRequest{
 		Project: &admin.Project{
 			Id:          projectConfig.ID,
 			Name:        id,
@@ -58,7 +57,6 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 	if err != nil {
 		logger.Error(ctx, "Error %v", err)
 	}
-	logger.Debug(ctx, "Response %v", response)
 	fmt.Println("Project Created successfully")
 	return nil
 }
