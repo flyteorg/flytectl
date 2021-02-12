@@ -1,6 +1,7 @@
 package register
 
 import (
+	"archive/tar"
 	"context"
 	"fmt"
 
@@ -12,6 +13,11 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/lyft/flytestdlib/logger"
+	"github.com/lyft/flytestdlib/storage"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"os"
 )
 
 //go:generate pflags FilesConfig
@@ -31,6 +37,7 @@ const registrationVersionPattern = "{{ registration.version }}"
 type FilesConfig struct {
 	Version     string `json:"version" pflag:",version of the entity to be registered with flyte."`
 	SkipOnError bool   `json:"skipOnError" pflag:",fail fast when registering files."`
+	Archive     bool   `json:"archive" pflag:",pass in archive file either an http link or local path."`
 }
 
 type Result struct {
@@ -202,7 +209,91 @@ func hydrateSpec(message proto.Message) error {
 	return nil
 }
 
-func getJSONSpec(message proto.Message) string {
+func DownloadFileFromHTTP(ctx context.Context, ref storage.DataReference) (io.ReadCloser, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ref.String(), nil)
+	if err != nil {
+		logger.Errorf(ctx, "failed to create new http request with context, %s", err)
+		return nil, err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Body, nil
+}
+
+func readContents(ctx context.Context,r io.Reader, isArchive bool) ([]byte, error) {
+	if isArchive {
+		tarReader := r.(*tar.Reader)
+		header, err := tarReader.Next()
+		if err != nil {
+			return nil, err
+		}
+		logger.Infof(ctx, "header name %v", header.Name)
+		if header.Typeflag == tar.TypeReg {
+			data, err := ioutil.ReadAll(tarReader)
+			if err != nil {
+				return nil, err
+			}
+			return data, nil
+		}
+		// Skip for non-regular files such as directories or symbolic links.
+		return nil, nil
+	} else {
+		return ioutil.ReadAll(r)
+	}
+}
+
+func registerContent(ctx context.Context, contents []byte, name string, registerResults []Result, cmdCtx cmdCore.CommandContext) ([]Result, error) {
+	var registerResult Result
+	spec, err := unMarshalContents(ctx, contents, name)
+	if err != nil {
+		registerResult =  Result{Name: name, Status: "Failed", Info: fmt.Sprintf("Error unmarshalling file due to %v", err)}
+		registerResults = append(registerResults, registerResult)
+		return registerResults, err
+	}
+	if err := hydrateSpec(spec); err != nil {
+		registerResult =  Result{Name: name, Status: "Failed", Info: fmt.Sprintf("Error hydrating spec due to %v", err)}
+		registerResults = append(registerResults, registerResult)
+		return registerResults, err
+	}
+	logger.Debugf(ctx, "Hydrated spec : %v", getJsonSpec(spec))
+	if err := register(ctx, spec, cmdCtx); err != nil {
+		registerResult =  Result{Name: name, Status: "Failed", Info: fmt.Sprintf("Error registering file due to %v", err)}
+		registerResults = append(registerResults, registerResult)
+		return registerResults, err
+	}
+	registerResult =  Result{Name: name, Status: "Success", Info: "Successfully registered file"}
+	logger.Debugf(ctx, "Successfully registered %v", name)
+	registerResults = append(registerResults, registerResult)
+	return registerResults, nil
+}
+
+func getReader(ctx context.Context, ref string) (io.Reader, error) {
+	dataRef := storage.DataReference(ref)
+	logger.Infof(ctx,"Opening data ref %v", dataRef)
+	scheme, _, _, err := dataRef.Split()
+	if err != nil {
+		fmt.Println("uri incorrectly formatted ", dataRef)
+		return nil, err
+	}
+	var dataRefReader io.Reader
+	if scheme == "http" || scheme == "https" {
+		dataRefReader, err = DownloadFileFromHTTP(ctx, dataRef)
+	} else {
+		dataRefReader, err = os.Open(dataRef.String())
+	}
+	if err != nil {
+		logger.Errorf(ctx,"failed to read from ref %v due to %v", dataRef, err)
+		return nil, err
+	}
+	if filesConfig.Archive {
+		dataRefReader = tar.NewReader(dataRefReader)
+	}
+	return dataRefReader, err
+}
+
+func getJsonSpec(message proto.Message) string {
 	marshaller := jsonpb.Marshaler{
 		EnumsAsInts:  false,
 		EmitDefaults: true,

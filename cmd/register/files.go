@@ -3,8 +3,7 @@ package register
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
+	"io"
 	"sort"
 
 	cmdCore "github.com/lyft/flytectl/cmd/core"
@@ -49,52 +48,42 @@ Usage
 )
 
 func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	files := args
-	sort.Strings(files)
-	logger.Infof(ctx, "Parsing files... Total(%v)", len(files))
-	logger.Infof(ctx, "Params version %v", filesConfig.Version)
-	var registerResults []Result
-	adminPrinter := printer.Printer{}
-	fastFail := !filesConfig.SkipOnError
-	logger.Infof(ctx, "Fail fast %v", fastFail)
+	dataRefs := args
+	registerPrinter := printer.Printer{}
+	sort.Strings(dataRefs)
+	logger.Infof(ctx, "Parsing files... Total(%v)", len(dataRefs))
+	logger.Infof(ctx, "Registering with version %v", filesConfig.Version)
 	var _err error
-	for i := 0; i < len(files) && !(fastFail && _err != nil); i++ {
-		absFilePath := files[i]
-		var registerResult Result
-		logger.Infof(ctx, "Parsing  %v", absFilePath)
-		fileContents, err := ioutil.ReadFile(absFilePath)
+	fastFail := !filesConfig.SkipOnError
+	isArchive := filesConfig.Archive
+	var registerResults [] Result
+	logger.Infof(ctx, "Archive flag state =  %v ", isArchive)
+	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil) ; i++ {
+		dataRefReader, err := getReader(ctx, dataRefs[i])
 		if err != nil {
-			registerResult = Result{Name: absFilePath, Status: "Failed", Info: fmt.Sprintf("Error reading file due to %v", err)}
-			registerResults = append(registerResults, registerResult)
 			_err = err
 			continue
 		}
-		spec, err := unMarshalContents(ctx, fileContents, absFilePath)
-		if err != nil {
-			registerResult = Result{Name: absFilePath, Status: "Failed", Info: fmt.Sprintf("Error unmarshalling file due to %v", err)}
-			registerResults = append(registerResults, registerResult)
-			_err = err
-			continue
+		for {
+			fileContents, err := readContents(ctx, dataRefReader, isArchive)
+			if err == nil {
+				if fileContents == nil {
+					// Mostly directory
+					continue
+				}
+				registerResults, _err = registerContent(ctx, fileContents, dataRefs[i], registerResults, cmdCtx)
+			} else {
+				_err = err
+				if err != io.EOF {
+					logger.Errorf(ctx,"failed to readContents from reader due to %v", err)
+				}
+			}
+			if !isArchive || (fastFail && _err != nil) || _err == io.EOF {
+				break
+			}
 		}
-		if err := hydrateSpec(spec); err != nil {
-			registerResult = Result{Name: absFilePath, Status: "Failed", Info: fmt.Sprintf("Error hydrating spec due to %v", err)}
-			registerResults = append(registerResults, registerResult)
-			_err = err
-			continue
-		}
-		logger.Debugf(ctx, "Hydrated spec : %v", getJSONSpec(spec))
-		if err := register(ctx, spec, cmdCtx); err != nil {
-			registerResult = Result{Name: absFilePath, Status: "Failed", Info: fmt.Sprintf("Error registering file due to %v", err)}
-			registerResults = append(registerResults, registerResult)
-			_err = err
-			continue
-		}
-		registerResult = Result{Name: absFilePath, Status: "Success", Info: "Successfully registered file"}
-		registerResults = append(registerResults, registerResult)
 	}
 	payload, _ := json.Marshal(registerResults)
-	if err := adminPrinter.JSONToTable(payload, projectColumns); err != nil {
-		return err
-	}
+	registerPrinter.JSONToTable(payload, projectColumns)
 	return nil
 }

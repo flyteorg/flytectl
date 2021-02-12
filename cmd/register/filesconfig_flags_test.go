@@ -103,7 +103,7 @@ func TestFilesConfig_SetFlags(t *testing.T) {
 		t.Run("DefaultValue", func(t *testing.T) {
 			// Test that default value is set properly
 			if vString, err := cmdFlags.GetString("version"); err == nil {
-				assert.Equal(t, string(*new(string)), vString)
+				assert.Equal(t, "v1", vString)
 			} else {
 				assert.FailNow(t, err.Error())
 			}
@@ -137,6 +137,28 @@ func TestFilesConfig_SetFlags(t *testing.T) {
 			cmdFlags.Set("skipOnError", testValue)
 			if vBool, err := cmdFlags.GetBool("skipOnError"); err == nil {
 				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vBool), &actual.SkipOnError)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_archive", func(t *testing.T) {
+		t.Run("DefaultValue", func(t *testing.T) {
+			// Test that default value is set properly
+			if vBool, err := cmdFlags.GetBool("archive"); err == nil {
+				assert.Equal(t, bool(*new(bool)), vBool)
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("archive", testValue)
+			if vBool, err := cmdFlags.GetBool("archive"); err == nil {
+				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vBool), &actual.Archive)
 
 			} else {
 				assert.FailNow(t, err.Error())
