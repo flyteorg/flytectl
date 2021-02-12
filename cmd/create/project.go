@@ -10,28 +10,43 @@ import (
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 )
 
+const (
+	projectShort = "Create project resources"
+	projectLong  = `
+Create the projects.(project,projects can be used interchangeably in these commands)
+::
+
+ bin/flytectl create project --id test --description test -p test
+Project Created
+
+::
+
+
+Usage
+`
+)
+
 //go:generate pflags ProjectConfig
 
 // ProjectConfig Config hold configuration for project create flags.
 type ProjectConfig struct {
-	ID          string        `json:"id" pflag:",id of the project specified as argument."`
-	Description string        `json:"description" pflag:",description for the project specified as argument."`
+	ID          string `json:"id" pflag:",id of the project specified as argument."`
+	Description string `json:"description" pflag:",description for the project specified as argument."`
 }
 
 var (
 	projectConfig = &ProjectConfig{
-		ID: "test",
 		Description: "",
 	}
 )
 
-func createProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
+func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	id := config.GetConfig().Project
 	if id == "" {
 		fmt.Printf("Project not found")
 		return nil
 	}
-	fmt.Println("%v", projectConfig)
+	fmt.Printf("%v", projectConfig)
 
 	response, err := cmdCtx.AdminClient().RegisterProject(ctx, &admin.ProjectRegisterRequest{
 		Project: &admin.Project{
