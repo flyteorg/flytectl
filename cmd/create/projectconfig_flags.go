@@ -41,7 +41,9 @@ func (ProjectConfig) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg ProjectConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("ProjectConfig", pflag.ExitOnError)
-	cmdFlags.StringVarP(&(projectConfig.ID), fmt.Sprintf("%v%v", prefix, "id"), "i", *new(string), "id of the project specified as argument.")
-	cmdFlags.StringVarP(&(projectConfig.Description),fmt.Sprintf("%v%v", prefix, "description"),"a", *new(string), "description for the project specified as argument.")
+	cmdFlags.StringVarP(&(projectConfig.id), fmt.Sprintf("%v%v", prefix, "id"), "i", *new(string), "id of the project specified as argument.")
+	cmdFlags.StringVarP(&(projectConfig.file), fmt.Sprintf("%v%v", prefix, "file"), "f", *new(string), "file of the project definition.")
+	cmdFlags.StringVarP(&(projectConfig.name), fmt.Sprintf("%v%v", prefix, "name"), "n", *new(string), "name of the project specified as argument.")
+	cmdFlags.StringVarP(&(projectConfig.description), fmt.Sprintf("%v%v", prefix, "description"), "a", *new(string), "description for the project specified as argument.")
 	return cmdFlags
 }

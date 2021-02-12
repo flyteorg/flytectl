@@ -3,9 +3,11 @@ package create
 import (
 	"context"
 	"fmt"
-	"github.com/lyft/flytectl/cmd/config"
+	"io/ioutil"
+
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/lyft/flytestdlib/logger"
+	"gopkg.in/yaml.v2"
 
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 )
@@ -21,6 +23,13 @@ Project Created
 
 ::
 
+Create the project using yaml definition file
+
+::
+ bin/flytectl create project --file project.yaml 
+Project Created successfully
+
+::
 
 Usage
 `
@@ -30,32 +39,55 @@ Usage
 
 // ProjectConfig Config hold configuration for project create flags.
 type ProjectConfig struct {
-	ID          string `json:"id" pflag:",id of the project specified as argument."`
-	Description string `json:"description" pflag:",description for the project specified as argument."`
+	id          string `json:"id" pflag:",id for the project specified as argument."`
+	name        string `json:"name" pflag:",name for the project specified as argument."`
+	file        string `json:"file" pflag:",file for the project definition."`
+	description string `json:"description" pflag:",description for the project specified as argument."`
 }
 
 var (
 	projectConfig = &ProjectConfig{
-		Description: "",
+		description: "",
 	}
 )
 
 func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	id := config.GetConfig().Project
-	if id == "" {
-		fmt.Printf("Project not found")
+	project := projectDefinition{}
+	if projectConfig.file != "" {
+		yamlFile, err := ioutil.ReadFile(projectConfig.file)
+		if err != nil {
+			logger.Error(ctx, "Error %v", err)
+		}
+		err = yaml.Unmarshal(yamlFile, &project)
+		if err != nil {
+			logger.Error(ctx, "Error %v", err)
+		}
+	} else {
+		project.ID = projectConfig.id
+		project.Name = projectConfig.name
+		project.Description = projectConfig.description
+	}
+	if project.ID == "" {
+		fmt.Printf("Project ID is required flag")
 		return nil
 	}
-
+	if project.Name == "" {
+		fmt.Printf("Project name is required flag")
+		return nil
+	}
 	_, err := cmdCtx.AdminClient().RegisterProject(ctx, &admin.ProjectRegisterRequest{
 		Project: &admin.Project{
-			Id:          projectConfig.ID,
-			Name:        id,
-			Description: projectConfig.Description,
+			Id:          project.ID,
+			Name:        project.Name,
+			Description: project.Description,
+			Labels: &admin.Labels{
+				Values: project.Labels,
+			},
 		},
 	})
 	if err != nil {
-		logger.Error(ctx, "Error %v", err)
+		fmt.Printf("error: %v", err.Error())
+		return nil
 	}
 	fmt.Println("Project Created successfully")
 	return nil
