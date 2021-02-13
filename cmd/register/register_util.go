@@ -19,9 +19,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
+	"sort"
 	"strings"
 )
 
+<<<<<<< HEAD
 //go:generate pflags FilesConfig
 
 var (
@@ -31,16 +34,21 @@ var (
 	}
 )
 
+=======
+>>>>>>> 3daa626 (Using temp directory to unarchive files and use it for registering)
 const registrationProjectPattern = "{{ registration.project }}"
 const registrationDomainPattern = "{{ registration.domain }}"
 const registrationVersionPattern = "{{ registration.version }}"
 
+<<<<<<< HEAD
 // FilesConfig
 type FilesConfig struct {
 	Version     string `json:"version" pflag:",version of the entity to be registered with flyte."`
 	SkipOnError bool   `json:"skipOnError" pflag:",fail fast when registering files."`
 	Archive     bool   `json:"archive" pflag:",pass in archive file either an http link or local path."`
 }
+=======
+>>>>>>> 3daa626 (Using temp directory to unarchive files and use it for registering)
 
 type Result struct {
 	Name   string
@@ -221,30 +229,75 @@ func DownloadFileFromHTTP(ctx context.Context, ref storage.DataReference) (io.Re
 	if err != nil {
 		return nil, err
 	}
-
 	return resp.Body, nil
 }
 
-func readContents(ctx context.Context, r io.Reader, isArchive bool) (string, []byte, error) {
-	if isArchive {
-		tarReader := r.(*tar.Reader)
-		header, err := tarReader.Next()
+/*
+Get file list from the args list.
+If the archive flag is on then download the archives to temp directory and extract it.
+The o/p of this function would be sorted list of the file locations.
+*/
+func getSortedFileList(ctx context.Context, args []string) ([]string, string, error) {
+	if !filesConfig.archive {
+		sort.Strings(args)
+		return args, "", nil
+	}
+	tempDir, err := ioutil.TempDir("/tmp", "register")
+	if err != nil {
+		return nil, tempDir, err
+	}
+	dataRefs := args
+	var unarchivedFiles []string
+	for i := 0; i < len(dataRefs); i++ {
+		dataRefReaderCloser, err := getArchiveReaderCloser(ctx, dataRefs[i])
 		if err != nil {
-			return "", nil, err
+			return unarchivedFiles, tempDir, err
 		}
-		logger.Infof(ctx, "header name %v", header.Name)
-		if header.Typeflag == tar.TypeReg {
-			data, err := ioutil.ReadAll(tarReader)
-			if err != nil {
-				return header.Name, nil, err
+		archiveReader := tar.NewReader(dataRefReaderCloser)
+		if unarchivedFiles, err = readAndCopyArchive(ctx, archiveReader, tempDir, unarchivedFiles); err != nil {
+			return unarchivedFiles, tempDir, err
+		}
+		if err = dataRefReaderCloser.Close(); err != nil {
+			return unarchivedFiles, tempDir, err
+		}
+	}
+	sort.Strings(unarchivedFiles)
+	return unarchivedFiles, tempDir, nil
+}
+
+func readAndCopyArchive(ctx context.Context, src io.Reader, tempDir string, unarchivedFiles []string) ([]string, error) {
+	for {
+		tarReader := src.(*tar.Reader)
+		header, err := tarReader.Next()
+		switch {
+		case err == io.EOF:
+			return unarchivedFiles, nil
+		case err != nil:
+			return unarchivedFiles, err
+		}
+		// Location to untar.
+		target := filepath.Join(tempDir, header.Name)
+		switch header.Typeflag {
+		case tar.TypeDir:
+			if _, err := os.Stat(target); err != nil {
+				if err := os.MkdirAll(target, 0755); err != nil {
+					return unarchivedFiles, err
+				}
 			}
-			return header.Name, data, nil
+		case tar.TypeReg:
+			dest, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			dest.Name()
+			if err != nil {
+				return unarchivedFiles, err
+			}
+			if _, err := io.Copy(dest, src); err != nil {
+				return unarchivedFiles, err
+			}
+			unarchivedFiles = append(unarchivedFiles, dest.Name())
+			if err := dest.Close(); err != nil {
+				return unarchivedFiles, err
+			}
 		}
-		// Skip for non-regular files such as directories or symbolic links.
-		return header.Name, nil, nil
-	} else {
-		data, err := ioutil.ReadAll(r)
-		return "", data, err
 	}
 }
 
@@ -273,36 +326,37 @@ func registerContent(ctx context.Context, contents []byte, name string, register
 	return registerResults, nil
 }
 
-func getReader(ctx context.Context, ref string) (io.Reader, error) {
+func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, error) {
 	dataRef := storage.DataReference(ref)
-	logger.Infof(ctx,"Opening data ref %v", dataRef)
 	scheme, _, key, err := dataRef.Split()
 	segments := strings.Split(key, ".")
 	ext := segments[len(segments)-1]
-	logger.Infof(ctx, "Key is  %v and extension is %v", key, segments[len(segments)-1])
 	if err != nil {
-		fmt.Println("uri incorrectly formatted ", dataRef)
 		return nil, err
 	}
-	var dataRefReader io.Reader
+	var dataRefReaderCloser io.ReadCloser
 	if scheme == "http" || scheme == "https" {
-		dataRefReader, err = DownloadFileFromHTTP(ctx, dataRef)
+		dataRefReaderCloser, err = DownloadFileFromHTTP(ctx, dataRef)
 	} else {
-		dataRefReader, err = os.Open(dataRef.String())
+		dataRefReaderCloser, err = os.Open(dataRef.String())
 	}
 	if err != nil {
-		logger.Errorf(ctx,"failed to read from ref %v due to %v", dataRef, err)
 		return nil, err
 	}
+<<<<<<< HEAD
 	if filesConfig.Archive {
 		if ext == "gz" || ext == "tgz" {
 			if dataRefReader, err = gzip.NewReader(dataRefReader); err != nil {
 				return nil, err
 			}
+=======
+	if ext == "tgz" {
+		if dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser); err != nil {
+			return nil, err
+>>>>>>> 3daa626 (Using temp directory to unarchive files and use it for registering)
 		}
-		dataRefReader = tar.NewReader(dataRefReader)
 	}
-	return dataRefReader, err
+	return dataRefReaderCloser, err
 }
 
 func getJsonSpec(message proto.Message) string {

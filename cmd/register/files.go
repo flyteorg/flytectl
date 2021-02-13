@@ -3,12 +3,11 @@ package register
 import (
 	"context"
 	"encoding/json"
-	"io"
-	"sort"
-
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flytectl/pkg/printer"
 	"github.com/lyft/flytestdlib/logger"
+	"io/ioutil"
+	"os"
 )
 
 const (
@@ -48,42 +47,28 @@ Usage
 )
 
 func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	dataRefs := args
-	registerPrinter := printer.Printer{}
-	sort.Strings(dataRefs)
+	dataRefs, tmpDir, err := getSortedFileList(ctx, args)
+	if err != nil {
+		logger.Errorf(ctx, "error while un-archiving files in tmp dir due to %v", err)
+		return nil
+	}
 	logger.Infof(ctx, "Parsing files... Total(%v)", len(dataRefs))
-	logger.Infof(ctx, "Registering with version %v", filesConfig.Version)
-	var _err error
 	fastFail := !filesConfig.SkipOnError
-	isArchive := filesConfig.Archive
+	var _err error
 	var registerResults [] Result
-	logger.Infof(ctx, "Archive flag state =  %v ", isArchive)
 	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil) ; i++ {
-		dataRefReader, err := getReader(ctx, dataRefs[i])
+		fileContents, err := ioutil.ReadFile(dataRefs[i])
 		if err != nil {
 			_err = err
 			continue
 		}
-		for {
-			name, fileContents, err := readContents(ctx, dataRefReader, isArchive)
-			if err == nil {
-				if fileContents == nil {
-					// Mostly directory
-					continue
-				}
-				registerResults, _err = registerContent(ctx, fileContents, name, registerResults, cmdCtx)
-			} else {
-				_err = err
-				if err != io.EOF {
-					logger.Errorf(ctx,"failed to readContents from reader due to %v", err)
-				}
-			}
-			if !isArchive || (fastFail && _err != nil) || _err == io.EOF {
-				break
-			}
-		}
+		registerResults, _err = registerContent(ctx, fileContents, dataRefs[i], registerResults, cmdCtx)
 	}
 	payload, _ := json.Marshal(registerResults)
+	registerPrinter := printer.Printer{}
 	registerPrinter.JSONToTable(payload, projectColumns)
+	if _err = os.RemoveAll(tmpDir); _err != nil {
+		logger.Errorf(ctx, "unable to delete temp dir %v due to %v", tmpDir, _err)
+	}
 	return nil
 }
