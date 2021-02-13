@@ -103,7 +103,7 @@ func TestRegisterFilesConfig_SetFlags(t *testing.T) {
 		t.Run("DefaultValue", func(t *testing.T) {
 			// Test that default value is set properly
 			if vString, err := cmdFlags.GetString("version"); err == nil {
-				assert.Equal(t, string("v1"), vString)
+				assert.Equal(t, string(filesConfig.version), vString)
 			} else {
 				assert.FailNow(t, err.Error())
 			}
@@ -125,7 +125,7 @@ func TestRegisterFilesConfig_SetFlags(t *testing.T) {
 		t.Run("DefaultValue", func(t *testing.T) {
 			// Test that default value is set properly
 			if vBool, err := cmdFlags.GetBool("skipOnError"); err == nil {
-				assert.Equal(t, bool(*new(bool)), vBool)
+				assert.Equal(t, bool(filesConfig.skipOnError), vBool)
 			} else {
 				assert.FailNow(t, err.Error())
 			}

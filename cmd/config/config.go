@@ -9,7 +9,7 @@ import (
 	"github.com/lyft/flytectl/pkg/printer"
 )
 
-//go:generate pflags Config
+//go:generate pflags Config --default-var defaultConfig --bind-default-var
 
 var (
 	defaultConfig = &Config{}

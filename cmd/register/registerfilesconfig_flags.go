@@ -5,8 +5,9 @@ package register
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
+
+	"fmt"
 
 	"github.com/spf13/pflag"
 )
@@ -40,7 +41,7 @@ func (RegisterFilesConfig) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg RegisterFilesConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("RegisterFilesConfig", pflag.ExitOnError)
-	cmdFlags.StringVarP(&(filesConfig.version),fmt.Sprintf("%v%v", prefix, "version"), "v", "v1", "version of the entity to be registered with flyte.")
-	cmdFlags.BoolVarP(&(filesConfig.skipOnError), fmt.Sprintf("%v%v", prefix, "skipOnError"), "s", *new(bool), "fail fast when registering files.")
+	cmdFlags.StringVar(&filesConfig.version, fmt.Sprintf("%v%v", prefix, "version"), filesConfig.version, "version of the entity to be registered with flyte.")
+	cmdFlags.BoolVar(&filesConfig.skipOnError, fmt.Sprintf("%v%v", prefix, "skipOnError"), filesConfig.skipOnError, "fail fast when registering files.")
 	return cmdFlags
 }

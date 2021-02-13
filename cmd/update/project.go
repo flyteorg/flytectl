@@ -8,7 +8,7 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
-//go:generate pflags ProjectConfig
+//go:generate pflags ProjectConfig --default-var projectConfig --bind-default-var
 
 // Config hold configuration for project update flags.
 type ProjectConfig struct {

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	"github.com/lyft/flytectl/cmd/config"
@@ -14,7 +15,7 @@ import (
 	"github.com/lyft/flytestdlib/logger"
 )
 
-//go:generate pflags RegisterFilesConfig
+//go:generate pflags RegisterFilesConfig --default-var filesConfig --bind-default-var
 
 var (
 	filesConfig = &RegisterFilesConfig{

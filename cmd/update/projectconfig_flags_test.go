@@ -103,7 +103,7 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 		t.Run("DefaultValue", func(t *testing.T) {
 			// Test that default value is set properly
 			if vBool, err := cmdFlags.GetBool("activateProject"); err == nil {
-				assert.Equal(t, bool(*new(bool)), vBool)
+				assert.Equal(t, bool(projectConfig.ActivateProject), vBool)
 			} else {
 				assert.FailNow(t, err.Error())
 			}
@@ -125,7 +125,7 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 		t.Run("DefaultValue", func(t *testing.T) {
 			// Test that default value is set properly
 			if vBool, err := cmdFlags.GetBool("archiveProject"); err == nil {
-				assert.Equal(t, bool(*new(bool)), vBool)
+				assert.Equal(t, bool(projectConfig.ArchiveProject), vBool)
 			} else {
 				assert.FailNow(t, err.Error())
 			}
