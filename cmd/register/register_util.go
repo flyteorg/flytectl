@@ -29,8 +29,10 @@ const registrationDomainPattern = "{{ registration.domain }}"
 const registrationVersionPattern = "{{ registration.version }}"
 
 type RegisterFilesConfig struct {
-	version     string `json:"version" pflag:",version of the entity to be registered with flyte."`
-	skipOnError bool   `json:"skipOnError" pflag:",fail fast when registering files."`
+	version     string            `json:"version" pflag:",version of the entity to be registered with flyte."`
+	skipOnError bool              `json:"skipOnError" pflag:",fail fast when registering files."`
+	stringMap   map[string]string `json:"stringMap" pflag:",Passes a string map."`
+	intMap      map[string]int    `json:"intMap" pflag:",Passes an int map."`
 }
 
 type RegisterResult struct {

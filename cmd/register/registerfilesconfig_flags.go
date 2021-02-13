@@ -28,6 +28,15 @@ func (RegisterFilesConfig) elemValueOrNil(v interface{}) interface{} {
 	return v
 }
 
+func (RegisterFilesConfig) mustJsonMarshal(v interface{}) string {
+	raw, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(raw)
+}
+
 func (RegisterFilesConfig) mustMarshalJSON(v json.Marshaler) string {
 	raw, err := v.MarshalJSON()
 	if err != nil {
@@ -43,5 +52,7 @@ func (cfg RegisterFilesConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("RegisterFilesConfig", pflag.ExitOnError)
 	cmdFlags.StringVar(&filesConfig.version, fmt.Sprintf("%v%v", prefix, "version"), filesConfig.version, "version of the entity to be registered with flyte.")
 	cmdFlags.BoolVar(&filesConfig.skipOnError, fmt.Sprintf("%v%v", prefix, "skipOnError"), filesConfig.skipOnError, "fail fast when registering files.")
+	cmdFlags.StringToStringVar(&filesConfig.stringMap, fmt.Sprintf("%v%v", prefix, "stringMap"), filesConfig.stringMap, "Passes a string map.")
+	cmdFlags.StringToIntVar(&filesConfig.intMap, fmt.Sprintf("%v%v", prefix, "intMap"), filesConfig.intMap, "Passes an int map.")
 	return cmdFlags
 }

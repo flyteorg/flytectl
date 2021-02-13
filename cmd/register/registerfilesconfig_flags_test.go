@@ -84,7 +84,7 @@ func testDecodeJson_RegisterFilesConfig(t *testing.T, val, result interface{}) {
 	assert.NoError(t, decode_RegisterFilesConfig(val, result))
 }
 
-func testDecodeSlice_RegisterFilesConfig(t *testing.T, vStringSlice, result interface{}) {
+func testDecodeRaw_RegisterFilesConfig(t *testing.T, vStringSlice, result interface{}) {
 	assert.NoError(t, decode_RegisterFilesConfig(vStringSlice, result))
 }
 
@@ -100,14 +100,6 @@ func TestRegisterFilesConfig_SetFlags(t *testing.T) {
 	assert.True(t, cmdFlags.HasFlags())
 
 	t.Run("Test_version", func(t *testing.T) {
-		t.Run("DefaultValue", func(t *testing.T) {
-			// Test that default value is set properly
-			if vString, err := cmdFlags.GetString("version"); err == nil {
-				assert.Equal(t, string(filesConfig.version), vString)
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -122,14 +114,6 @@ func TestRegisterFilesConfig_SetFlags(t *testing.T) {
 		})
 	})
 	t.Run("Test_skipOnError", func(t *testing.T) {
-		t.Run("DefaultValue", func(t *testing.T) {
-			// Test that default value is set properly
-			if vBool, err := cmdFlags.GetBool("skipOnError"); err == nil {
-				assert.Equal(t, bool(filesConfig.skipOnError), vBool)
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -137,6 +121,34 @@ func TestRegisterFilesConfig_SetFlags(t *testing.T) {
 			cmdFlags.Set("skipOnError", testValue)
 			if vBool, err := cmdFlags.GetBool("skipOnError"); err == nil {
 				testDecodeJson_RegisterFilesConfig(t, fmt.Sprintf("%v", vBool), &actual.skipOnError)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_stringMap", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "a=1,b=2"
+
+			cmdFlags.Set("stringMap", testValue)
+			if vStringToString, err := cmdFlags.GetStringToString("stringMap"); err == nil {
+				testDecodeRaw_RegisterFilesConfig(t, vStringToString, &actual.stringMap)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_intMap", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "a=1,b=2"
+
+			cmdFlags.Set("intMap", testValue)
+			if vStringToInt, err := cmdFlags.GetStringToInt("intMap"); err == nil {
+				testDecodeRaw_RegisterFilesConfig(t, vStringToInt, &actual.intMap)
 
 			} else {
 				assert.FailNow(t, err.Error())
