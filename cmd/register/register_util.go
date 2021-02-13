@@ -2,6 +2,7 @@ package register
 
 import (
 	"archive/tar"
+	"compress/gzip"
 	"context"
 	"fmt"
 
@@ -18,6 +19,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 )
 
 //go:generate pflags FilesConfig
@@ -219,28 +221,30 @@ func DownloadFileFromHTTP(ctx context.Context, ref storage.DataReference) (io.Re
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Body, nil
 }
 
-func readContents(ctx context.Context,r io.Reader, isArchive bool) ([]byte, error) {
+func readContents(ctx context.Context, r io.Reader, isArchive bool) (string, []byte, error) {
 	if isArchive {
 		tarReader := r.(*tar.Reader)
 		header, err := tarReader.Next()
 		if err != nil {
-			return nil, err
+			return "", nil, err
 		}
 		logger.Infof(ctx, "header name %v", header.Name)
 		if header.Typeflag == tar.TypeReg {
 			data, err := ioutil.ReadAll(tarReader)
 			if err != nil {
-				return nil, err
+				return header.Name, nil, err
 			}
-			return data, nil
+			return header.Name, data, nil
 		}
 		// Skip for non-regular files such as directories or symbolic links.
-		return nil, nil
+		return header.Name, nil, nil
 	} else {
-		return ioutil.ReadAll(r)
+		data, err := ioutil.ReadAll(r)
+		return "", data, err
 	}
 }
 
@@ -272,7 +276,10 @@ func registerContent(ctx context.Context, contents []byte, name string, register
 func getReader(ctx context.Context, ref string) (io.Reader, error) {
 	dataRef := storage.DataReference(ref)
 	logger.Infof(ctx,"Opening data ref %v", dataRef)
-	scheme, _, _, err := dataRef.Split()
+	scheme, _, key, err := dataRef.Split()
+	segments := strings.Split(key, ".")
+	ext := segments[len(segments)-1]
+	logger.Infof(ctx, "Key is  %v and extension is %v", key, segments[len(segments)-1])
 	if err != nil {
 		fmt.Println("uri incorrectly formatted ", dataRef)
 		return nil, err
@@ -288,6 +295,11 @@ func getReader(ctx context.Context, ref string) (io.Reader, error) {
 		return nil, err
 	}
 	if filesConfig.Archive {
+		if ext == "gz" || ext == "tgz" {
+			if dataRefReader, err = gzip.NewReader(dataRefReader); err != nil {
+				return nil, err
+			}
+		}
 		dataRefReader = tar.NewReader(dataRefReader)
 	}
 	return dataRefReader, err

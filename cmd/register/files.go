@@ -65,13 +65,13 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 			continue
 		}
 		for {
-			fileContents, err := readContents(ctx, dataRefReader, isArchive)
+			name, fileContents, err := readContents(ctx, dataRefReader, isArchive)
 			if err == nil {
 				if fileContents == nil {
 					// Mostly directory
 					continue
 				}
-				registerResults, _err = registerContent(ctx, fileContents, dataRefs[i], registerResults, cmdCtx)
+				registerResults, _err = registerContent(ctx, fileContents, name, registerResults, cmdCtx)
 			} else {
 				_err = err
 				if err != io.EOF {
