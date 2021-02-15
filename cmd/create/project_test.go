@@ -17,17 +17,17 @@ import (
 const projectValue = "dummyProject"
 
 var (
-	reader               *os.File
-	writer               *os.File
-	err                  error
-	ctx                  context.Context
-	mockClient           *mocks.AdminServiceClient
-	mockOutStream        io.Writer
-	args                 []string
-	cmdCtx               cmdCore.CommandContext
+	reader                 *os.File
+	writer                 *os.File
+	err                    error
+	ctx                    context.Context
+	mockClient             *mocks.AdminServiceClient
+	mockOutStream          io.Writer
+	args                   []string
+	cmdCtx                 cmdCore.CommandContext
 	projectRegisterRequest *admin.ProjectRegisterRequest
-	stdOut               *os.File
-	stderr               *os.File
+	stdOut                 *os.File
+	stderr                 *os.File
 )
 
 func setup() {
@@ -45,8 +45,8 @@ func setup() {
 	cmdCtx = cmdCore.NewCommandContext(mockClient, mockOutStream)
 	projectRegisterRequest = &admin.ProjectRegisterRequest{
 		Project: &admin.Project{
-			Id:    projectValue,
-			Name: projectValue,
+			Id:          projectValue,
+			Name:        projectValue,
 			Description: "",
 			Labels: &admin.Labels{
 				Values: map[string]string{},
@@ -72,7 +72,7 @@ func TestCreateProjectFunc(t *testing.T) {
 	projectConfig.Name = projectValue
 	projectConfig.Labels = map[string]string{}
 	projectConfig.Description = ""
-	mockClient.OnRegisterProjectMatch(ctx,projectRegisterRequest).Return(nil,nil)
+	mockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
 	err := createProjectsCommand(ctx, args, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "RegisterProject", ctx, projectRegisterRequest)
@@ -83,12 +83,11 @@ func TestEmptyProjectID(t *testing.T) {
 	defer teardownAndVerify(t, "project ID is required flag")
 	projectConfig.Name = projectValue
 	projectConfig.Labels = map[string]string{}
-	mockClient.OnRegisterProjectMatch(ctx,projectRegisterRequest).Return(nil, nil)
+	mockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
 	err := createProjectsCommand(ctx, args, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "RegisterProject", ctx, projectRegisterRequest)
 }
-
 
 func TestEmptyProjectName(t *testing.T) {
 	setup()
@@ -96,7 +95,7 @@ func TestEmptyProjectName(t *testing.T) {
 	projectConfig.ID = projectValue
 	projectConfig.Labels = map[string]string{}
 	projectConfig.Description = ""
-	mockClient.OnRegisterProjectMatch(ctx,projectRegisterRequest).Return(nil, nil)
+	mockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
 	err := createProjectsCommand(ctx, args, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "RegisterProject", ctx, projectRegisterRequest)

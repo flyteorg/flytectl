@@ -54,7 +54,7 @@ type ProjectConfig struct {
 var (
 	projectConfig = &ProjectConfig{
 		Description: "",
-		Labels: map[string]string{},
+		Labels:      map[string]string{},
 	}
 )
 
