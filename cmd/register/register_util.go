@@ -128,19 +128,17 @@ func hydrateNode(node *core.Node) error {
 			launchPlanNodeReference := workflowNodeWrapper.WorkflowNode.Reference.(*core.WorkflowNode_LaunchplanRef)
 			hydrateIdentifier(launchPlanNodeReference.LaunchplanRef)
 		default:
-			fmt.Printf("Unknown type %T", workflowNodeWrapper.WorkflowNode.Reference)
+			return fmt.Errorf("unknown type %T", workflowNodeWrapper.WorkflowNode.Reference)
 		}
 	case *core.Node_BranchNode:
 		branchNodeWrapper := targetNode.(*core.Node_BranchNode)
 		if err := hydrateNode(branchNodeWrapper.BranchNode.IfElse.Case.ThenNode); err != nil {
-			// TODO Write Error Log
-			fmt.Println("failed to hydrateNode")
+			return fmt.Errorf("failed to hydrateNode")
 		}
 		if len(branchNodeWrapper.BranchNode.IfElse.Other) > 0 {
 			for _, ifBlock := range branchNodeWrapper.BranchNode.IfElse.Other {
 				if err := hydrateNode(ifBlock.ThenNode); err != nil {
-					// TODO Write Error Log
-					fmt.Println("failed to hydrateNode")
+					return fmt.Errorf("failed to hydrateNode")
 				}
 			}
 		}
@@ -148,17 +146,16 @@ func hydrateNode(node *core.Node) error {
 		case *core.IfElseBlock_ElseNode:
 			elseNodeReference := branchNodeWrapper.BranchNode.IfElse.Default.(*core.IfElseBlock_ElseNode)
 			if err := hydrateNode(elseNodeReference.ElseNode); err != nil {
-				// TODO Write Error Log
-				fmt.Println("failed to hydrateNode")
+				return fmt.Errorf("failed to hydrateNode")
 			}
 
 		case *core.IfElseBlock_Error:
 			// Do nothing.
 		default:
-			return fmt.Errorf("Unknown type %T", branchNodeWrapper.BranchNode.IfElse.Default)
+			return fmt.Errorf("unknown type %T", branchNodeWrapper.BranchNode.IfElse.Default)
 		}
 	default:
-		return fmt.Errorf("Unknown type %T", v)
+		return fmt.Errorf("unknown type %T", v)
 	}
 	return nil
 }
