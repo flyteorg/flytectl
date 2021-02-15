@@ -106,7 +106,7 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 
 			cmdFlags.Set("id", testValue)
 			if vString, err := cmdFlags.GetString("id"); err == nil {
-				testDecodeJson_ProjectConfig(t, fmt.Sprintf("%v", vString), &actual.id)
+				testDecodeJson_ProjectConfig(t, fmt.Sprintf("%v", vString), &actual.ID)
 
 			} else {
 				assert.FailNow(t, err.Error())
@@ -120,7 +120,7 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 
 			cmdFlags.Set("name", testValue)
 			if vString, err := cmdFlags.GetString("name"); err == nil {
-				testDecodeJson_ProjectConfig(t, fmt.Sprintf("%v", vString), &actual.name)
+				testDecodeJson_ProjectConfig(t, fmt.Sprintf("%v", vString), &actual.Name)
 
 			} else {
 				assert.FailNow(t, err.Error())
@@ -134,7 +134,7 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 
 			cmdFlags.Set("file", testValue)
 			if vString, err := cmdFlags.GetString("file"); err == nil {
-				testDecodeJson_ProjectConfig(t, fmt.Sprintf("%v", vString), &actual.file)
+				testDecodeJson_ProjectConfig(t, fmt.Sprintf("%v", vString), &actual.File)
 
 			} else {
 				assert.FailNow(t, err.Error())
@@ -148,7 +148,7 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 
 			cmdFlags.Set("description", testValue)
 			if vString, err := cmdFlags.GetString("description"); err == nil {
-				testDecodeJson_ProjectConfig(t, fmt.Sprintf("%v", vString), &actual.description)
+				testDecodeJson_ProjectConfig(t, fmt.Sprintf("%v", vString), &actual.Description)
 
 			} else {
 				assert.FailNow(t, err.Error())
@@ -162,7 +162,7 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 
 			cmdFlags.Set("labels", testValue)
 			if vStringToString, err := cmdFlags.GetStringToString("labels"); err == nil {
-				testDecodeRaw_ProjectConfig(t, vStringToString, &actual.labels)
+				testDecodeRaw_ProjectConfig(t, vStringToString, &actual.Labels)
 
 			} else {
 				assert.FailNow(t, err.Error())

@@ -18,7 +18,7 @@ bin/flytectl create project --help
 )
 
 // CreateCommand will return create command
-func CreateCommand() *cobra.Command {
+func RemoteCreateCommand() *cobra.Command {
 	createCmd := &cobra.Command{
 		Use:   "create",
 		Short: createCmdShort,

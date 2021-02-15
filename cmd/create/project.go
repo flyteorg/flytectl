@@ -44,23 +44,23 @@ Usage
 
 // ProjectConfig Config hold configuration for project create flags.
 type ProjectConfig struct {
-	id          string `json:"id" pflag:",id for the project specified as argument."`
-	name        string `json:"name" pflag:",name for the project specified as argument."`
-	file        string `json:"file" pflag:",file for the project definition."`
-	description string `json:"description" pflag:",description for the project specified as argument."`
-	labels map[string]string `json:"labels" pflag:",labels for the project specified as argument."`
+	ID         string            `json:"id" pflag:",id for the project specified as argument."`
+	Name        string            `json:"name" pflag:",name for the project specified as argument."`
+	File        string            `json:"file" pflag:",file for the project definition."`
+	Description string            `json:"description" pflag:",description for the project specified as argument."`
+	Labels      map[string]string `json:"labels" pflag:",labels for the project specified as argument."`
 }
 
 var (
 	projectConfig = &ProjectConfig{
-		description: "",
+		Description: "",
 	}
 )
 
 func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	project := projectDefinition{}
-	if projectConfig.file != "" {
-		yamlFile, err := ioutil.ReadFile(projectConfig.file)
+	if projectConfig.File != "" {
+		yamlFile, err := ioutil.ReadFile(projectConfig.File)
 		if err != nil {
 			logger.Error(ctx, "Error %v", err)
 		}
@@ -69,10 +69,10 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 			logger.Error(ctx, "Error %v", err)
 		}
 	} else {
-		project.ID = projectConfig.id
-		project.Name = projectConfig.name
-		project.Description = projectConfig.description
-		project.Labels = projectConfig.labels
+		project.ID = projectConfig.ID
+		project.Name = projectConfig.Name
+		project.Description = projectConfig.Description
+		project.Labels = projectConfig.Labels
 	}
 	if project.ID == "" {
 		fmt.Printf("Project ID is required flag")

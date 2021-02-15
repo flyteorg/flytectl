@@ -8,7 +8,7 @@ import (
 )
 
 func TestCreateCommand(t *testing.T) {
-	createCommand := CreateCommand()
+	createCommand := RemoteCreateCommand()
 	assert.Equal(t, createCommand.Use, "create")
 	assert.Equal(t, createCommand.Short, "Used for creating various flyte resources including tasks/workflows/launchplans/executions/project.")
 	assert.Equal(t, len(createCommand.Commands()), 1)
