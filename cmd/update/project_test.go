@@ -132,6 +132,6 @@ func TestInvalidInput(t *testing.T) {
 	modifyProjectFlags(&(projectConfig.ArchiveProject), false, &(projectConfig.ActivateProject), false)
 	mockClient.OnUpdateProjectMatch(ctx, projectUpdateRequest).Return(nil, nil)
 	err := updateProjectsFunc(ctx, args, cmdCtx)
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 	mockClient.AssertNotCalled(t, "UpdateProject", ctx, projectUpdateRequest)
 }
