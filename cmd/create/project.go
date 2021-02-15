@@ -31,6 +31,11 @@ Project Created successfully
 
 ::
 
+.. code-block:: yaml
+
+   id: "project-unique-id"
+   name: "Friendly name"
+   description: "Some description for the project"
 Usage
 `
 )
@@ -67,6 +72,7 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 		project.ID = projectConfig.id
 		project.Name = projectConfig.name
 		project.Description = projectConfig.description
+		project.Labels = projectConfig.labels
 	}
 	if project.ID == "" {
 		fmt.Printf("Project ID is required flag")

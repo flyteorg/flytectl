@@ -12,7 +12,8 @@ const (
 Example Create projects.
 ::
 
- bin/flytectl get project
+bin/flytectl create project --help
+
 `
 )
 
