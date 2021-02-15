@@ -44,7 +44,7 @@ Usage
 
 // ProjectConfig Config hold configuration for project create flags.
 type ProjectConfig struct {
-	ID         string            `json:"id" pflag:",id for the project specified as argument."`
+	ID          string            `json:"id" pflag:",id for the project specified as argument."`
 	Name        string            `json:"name" pflag:",name for the project specified as argument."`
 	File        string            `json:"file" pflag:",file for the project definition."`
 	Description string            `json:"description" pflag:",description for the project specified as argument."`
@@ -54,6 +54,7 @@ type ProjectConfig struct {
 var (
 	projectConfig = &ProjectConfig{
 		Description: "",
+		Labels: map[string]string{},
 	}
 )
 
@@ -75,11 +76,11 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 		project.Labels = projectConfig.Labels
 	}
 	if project.ID == "" {
-		fmt.Printf("Project ID is required flag")
+		fmt.Printf("project ID is required flag")
 		return nil
 	}
 	if project.Name == "" {
-		fmt.Printf("Project name is required flag")
+		fmt.Printf("project name is required flag")
 		return nil
 	}
 	_, err := cmdCtx.AdminClient().RegisterProject(ctx, &admin.ProjectRegisterRequest{
@@ -96,6 +97,6 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 		fmt.Printf("error: %v", err.Error())
 		return nil
 	}
-	fmt.Println("Project Created successfully")
+	fmt.Println("project Created successfully")
 	return nil
 }
