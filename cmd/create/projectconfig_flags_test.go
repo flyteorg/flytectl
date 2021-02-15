@@ -84,7 +84,7 @@ func testDecodeJson_ProjectConfig(t *testing.T, val, result interface{}) {
 	assert.NoError(t, decode_ProjectConfig(val, result))
 }
 
-func testDecodeSlice_ProjectConfig(t *testing.T, vStringSlice, result interface{}) {
+func testDecodeRaw_ProjectConfig(t *testing.T, vStringSlice, result interface{}) {
 	assert.NoError(t, decode_ProjectConfig(vStringSlice, result))
 }
 
@@ -100,14 +100,6 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 	assert.True(t, cmdFlags.HasFlags())
 
 	t.Run("Test_id", func(t *testing.T) {
-		t.Run("DefaultValue", func(t *testing.T) {
-			// Test that default value is set properly
-			if vString, err := cmdFlags.GetString("id"); err == nil {
-				assert.Equal(t, string(*new(string)), vString)
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -122,14 +114,6 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 		})
 	})
 	t.Run("Test_name", func(t *testing.T) {
-		t.Run("DefaultValue", func(t *testing.T) {
-			// Test that default value is set properly
-			if vString, err := cmdFlags.GetString("name"); err == nil {
-				assert.Equal(t, string(*new(string)), vString)
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -144,14 +128,6 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 		})
 	})
 	t.Run("Test_file", func(t *testing.T) {
-		t.Run("DefaultValue", func(t *testing.T) {
-			// Test that default value is set properly
-			if vString, err := cmdFlags.GetString("file"); err == nil {
-				assert.Equal(t, string(*new(string)), vString)
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -166,14 +142,6 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 		})
 	})
 	t.Run("Test_description", func(t *testing.T) {
-		t.Run("DefaultValue", func(t *testing.T) {
-			// Test that default value is set properly
-			if vString, err := cmdFlags.GetString("description"); err == nil {
-				assert.Equal(t, string(*new(string)), vString)
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -181,6 +149,20 @@ func TestProjectConfig_SetFlags(t *testing.T) {
 			cmdFlags.Set("description", testValue)
 			if vString, err := cmdFlags.GetString("description"); err == nil {
 				testDecodeJson_ProjectConfig(t, fmt.Sprintf("%v", vString), &actual.description)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_labels", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "a=1,b=2"
+
+			cmdFlags.Set("labels", testValue)
+			if vStringToString, err := cmdFlags.GetStringToString("labels"); err == nil {
+				testDecodeRaw_ProjectConfig(t, vStringToString, &actual.labels)
 
 			} else {
 				assert.FailNow(t, err.Error())

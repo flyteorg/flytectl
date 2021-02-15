@@ -35,7 +35,7 @@ Usage
 `
 )
 
-//go:generate pflags ProjectConfig
+//go:generate pflags ProjectConfig --default-var projectConfig --bind-default-var
 
 // ProjectConfig Config hold configuration for project create flags.
 type ProjectConfig struct {
@@ -43,6 +43,7 @@ type ProjectConfig struct {
 	name        string `json:"name" pflag:",name for the project specified as argument."`
 	file        string `json:"file" pflag:",file for the project definition."`
 	description string `json:"description" pflag:",description for the project specified as argument."`
+	labels map[string]string `json:"labels" pflag:",labels for the project specified as argument."`
 }
 
 var (
