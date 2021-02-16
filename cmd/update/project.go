@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lyft/flytectl/cmd/config"
-	cmdCore "github.com/lyft/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/cmd/config"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 )
 

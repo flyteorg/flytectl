@@ -9,9 +9,9 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/lyft/flytestdlib/logger"
 
-	"github.com/lyft/flytectl/cmd/config"
-	cmdCore "github.com/lyft/flytectl/cmd/core"
-	"github.com/lyft/flytectl/pkg/printer"
+	"github.com/flyteorg/flytectl/cmd/config"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/pkg/printer"
 )
 
 const (

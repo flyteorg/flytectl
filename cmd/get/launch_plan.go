@@ -3,11 +3,11 @@ package get
 import (
 	"context"
 
+	"github.com/flyteorg/flytectl/cmd/config"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/pkg/adminutils"
+	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/golang/protobuf/proto"
-	"github.com/lyft/flytectl/cmd/config"
-	cmdCore "github.com/lyft/flytectl/cmd/core"
-	"github.com/lyft/flytectl/pkg/adminutils"
-	"github.com/lyft/flytectl/pkg/printer"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/lyft/flytestdlib/logger"
 )

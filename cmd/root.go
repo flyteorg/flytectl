@@ -4,17 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lyft/flytectl/cmd/get"
-	"github.com/lyft/flytectl/cmd/register"
-	"github.com/lyft/flytectl/cmd/update"
-	"github.com/lyft/flytectl/pkg/printer"
+	"github.com/flyteorg/flytectl/cmd/get"
+	"github.com/flyteorg/flytectl/cmd/register"
+	"github.com/flyteorg/flytectl/cmd/update"
+	"github.com/flyteorg/flytectl/pkg/printer"
 	stdConfig "github.com/lyft/flytestdlib/config"
 	"github.com/lyft/flytestdlib/config/viper"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 
-	"github.com/lyft/flytectl/cmd/config"
+	"github.com/flyteorg/flytectl/cmd/config"
 )
 
 var (
