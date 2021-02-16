@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
-	"github.com/lyft/flytestdlib/logger"
 	"gopkg.in/yaml.v2"
 
 	cmdCore "github.com/lyft/flytectl/cmd/core"
