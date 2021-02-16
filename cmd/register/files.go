@@ -25,7 +25,7 @@ type FilesConfig struct {
 	Archive     bool   `json:"archive" pflag:",pass in archive file either an http link or local path."`
 }
 
-const(
+const (
 	registerFilesShort = "Registers file resources"
 	registerFilesLong  = `
 Registers all the serialized protobuf files including tasks, workflows and launchplans with default v1 version.
@@ -82,13 +82,13 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 	}
 	logger.Infof(ctx, "Parsing files... Total(%v)", len(dataRefs))
 	fastFail := !filesConfig.SkipOnError
-	var registerResults [] Result
-	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil) ; i++ {
+	var registerResults []Result
+	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
 		registerResults, _err = registerFile(ctx, dataRefs[i], registerResults, cmdCtx)
 	}
 	payload, _ := json.Marshal(registerResults)
 	registerPrinter := printer.Printer{}
-	registerPrinter.JSONToTable(payload, projectColumns)
+	_ = registerPrinter.JSONToTable(payload, projectColumns)
 	if tmpDir != "" {
 		if _err = os.RemoveAll(tmpDir); _err != nil {
 			logger.Errorf(ctx, "unable to delete temp dir %v due to %v", tmpDir, _err)

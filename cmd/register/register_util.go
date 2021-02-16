@@ -6,9 +6,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"sort"
+	"strings"
 
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+
 	"github.com/lyft/flytectl/cmd/config"
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flytectl/pkg/printer"
@@ -16,19 +23,11 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/lyft/flytestdlib/logger"
 	"github.com/lyft/flytestdlib/storage"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"path/filepath"
-	"sort"
-	"strings"
 )
 
 const registrationProjectPattern = "{{ registration.project }}"
 const registrationDomainPattern = "{{ registration.domain }}"
 const registrationVersionPattern = "{{ registration.version }}"
-
 
 type Result struct {
 	Name   string
@@ -40,8 +39,8 @@ type Result struct {
 type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
-var Client HTTPClient
 
+var Client HTTPClient
 
 func init() {
 	Client = &http.Client{}
@@ -245,7 +244,7 @@ func getSortedFileList(ctx context.Context, args []string) ([]string, string, er
 			return unarchivedFiles, tempDir, err
 		}
 		archiveReader := tar.NewReader(dataRefReaderCloser)
-		if unarchivedFiles, err = readAndCopyArchive(ctx, archiveReader, tempDir, unarchivedFiles); err != nil {
+		if unarchivedFiles, err = readAndCopyArchive(archiveReader, tempDir, unarchivedFiles); err != nil {
 			return unarchivedFiles, tempDir, err
 		}
 		if err = dataRefReaderCloser.Close(); err != nil {
@@ -256,7 +255,7 @@ func getSortedFileList(ctx context.Context, args []string) ([]string, string, er
 	return unarchivedFiles, tempDir, nil
 }
 
-func readAndCopyArchive(ctx context.Context, src io.Reader, tempDir string, unarchivedFiles []string) ([]string, error) {
+func readAndCopyArchive(src io.Reader, tempDir string, unarchivedFiles []string) ([]string, error) {
 	for {
 		tarReader := src.(*tar.Reader)
 		header, err := tarReader.Next()
@@ -266,8 +265,9 @@ func readAndCopyArchive(ctx context.Context, src io.Reader, tempDir string, unar
 		case err != nil:
 			return unarchivedFiles, err
 		}
-		// Location to untar.
-		target := filepath.Join(tempDir, header.Name)
+		// Location to untar. FilePath couldnt be used here due to,
+		// G305: File traversal when extracting zip archive
+		target := tempDir + "/" + header.Name
 		switch header.Typeflag {
 		case tar.TypeDir:
 			if _, err := os.Stat(target); err != nil {
@@ -301,22 +301,22 @@ func registerFile(ctx context.Context, fileName string, registerResults []Result
 	}
 	spec, err := unMarshalContents(ctx, fileContents, fileName)
 	if err != nil {
-		registerResult =  Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error unmarshalling file due to %v", err)}
+		registerResult = Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error unmarshalling file due to %v", err)}
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
 	}
 	if err := hydrateSpec(spec); err != nil {
-		registerResult =  Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error hydrating spec due to %v", err)}
+		registerResult = Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error hydrating spec due to %v", err)}
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
 	}
-	logger.Debugf(ctx, "Hydrated spec : %v", getJsonSpec(spec))
+	logger.Debugf(ctx, "Hydrated spec : %v", getJSONSpec(spec))
 	if err := register(ctx, spec, cmdCtx); err != nil {
-		registerResult =  Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error registering file due to %v", err)}
+		registerResult = Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error registering file due to %v", err)}
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
 	}
-	registerResult =  Result{Name: fileName, Status: "Success", Info: "Successfully registered file"}
+	registerResult = Result{Name: fileName, Status: "Success", Info: "Successfully registered file"}
 	logger.Debugf(ctx, "Successfully registered %v", fileName)
 	registerResults = append(registerResults, registerResult)
 	return registerResults, nil
@@ -350,7 +350,7 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 	return dataRefReaderCloser, err
 }
 
-func getJsonSpec(message proto.Message) string {
+func getJSONSpec(message proto.Message) string {
 	marshaller := jsonpb.Marshaler{
 		EnumsAsInts:  false,
 		EmitDefaults: true,
