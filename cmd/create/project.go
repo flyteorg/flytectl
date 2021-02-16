@@ -65,11 +65,11 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 	if projectConfig.File != "" {
 		yamlFile, err := ioutil.ReadFile(projectConfig.File)
 		if err != nil {
-			logger.Error(ctx, "Error %v", err)
+			return fmt.Errorf("Error %v", err)
 		}
 		err = yaml.Unmarshal(yamlFile, &project)
 		if err != nil {
-			logger.Error(ctx, "Error %v", err)
+			return fmt.Errorf("Error %v", err)
 		}
 	} else {
 		project.ID = projectConfig.ID
@@ -79,11 +79,10 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 	}
 	if project.ID == "" {
 		fmt.Printf("project ID is required flag")
-		return nil
+		return fmt.Errorf("project ID is required flag")
 	}
 	if project.Name == "" {
-		fmt.Printf("project name is required flag")
-		return nil
+		return fmt.Errorf("project name is required flag")
 	}
 	_, err := cmdCtx.AdminClient().RegisterProject(ctx, &admin.ProjectRegisterRequest{
 		Project: &admin.Project{
@@ -96,8 +95,7 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 		},
 	})
 	if err != nil {
-		fmt.Printf("error: %v", err.Error())
-		return nil
+		return fmt.Errorf("error: %v", err.Error())
 	}
 	fmt.Println("project Created successfully")
 	return nil
