@@ -3,14 +3,29 @@ package register
 import (
 	"context"
 	"encoding/json"
+	"os"
+
 	cmdCore "github.com/lyft/flytectl/cmd/core"
 	"github.com/lyft/flytectl/pkg/printer"
 	"github.com/lyft/flytestdlib/logger"
-	"io/ioutil"
-	"os"
 )
 
-const (
+//go:generate pflags FilesConfig
+var (
+	filesConfig = &FilesConfig{
+		Version:     "v1",
+		SkipOnError: false,
+	}
+)
+
+// FilesConfig
+type FilesConfig struct {
+	Version     string `json:"version" pflag:",version of the entity to be registered with flyte."`
+	SkipOnError bool   `json:"skipOnError" pflag:",fail fast when registering files."`
+	Archive     bool   `json:"archive" pflag:",pass in archive file either an http link or local path."`
+}
+
+const(
 	registerFilesShort = "Registers file resources"
 	registerFilesLong  = `
 Registers all the serialized protobuf files including tasks, workflows and launchplans with default v1 version.
@@ -18,6 +33,19 @@ If there are already registered entities with v1 version then the command will f
 ::
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks
+
+Using archive file.Currently supported are .tgz and .tar extension files and can be local or remote file served through http/https.
+Use --archive flag.
+
+::
+
+ bin/flytectl register files  http://localhost:8080/_pb_output.tar -d development  -p flytesnacks --archive
+
+Using  local tgz file.
+
+::
+
+ bin/flytectl register files  _pb_output.tgz -d development  -p flytesnacks --archive
 
 If you want to continue executing registration on other files ignoring the errors including version conflicts then pass in
 the skipOnError flag.
@@ -47,28 +75,24 @@ Usage
 )
 
 func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	dataRefs, tmpDir, err := getSortedFileList(ctx, args)
-	if err != nil {
-		logger.Errorf(ctx, "error while un-archiving files in tmp dir due to %v", err)
-		return nil
+	dataRefs, tmpDir, _err := getSortedFileList(ctx, args)
+	if _err != nil {
+		logger.Errorf(ctx, "error while un-archiving files in tmp dir due to %v", _err)
+		return _err
 	}
 	logger.Infof(ctx, "Parsing files... Total(%v)", len(dataRefs))
 	fastFail := !filesConfig.SkipOnError
-	var _err error
 	var registerResults [] Result
 	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil) ; i++ {
-		fileContents, err := ioutil.ReadFile(dataRefs[i])
-		if err != nil {
-			_err = err
-			continue
-		}
-		registerResults, _err = registerContent(ctx, fileContents, dataRefs[i], registerResults, cmdCtx)
+		registerResults, _err = registerFile(ctx, dataRefs[i], registerResults, cmdCtx)
 	}
 	payload, _ := json.Marshal(registerResults)
 	registerPrinter := printer.Printer{}
 	registerPrinter.JSONToTable(payload, projectColumns)
-	if _err = os.RemoveAll(tmpDir); _err != nil {
-		logger.Errorf(ctx, "unable to delete temp dir %v due to %v", tmpDir, _err)
+	if tmpDir != "" {
+		if _err = os.RemoveAll(tmpDir); _err != nil {
+			logger.Errorf(ctx, "unable to delete temp dir %v due to %v", tmpDir, _err)
+		}
 	}
 	return nil
 }

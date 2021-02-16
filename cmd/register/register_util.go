@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/golang/protobuf/jsonpb"
@@ -24,36 +25,26 @@ import (
 	"strings"
 )
 
-<<<<<<< HEAD
-//go:generate pflags FilesConfig
-
-var (
-	filesConfig = &FilesConfig{
-		Version:     "v1",
-		SkipOnError: false,
-	}
-)
-
-=======
->>>>>>> 3daa626 (Using temp directory to unarchive files and use it for registering)
 const registrationProjectPattern = "{{ registration.project }}"
 const registrationDomainPattern = "{{ registration.domain }}"
 const registrationVersionPattern = "{{ registration.version }}"
 
-<<<<<<< HEAD
-// FilesConfig
-type FilesConfig struct {
-	Version     string `json:"version" pflag:",version of the entity to be registered with flyte."`
-	SkipOnError bool   `json:"skipOnError" pflag:",fail fast when registering files."`
-	Archive     bool   `json:"archive" pflag:",pass in archive file either an http link or local path."`
-}
-=======
->>>>>>> 3daa626 (Using temp directory to unarchive files and use it for registering)
 
 type Result struct {
 	Name   string
 	Status string
 	Info   string
+}
+
+// HTTPClient interface
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+var Client HTTPClient
+
+
+func init() {
+	Client = &http.Client{}
 }
 
 var projectColumns = []printer.Column{
@@ -222,10 +213,9 @@ func hydrateSpec(message proto.Message) error {
 func DownloadFileFromHTTP(ctx context.Context, ref storage.DataReference) (io.ReadCloser, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, ref.String(), nil)
 	if err != nil {
-		logger.Errorf(ctx, "failed to create new http request with context, %s", err)
 		return nil, err
 	}
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -238,11 +228,12 @@ If the archive flag is on then download the archives to temp directory and extra
 The o/p of this function would be sorted list of the file locations.
 */
 func getSortedFileList(ctx context.Context, args []string) ([]string, string, error) {
-	if !filesConfig.archive {
+	if !filesConfig.Archive {
 		sort.Strings(args)
 		return args, "", nil
 	}
 	tempDir, err := ioutil.TempDir("/tmp", "register")
+
 	if err != nil {
 		return nil, tempDir, err
 	}
@@ -286,7 +277,6 @@ func readAndCopyArchive(ctx context.Context, src io.Reader, tempDir string, unar
 			}
 		case tar.TypeReg:
 			dest, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
-			dest.Name()
 			if err != nil {
 				return unarchivedFiles, err
 			}
@@ -301,27 +291,33 @@ func readAndCopyArchive(ctx context.Context, src io.Reader, tempDir string, unar
 	}
 }
 
-func registerContent(ctx context.Context, contents []byte, name string, registerResults []Result, cmdCtx cmdCore.CommandContext) ([]Result, error) {
+func registerFile(ctx context.Context, fileName string, registerResults []Result, cmdCtx cmdCore.CommandContext) ([]Result, error) {
 	var registerResult Result
-	spec, err := unMarshalContents(ctx, contents, name)
+	var fileContents []byte
+	var err error
+	if fileContents, err = ioutil.ReadFile(fileName); err != nil {
+		registerResults = append(registerResults, Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error reading file due to %v", err)})
+		return registerResults, err
+	}
+	spec, err := unMarshalContents(ctx, fileContents, fileName)
 	if err != nil {
-		registerResult =  Result{Name: name, Status: "Failed", Info: fmt.Sprintf("Error unmarshalling file due to %v", err)}
+		registerResult =  Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error unmarshalling file due to %v", err)}
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
 	}
 	if err := hydrateSpec(spec); err != nil {
-		registerResult =  Result{Name: name, Status: "Failed", Info: fmt.Sprintf("Error hydrating spec due to %v", err)}
+		registerResult =  Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error hydrating spec due to %v", err)}
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
 	}
 	logger.Debugf(ctx, "Hydrated spec : %v", getJsonSpec(spec))
 	if err := register(ctx, spec, cmdCtx); err != nil {
-		registerResult =  Result{Name: name, Status: "Failed", Info: fmt.Sprintf("Error registering file due to %v", err)}
+		registerResult =  Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error registering file due to %v", err)}
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
 	}
-	registerResult =  Result{Name: name, Status: "Success", Info: "Successfully registered file"}
-	logger.Debugf(ctx, "Successfully registered %v", name)
+	registerResult =  Result{Name: fileName, Status: "Success", Info: "Successfully registered file"}
+	logger.Debugf(ctx, "Successfully registered %v", fileName)
 	registerResults = append(registerResults, registerResult)
 	return registerResults, nil
 }
@@ -334,6 +330,9 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 	if err != nil {
 		return nil, err
 	}
+	if ext != "tar" && ext != "tgz" {
+		return nil, errors.New("only .tar and .tgz extension archives are supported")
+	}
 	var dataRefReaderCloser io.ReadCloser
 	if scheme == "http" || scheme == "https" {
 		dataRefReaderCloser, err = DownloadFileFromHTTP(ctx, dataRef)
@@ -343,17 +342,9 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 	if err != nil {
 		return nil, err
 	}
-<<<<<<< HEAD
-	if filesConfig.Archive {
-		if ext == "gz" || ext == "tgz" {
-			if dataRefReader, err = gzip.NewReader(dataRefReader); err != nil {
-				return nil, err
-			}
-=======
 	if ext == "tgz" {
 		if dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser); err != nil {
 			return nil, err
->>>>>>> 3daa626 (Using temp directory to unarchive files and use it for registering)
 		}
 	}
 	return dataRefReaderCloser, err
