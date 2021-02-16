@@ -42,7 +42,7 @@ func (FilesConfig) mustMarshalJSON(v json.Marshaler) string {
 func (cfg FilesConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("FilesConfig", pflag.ExitOnError)
 	cmdFlags.StringVarP(&(filesConfig.Version),fmt.Sprintf("%v%v", prefix, "version"), "v", "v1", "version of the entity to be registered with flyte.")
-	cmdFlags.BoolVarP(&(filesConfig.SkipOnError), fmt.Sprintf("%v%v", prefix, "skipOnError"), "s", *new(bool), "fail fast when registering files.")
+	cmdFlags.BoolVarP(&(filesConfig.ContinueOnError), fmt.Sprintf("%v%v", prefix, "continueOnError"), "c", *new(bool), "continue on error when registering files.")
 	cmdFlags.BoolVarP(&(filesConfig.Archive), fmt.Sprintf("%v%v", prefix, "archive"), "a", *new(bool), "pass in archive file either an http link or local path.")
 	return cmdFlags
 }

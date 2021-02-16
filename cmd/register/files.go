@@ -13,16 +13,16 @@ import (
 //go:generate pflags FilesConfig
 var (
 	filesConfig = &FilesConfig{
-		Version:     "v1",
-		SkipOnError: false,
+		Version:         "v1",
+		ContinueOnError: false,
 	}
 )
 
 // FilesConfig
 type FilesConfig struct {
-	Version     string `json:"version" pflag:",version of the entity to be registered with flyte."`
-	SkipOnError bool   `json:"skipOnError" pflag:",fail fast when registering files."`
-	Archive     bool   `json:"archive" pflag:",pass in archive file either an http link or local path."`
+	Version         string `json:"version" pflag:",version of the entity to be registered with flyte."`
+	ContinueOnError bool   `json:"continueOnError" pflag:",continue on error when registering files."`
+	Archive         bool   `json:"archive" pflag:",pass in archive file either an http link or local path."`
 }
 
 const (
@@ -48,16 +48,16 @@ Using  local tgz file.
  bin/flytectl register files  _pb_output.tgz -d development  -p flytesnacks --archive
 
 If you want to continue executing registration on other files ignoring the errors including version conflicts then pass in
-the skipOnError flag.
+the continueOnError flag.
 
 ::
 
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks --skipOnError
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks --continueOnError
 
-Using short format of skipOnError flag
+Using short format of continueOnError flag
 ::
 
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks -s
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks -c
 
 Overriding the default version v1 using version string.
 ::
@@ -68,7 +68,7 @@ Change the o/p format has not effect on registration. The O/p is currently avail
 
 ::
 
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks -s -o yaml
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks -c -o yaml
 
 Usage
 `
@@ -81,7 +81,7 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 		return _err
 	}
 	logger.Infof(ctx, "Parsing files... Total(%v)", len(dataRefs))
-	fastFail := !filesConfig.SkipOnError
+	fastFail := !filesConfig.ContinueOnError
 	var registerResults []Result
 	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
 		registerResults, _err = registerFile(ctx, dataRefs[i], registerResults, cmdCtx)

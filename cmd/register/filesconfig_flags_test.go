@@ -121,10 +121,10 @@ func TestFilesConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
-	t.Run("Test_skipOnError", func(t *testing.T) {
+	t.Run("Test_continueOnError", func(t *testing.T) {
 		t.Run("DefaultValue", func(t *testing.T) {
 			// Test that default value is set properly
-			if vBool, err := cmdFlags.GetBool("skipOnError"); err == nil {
+			if vBool, err := cmdFlags.GetBool("continueOnError"); err == nil {
 				assert.Equal(t, bool(*new(bool)), vBool)
 			} else {
 				assert.FailNow(t, err.Error())
@@ -134,9 +134,9 @@ func TestFilesConfig_SetFlags(t *testing.T) {
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("skipOnError", testValue)
-			if vBool, err := cmdFlags.GetBool("skipOnError"); err == nil {
-				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vBool), &actual.SkipOnError)
+			cmdFlags.Set("continueOnError", testValue)
+			if vBool, err := cmdFlags.GetBool("continueOnError"); err == nil {
+				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vBool), &actual.ContinueOnError)
 
 			} else {
 				assert.FailNow(t, err.Error())

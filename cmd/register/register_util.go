@@ -228,6 +228,11 @@ The o/p of this function would be sorted list of the file locations.
 */
 func getSortedFileList(ctx context.Context, args []string) ([]string, string, error) {
 	if !filesConfig.Archive {
+		/*
+		 * Sorting is required for non-archived case since its possible for the user to pass in a list of unordered
+		 * serialized protobuf files , but flyte expects them to be registered in topologically sorted order that it had
+		 * generated otherwise the registration can fail if the dependent files are not registered earlier.
+		 */
 		sort.Strings(args)
 		return args, "", nil
 	}
@@ -251,6 +256,10 @@ func getSortedFileList(ctx context.Context, args []string) ([]string, string, er
 			return unarchivedFiles, tempDir, err
 		}
 	}
+	/*
+	 * Similarly in case of archived files, it possible to have an archive created in totally different order than the
+	 * listing order of the serialized files which is required by flyte. Hence we explicitly sort here after unarchiving it.
+	 */
 	sort.Strings(unarchivedFiles)
 	return unarchivedFiles, tempDir, nil
 }
@@ -268,14 +277,13 @@ func readAndCopyArchive(src io.Reader, tempDir string, unarchivedFiles []string)
 		// Location to untar. FilePath couldnt be used here due to,
 		// G305: File traversal when extracting zip archive
 		target := tempDir + "/" + header.Name
-		switch header.Typeflag {
-		case tar.TypeDir:
+		if header.Typeflag == tar.TypeDir {
 			if _, err := os.Stat(target); err != nil {
 				if err := os.MkdirAll(target, 0755); err != nil {
 					return unarchivedFiles, err
 				}
 			}
-		case tar.TypeReg:
+		} else if header.Typeflag == tar.TypeReg {
 			dest, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
 			if err != nil {
 				return unarchivedFiles, err
