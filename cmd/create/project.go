@@ -18,7 +18,7 @@ const (
 Create the projects.(project,projects can be used interchangeably in these commands)
 ::
 
- bin/flytectl create project --id test --description test -p test
+ bin/flytectl create project --name flytesnacks --id flytesnacks --description "flytesnacks description"  --labels app=flyte
 Project Created
 
 ::
@@ -35,6 +35,8 @@ Project Created successfully
 
    id: "project-unique-id"
    name: "Friendly name"
+   labels:
+	  app: flyte
    description: "Some description for the project"
 Usage
 `
