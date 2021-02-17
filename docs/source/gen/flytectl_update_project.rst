@@ -114,7 +114,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_update` 	 - 
-Used for updating flyte resources eg: project.
-
+* :doc:`flytectl_update` 	 - Used for updating flyte resources eg: project.
 

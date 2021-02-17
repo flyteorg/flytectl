@@ -3,9 +3,7 @@
 flytectl update
 ---------------
 
-
 Used for updating flyte resources eg: project.
-
 
 Synopsis
 ~~~~~~~~

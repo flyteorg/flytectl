@@ -25,7 +25,7 @@ Terminate a single execution with its name
 
  bin/flytectl delete execution c6a51x2l9e  -d development  -p flytesnacks
 
-You can do get executions to find the state of this execution.
+You can get executions to check its state.
 
 ::
 
