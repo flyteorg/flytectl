@@ -20,6 +20,6 @@ func TestDeleteCommand(t *testing.T) {
 	})
 	assert.Equal(t, cmdNouns[0].Use, "execution")
 	assert.Equal(t, cmdNouns[0].Aliases, []string{"executions"})
-	assert.Equal(t, cmdNouns[0].Short, deleteCmdShort)
-	assert.Equal(t, cmdNouns[0].Long, deleteCmdLong)
+	assert.Equal(t, cmdNouns[0].Short, execCmdShort)
+	assert.Equal(t, cmdNouns[0].Long, execCmdLong)
 }
