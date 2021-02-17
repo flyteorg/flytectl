@@ -15,20 +15,15 @@ const (
 	projectShort = "Create project resources"
 	projectLong  = `
 Create the projects.(project,projects can be used interchangeably in these commands)
+
 ::
 
  bin/flytectl create project --name flytesnacks --id flytesnacks --description "flytesnacks description"  --labels app=flyte
-Project Created
 
+Create Project by defination file
 ::
 
-Create the project using yaml definition file
-
-::
  bin/flytectl create project --file project.yaml 
-Project Created successfully
-
-::
 
 .. code-block:: yaml
 
@@ -37,7 +32,7 @@ Project Created successfully
    labels:
 	  app: flyte
    description: "Some description for the project"
-Usage
+
 `
 )
 
