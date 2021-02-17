@@ -13,7 +13,7 @@ Synopsis
 Example create.
 ::
 
- bin/flytectl create project
+ bin/flytectl create project --file project.yaml 
 
 
 Options

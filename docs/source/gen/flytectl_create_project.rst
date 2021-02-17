@@ -16,18 +16,18 @@ Create the projects.(project,projects can be used interchangeably in these comma
 
  bin/flytectl create project --name flytesnacks --id flytesnacks --description "flytesnacks description"  --labels app=flyte
 
-Create Project by defination file
+Create Project by definition file
 ::
 
  bin/flytectl create project --file project.yaml 
 
 .. code-block:: yaml
 
-   id: "project-unique-id"
-   name: "Friendly name"
-   labels:
+	id: "project-unique-id"
+	name: "Friendly name"
+	labels:
 	  app: flyte
-   description: "Some description for the project"
+	description: "Some description for the project"
 
 
 

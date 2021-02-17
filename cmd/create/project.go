@@ -20,18 +20,18 @@ Create the projects.(project,projects can be used interchangeably in these comma
 
  bin/flytectl create project --name flytesnacks --id flytesnacks --description "flytesnacks description"  --labels app=flyte
 
-Create Project by defination file
+Create Project by definition file
 ::
 
  bin/flytectl create project --file project.yaml 
 
 .. code-block:: yaml
 
-   id: "project-unique-id"
-   name: "Friendly name"
-   labels:
+	id: "project-unique-id"
+	name: "Friendly name"
+	labels:
 	  app: flyte
-   description: "Some description for the project"
+	description: "Some description for the project"
 
 `
 )
@@ -59,11 +59,11 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 	if projectConfig.File != "" {
 		yamlFile, err := ioutil.ReadFile(projectConfig.File)
 		if err != nil {
-			return fmt.Errorf("Error %v", err)
+			return err
 		}
 		err = yaml.Unmarshal(yamlFile, &project)
 		if err != nil {
-			return fmt.Errorf("Error %v", err)
+			return err
 		}
 	} else {
 		project.ID = projectConfig.ID
@@ -72,7 +72,6 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 		project.Labels = projectConfig.Labels
 	}
 	if project.ID == "" {
-		fmt.Printf("project ID is required flag")
 		return fmt.Errorf("project ID is required flag")
 	}
 	if project.Name == "" {
@@ -89,7 +88,7 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("error: %v", err.Error())
+		return err
 	}
 	fmt.Println("project Created successfully")
 	return nil

@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/lyft/flytectl/cmd/create"
 	"github.com/lyft/flytectl/cmd/config"
+	"github.com/lyft/flytectl/cmd/create"
 	"github.com/lyft/flytectl/cmd/delete"
 	"github.com/lyft/flytectl/cmd/get"
 	"github.com/lyft/flytectl/cmd/register"
