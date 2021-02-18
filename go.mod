@@ -1,4 +1,4 @@
-module github.com/lyft/flytectl
+module github.com/flyteorg/flytectl
 
 go 1.13
 
