@@ -8,7 +8,7 @@ import (
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 	"gopkg.in/yaml.v2"
 
-	cmdCore "github.com/lyft/flytectl/cmd/core"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 )
 
 const (

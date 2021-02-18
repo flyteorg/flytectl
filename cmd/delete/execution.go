@@ -3,8 +3,8 @@ package delete
 import (
 	"context"
 
-	"github.com/lyft/flytectl/cmd/config"
-	cmdCore "github.com/lyft/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/cmd/config"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/lyft/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/lyft/flytestdlib/logger"
