@@ -29,7 +29,7 @@ pushd "$tmp_dir"
 
 for tool in "${tools[@]}"
 do
-    echo "Installing ${tool}"
+    echo "Installing git ${tool}"
     GO111MODULE=on go install $tool
 done
 
