@@ -128,63 +128,91 @@ project.yaml
 name: Human readable project name
 id: project-x
 labels:
-  - k: v
-  - k1: v1
+  k: v
+  k1: v1
 description: |
   Long description
 ```
+
  - get
 ```bash
 $ flytectl get projects [project-name] [-o yaml | -o json | default -o table]
 ```
  - update
 ```bash
-$ flytectl update projects --id project-x ...
+$ flytectl update projects --id project-x --active/--archive
 # You can only update one project at a time
 ```
 
+- delete
+```bash
+$ flytectl delete project --id project-x
+```
+
 ## Tasks
+
  - get
 ```bash
 $ flytectl get tasks [task-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
 ```
  - get specific version and get a template to launch
    Create an execution is complicated as the user needs to know all the input types and  way to simplify this could be to create a YAML template locally from the launchplan (the interface, etc)
+
 ```bash
 $ flytectl get task task-name --execution-template -o YAML
 yaml.template (TBD)
 This is a special version of get launch-plan which can be executed by passing it to create execution.
 
 ```
- - create
- - create
+
+ - create - Not Needed
  - update
+```bash
+$ flytectl update task task-name --description "Long discription" 
+```
+
+ - delete - Not Needed
 
 ## Workflows
 Support
  - get
 ```bash
 $ flytectl get workflows [workflow-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
+# List all workflow in a scope
+$ flytectl get workflow -p flytesnacks -d development
+# List All workflow version in a scope
+$ flytectl get workflow [workflow-name] --version v1 
 ```
- - create
- - update
+ - create - Not Needed
+ - delete - Not Needed
+ - update 
+```bash
+$ flytectl update workflow workflow-name --state [active/archived] --description "long description"
+```
 
 ## Launch Plans
 Support
  - get
 ```bash
 $ flytectl get launch-plans [launchplan-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
+$ flytectl get launch-plans -p flytesnacks -d development
+$ flytectl get launch-plans [launch-plan] --state [active/inactive]
 ```
  - get specific version and get a template to launch
    Create an execution is complicated as the user needs to know all the input types and  way to simplify this could be to create a YAML template locally from the launchplan (the interface, etc)
+
 ```bash
 $ flytectl get launch-plans launch-plan-name --execution-template -o YAML
 yaml.template (TBD)
 This is a special version of get launch-plan which can be executed by passing it to create execution.
 
 ```
- - create
+ - create - Note Needed
  - update
+```bash
+$ flytectl update launch-plans --urn "URN" --state [active/inactive]
+$ flytectl update launch-plans [launch-plan-name] --description "long description" 
+```
 
 ## Execution
 Create or retrieve an execution. 
