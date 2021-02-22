@@ -195,14 +195,14 @@ Support
  - get
 ```bash
 $ flytectl get launch-plans [launchplan-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
-$ flytectl get launch-plans -p flytesnacks -d development
-$ flytectl get launch-plans [launch-plan] --state [active/inactive]
+$ flytectl get launch-plans -p flytesnacks -d development --project flytesnacks --domain development 
+$ flytectl get launch-plans [launch-plan] --state [active/inactive] --project flytesnacks --domain development 
 ```
  - get specific version and get a template to launch
    Create an execution is complicated as the user needs to know all the input types and  way to simplify this could be to create a YAML template locally from the launchplan (the interface, etc)
 
 ```bash
-$ flytectl get launch-plans launch-plan-name --execution-template -o YAML
+$ flytectl get launch-plans launch-plan-name --execution-template -o YAML --project flytesnacks --domain development 
 yaml.template (TBD)
 This is a special version of get launch-plan which can be executed by passing it to create execution.
 
@@ -210,8 +210,12 @@ This is a special version of get launch-plan which can be executed by passing it
  - create - Note Needed
  - update
 ```bash
-$ flytectl update launch-plans --urn "URN" --state [active/inactive]
-$ flytectl update launch-plans [launch-plan-name] --description "long description" 
+$ flytectl update launch-plans --urn "URN" --state [active/inactive] --project flytesnacks --domain development 
+$ flytectl update launch-plans [launch-plan-name] --description "long description"  --project flytesnacks --domain development    
+```
+ - execute
+```bash
+$ flytectl execute launch-plans --urn "URN" --principal "" --input "" --moreinput "" --other-input "" --project flytesnacks --domain development 
 ```
 
 ## Execution
@@ -220,6 +224,8 @@ Create or retrieve an execution.
 Get all executions or get a single execution.
 ```bash
 $ flytectl get execution [exec-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
+$ flytectl get execution [URN]  --project flytesnacks --domain development
+$ flytectl get execution  --project flytesnacks --domain development 
 ```
 An interesting feature in get-execution might be to filter within the execution only the execution of a node, or quickly find the ones that have failed. 
 Visualizing the execution is also challenging. We may want to visualize
@@ -233,6 +239,14 @@ OR
 $ flytectl create execution --launch-plan "name" --inputs "key=value"
 ```
  - delete - here refers to terminate
+```bash
+$ flytectl terminate/delete --urn "URN" --project flytesnacks --domain development 
+```
+ 
+ - update
+```bash
+$ flytectl update execution [exec-name] --tags "gpu" 
+```
 
 ## MatchableEntity
 Ability to retrieve matchable entity and edit its details
