@@ -23,11 +23,11 @@ Create Project by definition file. Note: The name shouldn't contain any whitespa
 
 .. code-block:: yaml
 
-	id: "project-unique-id"
-	name: "Name"
-	labels:
-	  app: flyte
-	description: "Some description for the project"
+    id: "project-unique-id"
+    name: "Name"
+    labels:
+     app: flyte
+    description: "Some description for the project"
 
 
 
