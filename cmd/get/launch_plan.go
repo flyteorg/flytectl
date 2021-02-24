@@ -47,6 +47,17 @@ Usage
 `
 )
 
+//go:generate pflags LaunchPlanConfig --default-var launchPlanConfig
+var (
+	launchPlanConfig = &LaunchPlanConfig{}
+)
+
+// LaunchPlanConfig
+type LaunchPlanConfig struct {
+	ExecFile string `json:"execFile" pflag:",execution file name to be used for generating execution spec of a single launchplan."`
+	Version  string `json:"version" pflag:",version of the launchplan to be fetched."`
+}
+
 var launchplanColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
 	{Header: "Name", JSONPath: "$.id.name"},
@@ -65,22 +76,28 @@ func LaunchplanToProtoMessages(l []*admin.LaunchPlan) []proto.Message {
 
 func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	launchPlanPrinter := printer.Printer{}
-
 	if len(args) == 1 {
 		name := args[0]
-		launchPlan, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, &admin.ResourceListRequest{
-			Limit: 10,
-			Id: &admin.NamedEntityIdentifier{
-				Project: config.GetConfig().Project,
-				Domain:  config.GetConfig().Domain,
-				Name:    name,
-			},
-		})
-		if err != nil {
-			return err
+		var launchPlans []*admin.LaunchPlan
+		var err error
+		// Right only support writing execution file for single task version.
+		if launchPlanConfig.ExecFile != "" {
+			var lp *admin.LaunchPlan
+			if lp, err = FetchLPVersionOrLatest(ctx, name, taskConfig.Version, cmdCtx); err != nil {
+				return err
+			}
+			launchPlans = append(launchPlans, lp)
+			if err = createAndWriteExecConfigForWorkflow(lp, launchPlanConfig.ExecFile); err != nil {
+				return err
+			}
+		} else {
+			launchPlans, err = getAllVerOfLP(ctx, name, cmdCtx)
+			if err != nil {
+				return err
+			}
 		}
-		logger.Debugf(ctx, "Retrieved %v excutions", len(launchPlan.LaunchPlans))
-		err = launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplanColumns, LaunchplanToProtoMessages(launchPlan.LaunchPlans)...)
+		logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
+		err = launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplanColumns, LaunchplanToProtoMessages(launchPlans)...)
 		if err != nil {
 			return err
 		}

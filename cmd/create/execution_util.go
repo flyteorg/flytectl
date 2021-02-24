@@ -1,0 +1,148 @@
+package create
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"strings"
+
+	"github.com/flyteorg/flytectl/cmd/config"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	cmdGet "github.com/flyteorg/flytectl/cmd/get"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+
+	"github.com/google/uuid"
+	"sigs.k8s.io/yaml"
+)
+
+func createExecutionRequestForWorkflow(ctx context.Context, workflowName string, cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
+	var lp *admin.LaunchPlan
+	var err error
+	// Fetch the task
+	if lp, err = cmdGet.FetchLPVersionOrLatest(ctx, workflowName, executionConfig.Version, cmdCtx); err != nil {
+		return nil, err
+	}
+	// Create workflow params literal map
+	var paramLiterals map[string]*core.Literal
+	if paramLiterals, err = MakeLiteralForParams(executionConfig.Inputs, lp.Spec.DefaultInputs.Parameters); err != nil {
+		return nil, err
+	}
+	var inputs = &core.LiteralMap{
+		Literals: paramLiterals,
+	}
+	ID := lp.Id
+	return createExecutionRequest(ID, inputs, nil), nil
+}
+
+func createExecutionRequestForTask(ctx context.Context, taskName string, cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
+	var task *admin.Task
+	var err error
+	// Fetch the task
+	if task, err = cmdGet.FetchTaskVersionOrLatest(ctx, taskName, executionConfig.Version, cmdCtx); err != nil {
+		return nil, err
+	}
+	// Create task variables literal map
+	var variableLiterals map[string]*core.Literal
+	if variableLiterals, err = MakeLiteralForVariables(executionConfig.Inputs, task.Closure.CompiledTask.Template.Interface.Inputs.Variables); err != nil {
+		return nil, err
+	}
+	var inputs = &core.LiteralMap{
+		Literals: variableLiterals,
+	}
+	var authRole *admin.AuthRole
+	if executionConfig.KubeServiceAcct != "" {
+		authRole = &admin.AuthRole{Method: &admin.AuthRole_KubernetesServiceAccount{
+			KubernetesServiceAccount: executionConfig.KubeServiceAcct}}
+	} else {
+		authRole = &admin.AuthRole{Method: &admin.AuthRole_AssumableIamRole{
+			AssumableIamRole: executionConfig.IamRoleARN}}
+	}
+	ID := &core.Identifier{
+		ResourceType: core.ResourceType_TASK,
+		Project:      executionConfig.TargetProject,
+		Domain:       executionConfig.TargetDomain,
+		Name:         task.Id.Name,
+		Version:      task.Id.Version,
+	}
+	return createExecutionRequest(ID, inputs, authRole), nil
+}
+
+func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, authRole *admin.AuthRole) *admin.ExecutionCreateRequest {
+	return &admin.ExecutionCreateRequest{
+		Project: executionConfig.TargetProject,
+		Domain:  executionConfig.TargetDomain,
+		Name:    "f" + strings.ReplaceAll(uuid.New().String(), "-", "")[:19],
+		Spec: &admin.ExecutionSpec{
+			LaunchPlan: ID,
+			Metadata: &admin.ExecutionMetadata{
+				Mode:      admin.ExecutionMetadata_MANUAL,
+				Principal: "sdk",
+				Nesting:   0,
+			},
+			AuthRole: authRole,
+		},
+		Inputs: inputs,
+	}
+}
+
+func readExecConfigFromFile(fileName string) (*ExecutionConfig, error) {
+	data, _err := ioutil.ReadFile(fileName)
+	if _err != nil {
+		return nil, fmt.Errorf("unable to read from %v yaml file", executionConfig.File)
+	}
+	executionConfigRead := ExecutionConfig{}
+	if _err = yaml.Unmarshal(data, &executionConfigRead); _err != nil {
+		return nil, _err
+	}
+	return &executionConfigRead, nil
+}
+
+func resolveOverrides(readExecutionConfig *ExecutionConfig) {
+	if executionConfig.KubeServiceAcct != "" {
+		readExecutionConfig.KubeServiceAcct = executionConfig.KubeServiceAcct
+	}
+	if executionConfig.IamRoleARN != "" {
+		readExecutionConfig.IamRoleARN = executionConfig.IamRoleARN
+	}
+	if executionConfig.TargetProject != "" {
+		readExecutionConfig.TargetProject = executionConfig.TargetProject
+	}
+	if executionConfig.TargetDomain != "" {
+		readExecutionConfig.TargetDomain = executionConfig.TargetDomain
+	}
+	// Use the configured project and domain to launch the task/workflow
+	if executionConfig.TargetProject == "" {
+		readExecutionConfig.TargetProject = config.GetConfig().Project
+	}
+	if executionConfig.TargetDomain == "" {
+		readExecutionConfig.TargetDomain = config.GetConfig().Domain
+	}
+}
+
+func readConfigAndValidate() (*ExecutionParams, error) {
+	if executionConfig.File == "" {
+		return nil, errors.New("executionConfig can't be empty. Run the flytectl get task/launchplan to generate the config")
+	}
+	var readExecutionConfig *ExecutionConfig
+	var err error
+	if readExecutionConfig, err = readExecConfigFromFile(executionConfig.File); err != nil {
+		return nil, err
+	}
+	resolveOverrides(readExecutionConfig)
+	// Update executionConfig pointer to readExecutionConfig as it contains all the updates.
+	executionConfig = readExecutionConfig
+
+	isTask := executionConfig.Task != ""
+	isWorkflow := executionConfig.Workflow != ""
+	if isTask == isWorkflow {
+		return nil, errors.New("either one of task or workflow name should be specified to launch an execution")
+	}
+	name := executionConfig.Task
+	if !isTask {
+		name = executionConfig.Workflow
+	}
+	return &ExecutionParams{name: name, isTask: isTask}, nil
+}
+

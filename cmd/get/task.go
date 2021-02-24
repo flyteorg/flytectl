@@ -3,16 +3,14 @@ package get
 import (
 	"context"
 
-	"github.com/flyteorg/flytestdlib/logger"
-	"github.com/golang/protobuf/proto"
-
-	"github.com/flyteorg/flytectl/pkg/adminutils"
-	"github.com/flyteorg/flytectl/pkg/printer"
-
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-
+	"github.com/flyteorg/flytectl/pkg/adminutils"
+	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/flyteorg/flytestdlib/logger"
+
+	"github.com/golang/protobuf/proto"
 )
 
 const (
@@ -50,6 +48,17 @@ Usage
 `
 )
 
+//go:generate pflags TaskConfig --default-var taskConfig
+var (
+	taskConfig = &TaskConfig{}
+)
+
+// FilesConfig
+type TaskConfig struct {
+	ExecFile string `json:"execFile" pflag:",execution file name to be used for generating execution spec of a single task."`
+	Version  string `json:"version" pflag:",version of the task to be fetched."`
+}
+
 var taskColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
 	{Header: "Name", JSONPath: "$.id.name"},
@@ -68,29 +77,28 @@ func TaskToProtoMessages(l []*admin.Task) []proto.Message {
 }
 
 func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-
 	taskPrinter := printer.Printer{}
-
 	if len(args) == 1 {
-		task, err := cmdCtx.AdminClient().ListTasks(ctx, &admin.ResourceListRequest{
-			Id: &admin.NamedEntityIdentifier{
-				Project: config.GetConfig().Project,
-				Domain:  config.GetConfig().Domain,
-				Name:    args[0],
-			},
-			// TODO Sorting and limits should be parameters
-			SortBy: &admin.Sort{
-				Key:       "created_at",
-				Direction: admin.Sort_DESCENDING,
-			},
-			Limit: 100,
-		})
-		if err != nil {
-			return err
+		var tasks []*admin.Task
+		var err error
+		// Right only support writing execution file for single task version.
+		if taskConfig.ExecFile != "" {
+			var task *admin.Task
+			if task, err = FetchTaskVersionOrLatest(ctx, args[0], taskConfig.Version, cmdCtx); err != nil {
+				return err
+			}
+			tasks = append(tasks, task)
+			if err = createAndWriteExecConfigForTask(task, taskConfig.ExecFile); err != nil {
+				return err
+			}
+		} else {
+			tasks, err = getAllVerOfTask(ctx, args[0], cmdCtx)
+			if err != nil {
+				return err
+			}
 		}
-		logger.Debugf(ctx, "Retrieved Task", task.Tasks)
-
-		return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToProtoMessages(task.Tasks)...)
+		logger.Debugf(ctx, "Retrieved Task", tasks)
+		return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToProtoMessages(tasks)...)
 	}
 	tasks, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListTaskIds, adminutils.ListRequest{Project: config.GetConfig().Project, Domain: config.GetConfig().Domain})
 	if err != nil {
