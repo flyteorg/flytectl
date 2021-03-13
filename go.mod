@@ -4,8 +4,8 @@ go 1.13
 
 require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
-	github.com/flyteorg/flyteidl v0.18.17
-	github.com/flyteorg/flytestdlib v0.3.14
+	github.com/flyteorg/flyteidl v0.18.15
+	github.com/flyteorg/flytestdlib v0.3.13
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.4.3
 	github.com/kataras/tablewriter v0.0.0-20180708051242-e063d29b7c23
@@ -19,4 +19,5 @@ require (
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0
 	google.golang.org/grpc v1.35.0
 	gopkg.in/yaml.v2 v2.4.0
+	k8s.io/client-go v11.0.0+incompatible // indirect
 )
