@@ -3,8 +3,8 @@ package get
 import (
 	"context"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/flyteorg/flytestdlib/logger"
+	"github.com/golang/protobuf/proto"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"

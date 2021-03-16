@@ -3,13 +3,13 @@ package get
 import (
 	"context"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/adminutils"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
+	"github.com/golang/protobuf/proto"
 )
 
 const (
