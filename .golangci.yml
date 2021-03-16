@@ -14,6 +14,7 @@ linters:
     - errcheck
     - gas
     - goconst
+    - goimports
     - golint
     - gosimple
     - govet
