@@ -19,5 +19,4 @@ require (
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0
 	google.golang.org/grpc v1.35.0
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/client-go v11.0.0+incompatible // indirect
 )
