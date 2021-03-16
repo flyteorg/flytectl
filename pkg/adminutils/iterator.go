@@ -3,8 +3,8 @@ package adminutils
 import (
 	"context"
 
-	"github.com/golang/protobuf/proto"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/golang/protobuf/proto"
 	"google.golang.org/grpc"
 )
 
