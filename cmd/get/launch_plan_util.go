@@ -9,6 +9,38 @@ import (
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 )
 
+// Reads the launchplan config to drive fetching the correct launch plans.
+func fetchLPForName(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.LaunchPlan, error) {
+	var launchPlans []*admin.LaunchPlan
+	var lp *admin.LaunchPlan
+	var err error
+	if launchPlanConfig.Latest {
+		if lp, err = fetchLPLatestVersion(ctx, name, project, domain, cmdCtx); err != nil {
+			return nil, err
+		}
+		launchPlans = append(launchPlans, lp)
+	} else if launchPlanConfig.Version != "" {
+		if lp, err = FetchLPVersion(ctx, name, launchPlanConfig.Version, project, domain, cmdCtx); err != nil {
+			return nil, err
+		}
+		launchPlans = append(launchPlans, lp)
+	} else {
+		launchPlans, err = getAllVerOfLP(ctx, name, project, domain, cmdCtx)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if launchPlanConfig.ExecFile != "" {
+		// There would be atleast one launchplan object when code reaches here and hence the length assertion is not required.
+		lp = launchPlans[0]
+		// Only write the first task from the tasks object.
+		if err = createAndWriteExecConfigForWorkflow(lp, launchPlanConfig.ExecFile); err != nil {
+			return nil, err
+		}
+	}
+	return launchPlans, nil
+}
+
 func getAllVerOfLP(ctx context.Context, lpName string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.LaunchPlan, error) {
 	tList, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, &admin.ResourceListRequest{
 		Id: &admin.NamedEntityIdentifier{

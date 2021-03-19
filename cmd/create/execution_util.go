@@ -90,7 +90,7 @@ func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, authRo
 func readExecConfigFromFile(fileName string) (*ExecutionConfig, error) {
 	data, _err := ioutil.ReadFile(fileName)
 	if _err != nil {
-		return nil, fmt.Errorf("unable to read from %v yaml file", executionConfig.File)
+		return nil, fmt.Errorf("unable to read from %v yaml file", fileName)
 	}
 	executionConfigRead := ExecutionConfig{}
 	if _err = yaml.Unmarshal(data, &executionConfigRead); _err != nil {
@@ -122,12 +122,12 @@ func resolveOverrides(readExecutionConfig *ExecutionConfig) {
 }
 
 func readConfigAndValidate() (*ExecutionParams, error) {
-	if executionConfig.File == "" {
+	if executionConfig.ExecFile == "" {
 		return nil, errors.New("executionConfig can't be empty. Run the flytectl get task/launchplan to generate the config")
 	}
 	var readExecutionConfig *ExecutionConfig
 	var err error
-	if readExecutionConfig, err = readExecConfigFromFile(executionConfig.File); err != nil {
+	if readExecutionConfig, err = readExecConfigFromFile(executionConfig.ExecFile); err != nil {
 		return nil, err
 	}
 	resolveOverrides(readExecutionConfig)

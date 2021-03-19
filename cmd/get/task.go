@@ -54,8 +54,7 @@ The generated file would look similar to this
 
 .. code-block:: yaml
 
-	 genExecSpecFile: true
-	 iamRoleURN: 'example: arn:aws:iam::12345678:role/defaultrole'
+	 iamRoleARN: ""
 	 inputs:
 	   sorted_list1:
 	   - 0
@@ -65,7 +64,9 @@ The generated file would look similar to this
 	 targetDomain: ""
 	 targetProject: ""
 	 task: core.advanced.run_merge_sort.merge
-	 version: ""
+	 version: v2
+
+Check the create execution section on how to launch one using the generated file.
 
 Usage
 `
@@ -105,32 +106,11 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 	project := config.GetConfig().Project
 	domain := config.GetConfig().Domain
 	if len(args) == 1 {
+		name := args[0]
 		var tasks []*admin.Task
 		var err error
-		var task *admin.Task
-		if taskConfig.Latest {
-			if task, err = fetchTaskLatestVersion(ctx, args[0], project, domain, cmdCtx); err != nil {
-				return err
-			}
-			tasks = append(tasks, task)
-		} else if taskConfig.Version != "" {
-			if task, err = FetchTaskVersion(ctx, args[0], taskConfig.Version, project, domain, cmdCtx); err != nil {
-				return err
-			}
-			tasks = append(tasks, task)
-		} else {
-			tasks, err = getAllVerOfTask(ctx, args[0], project, domain, cmdCtx)
-			if err != nil {
-				return err
-			}
-		}
-		if taskConfig.ExecFile != "" {
-			// There would be atleast one task object when code reaches here and hence the length assertion is not required.
-			task = tasks[0]
-			// Only write the first task from the tasks object.
-			if err = createAndWriteExecConfigForTask(task, taskConfig.ExecFile); err != nil {
-				return err
-			}
+		if tasks, err = fetchTaskForName(ctx, name, project, domain, cmdCtx); err != nil {
+			return err
 		}
 		logger.Debugf(ctx, "Retrieved Task", tasks)
 		return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToProtoMessages(tasks)...)

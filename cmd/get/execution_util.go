@@ -17,7 +17,6 @@ import (
 // ExecutionConfig is duplicated struct from create with the same structure. This is to avoid the circular dependency.
 // TODO : replace this with a cleaner design
 type ExecutionConfig struct {
-	File            string                 `json:"file,omitempty"`
 	TargetDomain    string                 `json:"targetDomain"`
 	TargetProject   string                 `json:"targetProject"`
 	KubeServiceAcct string                 `json:"kubeServiceAcct"`
@@ -40,7 +39,7 @@ func writeExecConfigToFile(executionConfig ExecutionConfig, fileName string) err
 	}
 	err = ioutil.WriteFile(fileName, d, 0600)
 	if err != nil {
-		return fmt.Errorf("unable to write in %v yaml file due to %v", executionConfig.File, err)
+		return fmt.Errorf("unable to write in %v yaml file due to %v", fileName, err)
 	}
 	return nil
 }

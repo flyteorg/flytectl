@@ -41,7 +41,7 @@ func (ExecutionConfig) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg ExecutionConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("ExecutionConfig", pflag.ExitOnError)
-	cmdFlags.StringVar(&(executionConfig.File),fmt.Sprintf("%v%v", prefix, "file"), executionConfig.File, "file for the execution params.If not specified defaults to <<workflow/task>_name>.execution_spec.yaml")
+	cmdFlags.StringVar(&(executionConfig.ExecFile),fmt.Sprintf("%v%v", prefix, "execFile"), executionConfig.ExecFile, "file for the execution params.If not specified defaults to <<workflow/task>_name>.execution_spec.yaml")
 	cmdFlags.StringVar(&(executionConfig.TargetDomain),fmt.Sprintf("%v%v", prefix, "targetDomain"), executionConfig.TargetDomain, "project where execution needs to be created.If not specified configured domain would be used.")
 	cmdFlags.StringVar(&(executionConfig.TargetProject),fmt.Sprintf("%v%v", prefix, "targetProject"), executionConfig.TargetProject, "project where execution needs to be created.If not specified configured project would be used.")
 	cmdFlags.StringVar(&(executionConfig.KubeServiceAcct),fmt.Sprintf("%v%v", prefix, "kubeServiceAcct"), executionConfig.KubeServiceAcct, "kubernetes service account AuthRole for launching execution.")

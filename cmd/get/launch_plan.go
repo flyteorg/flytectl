@@ -18,13 +18,13 @@ const (
 Retrieves all the launch plans within project and domain.(launchplan,launchplans can be used interchangeably in these commands)
 ::
 
- bin/flytectl get launchplan -p flytesnacks -d development
+ flytectl get launchplan -p flytesnacks -d development
 
 Retrieves launch plan by name within project and domain.
 
 ::
 
- bin/flytectl get launchplan -p flytesnacks -d development core.basic.lp.go_greet
+ flytectl get launchplan -p flytesnacks -d development core.basic.lp.go_greet
 
 Retrieves launchplan by filters.
 ::
@@ -35,13 +35,37 @@ Retrieves all the launchplan within project and domain in yaml format.
 
 ::
 
- bin/flytectl get launchplan -p flytesnacks -d development -o yaml
+ flytectl get launchplan -p flytesnacks -d development -o yaml
 
 Retrieves all the launchplan within project and domain in json format
 
 ::
 
- bin/flytectl get launchplan -p flytesnacks -d development -o json
+ flytectl get launchplan -p flytesnacks -d development -o json
+
+Retrieves a launch plans within project and domain for a version and generate the execution spec file for it to be used for launching the execution using create execution.
+
+::
+
+ flytectl get launchplan -d development -p flytectldemo core.advanced.run_merge_sort.merge_sort --execFile execution_spec.yam
+
+The generated file would look similar to this
+
+.. code-block:: yaml
+
+	 iamRoleARN: ""
+	 inputs:
+	   numbers:
+	   - 0
+	   numbers_count: 0
+	   run_local_at_count: 10
+	 kubeServiceAcct: ""
+	 targetDomain: ""
+	 targetProject: ""
+	 version: v3
+	 workflow: core.advanced.run_merge_sort.merge_sort
+
+Check the create execution section on how to launch one using the generated file.
 
 Usage
 `
@@ -83,30 +107,8 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		name := args[0]
 		var launchPlans []*admin.LaunchPlan
 		var err error
-		var lp *admin.LaunchPlan
-		if launchPlanConfig.Latest {
-			if lp, err = fetchLPLatestVersion(ctx, name, project, domain, cmdCtx); err != nil {
-				return err
-			}
-			launchPlans = append(launchPlans, lp)
-		} else if launchPlanConfig.Version != "" {
-			if lp, err = FetchLPVersion(ctx, name, launchPlanConfig.Version, project, domain, cmdCtx); err != nil {
-				return err
-			}
-			launchPlans = append(launchPlans, lp)
-		} else {
-			launchPlans, err = getAllVerOfLP(ctx, name, project, domain, cmdCtx)
-			if err != nil {
-				return err
-			}
-		}
-		if launchPlanConfig.ExecFile != "" {
-			// There would be atleast one launchplan object when code reaches here and hence the length assertion is not required.
-			lp = launchPlans[0]
-			// Only write the first task from the tasks object.
-			if err = createAndWriteExecConfigForWorkflow(lp, launchPlanConfig.ExecFile); err != nil {
-				return err
-			}
+		if launchPlans, err = fetchLPForName(ctx, name, project, domain, cmdCtx); err != nil {
+			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
 		err = launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplanColumns, LaunchplanToProtoMessages(launchPlans)...)

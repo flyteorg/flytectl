@@ -99,11 +99,11 @@ func TestExecutionConfig_SetFlags(t *testing.T) {
 	cmdFlags := actual.GetPFlagSet("")
 	assert.True(t, cmdFlags.HasFlags())
 
-	t.Run("Test_file", func(t *testing.T) {
+	t.Run("Test_execFile", func(t *testing.T) {
 		t.Run("DefaultValue", func(t *testing.T) {
 			// Test that default value is set properly
-			if vString, err := cmdFlags.GetString("file"); err == nil {
-				assert.Equal(t, string(executionConfig.File), vString)
+			if vString, err := cmdFlags.GetString("execFile"); err == nil {
+				assert.Equal(t, string(executionConfig.ExecFile), vString)
 			} else {
 				assert.FailNow(t, err.Error())
 			}
@@ -112,9 +112,9 @@ func TestExecutionConfig_SetFlags(t *testing.T) {
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("file", testValue)
-			if vString, err := cmdFlags.GetString("file"); err == nil {
-				testDecodeJson_ExecutionConfig(t, fmt.Sprintf("%v", vString), &actual.File)
+			cmdFlags.Set("execFile", testValue)
+			if vString, err := cmdFlags.GetString("execFile"); err == nil {
+				testDecodeJson_ExecutionConfig(t, fmt.Sprintf("%v", vString), &actual.ExecFile)
 
 			} else {
 				assert.FailNow(t, err.Error())

@@ -9,6 +9,38 @@ import (
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 )
 
+// Reads the task config to drive fetching the correct tasks.
+func fetchTaskForName(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.Task, error) {
+	var tasks []*admin.Task
+	var err error
+	var task *admin.Task
+	if taskConfig.Latest {
+		if task, err = fetchTaskLatestVersion(ctx, name, project, domain, cmdCtx); err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	} else if taskConfig.Version != "" {
+		if task, err = FetchTaskVersion(ctx, name, taskConfig.Version, project, domain, cmdCtx); err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	} else {
+		tasks, err = getAllVerOfTask(ctx, name, project, domain, cmdCtx)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if taskConfig.ExecFile != "" {
+		// There would be atleast one task object when code reaches here and hence the length assertion is not required.
+		task = tasks[0]
+		// Only write the first task from the tasks object.
+		if err = createAndWriteExecConfigForTask(task, taskConfig.ExecFile); err != nil {
+			return nil, err
+		}
+	}
+	return tasks, nil
+}
+
 func getAllVerOfTask(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.Task, error) {
 	tList, err := cmdCtx.AdminClient().ListTasks(ctx, &admin.ResourceListRequest{
 		Id: &admin.NamedEntityIdentifier{

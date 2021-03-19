@@ -16,44 +16,39 @@ Create the executions for given workflow/task in a project and domain.
 
 There are three steps in generating an execution.
 
-- Generate the execution spec file.
+- Generate the execution spec file using the get command.
 - Update the inputs for the execution if needed.
 - Run the execution by passing in the generated yaml file.
 
 The spec file should be generated first and then run the execution using the spec file.
-This would use the latest version of the task core.advanced.run_merge_sort.merge if version flag is not passed.
-Notice the source and target domain/projects can be different.
+You can reference the flytectl get task for more details
 
 ::
 
- bin/flytectl create execution  --sourceDomain development  --sourceProject flytectldemo --targetDomain development --targetProject flytesnacks --task core.advanced.run_merge_sort.merge   --genExecSpecFile
+ flytectl get tasks -d development -p flytectldemo core.advanced.run_merge_sort.merge  --version v2 --execFile execution_spec.yaml
 
 The generated file would look similar to this
 
 .. code-block:: yaml
 
-	 genExecSpecFile: true
-	 iamRoleURN: 'example: arn:aws:iam::12345678:role/defaultrole'
+	 iamRoleARN: ""
 	 inputs:
 	   sorted_list1:
 	   - 0
 	   sorted_list2:
 	   - 0
 	 kubeServiceAcct: ""
-	 sourceDomain: development
-	 sourceProject: flytectldemo
-	 targetDomain: development
-	 targetProject: flytectldemo
+	 targetDomain: ""
+	 targetProject: ""
 	 task: core.advanced.run_merge_sort.merge
-	 version: ""
+	 version: "v2"
 
 
 The generated file can be modified to change the input values.
 
 .. code-block:: yaml
 
-	 genExecSpecFile: true
-	 iamRoleURN: 'example: arn:aws:iam::12345678:role/defaultrole'
+	 iamRoleARN: 'arn:aws:iam::12345678:role/defaultrole'
 	 inputs:
 	   sorted_list1:
 	   - 2
@@ -64,18 +59,18 @@ The generated file can be modified to change the input values.
 	   - 3
 	   - 5
 	 kubeServiceAcct: ""
-	 sourceDomain: development
-	 sourceProject: flytectldemo
-	 targetDomain: development
-	 targetProject: flytectldemo
+	 targetDomain: ""
+	 targetProject: ""
 	 task: core.advanced.run_merge_sort.merge
-	 version: ""
+	 version: "v2"
 
 And then can be passed through the command line.
+Notice the source and target domain/projects can be different.
+The root project and domain flags of -p and -d should point to task/launch plans project/domain.
 
 ::
 
- bin/flytectl create execution --file core.advanced.run_merge_sort.merge.execution_spec.yaml
+ flytectl create execution --execFile execution_spec.yaml -p flytectldemo -d development --targetProject flytesnacks
 
 Usage
 `
@@ -86,7 +81,7 @@ Usage
 // ExecutionConfig hold configuration for create execution flags and configuration of the actual task or workflow  to be launched.
 type ExecutionConfig struct {
 	// pflag section
-	File            string `json:"file,omitempty" pflag:",file for the execution params.If not specified defaults to <<workflow/task>_name>.execution_spec.yaml"`
+	ExecFile        string `json:"execFile,omitempty" pflag:",file for the execution params.If not specified defaults to <<workflow/task>_name>.execution_spec.yaml"`
 	TargetDomain    string `json:"targetDomain" pflag:",project where execution needs to be created.If not specified configured domain would be used."`
 	TargetProject   string `json:"targetProject" pflag:",project where execution needs to be created.If not specified configured project would be used."`
 	KubeServiceAcct string `json:"kubeServiceAcct" pflag:",kubernetes service account AuthRole for launching execution."`
