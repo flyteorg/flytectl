@@ -4,24 +4,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 )
 
-func getAllVerOfLP(ctx context.Context, lpName string, cmdCtx cmdCore.CommandContext) ([]*admin.LaunchPlan, error) {
+func getAllVerOfLP(ctx context.Context, lpName string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.LaunchPlan, error) {
 	tList, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, &admin.ResourceListRequest{
-		Limit: 1,
 		Id: &admin.NamedEntityIdentifier{
-			Project: config.GetConfig().Project,
-			Domain:  config.GetConfig().Domain,
+			Project: project,
+			Domain:  domain,
 			Name:    lpName,
 		},
 		SortBy: &admin.Sort{
 			Key:       "created_at",
 			Direction: admin.Sort_DESCENDING,
 		},
+		Limit: 100,
 	})
 	if err != nil {
 		return nil, err
@@ -32,30 +31,28 @@ func getAllVerOfLP(ctx context.Context, lpName string, cmdCtx cmdCore.CommandCon
 	return tList.LaunchPlans, nil
 }
 
-func FetchLPVersionOrLatest(ctx context.Context, name string, version string, cmdCtx cmdCore.CommandContext) (*admin.LaunchPlan, error) {
-	var lp *admin.LaunchPlan
-	var err error
-	if version == "" {
-		// Fetch the latest version of the task.
-		var lpVersions []*admin.LaunchPlan
-		lpVersions, err = getAllVerOfLP(ctx, name, cmdCtx)
-		if err != nil {
-			return nil, err
-		}
-		lp = lpVersions[0]
-	} else {
-		lp, err = cmdCtx.AdminClient().GetLaunchPlan(ctx, &admin.ObjectGetRequest{
-			Id: &core.Identifier{
-				ResourceType: core.ResourceType_LAUNCH_PLAN,
-				Project:      config.GetConfig().Project,
-				Domain:       config.GetConfig().Domain,
-				Name:         name,
-				Version:      version,
-			},
-		})
-		if err != nil {
-			return nil, err
-		}
+func fetchLPLatestVersion(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.LaunchPlan, error) {
+	// Fetch the latest version of the task.
+	lpVersions, err := getAllVerOfLP(ctx, name, project, domain, cmdCtx)
+	if err != nil {
+		return nil, err
+	}
+	lp := lpVersions[0]
+	return lp, nil
+}
+
+func FetchLPVersion(ctx context.Context, name string, version string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.LaunchPlan, error) {
+	lp, err := cmdCtx.AdminClient().GetLaunchPlan(ctx, &admin.ObjectGetRequest{
+		Id: &core.Identifier{
+			ResourceType: core.ResourceType_LAUNCH_PLAN,
+			Project:      project,
+			Domain:       domain,
+			Name:         name,
+			Version:      version,
+		},
+	})
+	if err != nil {
+		return nil, err
 	}
 	return lp, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 )
@@ -109,16 +110,18 @@ var (
 func createExecutionCommand(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	var execParams *ExecutionParams
 	var err error
+	sourceProject := config.GetConfig().Project
+	sourceDomain := config.GetConfig().Domain
 	if execParams, err = readConfigAndValidate(); err != nil {
 		return err
 	}
 	var executionRequest *admin.ExecutionCreateRequest
 	if execParams.isTask {
-		if executionRequest, err = createExecutionRequestForTask(ctx, execParams.name, cmdCtx); err != nil {
+		if executionRequest, err = createExecutionRequestForTask(ctx, execParams.name, sourceProject, sourceDomain, cmdCtx); err != nil {
 			return err
 		}
 	} else {
-		if executionRequest, err = createExecutionRequestForWorkflow(ctx, execParams.name, cmdCtx); err != nil {
+		if executionRequest, err = createExecutionRequestForWorkflow(ctx, execParams.name, sourceProject, sourceDomain, cmdCtx); err != nil {
 			return err
 		}
 	}

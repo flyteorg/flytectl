@@ -17,11 +17,11 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func createExecutionRequestForWorkflow(ctx context.Context, workflowName string, cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
+func createExecutionRequestForWorkflow(ctx context.Context, workflowName string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
 	var lp *admin.LaunchPlan
 	var err error
-	// Fetch the task
-	if lp, err = cmdGet.FetchLPVersionOrLatest(ctx, workflowName, executionConfig.Version, cmdCtx); err != nil {
+	// Fetch the launch plan
+	if lp, err = cmdGet.FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain, cmdCtx); err != nil {
 		return nil, err
 	}
 	// Create workflow params literal map
@@ -36,11 +36,11 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName string,
 	return createExecutionRequest(ID, inputs, nil), nil
 }
 
-func createExecutionRequestForTask(ctx context.Context, taskName string, cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
+func createExecutionRequestForTask(ctx context.Context, taskName string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
 	var task *admin.Task
 	var err error
 	// Fetch the task
-	if task, err = cmdGet.FetchTaskVersionOrLatest(ctx, taskName, executionConfig.Version, cmdCtx); err != nil {
+	if task, err = cmdGet.FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain, cmdCtx); err != nil {
 		return nil, err
 	}
 	// Create task variables literal map
@@ -61,8 +61,8 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, cmdCtx 
 	}
 	ID := &core.Identifier{
 		ResourceType: core.ResourceType_TASK,
-		Project:      executionConfig.TargetProject,
-		Domain:       executionConfig.TargetDomain,
+		Project:      project,
+		Domain:       domain,
 		Name:         task.Id.Name,
 		Version:      task.Id.Version,
 	}
@@ -112,7 +112,7 @@ func resolveOverrides(readExecutionConfig *ExecutionConfig) {
 	if executionConfig.TargetDomain != "" {
 		readExecutionConfig.TargetDomain = executionConfig.TargetDomain
 	}
-	// Use the configured project and domain to launch the task/workflow
+	// Use the root project and domain to launch the task/workflow if target is unspecified
 	if executionConfig.TargetProject == "" {
 		readExecutionConfig.TargetProject = config.GetConfig().Project
 	}
@@ -133,16 +133,14 @@ func readConfigAndValidate() (*ExecutionParams, error) {
 	resolveOverrides(readExecutionConfig)
 	// Update executionConfig pointer to readExecutionConfig as it contains all the updates.
 	executionConfig = readExecutionConfig
-
-	isTask := executionConfig.Task != ""
-	isWorkflow := executionConfig.Workflow != ""
+	isTask := readExecutionConfig.Task != ""
+	isWorkflow := readExecutionConfig.Workflow != ""
 	if isTask == isWorkflow {
 		return nil, errors.New("either one of task or workflow name should be specified to launch an execution")
 	}
-	name := executionConfig.Task
+	name := readExecutionConfig.Task
 	if !isTask {
-		name = executionConfig.Workflow
+		name = readExecutionConfig.Workflow
 	}
 	return &ExecutionParams{name: name, isTask: isTask}, nil
 }
-

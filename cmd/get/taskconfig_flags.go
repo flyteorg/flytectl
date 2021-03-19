@@ -43,5 +43,7 @@ func (cfg TaskConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("TaskConfig", pflag.ExitOnError)
 	cmdFlags.StringVar(&(taskConfig.ExecFile),fmt.Sprintf("%v%v", prefix, "execFile"), taskConfig.ExecFile, "execution file name to be used for generating execution spec of a single task.")
 	cmdFlags.StringVar(&(taskConfig.Version),fmt.Sprintf("%v%v", prefix, "version"), taskConfig.Version, "version of the task to be fetched.")
+	cmdFlags.BoolVar(&(taskConfig.Latest),fmt.Sprintf("%v%v", prefix, "latest"), taskConfig.Latest, "flag to indicate to fetch the latest version, version flag will be ignored in this case")
+
 	return cmdFlags
 }

@@ -47,7 +47,7 @@ func writeExecConfigToFile(executionConfig ExecutionConfig, fileName string) err
 
 func createAndWriteExecConfigForTask(task *admin.Task, fileName string) error {
 	var err error
-	executionConfig := ExecutionConfig{Task: task.Id.Name}
+	executionConfig := ExecutionConfig{Task: task.Id.Name, Version: task.Id.Version}
 	if executionConfig.Inputs, err = getParamMapForTask(task); err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func createAndWriteExecConfigForTask(task *admin.Task, fileName string) error {
 
 func createAndWriteExecConfigForWorkflow(wlp *admin.LaunchPlan, fileName string) error {
 	var err error
-	executionConfig := ExecutionConfig{Workflow: wlp.Id.Name}
+	executionConfig := ExecutionConfig{Workflow: wlp.Id.Name, Version: wlp.Id.Version}
 	if executionConfig.Inputs, err = getParamMapForWorkflow(wlp); err != nil {
 		return err
 	}

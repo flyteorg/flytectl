@@ -56,6 +56,7 @@ var (
 type LaunchPlanConfig struct {
 	ExecFile string `json:"execFile" pflag:",execution file name to be used for generating execution spec of a single launchplan."`
 	Version  string `json:"version" pflag:",version of the launchplan to be fetched."`
+	Latest   bool   `json:"latest" pflag:", flag to indicate to fetch the latest version, version flag will be ignored in this case"`
 }
 
 var launchplanColumns = []printer.Column{
@@ -76,23 +77,34 @@ func LaunchplanToProtoMessages(l []*admin.LaunchPlan) []proto.Message {
 
 func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	launchPlanPrinter := printer.Printer{}
+	project := config.GetConfig().Project
+	domain := config.GetConfig().Domain
 	if len(args) == 1 {
 		name := args[0]
 		var launchPlans []*admin.LaunchPlan
 		var err error
-		// Right only support writing execution file for single task version.
-		if launchPlanConfig.ExecFile != "" {
-			var lp *admin.LaunchPlan
-			if lp, err = FetchLPVersionOrLatest(ctx, name, taskConfig.Version, cmdCtx); err != nil {
+		var lp *admin.LaunchPlan
+		if launchPlanConfig.Latest {
+			if lp, err = fetchLPLatestVersion(ctx, name, project, domain, cmdCtx); err != nil {
 				return err
 			}
 			launchPlans = append(launchPlans, lp)
-			if err = createAndWriteExecConfigForWorkflow(lp, launchPlanConfig.ExecFile); err != nil {
+		} else if launchPlanConfig.Version != "" {
+			if lp, err = FetchLPVersion(ctx, name, launchPlanConfig.Version, project, domain, cmdCtx); err != nil {
 				return err
 			}
+			launchPlans = append(launchPlans, lp)
 		} else {
-			launchPlans, err = getAllVerOfLP(ctx, name, cmdCtx)
+			launchPlans, err = getAllVerOfLP(ctx, name, project, domain, cmdCtx)
 			if err != nil {
+				return err
+			}
+		}
+		if launchPlanConfig.ExecFile != "" {
+			// There would be atleast one launchplan object when code reaches here and hence the length assertion is not required.
+			lp = launchPlans[0]
+			// Only write the first task from the tasks object.
+			if err = createAndWriteExecConfigForWorkflow(lp, launchPlanConfig.ExecFile); err != nil {
 				return err
 			}
 		}
@@ -104,7 +116,7 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		return nil
 	}
 
-	launchPlans, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListLaunchPlanIds, adminutils.ListRequest{Project: config.GetConfig().Project, Domain: config.GetConfig().Domain})
+	launchPlans, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListLaunchPlanIds, adminutils.ListRequest{Project: project, Domain: domain})
 	if err != nil {
 		return err
 	}

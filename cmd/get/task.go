@@ -44,6 +44,29 @@ Retrieves all the tasks within project and domain in json format.
 
  bin/flytectl get task -p flytesnacks -d development -o json
 
+Retrieves a tasks within project and domain for a version and generate the execution spec file for it to be used for launching the execution using create execution.
+
+::
+
+ bin/flytectl get tasks -d development -p flytesnacks core.advanced.run_merge_sort.merge --execFile execution_spec.yaml --version v2
+
+The generated file would look similar to this
+
+.. code-block:: yaml
+
+	 genExecSpecFile: true
+	 iamRoleURN: 'example: arn:aws:iam::12345678:role/defaultrole'
+	 inputs:
+	   sorted_list1:
+	   - 0
+	   sorted_list2:
+	   - 0
+	 kubeServiceAcct: ""
+	 targetDomain: ""
+	 targetProject: ""
+	 task: core.advanced.run_merge_sort.merge
+	 version: ""
+
 Usage
 `
 )
@@ -57,6 +80,7 @@ var (
 type TaskConfig struct {
 	ExecFile string `json:"execFile" pflag:",execution file name to be used for generating execution spec of a single task."`
 	Version  string `json:"version" pflag:",version of the task to be fetched."`
+	Latest   bool   `json:"latest" pflag:", flag to indicate to fetch the latest version, version flag will be ignored in this case"`
 }
 
 var taskColumns = []printer.Column{
@@ -78,29 +102,40 @@ func TaskToProtoMessages(l []*admin.Task) []proto.Message {
 
 func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	taskPrinter := printer.Printer{}
+	project := config.GetConfig().Project
+	domain := config.GetConfig().Domain
 	if len(args) == 1 {
 		var tasks []*admin.Task
 		var err error
-		// Right only support writing execution file for single task version.
-		if taskConfig.ExecFile != "" {
-			var task *admin.Task
-			if task, err = FetchTaskVersionOrLatest(ctx, args[0], taskConfig.Version, cmdCtx); err != nil {
+		var task *admin.Task
+		if taskConfig.Latest {
+			if task, err = fetchTaskLatestVersion(ctx, args[0], project, domain, cmdCtx); err != nil {
 				return err
 			}
 			tasks = append(tasks, task)
-			if err = createAndWriteExecConfigForTask(task, taskConfig.ExecFile); err != nil {
+		} else if taskConfig.Version != "" {
+			if task, err = FetchTaskVersion(ctx, args[0], taskConfig.Version, project, domain, cmdCtx); err != nil {
 				return err
 			}
+			tasks = append(tasks, task)
 		} else {
-			tasks, err = getAllVerOfTask(ctx, args[0], cmdCtx)
+			tasks, err = getAllVerOfTask(ctx, args[0], project, domain, cmdCtx)
 			if err != nil {
+				return err
+			}
+		}
+		if taskConfig.ExecFile != "" {
+			// There would be atleast one task object when code reaches here and hence the length assertion is not required.
+			task = tasks[0]
+			// Only write the first task from the tasks object.
+			if err = createAndWriteExecConfigForTask(task, taskConfig.ExecFile); err != nil {
 				return err
 			}
 		}
 		logger.Debugf(ctx, "Retrieved Task", tasks)
 		return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToProtoMessages(tasks)...)
 	}
-	tasks, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListTaskIds, adminutils.ListRequest{Project: config.GetConfig().Project, Domain: config.GetConfig().Domain})
+	tasks, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListTaskIds, adminutils.ListRequest{Project: project, Domain: domain})
 	if err != nil {
 		return err
 	}
