@@ -121,14 +121,15 @@ func resolveOverrides(readExecutionConfig *ExecutionConfig) {
 	}
 }
 
-func readConfigAndValidate() (*ExecutionParams, error) {
+func readConfigAndValidate() (ExecutionParams, error) {
+	executionParams := ExecutionParams{}
 	if executionConfig.ExecFile == "" {
-		return nil, errors.New("executionConfig can't be empty. Run the flytectl get task/launchplan to generate the config")
+		return executionParams, errors.New("executionConfig can't be empty. Run the flytectl get task/launchplan to generate the config")
 	}
 	var readExecutionConfig *ExecutionConfig
 	var err error
 	if readExecutionConfig, err = readExecConfigFromFile(executionConfig.ExecFile); err != nil {
-		return nil, err
+		return executionParams, err
 	}
 	resolveOverrides(readExecutionConfig)
 	// Update executionConfig pointer to readExecutionConfig as it contains all the updates.
@@ -136,11 +137,11 @@ func readConfigAndValidate() (*ExecutionParams, error) {
 	isTask := readExecutionConfig.Task != ""
 	isWorkflow := readExecutionConfig.Workflow != ""
 	if isTask == isWorkflow {
-		return nil, errors.New("either one of task or workflow name should be specified to launch an execution")
+		return executionParams, errors.New("either one of task or workflow name should be specified to launch an execution")
 	}
 	name := readExecutionConfig.Task
 	if !isTask {
 		name = readExecutionConfig.Workflow
 	}
-	return &ExecutionParams{name: name, isTask: isTask}, nil
+	return ExecutionParams{name: name, isTask: isTask}, nil
 }

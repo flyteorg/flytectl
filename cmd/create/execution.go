@@ -103,7 +103,7 @@ var (
 )
 
 func createExecutionCommand(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	var execParams *ExecutionParams
+	var execParams ExecutionParams
 	var err error
 	sourceProject := config.GetConfig().Project
 	sourceDomain := config.GetConfig().Domain

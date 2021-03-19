@@ -7,6 +7,7 @@ require (
 	github.com/flyteorg/flyteidl v0.18.15
 	github.com/flyteorg/flytestdlib v0.3.13
 	github.com/ghodss/yaml v1.0.0
+	github.com/golang/mock v1.4.4
 	github.com/golang/protobuf v1.4.3
 	github.com/golangci/golangci-lint v1.38.0 // indirect
 	github.com/google/uuid v1.1.2
@@ -21,6 +22,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0
 	google.golang.org/grpc v1.35.0
+	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.4.0
 	sigs.k8s.io/yaml v1.2.0
 )
