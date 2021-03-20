@@ -21,6 +21,30 @@ func TestGetTaskFunc(t *testing.T) {
 			"version": "v2"
 		},
 		"closure": {
+			"compiledTask": {
+				"template": {
+					"interface": {
+						"inputs": {
+							"variables": {
+								"sorted_list1": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									}
+								},
+								"sorted_list2": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
 			"createdAt": "1970-01-01T00:00:01Z"
 		}
 	},
@@ -30,6 +54,30 @@ func TestGetTaskFunc(t *testing.T) {
 			"version": "v1"
 		},
 		"closure": {
+			"compiledTask": {
+				"template": {
+					"interface": {
+						"inputs": {
+							"variables": {
+								"sorted_list1": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									}
+								},
+								"sorted_list2": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
 			"createdAt": "1970-01-01T00:00:00Z"
 		}
 	}
@@ -48,6 +96,30 @@ func TestGetTaskFuncLatest(t *testing.T) {
 		"version": "v2"
 	},
 	"closure": {
+		"compiledTask": {
+			"template": {
+				"interface": {
+					"inputs": {
+						"variables": {
+							"sorted_list1": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								}
+							},
+							"sorted_list2": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"createdAt": "1970-01-01T00:00:01Z"
 	}
 }`)
@@ -66,6 +138,30 @@ func TestGetTaskWithVersion(t *testing.T) {
 		"version": "v2"
 	},
 	"closure": {
+		"compiledTask": {
+			"template": {
+				"interface": {
+					"inputs": {
+						"variables": {
+							"sorted_list1": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								}
+							},
+							"sorted_list2": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"createdAt": "1970-01-01T00:00:01Z"
 	}
 }`)
