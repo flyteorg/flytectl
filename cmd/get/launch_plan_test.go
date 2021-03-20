@@ -1,6 +1,7 @@
 package get
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -85,4 +86,93 @@ func TestGetLaunchPlans(t *testing.T) {
 		"name": "launchplan2"
 	}
 ]`)
+}
+
+func TestGetLaunchPlansWithExecFile(t *testing.T) {
+	setup()
+	launchPlanConfig.Version = "v2"
+	launchPlanConfig.ExecFile = "exec_file"
+	err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
+	os.Remove(launchPlanConfig.ExecFile)
+	assert.Nil(t, err)
+	mockClient.AssertCalled(t, "GetLaunchPlan", ctx, objectGetRequest)
+	teardownAndVerify(t, `{
+	"id": {
+		"name": "launchplan1",
+		"version": "v2"
+	},
+	"spec": {
+		"defaultInputs": {
+			"parameters": {
+				"numbers": {
+					"var": {
+						"type": {
+							"collectionType": {
+								"simple": "INTEGER"
+							}
+						}
+					}
+				},
+				"numbers_count": {
+					"var": {
+						"type": {
+							"simple": "INTEGER"
+						}
+					}
+				},
+				"run_local_at_count": {
+					"var": {
+						"type": {
+							"simple": "INTEGER"
+						}
+					},
+					"default": {
+						"scalar": {
+							"primitive": {
+								"integer": "10"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"closure": {
+		"expectedInputs": {
+			"parameters": {
+				"numbers": {
+					"var": {
+						"type": {
+							"collectionType": {
+								"simple": "INTEGER"
+							}
+						}
+					}
+				},
+				"numbers_count": {
+					"var": {
+						"type": {
+							"simple": "INTEGER"
+						}
+					}
+				},
+				"run_local_at_count": {
+					"var": {
+						"type": {
+							"simple": "INTEGER"
+						}
+					},
+					"default": {
+						"scalar": {
+							"primitive": {
+								"integer": "10"
+							}
+						}
+					}
+				}
+			}
+		},
+		"createdAt": "1970-01-01T00:00:01Z"
+	}
+}`)
 }

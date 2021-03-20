@@ -143,4 +143,26 @@ func TestLaunchPlanConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
+	t.Run("Test_latest", func(t *testing.T) {
+		t.Run("DefaultValue", func(t *testing.T) {
+			// Test that default value is set properly
+			if vBool, err := cmdFlags.GetBool("latest"); err == nil {
+				assert.Equal(t, bool(launchPlanConfig.Latest), vBool)
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("latest", testValue)
+			if vBool, err := cmdFlags.GetBool("latest"); err == nil {
+				testDecodeJson_LaunchPlanConfig(t, fmt.Sprintf("%v", vBool), &actual.Latest)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
 }

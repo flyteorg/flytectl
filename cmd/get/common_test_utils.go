@@ -69,14 +69,85 @@ func setup() {
 	mockClient = new(mocks.AdminServiceClient)
 	mockOutStream := new(io.Writer)
 	cmdCtx = cmdCore.NewCommandContext(mockClient, *mockOutStream)
+	sortedListLiteralType := core.Variable{
+		Type: &core.LiteralType{
+			Type: &core.LiteralType_CollectionType{
+				CollectionType: &core.LiteralType{
+					Type: &core.LiteralType_Simple{
+						Simple: core.SimpleType_INTEGER,
+					},
+				},
+			},
+		},
+	}
+	variableMap := map[string]*core.Variable{
+		"sorted_list1": &sortedListLiteralType,
+		"sorted_list2": &sortedListLiteralType,
+	}
 
+	parameterMap := map[string]*core.Parameter{
+		"numbers": {
+			Var: &core.Variable{
+				Type: &core.LiteralType{
+					Type: &core.LiteralType_CollectionType{
+						CollectionType: &core.LiteralType{
+							Type: &core.LiteralType_Simple{
+								Simple: core.SimpleType_INTEGER,
+							},
+						},
+					},
+				},
+			},
+		},
+		"numbers_count": {
+			Var: &core.Variable{
+				Type: &core.LiteralType{
+					Type: &core.LiteralType_Simple{
+						Simple: core.SimpleType_INTEGER,
+					},
+				},
+			},
+		},
+		"run_local_at_count": {
+			Var: &core.Variable{
+				Type: &core.LiteralType{
+					Type: &core.LiteralType_Simple{
+						Simple: core.SimpleType_INTEGER,
+					},
+				},
+			},
+			Behavior: &core.Parameter_Default{
+				Default: &core.Literal{
+					Value: &core.Literal_Scalar{
+						Scalar: &core.Scalar{
+							Value: &core.Scalar_Primitive{
+								Primitive: &core.Primitive{
+									Value: &core.Primitive_Integer{
+										Integer: 10,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 	launchPlan1 := &admin.LaunchPlan{
 		Id: &core.Identifier{
 			Name:    "launchplan1",
 			Version: "v1",
 		},
+		Spec: &admin.LaunchPlanSpec{
+			DefaultInputs: &core.ParameterMap{
+				Parameters: parameterMap,
+			},
+		},
 		Closure: &admin.LaunchPlanClosure{
 			CreatedAt: &timestamppb.Timestamp{Seconds: 0, Nanos: 0},
+			ExpectedInputs: &core.ParameterMap{
+				Parameters: parameterMap,
+			},
 		},
 	}
 	launchPlan2 := &admin.LaunchPlan{
@@ -84,8 +155,16 @@ func setup() {
 			Name:    "launchplan1",
 			Version: "v2",
 		},
+		Spec: &admin.LaunchPlanSpec{
+			DefaultInputs: &core.ParameterMap{
+				Parameters: parameterMap,
+			},
+		},
 		Closure: &admin.LaunchPlanClosure{
 			CreatedAt: &timestamppb.Timestamp{Seconds: 1, Nanos: 0},
+			ExpectedInputs: &core.ParameterMap{
+				Parameters: parameterMap,
+			},
 		},
 	}
 
@@ -98,8 +177,18 @@ func setup() {
 		},
 		Closure: &admin.TaskClosure{
 			CreatedAt: &timestamppb.Timestamp{Seconds: 0, Nanos: 0},
+			CompiledTask: &core.CompiledTask{
+				Template: &core.TaskTemplate{
+					Interface: &core.TypedInterface{
+						Inputs: &core.VariableMap{
+							Variables: variableMap,
+						},
+					},
+				},
+			},
 		},
 	}
+
 	task2 := &admin.Task{
 		Id: &core.Identifier{
 			Name:    "task1",
@@ -107,6 +196,15 @@ func setup() {
 		},
 		Closure: &admin.TaskClosure{
 			CreatedAt: &timestamppb.Timestamp{Seconds: 1, Nanos: 0},
+			CompiledTask: &core.CompiledTask{
+				Template: &core.TaskTemplate{
+					Interface: &core.TypedInterface{
+						Inputs: &core.VariableMap{
+							Variables: variableMap,
+						},
+					},
+				},
+			},
 		},
 	}
 
@@ -212,9 +310,11 @@ func setup() {
 	mockClient.OnListTaskIdsMatch(ctx, namedIDRequest).Return(namedIdentifierListTask, nil)
 
 	taskConfig.Latest = false
-	launchPlanConfig.Latest = false
+	taskConfig.ExecFile = ""
 	taskConfig.Version = ""
+	launchPlanConfig.Latest = false
 	launchPlanConfig.Version = ""
+	launchPlanConfig.ExecFile = ""
 }
 
 func teardownAndVerify(t *testing.T, expectedLog string) {

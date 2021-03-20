@@ -1,6 +1,7 @@
 package get
 
 import (
+	"os"
 	"testing"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
@@ -88,4 +89,47 @@ func TestGetTasks(t *testing.T) {
 		"name": "task2"
 	}
 ]`)
+}
+
+func TestGetTaskWithExecFile(t *testing.T) {
+	setup()
+	taskConfig.Version = "v2"
+	taskConfig.ExecFile = "task_exec_file"
+	err = getTaskFunc(ctx, argsTask, cmdCtx)
+	os.Remove(taskConfig.ExecFile)
+	assert.Nil(t, err)
+	mockClient.AssertCalled(t, "GetTask", ctx, objectGetRequestTask)
+	teardownAndVerify(t, `{
+	"id": {
+		"name": "task1",
+		"version": "v2"
+	},
+	"closure": {
+		"compiledTask": {
+			"template": {
+				"interface": {
+					"inputs": {
+						"variables": {
+							"sorted_list1": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								}
+							},
+							"sorted_list2": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"createdAt": "1970-01-01T00:00:01Z"
+	}
+}`)
 }
