@@ -39,12 +39,12 @@ func createProjectSetup() {
 func TestCreateProjectFunc(t *testing.T) {
 	setup()
 	createProjectSetup()
-	defer testutils.TearDownAndVerify(t, "project Created successfully")
+	defer tearDownAndVerify(t, "project Created successfully")
 	projectConfig.ID = projectValue
 	projectConfig.Name = projectValue
 	projectConfig.Labels = map[string]string{}
 	projectConfig.Description = ""
-	testutils.MockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
+	mockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
 	err := createProjectsCommand(ctx, args, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "RegisterProject", ctx, projectRegisterRequest)
