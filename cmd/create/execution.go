@@ -107,7 +107,7 @@ func createExecutionCommand(ctx context.Context, args []string, cmdCtx cmdCore.C
 	var err error
 	sourceProject := config.GetConfig().Project
 	sourceDomain := config.GetConfig().Domain
-	if execParams, err = readConfigAndValidate(); err != nil {
+	if execParams, err = readConfigAndValidate(config.GetConfig().Project, config.GetConfig().Domain); err != nil {
 		return err
 	}
 	var executionRequest *admin.ExecutionCreateRequest

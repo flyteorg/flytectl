@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	cmdGet "github.com/flyteorg/flytectl/cmd/get"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -26,7 +25,8 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName string,
 	}
 	// Create workflow params literal map
 	var paramLiterals map[string]*core.Literal
-	if paramLiterals, err = MakeLiteralForParams(executionConfig.Inputs, lp.Spec.DefaultInputs.Parameters); err != nil {
+	workflowParams := cmdGet.WorkflowParams(lp)
+	if paramLiterals, err = MakeLiteralForParams(executionConfig.Inputs, workflowParams); err != nil {
 		return nil, err
 	}
 	var inputs = &core.LiteralMap{
@@ -45,7 +45,8 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 	}
 	// Create task variables literal map
 	var variableLiterals map[string]*core.Literal
-	if variableLiterals, err = MakeLiteralForVariables(executionConfig.Inputs, task.Closure.CompiledTask.Template.Interface.Inputs.Variables); err != nil {
+	taskInputs := cmdGet.TaskInputs(task)
+	if variableLiterals, err = MakeLiteralForVariables(executionConfig.Inputs, taskInputs); err != nil {
 		return nil, err
 	}
 	var inputs = &core.LiteralMap{
@@ -99,7 +100,7 @@ func readExecConfigFromFile(fileName string) (*ExecutionConfig, error) {
 	return &executionConfigRead, nil
 }
 
-func resolveOverrides(readExecutionConfig *ExecutionConfig) {
+func resolveOverrides(readExecutionConfig *ExecutionConfig, project string, domain string) {
 	if executionConfig.KubeServiceAcct != "" {
 		readExecutionConfig.KubeServiceAcct = executionConfig.KubeServiceAcct
 	}
@@ -114,14 +115,14 @@ func resolveOverrides(readExecutionConfig *ExecutionConfig) {
 	}
 	// Use the root project and domain to launch the task/workflow if target is unspecified
 	if executionConfig.TargetProject == "" {
-		readExecutionConfig.TargetProject = config.GetConfig().Project
+		readExecutionConfig.TargetProject = project
 	}
 	if executionConfig.TargetDomain == "" {
-		readExecutionConfig.TargetDomain = config.GetConfig().Domain
+		readExecutionConfig.TargetDomain = domain
 	}
 }
 
-func readConfigAndValidate() (ExecutionParams, error) {
+func readConfigAndValidate(project string, domain string) (ExecutionParams, error) {
 	executionParams := ExecutionParams{}
 	if executionConfig.ExecFile == "" {
 		return executionParams, errors.New("executionConfig can't be empty. Run the flytectl get task/launchplan to generate the config")
@@ -131,7 +132,7 @@ func readConfigAndValidate() (ExecutionParams, error) {
 	if readExecutionConfig, err = readExecConfigFromFile(executionConfig.ExecFile); err != nil {
 		return executionParams, err
 	}
-	resolveOverrides(readExecutionConfig)
+	resolveOverrides(readExecutionConfig, project, domain)
 	// Update executionConfig pointer to readExecutionConfig as it contains all the updates.
 	executionConfig = readExecutionConfig
 	isTask := readExecutionConfig.Task != ""
