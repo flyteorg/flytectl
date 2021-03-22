@@ -27,7 +27,7 @@ type ExecutionConfig struct {
 	Inputs          map[string]interface{} `json:"inputs"`
 }
 
-func writeExecConfigToFile(executionConfig ExecutionConfig, fileName string) error {
+func WriteExecConfigToFile(executionConfig ExecutionConfig, fileName string) error {
 	d, err := yaml.Marshal(executionConfig)
 	if err != nil {
 		fmt.Printf("error: %v", err)
@@ -37,40 +37,51 @@ func writeExecConfigToFile(executionConfig ExecutionConfig, fileName string) err
 			return errors.New("backup the file before continuing")
 		}
 	}
-	err = ioutil.WriteFile(fileName, d, 0600)
-	if err != nil {
-		return fmt.Errorf("unable to write in %v yaml file due to %v", fileName, err)
-	}
-	return nil
+	return ioutil.WriteFile(fileName, d, 0600)
 }
 
-func createAndWriteExecConfigForTask(task *admin.Task, fileName string) error {
+func CreateAndWriteExecConfigForTask(task *admin.Task, fileName string) error {
 	var err error
 	executionConfig := ExecutionConfig{Task: task.Id.Name, Version: task.Id.Version}
-	if executionConfig.Inputs, err = getParamMapForTask(task); err != nil {
+	if executionConfig.Inputs, err = ParamMapForTask(task); err != nil {
 		return err
 	}
-	if err = writeExecConfigToFile(executionConfig, fileName); err != nil {
-		return err
-	}
-	return nil
+	return WriteExecConfigToFile(executionConfig, fileName)
 }
 
-func createAndWriteExecConfigForWorkflow(wlp *admin.LaunchPlan, fileName string) error {
+func CreateAndWriteExecConfigForWorkflow(wlp *admin.LaunchPlan, fileName string) error {
 	var err error
 	executionConfig := ExecutionConfig{Workflow: wlp.Id.Name, Version: wlp.Id.Version}
-	if executionConfig.Inputs, err = getParamMapForWorkflow(wlp); err != nil {
+	if executionConfig.Inputs, err = ParamMapForWorkflow(wlp); err != nil {
 		return err
 	}
-	if err = writeExecConfigToFile(executionConfig, fileName); err != nil {
-		return err
-	}
-	return nil
+	return WriteExecConfigToFile(executionConfig, fileName)
 }
 
-func getParamMapForTask(task *admin.Task) (map[string]interface{}, error) {
-	paramMap := make(map[string]interface{})
-	for k, v := range task.Closure.CompiledTask.Template.Interface.Inputs.Variables {
+func TaskInputs(task *admin.Task) map[string]*core.Variable {
+	taskInputs := map[string]*core.Variable{}
+	if task == nil || task.Closure == nil {
+		return taskInputs
+	}
+	if task.Closure.CompiledTask == nil {
+		return taskInputs
+	}
+	if task.Closure.CompiledTask.Template == nil {
+		return taskInputs
+	}
+	if task.Closure.CompiledTask.Template.Interface == nil {
+		return taskInputs
+	}
+	if task.Closure.CompiledTask.Template.Interface.Inputs == nil {
+		return taskInputs
+	}
+	return task.Closure.CompiledTask.Template.Interface.Inputs.Variables
+}
+
+func ParamMapForTask(task *admin.Task) (map[string]interface{}, error) {
+	taskInputs := TaskInputs(task)
+	paramMap := make(map[string]interface{}, len(taskInputs))
+	for k, v := range taskInputs {
 		varTypeValue, err := coreutils.MakeDefaultLiteralForType(v.Type)
 		if err != nil {
 			fmt.Println("error creating default value for literal type ", v.Type)
@@ -83,9 +94,21 @@ func getParamMapForTask(task *admin.Task) (map[string]interface{}, error) {
 	return paramMap, nil
 }
 
-func getParamMapForWorkflow(lp *admin.LaunchPlan) (map[string]interface{}, error) {
-	paramMap := make(map[string]interface{})
-	for k, v := range lp.Spec.DefaultInputs.Parameters {
+func WorkflowParams(lp *admin.LaunchPlan) map[string]*core.Parameter {
+	workflowParams := map[string]*core.Parameter{}
+	if lp == nil || lp.Spec == nil {
+		return workflowParams
+	}
+	if lp.Spec.DefaultInputs == nil {
+		return workflowParams
+	}
+	return lp.Spec.DefaultInputs.Parameters
+}
+
+func ParamMapForWorkflow(lp *admin.LaunchPlan) (map[string]interface{}, error) {
+	workflowParams := WorkflowParams(lp)
+	paramMap := make(map[string]interface{}, len(workflowParams))
+	for k, v := range workflowParams {
 		varTypeValue, err := coreutils.MakeDefaultLiteralForType(v.Var.Type)
 		if err != nil {
 			fmt.Println("error creating default value for literal type ", v.Var.Type)

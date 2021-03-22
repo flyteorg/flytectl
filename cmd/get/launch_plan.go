@@ -108,7 +108,7 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		name := args[0]
 		var launchPlans []*admin.LaunchPlan
 		var err error
-		if launchPlans, err = fetchLPForName(ctx, name, project, domain, cmdCtx); err != nil {
+		if launchPlans, err = FetchLPForName(ctx, name, project, domain, cmdCtx); err != nil {
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))

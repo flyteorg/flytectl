@@ -10,12 +10,12 @@ import (
 )
 
 // Reads the task config to drive fetching the correct tasks.
-func fetchTaskForName(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.Task, error) {
+func FetchTaskForName(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.Task, error) {
 	var tasks []*admin.Task
 	var err error
 	var task *admin.Task
 	if taskConfig.Latest {
-		if task, err = fetchTaskLatestVersion(ctx, name, project, domain, cmdCtx); err != nil {
+		if task, err = FetchTaskLatestVersion(ctx, name, project, domain, cmdCtx); err != nil {
 			return nil, err
 		}
 		tasks = append(tasks, task)
@@ -25,7 +25,7 @@ func fetchTaskForName(ctx context.Context, name string, project string, domain s
 		}
 		tasks = append(tasks, task)
 	} else {
-		tasks, err = getAllVerOfTask(ctx, name, project, domain, cmdCtx)
+		tasks, err = FetchAllVerOfTask(ctx, name, project, domain, cmdCtx)
 		if err != nil {
 			return nil, err
 		}
@@ -34,14 +34,14 @@ func fetchTaskForName(ctx context.Context, name string, project string, domain s
 		// There would be atleast one task object when code reaches here and hence the length assertion is not required.
 		task = tasks[0]
 		// Only write the first task from the tasks object.
-		if err = createAndWriteExecConfigForTask(task, taskConfig.ExecFile); err != nil {
+		if err = CreateAndWriteExecConfigForTask(task, taskConfig.ExecFile); err != nil {
 			return nil, err
 		}
 	}
 	return tasks, nil
 }
 
-func getAllVerOfTask(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.Task, error) {
+func FetchAllVerOfTask(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.Task, error) {
 	tList, err := cmdCtx.AdminClient().ListTasks(ctx, &admin.ResourceListRequest{
 		Id: &admin.NamedEntityIdentifier{
 			Project: project,
@@ -63,12 +63,12 @@ func getAllVerOfTask(ctx context.Context, name string, project string, domain st
 	return tList.Tasks, nil
 }
 
-func fetchTaskLatestVersion(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.Task, error) {
+func FetchTaskLatestVersion(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.Task, error) {
 	var t *admin.Task
 	var err error
 	// Fetch the latest version of the task.
 	var taskVersions []*admin.Task
-	taskVersions, err = getAllVerOfTask(ctx, name, project, domain, cmdCtx)
+	taskVersions, err = FetchAllVerOfTask(ctx, name, project, domain, cmdCtx)
 	if err != nil {
 		return nil, err
 	}

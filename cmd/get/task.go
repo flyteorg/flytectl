@@ -109,7 +109,7 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 		name := args[0]
 		var tasks []*admin.Task
 		var err error
-		if tasks, err = fetchTaskForName(ctx, name, project, domain, cmdCtx); err != nil {
+		if tasks, err = FetchTaskForName(ctx, name, project, domain, cmdCtx); err != nil {
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved Task", tasks)
