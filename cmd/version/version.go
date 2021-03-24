@@ -23,7 +23,7 @@ Example version.
 )
 
 // VersionCommand will return version of flyte
-func VersionCommand() *cobra.Command {
+func GetVersionCommand() *cobra.Command {
 	versionCmd := &cobra.Command{
 		Use:     "version",
 		Short:   versionCmdShort,
@@ -34,12 +34,12 @@ func VersionCommand() *cobra.Command {
 			ctx := context.Background()
 			adminClient, err := adminclient.InitializeAdminClientFromConfig(ctx)
 			if err != nil {
-				fmt.Sprintf("err %v:", err)
+				fmt.Printf("err %v:", err)
 				os.Exit(1)
 			}
 			v, err := adminClient.GetVersion(ctx, &admin.GetVersionRequest{})
 			if err != nil {
-				fmt.Sprintf("err %v:", err)
+				fmt.Printf("err %v:", err)
 				os.Exit(1)
 			}
 			version.LogBuildInformation("flytectl")

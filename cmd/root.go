@@ -45,7 +45,7 @@ func newRootCmd() *cobra.Command {
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Domain), "domain", "d", "", "Specifies the Flyte project's domain.")
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Output), "output", "o", printer.OutputFormatTABLE.String(), fmt.Sprintf("Specifies the output type - supported formats %s", printer.OutputFormats()))
 	rootCmd.AddCommand(viper.GetConfigCommand())
-	rootCmd.AddCommand(version.VersionCommand())
+	rootCmd.AddCommand(version.GetVersionCommand())
 	rootCmd.AddCommand(get.CreateGetCommand())
 	rootCmd.AddCommand(create.RemoteCreateCommand())
 	rootCmd.AddCommand(update.CreateUpdateCommand())
