@@ -10,6 +10,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/get"
 	"github.com/flyteorg/flytectl/cmd/register"
 	"github.com/flyteorg/flytectl/cmd/update"
+	"github.com/flyteorg/flytectl/cmd/version"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	stdConfig "github.com/flyteorg/flytestdlib/config"
 	"github.com/flyteorg/flytestdlib/config/viper"
@@ -44,7 +45,7 @@ func newRootCmd() *cobra.Command {
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Domain), "domain", "d", "", "Specifies the Flyte project's domain.")
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Output), "output", "o", printer.OutputFormatTABLE.String(), fmt.Sprintf("Specifies the output type - supported formats %s", printer.OutputFormats()))
 	rootCmd.AddCommand(viper.GetConfigCommand())
-	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(version.VersionCommand())
 	rootCmd.AddCommand(get.CreateGetCommand())
 	rootCmd.AddCommand(create.RemoteCreateCommand())
 	rootCmd.AddCommand(update.CreateUpdateCommand())
