@@ -1,8 +1,9 @@
 package version
 
 import (
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"time"
+
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 
 	"github.com/sirupsen/logrus"
 )
@@ -30,8 +31,8 @@ func LogBuildInformation(appName string) {
 
 // LogBuildInformation Use this method to log the build information for the current app. The app name should be provided. To inject the build
 // and version information refer to the top-level comment in this file
-func PrintVersion(appName string, version *admin.Version) {
+func PrintVersion(appName string, version *admin.GetVersionResponse) {
 	logrus.Info("------------------------------------------------------------------------")
-	logrus.Infof("App [%s], Version [%s], BuildSHA [%s], BuildTS [%s]", appName, version.Version, version.Build, version.BuildTime)
+	logrus.Infof("App [%s], Version [%s], BuildSHA [%s], BuildTS [%s]", appName, version.ControlPlaneVersion.Version, version.ControlPlaneVersion.Build, version.ControlPlaneVersion.BuildTime)
 	logrus.Info("------------------------------------------------------------------------")
 }

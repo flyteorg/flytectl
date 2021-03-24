@@ -15,7 +15,6 @@ var (
 		Short: "Displays version information for the client and server.",
 		Run: func(cmd *cobra.Command, args []string) {
 			ctx := context.Background()
-
 			adminClient, err := admin.InitializeAdminClientFromConfig(ctx)
 			if err != nil {
 				fmt.Sprintf("err %v:", err)
