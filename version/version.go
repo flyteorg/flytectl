@@ -2,10 +2,10 @@ package version
 
 import (
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/sirupsen/logrus"
 )
 
 // This module provides the ability to inject Build (git sha) and Version information at compile time.
@@ -30,7 +30,7 @@ func LogBuildInformation(appName string) {
 		"build":      Build,
 		"build-time": BuildTime,
 	})
-	fmt.Println(string(b))
+	logrus.Infof(string(b))
 }
 
 // LogBuildInformation Use this method to log the build information for the current app. The app name should be provided. To inject the build
@@ -42,5 +42,5 @@ func PrintVersion(appName string, version *admin.GetVersionResponse) {
 		"build":      version.ControlPlaneVersion.Build,
 		"build-time": version.ControlPlaneVersion.BuildTime,
 	})
-	fmt.Println(string(b))
+	logrus.Infof(string(b))
 }
