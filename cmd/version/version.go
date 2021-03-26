@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/flyteorg/flytectl/version"
 	adminclient "github.com/flyteorg/flyteidl/clients/go/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/flyteorg/flytestdlib/version"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -43,9 +44,15 @@ func GetVersionCommand() *cobra.Command {
 				os.Exit(1)
 			}
 			version.LogBuildInformation("flytectl")
-			version.PrintVersion("flyteadmin", v)
+			PrintVersion("flyteadmin", v)
 		},
 	}
 
 	return versionCmd
+}
+
+func PrintVersion(appName string, res *admin.GetVersionResponse) {
+	logrus.Info("------------------------------------------------------------------------")
+	logrus.Infof("App [%s], Version [%s], BuildSHA [%s], BuildTS [%s]", appName, res.ControlPlaneVersion.Version, res.ControlPlaneVersion.Build, res.ControlPlaneVersion.BuildTime)
+	logrus.Info("------------------------------------------------------------------------")
 }
