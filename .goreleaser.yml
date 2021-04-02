@@ -97,12 +97,12 @@ brews:
     # Git author used to commit to the repository.
     # Defaults are shown.
     commit_author:
-      name: flytebot
-      email: flytebot@flyte.org
+      name: Flyte-Bot
+      email: admin@flyte.org
 
     # Your app's homepage.
     # Default is empty.
-    homepage: "https://flytectl.readthedocs.io/en/latest"
+    homepage: "https://docs.flyte.org/projects/flytectl"
 
     # Your app's description.
     # Default is empty.
