@@ -7,7 +7,7 @@ import (
 
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
-	adminversion "github.com/flyteorg/flytestdlib/version"
+	stdlibversion "github.com/flyteorg/flytestdlib/version"
 	"github.com/spf13/cobra"
 )
 
@@ -52,9 +52,9 @@ func getVersion(ctx context.Context, args []string, cmdCtx cmdCore.CommandContex
 
 	// Print Flytectl
 	if err := printVersion(versionOutput{
-		Build:     adminversion.Build,
-		BuildTime: adminversion.BuildTime,
-		Version:   adminversion.Version,
+		Build:     stdlibversion.Build,
+		BuildTime: stdlibversion.BuildTime,
+		Version:   stdlibversion.Version,
 		App:       "flytectl",
 	}); err != nil {
 		return err
