@@ -2,13 +2,12 @@ package version
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"os"
 
 	adminclient "github.com/flyteorg/flyteidl/clients/go/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
-	"github.com/flyteorg/flytestdlib/version"
-	"github.com/sirupsen/logrus"
+	adminversion "github.com/flyteorg/flytestdlib/version"
 	"github.com/spf13/cobra"
 )
 
@@ -23,6 +22,17 @@ Example version.
 `
 )
 
+type versionOutput struct {
+	// Specifies the Name of app
+	App string `json:"App,omitempty"`
+	// Specifies the GIT sha of the build
+	Build string `json:"Build,omitempty"`
+	// Version for the build, should follow a semver
+	Version string `json:"Version,omitempty"`
+	// Build timestamp
+	BuildTime string `json:"BuildTime,omitempty"`
+}
+
 // VersionCommand will return version of flyte
 func GetVersionCommand() *cobra.Command {
 	versionCmd := &cobra.Command{
@@ -30,29 +40,50 @@ func GetVersionCommand() *cobra.Command {
 		Short:   versionCmdShort,
 		Aliases: []string{"versions"},
 		Long:    versionCmdLong,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 
 			ctx := context.Background()
 			adminClient, err := adminclient.InitializeAdminClientFromConfig(ctx)
 			if err != nil {
-				fmt.Printf("err %v:", err)
-				os.Exit(1)
+				return fmt.Errorf("err %v: ", err)
 			}
+
 			v, err := adminClient.GetVersion(ctx, &admin.GetVersionRequest{})
 			if err != nil {
-				fmt.Printf("err %v:", err)
-				os.Exit(1)
+				return fmt.Errorf("err %v: ", err)
 			}
-			version.LogBuildInformation("flytectl")
-			PrintVersion("flyteadmin", v)
+
+			// Print Flytectl
+			if err := PrintVersion(versionOutput{
+				Build:     adminversion.Build,
+				BuildTime: adminversion.BuildTime,
+				Version:   adminversion.Version,
+				App:       "flytectl",
+			}); err != nil {
+				return err
+			}
+
+			// Print Flyteadmin
+			if err := PrintVersion(versionOutput{
+				Build:     v.ControlPlaneVersion.Build,
+				BuildTime: v.ControlPlaneVersion.BuildTime,
+				Version:   v.ControlPlaneVersion.Version,
+				App:       "controlPlane",
+			}); err != nil {
+				return err
+			}
+			return nil
 		},
 	}
 
 	return versionCmd
 }
 
-func PrintVersion(appName string, res *admin.GetVersionResponse) {
-	logrus.Info("------------------------------------------------------------------------")
-	logrus.Infof("App [%s], Version [%s], BuildSHA [%s], BuildTS [%s]", appName, res.ControlPlaneVersion.Version, res.ControlPlaneVersion.Build, res.ControlPlaneVersion.BuildTime)
-	logrus.Info("------------------------------------------------------------------------")
+func PrintVersion(response versionOutput) error {
+	b, err := json.MarshalIndent(response, "", "  ")
+	if err != nil {
+		return fmt.Errorf("err %v:", err)
+	}
+	fmt.Print(string(b))
+	return nil
 }
