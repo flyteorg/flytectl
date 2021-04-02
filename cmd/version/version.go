@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	adminclient "github.com/flyteorg/flyteidl/clients/go/admin"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	adminversion "github.com/flyteorg/flytestdlib/version"
 	"github.com/spf13/cobra"
@@ -33,56 +33,49 @@ type versionOutput struct {
 	BuildTime string `json:"BuildTime,omitempty"`
 }
 
-// VersionCommand will return version of flyte
-func GetVersionCommand() *cobra.Command {
-	versionCmd := &cobra.Command{
-		Use:     "version",
-		Short:   versionCmdShort,
-		Aliases: []string{"versions"},
-		Long:    versionCmdLong,
-		RunE: func(cmd *cobra.Command, args []string) error {
-
-			ctx := context.Background()
-			adminClient, err := adminclient.InitializeAdminClientFromConfig(ctx)
-			if err != nil {
-				return fmt.Errorf("err %v: ", err)
-			}
-
-			v, err := adminClient.GetVersion(ctx, &admin.GetVersionRequest{})
-			if err != nil {
-				return fmt.Errorf("err %v: ", err)
-			}
-
-			// Print Flytectl
-			if err := PrintVersion(versionOutput{
-				Build:     adminversion.Build,
-				BuildTime: adminversion.BuildTime,
-				Version:   adminversion.Version,
-				App:       "flytectl",
-			}); err != nil {
-				return err
-			}
-
-			// Print Flyteadmin
-			if err := PrintVersion(versionOutput{
-				Build:     v.ControlPlaneVersion.Build,
-				BuildTime: v.ControlPlaneVersion.BuildTime,
-				Version:   v.ControlPlaneVersion.Version,
-				App:       "controlPlane",
-			}); err != nil {
-				return err
-			}
-			return nil
-		},
+// GetVersionCommand will return version command
+func GetVersionCommand(rootCmd *cobra.Command) map[string]cmdCore.CommandEntry {
+	getResourcesFuncs := map[string]cmdCore.CommandEntry{
+		"version": {CmdFunc: getVersion, Aliases: []string{"versions"}, ProjectDomainNotRequired: true,
+			Short: versionCmdShort,
+			Long:  versionCmdLong},
 	}
-
-	return versionCmd
+	return getResourcesFuncs
 }
 
-func PrintVersion(response versionOutput) error {
+func getVersion(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
+
+	v, err := cmdCtx.AdminClient().GetVersion(ctx, &admin.GetVersionRequest{})
+	if err != nil {
+		return fmt.Errorf("err %v: ", err)
+	}
+
+	// Print Flytectl
+	if err := printVersion(versionOutput{
+		Build:     adminversion.Build,
+		BuildTime: adminversion.BuildTime,
+		Version:   adminversion.Version,
+		App:       "flytectl",
+	}); err != nil {
+		return err
+	}
+
+	// Print Flyteadmin
+	if err := printVersion(versionOutput{
+		Build:     v.ControlPlaneVersion.Build,
+		BuildTime: v.ControlPlaneVersion.BuildTime,
+		Version:   v.ControlPlaneVersion.Version,
+		App:       "controlPlane",
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func printVersion(response versionOutput) error {
 	b, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
-		return fmt.Errorf("err %v:", err)
+		return fmt.Errorf("err %v: ", err)
 	}
 	fmt.Print(string(b))
 	return nil
