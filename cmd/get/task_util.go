@@ -50,7 +50,7 @@ func FetchAllVerOfTask(ctx context.Context, name string, project string, domain 
 			Name:    name,
 		},
 		SortBy: &admin.Sort{
-			Key:       "created_at",
+			Key:       config.GetConfig().SortBy,
 			Direction: admin.Sort_DESCENDING,
 		},
 		Filters: config.GetConfig().Filters,

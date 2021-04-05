@@ -155,14 +155,14 @@ func TestConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
-	t.Run("Test_sort", func(t *testing.T) {
+	t.Run("Test_sort-by", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("sort", testValue)
-			if vString, err := cmdFlags.GetString("sort"); err == nil {
-				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.Sort)
+			cmdFlags.Set("sort-by", testValue)
+			if vString, err := cmdFlags.GetString("sort-by"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.SortBy)
 
 			} else {
 				assert.FailNow(t, err.Error())

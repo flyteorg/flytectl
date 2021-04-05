@@ -66,7 +66,7 @@ func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 	projects, err := cmdCtx.AdminClient().ListProjects(ctx, &admin.ProjectListRequest{
 		Filters: config.GetConfig().Filters,
 		SortBy: &admin.Sort{
-			Key:       "created_at",
+			Key:       config.GetConfig().SortBy,
 			Direction: admin.Sort_DESCENDING,
 		},
 	})

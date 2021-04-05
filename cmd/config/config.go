@@ -12,8 +12,10 @@ import (
 //go:generate pflags Config
 
 var (
-	defaultConfig = &Config{}
-	section       = config.MustRegisterSection("root", defaultConfig)
+	defaultConfig = &Config{
+		SortBy: "created_at",
+	}
+	section = config.MustRegisterSection("root", defaultConfig)
 )
 
 // Config hold configration for flytectl flag
@@ -21,8 +23,8 @@ type Config struct {
 	Project string `json:"project" pflag:",Specifies the project to work on."`
 	Domain  string `json:"domain" pflag:",Specified the domain to work on."`
 	Output  string `json:"output" pflag:",Specified the output type."`
-	Filters string `json:"filters" pflag:",Specified the filters"`
-	Sort    string `json:"sort" pflag:",Specified the sort"`
+	Filters string `json:"filters,omitempty" pflag:",Specified the filters"`
+	SortBy  string `json:"sort-by" pflag:",Specified the sort"`
 }
 
 // OutputFormat will return output formate

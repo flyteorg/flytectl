@@ -50,7 +50,7 @@ func FetchAllVerOfLP(ctx context.Context, lpName string, project string, domain 
 			Name:    lpName,
 		},
 		SortBy: &admin.Sort{
-			Key:       "created_at",
+			Key:       config.GetConfig().SortBy,
 			Direction: admin.Sort_DESCENDING,
 		},
 		Filters: config.GetConfig().Filters,

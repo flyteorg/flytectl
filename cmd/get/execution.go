@@ -89,6 +89,10 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 				Project: config.GetConfig().Project,
 				Domain:  config.GetConfig().Domain,
 			},
+			SortBy: &admin.Sort{
+				Key:       config.GetConfig().SortBy,
+				Direction: admin.Sort_DESCENDING,
+			},
 		})
 		if err != nil {
 			return err
