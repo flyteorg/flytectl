@@ -63,7 +63,13 @@ func ProjectToProtoMessages(l []*admin.Project) []proto.Message {
 
 func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
-	projects, err := cmdCtx.AdminClient().ListProjects(ctx, &admin.ProjectListRequest{})
+	projects, err := cmdCtx.AdminClient().ListProjects(ctx, &admin.ProjectListRequest{
+		Filters: config.GetConfig().Filters,
+		SortBy: &admin.Sort{
+			Key:       "created_at",
+			Direction: admin.Sort_DESCENDING,
+		},
+	})
 	if err != nil {
 		return err
 	}

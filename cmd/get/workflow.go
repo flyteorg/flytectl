@@ -77,7 +77,8 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 				Key:       "created_at",
 				Direction: admin.Sort_DESCENDING,
 			},
-			Limit: 100,
+			Filters: config.GetConfig().Filters,
+			Limit:   100,
 		})
 		if err != nil {
 			return err

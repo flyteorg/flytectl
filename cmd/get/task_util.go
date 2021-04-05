@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
@@ -52,7 +53,8 @@ func FetchAllVerOfTask(ctx context.Context, name string, project string, domain 
 			Key:       "created_at",
 			Direction: admin.Sort_DESCENDING,
 		},
-		Limit: 100,
+		Filters: config.GetConfig().Filters,
+		Limit:   100,
 	})
 	if err != nil {
 		return nil, err

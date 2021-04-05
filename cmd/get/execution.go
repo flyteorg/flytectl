@@ -83,7 +83,8 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 		executions = append(executions, execution)
 	} else {
 		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, &admin.ResourceListRequest{
-			Limit: 100,
+			Limit:   100,
+			Filters: config.GetConfig().Filters,
 			Id: &admin.NamedEntityIdentifier{
 				Project: config.GetConfig().Project,
 				Domain:  config.GetConfig().Domain,
