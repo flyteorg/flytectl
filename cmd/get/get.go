@@ -40,6 +40,5 @@ func CreateGetCommand() *cobra.Command {
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)
-
 	return getCmd
 }

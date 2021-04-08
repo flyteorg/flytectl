@@ -28,6 +28,15 @@ func (TaskConfig) elemValueOrNil(v interface{}) interface{} {
 	return v
 }
 
+func (TaskConfig) mustJsonMarshal(v interface{}) string {
+	raw, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(raw)
+}
+
 func (TaskConfig) mustMarshalJSON(v json.Marshaler) string {
 	raw, err := v.MarshalJSON()
 	if err != nil {
@@ -41,8 +50,8 @@ func (TaskConfig) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg TaskConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("TaskConfig", pflag.ExitOnError)
-	cmdFlags.StringVar(&(taskConfig.ExecFile),fmt.Sprintf("%v%v", prefix, "execFile"), taskConfig.ExecFile, "execution file name to be used for generating execution spec of a single task.")
-	cmdFlags.StringVar(&(taskConfig.Version),fmt.Sprintf("%v%v", prefix, "version"), taskConfig.Version, "version of the task to be fetched.")
-	cmdFlags.BoolVar(&(taskConfig.Latest),fmt.Sprintf("%v%v", prefix, "latest"), taskConfig.Latest, "flag to indicate to fetch the latest version, version flag will be ignored in this case")
+	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "execFile"), *new(string), "execution file name to be used for generating execution spec of a single task.")
+	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "version"), *new(string), "version of the task to be fetched.")
+	cmdFlags.Bool(fmt.Sprintf("%v%v", prefix, "latest"), *new(bool), " flag to indicate to fetch the latest version,  version flag will be ignored in this case")
 	return cmdFlags
 }

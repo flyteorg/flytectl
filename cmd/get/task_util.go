@@ -43,19 +43,7 @@ func FetchTaskForName(ctx context.Context, name string, project string, domain s
 }
 
 func FetchAllVerOfTask(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.Task, error) {
-	tList, err := cmdCtx.AdminClient().ListTasks(ctx, &admin.ResourceListRequest{
-		Id: &admin.NamedEntityIdentifier{
-			Project: project,
-			Domain:  domain,
-			Name:    name,
-		},
-		SortBy: &admin.Sort{
-			Key:       config.GetConfig().SortBy,
-			Direction: admin.Sort_DESCENDING,
-		},
-		Filters: config.GetConfig().Filters,
-		Limit:   100,
-	})
+	tList, err := cmdCtx.AdminClient().ListTasks(ctx, buildResourceListRequestWithName(config.GetConfig(), name))
 	if err != nil {
 		return nil, err
 	}

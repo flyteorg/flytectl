@@ -84,7 +84,7 @@ func testDecodeJson_LaunchPlanConfig(t *testing.T, val, result interface{}) {
 	assert.NoError(t, decode_LaunchPlanConfig(val, result))
 }
 
-func testDecodeSlice_LaunchPlanConfig(t *testing.T, vStringSlice, result interface{}) {
+func testDecodeRaw_LaunchPlanConfig(t *testing.T, vStringSlice, result interface{}) {
 	assert.NoError(t, decode_LaunchPlanConfig(vStringSlice, result))
 }
 
@@ -100,14 +100,6 @@ func TestLaunchPlanConfig_SetFlags(t *testing.T) {
 	assert.True(t, cmdFlags.HasFlags())
 
 	t.Run("Test_execFile", func(t *testing.T) {
-		t.Run("DefaultValue", func(t *testing.T) {
-			// Test that default value is set properly
-			if vString, err := cmdFlags.GetString("execFile"); err == nil {
-				assert.Equal(t, string(launchPlanConfig.ExecFile), vString)
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -122,14 +114,6 @@ func TestLaunchPlanConfig_SetFlags(t *testing.T) {
 		})
 	})
 	t.Run("Test_version", func(t *testing.T) {
-		t.Run("DefaultValue", func(t *testing.T) {
-			// Test that default value is set properly
-			if vString, err := cmdFlags.GetString("version"); err == nil {
-				assert.Equal(t, string(launchPlanConfig.Version), vString)
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -144,14 +128,6 @@ func TestLaunchPlanConfig_SetFlags(t *testing.T) {
 		})
 	})
 	t.Run("Test_latest", func(t *testing.T) {
-		t.Run("DefaultValue", func(t *testing.T) {
-			// Test that default value is set properly
-			if vBool, err := cmdFlags.GetBool("latest"); err == nil {
-				assert.Equal(t, bool(launchPlanConfig.Latest), vBool)
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"

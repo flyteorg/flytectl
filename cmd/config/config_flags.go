@@ -53,7 +53,8 @@ func (cfg Config) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "project"), defaultConfig.Project, "Specifies the project to work on.")
 	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "domain"), defaultConfig.Domain, "Specified the domain to work on.")
 	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "output"), defaultConfig.Output, "Specified the output type.")
-	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "filters"), defaultConfig.Filters, "Specified the filters")
-	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "sort-by"), defaultConfig.SortBy, "Specified the sort")
+	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "filters"), defaultConfig.Filters, "Specified the filter")
+	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "sort-by"), defaultConfig.SortBy, "Specified sort key")
+	cmdFlags.Int32(fmt.Sprintf("%v%v", prefix, "limit"), defaultConfig.Limit, "Specified the limit")
 	return cmdFlags
 }

@@ -43,19 +43,8 @@ func FetchLPForName(ctx context.Context, name string, project string, domain str
 }
 
 func FetchAllVerOfLP(ctx context.Context, lpName string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.LaunchPlan, error) {
-	tList, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, &admin.ResourceListRequest{
-		Id: &admin.NamedEntityIdentifier{
-			Project: project,
-			Domain:  domain,
-			Name:    lpName,
-		},
-		SortBy: &admin.Sort{
-			Key:       config.GetConfig().SortBy,
-			Direction: admin.Sort_DESCENDING,
-		},
-		Filters: config.GetConfig().Filters,
-		Limit:   100,
-	})
+
+	tList, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, buildResourceListRequestWithName(config.GetConfig(), lpName))
 	if err != nil {
 		return nil, err
 	}

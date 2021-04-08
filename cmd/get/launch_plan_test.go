@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
@@ -109,7 +110,7 @@ func getLaunchPlanSetup() {
 	}
 
 	launchPlans := []*admin.LaunchPlan{launchPlan2, launchPlan1}
-
+	config.GetConfig().SortBy = "created_at"
 	resourceListRequest = &admin.ResourceListRequest{
 		Id: &admin.NamedEntityIdentifier{
 			Project: projectValue,

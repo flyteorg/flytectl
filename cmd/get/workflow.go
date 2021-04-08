@@ -66,20 +66,7 @@ func WorkflowToProtoMessages(l []*admin.Workflow) []proto.Message {
 func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
 	if len(args) > 0 {
-		workflows, err := cmdCtx.AdminClient().ListWorkflows(ctx, &admin.ResourceListRequest{
-			Id: &admin.NamedEntityIdentifier{
-				Project: config.GetConfig().Project,
-				Domain:  config.GetConfig().Domain,
-				Name:    args[0],
-			},
-			// TODO Sorting and limits should be parameters
-			SortBy: &admin.Sort{
-				Key:       "created_at",
-				Direction: admin.Sort_DESCENDING,
-			},
-			Filters: config.GetConfig().Filters,
-			Limit:   100,
-		})
+		workflows, err := cmdCtx.AdminClient().ListWorkflows(ctx, buildResourceListRequestWithName(config.GetConfig(), args[0]))
 		if err != nil {
 			return err
 		}

@@ -13,7 +13,7 @@ import (
 
 var (
 	defaultConfig = &Config{
-		SortBy: "created_at",
+		Limit: 100,
 	}
 	section = config.MustRegisterSection("root", defaultConfig)
 )
@@ -23,8 +23,9 @@ type Config struct {
 	Project string `json:"project" pflag:",Specifies the project to work on."`
 	Domain  string `json:"domain" pflag:",Specified the domain to work on."`
 	Output  string `json:"output" pflag:",Specified the output type."`
-	Filters string `json:"filters,omitempty" pflag:",Specified the filters"`
-	SortBy  string `json:"sort-by" pflag:",Specified the sort"`
+	Filters string `json:"filters" pflag:",Specified the filter"`
+	SortBy  string `json:"sort-by" pflag:",Specified sort key"`
+	Limit   int32  `json:"limit" pflag:",Specified the limit"`
 }
 
 // OutputFormat will return output formate
