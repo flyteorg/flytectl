@@ -6,6 +6,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/adminutils"
+	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -17,20 +18,26 @@ const (
 	taskShort = "Gets task resources"
 	taskLong  = `
 Retrieves all the task within project and domain.(task,tasks can be used interchangeably in these commands)
+
 ::
 
  bin/flytectl get task -p flytesnacks -d development
 
-Retrieves task by name within project and domain.
 
+Retrieves task by name within project and domain.
 ::
 
  bin/flytectl task -p flytesnacks -d development core.basic.lp.greet
 
-Retrieves project by filters.
+Retrieves all the tasks with filters.
 ::
-
- Not yet implemented
+ 
+ bin/flytectl get task -p flytesnacks -d development --field-selector="task.name=core.basic.lp.greet" 
+ 
+Retrieves all the task with limit and sorting.
+::
+  
+ bin/flytectl get -p flytesnacks -d development task  --sort-by=created_at --limit=1 --asc
 
 Retrieves all the tasks within project and domain in yaml format.
 
@@ -105,6 +112,10 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 	taskPrinter := printer.Printer{}
 	project := config.GetConfig().Project
 	domain := config.GetConfig().Domain
+	fieldSelector,err := filters.Transform(filters.SplitTerms(config.GetConfig().FieldSelector))
+	if err != nil {
+		return err
+	}
 	if len(args) == 1 {
 		name := args[0]
 		var tasks []*admin.Task
@@ -115,7 +126,7 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 		logger.Debugf(ctx, "Retrieved Task", tasks)
 		return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToProtoMessages(tasks)...)
 	}
-	tasks, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListTaskIds, adminutils.ListRequest{Project: project, Domain: domain})
+	tasks, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListTaskIds, adminutils.ListRequest{Project: project, Domain: domain, Filters: fieldSelector})
 	if err != nil {
 		return err
 	}

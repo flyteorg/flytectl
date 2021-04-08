@@ -26,7 +26,7 @@ func FetchTaskForName(ctx context.Context, name string, project string, domain s
 		}
 		tasks = append(tasks, task)
 	} else {
-		tasks, err = FetchAllVerOfTask(ctx, name, project, domain, cmdCtx)
+		tasks, err = FetchAllVerOfTask(ctx, name, cmdCtx)
 		if err != nil {
 			return nil, err
 		}
@@ -42,7 +42,7 @@ func FetchTaskForName(ctx context.Context, name string, project string, domain s
 	return tasks, nil
 }
 
-func FetchAllVerOfTask(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.Task, error) {
+func FetchAllVerOfTask(ctx context.Context, name string, cmdCtx cmdCore.CommandContext) ([]*admin.Task, error) {
 	tList, err := cmdCtx.AdminClient().ListTasks(ctx, buildResourceListRequestWithName(config.GetConfig(), name))
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func FetchTaskLatestVersion(ctx context.Context, name string, project string, do
 	var err error
 	// Fetch the latest version of the task.
 	var taskVersions []*admin.Task
-	taskVersions, err = FetchAllVerOfTask(ctx, name, project, domain, cmdCtx)
+	taskVersions, err = FetchAllVerOfTask(ctx, name, cmdCtx)
 	if err != nil {
 		return nil, err
 	}

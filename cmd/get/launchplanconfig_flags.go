@@ -28,15 +28,6 @@ func (LaunchPlanConfig) elemValueOrNil(v interface{}) interface{} {
 	return v
 }
 
-func (LaunchPlanConfig) mustJsonMarshal(v interface{}) string {
-	raw, err := json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(raw)
-}
-
 func (LaunchPlanConfig) mustMarshalJSON(v json.Marshaler) string {
 	raw, err := v.MarshalJSON()
 	if err != nil {
@@ -50,8 +41,8 @@ func (LaunchPlanConfig) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg LaunchPlanConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("LaunchPlanConfig", pflag.ExitOnError)
-	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "execFile"), *new(string), "execution file name to be used for generating execution spec of a single launchplan.")
-	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "version"), *new(string), "version of the launchplan to be fetched.")
-	cmdFlags.Bool(fmt.Sprintf("%v%v", prefix, "latest"), *new(bool), " flag to indicate to fetch the latest version,  version flag will be ignored in this case")
+	cmdFlags.StringVar(&(launchPlanConfig.ExecFile), fmt.Sprintf("%v%v", prefix, "execFile"), launchPlanConfig.ExecFile, "execution file name to be used for generating execution spec of a single launchplan.")
+	cmdFlags.StringVar(&(launchPlanConfig.Version), fmt.Sprintf("%v%v", prefix, "version"), launchPlanConfig.Version, "version of the launchplan to be fetched.")
+	cmdFlags.BoolVar(&(launchPlanConfig.Latest), fmt.Sprintf("%v%v", prefix, "latest"), launchPlanConfig.Latest, "flag to indicate to fetch the latest version, version flag will be ignored in this case")
 	return cmdFlags
 }

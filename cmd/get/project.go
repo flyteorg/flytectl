@@ -26,10 +26,16 @@ Retrieves project by name
 
  bin/flytectl get project flytesnacks
 
-Retrieves project by filters
+Retrieves all the projects with filters.
 ::
 
- Not yet implemented
+ bin/flytectl get project --field-selector="project.name=flytesnacks"
+
+Retrieves all the projects with limit and sorting.
+::
+
+ bin/flytectl get project --sort-by=created_at --limit=1 --asc
+
 
 Retrieves all the projects in yaml format
 

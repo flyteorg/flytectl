@@ -43,7 +43,6 @@ func FetchLPForName(ctx context.Context, name string, project string, domain str
 }
 
 func FetchAllVerOfLP(ctx context.Context, lpName string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.LaunchPlan, error) {
-
 	tList, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, buildResourceListRequestWithName(config.GetConfig(), lpName))
 	if err != nil {
 		return nil, err

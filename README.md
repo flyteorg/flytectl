@@ -2,7 +2,7 @@
 
 [![Docs](https://readthedocs.org/projects/flytectl/badge/?version=latest&style=plastic)](https://flytectl.rtfd.io)
 [![Current Release](https://img.shields.io/github/release/flyteorg/flytectl.svg)](https://github.com/flyteorg/flytectl/releases/latest)
-![Master](https://github.com/flyteorg/flytectl/workflows/Master/badge.svg)
+[![Master](https://github.com/flyteorg/flytectl/actions/workflows/build.yaml/badge.svg)](https://github.com/flyteorg/flytectl/actions/workflows/build.yaml)
 [![GoDoc](https://godoc.org/github.com/flyteorg/flytectl?status.svg)](https://pkg.go.dev/mod/github.com/flyteorg/flytectl)
 [![License](https://img.shields.io/badge/LICENSE-Apache2.0-ff69b4.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 [![CodeCoverage](https://img.shields.io/codecov/c/github/flyteorg/flytectl.svg)](https://codecov.io/gh/flyteorg/flytectl)
