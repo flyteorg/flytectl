@@ -86,10 +86,6 @@ func getTaskSetup() {
 			Domain:  domainValue,
 			Name:    argsTask[0],
 		},
-		SortBy: &admin.Sort{
-			Key:       "created_at",
-			Direction: admin.Sort_DESCENDING,
-		},
 		Limit: 100,
 	}
 

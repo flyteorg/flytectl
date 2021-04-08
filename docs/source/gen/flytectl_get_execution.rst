@@ -16,24 +16,27 @@ Retrieves all the executions within project and domain.(execution,executions can
  bin/flytectl get execution -p flytesnacks -d development
 
 Retrieves execution by name within project and domain.
-
 ::
 
  bin/flytectl get execution -p flytesnacks -d development oeh94k9r2r
 
-Retrieves execution by filters
+Retrieves all the execution with filters.
 ::
 
- Not yet implemented
+ bin/flytectl get execution -p flytesnacks -d development --field-selector="execution.name=oeh94k9r2r" 
+
+Retrieves all the execution with limit and sorting.
+::
+
+ bin/flytectl get execution -p flytesnacks -d development --sort-by=created_at --limit=1 --asc
+
 
 Retrieves all the execution within project and domain in yaml format
-
 ::
 
  bin/flytectl get execution -p flytesnacks -d development -o yaml
 
 Retrieves all the execution within project and domain in json format.
-
 ::
 
  bin/flytectl get execution -p flytesnacks -d development -o json
@@ -71,17 +74,25 @@ Options inherited from parent commands
       --admin.useAuth                              Whether or not to try to authenticate with options below
       --adminutils.batchSize int                   Maximum number of records to retrieve per call. (default 100)
       --adminutils.maxRecords int                  Maximum number of records to retrieve. (default 500)
+      --asc                                        Specifies the sorting order
       --config string                              config file (default is $HOME/config.yaml)
   -d, --domain string                              Specifies the Flyte project's domain.
+  -f, --field-selector string                      Specifies the Field selector
+      --limit int32                                Specifies the limit on results (default 100)
       --logger.formatter.type string               Sets logging format type. (default "json")
       --logger.level int                           Sets the minimum logging level. (default 4)
       --logger.mute                                Mutes all logs regardless of severity. Intended for benchmarks/tests only.
       --logger.show-source                         Includes source code location in logs.
   -o, --output string                              Specifies the output type - supported formats [TABLE JSON YAML] (default "TABLE")
   -p, --project string                             Specifies the Flyte project.
-      --root.domain string                         Specified the domain to work on.
-      --root.output string                         Specified the output type.
+      --root.asc                                   Specifies the sorting order
+      --root.domain string                         Specifies the domain to work on.
+      --root.field-selector string                 Specifies the filter
+      --root.limit int32                           Specifies the limit (default 100)
+      --root.output string                         Specifies the output type.
       --root.project string                        Specifies the project to work on.
+      --root.sort-by string                        Specifies sort key
+  -s, --sort-by string                             Specifies which field to sort results 
       --storage.cache.max_size_mbs int             Maximum size of the cache where the Blob store data is cached in-memory. If not specified or set to 0,  cache is not used
       --storage.cache.target_gc_percent int        Sets the garbage collection target percentage.
       --storage.connection.access-key string       Access key to use. Only required when authtype is set to accesskey.

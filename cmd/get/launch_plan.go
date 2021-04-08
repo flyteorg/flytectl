@@ -6,6 +6,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/adminutils"
+	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -27,18 +28,23 @@ Retrieves launch plan by name within project and domain.
 
  flytectl get launchplan -p flytesnacks -d development core.basic.lp.go_greet
 
-Retrieves launchplan by filters.
+Retrieves all the launch plans with filters.
 ::
 
- Not yet implemented
+ bin/flytectl get launchplan -p flytesnacks -d development --field-selector="launchplan.name=core.basic.lp.go_greet"
 
-Retrieves all the launchplan within project and domain in yaml format.
+Retrieves all the launch plans with limit and sorting.
+::
+
+ bin/flytectl get launchplan -p flytesnacks -d development --sort-by=created_at --limit=1 --asc
+
+Retrieves all the launch plans within project and domain in yaml format.
 
 ::
 
  flytectl get launchplan -p flytesnacks -d development -o yaml
 
-Retrieves all the launchplan within project and domain in json format
+Retrieves all the launch plans within project and domain in json format
 
 ::
 
@@ -104,6 +110,10 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 	launchPlanPrinter := printer.Printer{}
 	project := config.GetConfig().Project
 	domain := config.GetConfig().Domain
+	fieldSelector,err := filters.Transform(filters.SplitTerms(config.GetConfig().FieldSelector))
+	if err != nil {
+		return err
+	}
 	if len(args) == 1 {
 		name := args[0]
 		var launchPlans []*admin.LaunchPlan
@@ -118,8 +128,7 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		}
 		return nil
 	}
-
-	launchPlans, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListLaunchPlanIds, adminutils.ListRequest{Project: project, Domain: domain})
+	launchPlans, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListLaunchPlanIds, adminutils.ListRequest{Project: project, Domain: domain, Filters: fieldSelector})
 	if err != nil {
 		return err
 	}

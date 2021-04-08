@@ -43,19 +43,27 @@ Options inherited from parent commands
       --admin.useAuth                              Whether or not to try to authenticate with options below
       --adminutils.batchSize int                   Maximum number of records to retrieve per call. (default 100)
       --adminutils.maxRecords int                  Maximum number of records to retrieve. (default 500)
+      --asc                                        Specifies the sorting order
       --config string                              config file (default is $HOME/config.yaml)
   -d, --domain string                              Specifies the Flyte project's domain.
+  -f, --field-selector string                      Specifies the Field selector
       --file stringArray                           Passes the config file to load.
                                                    If empty, it'll first search for the config file path then, if found, will load config from there.
+      --limit int32                                Specifies the limit on results (default 100)
       --logger.formatter.type string               Sets logging format type. (default "json")
       --logger.level int                           Sets the minimum logging level. (default 4)
       --logger.mute                                Mutes all logs regardless of severity. Intended for benchmarks/tests only.
       --logger.show-source                         Includes source code location in logs.
   -o, --output string                              Specifies the output type - supported formats [TABLE JSON YAML] (default "TABLE")
   -p, --project string                             Specifies the Flyte project.
-      --root.domain string                         Specified the domain to work on.
-      --root.output string                         Specified the output type.
+      --root.asc                                   Specifies the sorting order
+      --root.domain string                         Specifies the domain to work on.
+      --root.field-selector string                 Specifies the filter
+      --root.limit int32                           Specifies the limit (default 100)
+      --root.output string                         Specifies the output type.
       --root.project string                        Specifies the project to work on.
+      --root.sort-by string                        Specifies sort key
+  -s, --sort-by string                             Specifies which field to sort results 
       --storage.cache.max_size_mbs int             Maximum size of the cache where the Blob store data is cached in-memory. If not specified or set to 0,  cache is not used
       --storage.cache.target_gc_percent int        Sets the garbage collection target percentage.
       --storage.connection.access-key string       Access key to use. Only required when authtype is set to accesskey.

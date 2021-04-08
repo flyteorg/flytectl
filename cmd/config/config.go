@@ -12,20 +12,23 @@ import (
 //go:generate pflags Config
 
 var (
-	defaultConfig = &Config{
-		Limit: 100,
+	DefaultLimit  int32 = 100
+	defaultConfig       = &Config{
+		Limit: DefaultLimit,
 	}
 	section = config.MustRegisterSection("root", defaultConfig)
 )
 
 // Config hold configration for flytectl flag
 type Config struct {
-	Project string `json:"project" pflag:",Specifies the project to work on."`
-	Domain  string `json:"domain" pflag:",Specified the domain to work on."`
-	Output  string `json:"output" pflag:",Specified the output type."`
-	Filters string `json:"filters" pflag:",Specified the filter"`
-	SortBy  string `json:"sort-by" pflag:",Specified sort key"`
-	Limit   int32  `json:"limit" pflag:",Specified the limit"`
+	Project       string `json:"project" pflag:",Specifies the project to work on."`
+	Domain        string `json:"domain" pflag:",Specified the domain to work on."`
+	Output        string `json:"output" pflag:",Specified the output type."`
+	FieldSelector string `json:"field-selector" pflag:",Specifies the Field selector"`
+	SortBy        string `json:"sort-by" pflag:",Specifies which field to sort results "`
+	// TODO: Support paginated queries
+	Limit         int32  `json:"limit" pflag:",Specifies the limit"`
+	Asc           bool   `json:"asc"  pflag:",Specifies the sorting order"`
 }
 
 // OutputFormat will return output formate

@@ -28,15 +28,6 @@ func (Config) elemValueOrNil(v interface{}) interface{} {
 	return v
 }
 
-func (Config) mustJsonMarshal(v interface{}) string {
-	raw, err := json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(raw)
-}
-
 func (Config) mustMarshalJSON(v json.Marshaler) string {
 	raw, err := v.MarshalJSON()
 	if err != nil {
@@ -51,10 +42,11 @@ func (Config) mustMarshalJSON(v json.Marshaler) string {
 func (cfg Config) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("Config", pflag.ExitOnError)
 	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "project"), defaultConfig.Project, "Specifies the project to work on.")
-	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "domain"), defaultConfig.Domain, "Specified the domain to work on.")
-	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "output"), defaultConfig.Output, "Specified the output type.")
-	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "filters"), defaultConfig.Filters, "Specified the filter")
-	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "sort-by"), defaultConfig.SortBy, "Specified sort key")
-	cmdFlags.Int32(fmt.Sprintf("%v%v", prefix, "limit"), defaultConfig.Limit, "Specified the limit")
+	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "domain"), defaultConfig.Domain, "Specifies the domain to work on.")
+	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "output"), defaultConfig.Output, "Specifies the output type.")
+	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "field-selector"), defaultConfig.FieldSelector, "Specifies the filter")
+	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "sort-by"), defaultConfig.SortBy, "Specifies sort key")
+	cmdFlags.Int32(fmt.Sprintf("%v%v", prefix, "limit"), defaultConfig.Limit, "Specifies the limit")
+	cmdFlags.Bool(fmt.Sprintf("%v%v", prefix, "asc"), defaultConfig.Asc, "Specifies the sorting order")
 	return cmdFlags
 }

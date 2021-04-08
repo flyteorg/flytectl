@@ -84,7 +84,7 @@ func testDecodeJson_TaskConfig(t *testing.T, val, result interface{}) {
 	assert.NoError(t, decode_TaskConfig(val, result))
 }
 
-func testDecodeRaw_TaskConfig(t *testing.T, vStringSlice, result interface{}) {
+func testDecodeSlice_TaskConfig(t *testing.T, vStringSlice, result interface{}) {
 	assert.NoError(t, decode_TaskConfig(vStringSlice, result))
 }
 
@@ -100,6 +100,14 @@ func TestTaskConfig_SetFlags(t *testing.T) {
 	assert.True(t, cmdFlags.HasFlags())
 
 	t.Run("Test_execFile", func(t *testing.T) {
+		t.Run("DefaultValue", func(t *testing.T) {
+			// Test that default value is set properly
+			if vString, err := cmdFlags.GetString("execFile"); err == nil {
+				assert.Equal(t, string(taskConfig.ExecFile), vString)
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -114,6 +122,14 @@ func TestTaskConfig_SetFlags(t *testing.T) {
 		})
 	})
 	t.Run("Test_version", func(t *testing.T) {
+		t.Run("DefaultValue", func(t *testing.T) {
+			// Test that default value is set properly
+			if vString, err := cmdFlags.GetString("version"); err == nil {
+				assert.Equal(t, string(taskConfig.Version), vString)
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -128,6 +144,14 @@ func TestTaskConfig_SetFlags(t *testing.T) {
 		})
 	})
 	t.Run("Test_latest", func(t *testing.T) {
+		t.Run("DefaultValue", func(t *testing.T) {
+			// Test that default value is set properly
+			if vBool, err := cmdFlags.GetBool("latest"); err == nil {
+				assert.Equal(t, bool(taskConfig.Latest), vBool)
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"

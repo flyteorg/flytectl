@@ -22,24 +22,27 @@ Retrieves all the executions within project and domain.(execution,executions can
  bin/flytectl get execution -p flytesnacks -d development
 
 Retrieves execution by name within project and domain.
-
 ::
 
  bin/flytectl get execution -p flytesnacks -d development oeh94k9r2r
 
-Retrieves execution by filters
+Retrieves all the execution with filters.
 ::
 
- Not yet implemented
+ bin/flytectl get execution -p flytesnacks -d development --field-selector="execution.name=oeh94k9r2r" 
+
+Retrieves all the execution with limit and sorting.
+::
+
+ bin/flytectl get execution -p flytesnacks -d development --sort-by=created_at --limit=1 --asc
+
 
 Retrieves all the execution within project and domain in yaml format
-
 ::
 
  bin/flytectl get execution -p flytesnacks -d development -o yaml
 
 Retrieves all the execution within project and domain in json format.
-
 ::
 
  bin/flytectl get execution -p flytesnacks -d development -o json
@@ -82,7 +85,7 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 		}
 		executions = append(executions, execution)
 	} else {
-		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, buildResourceListRequestWithoutName(config.GetConfig()))
+		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, buildResourceListRequestWithName(config.GetConfig(),""))
 		if err != nil {
 			return err
 		}
