@@ -224,3 +224,21 @@ func TestCreateRelaunchExecutionFunc(t *testing.T) {
 	mockClient.AssertCalled(t, "CreateExecution", ctx, mock.Anything)
 	tearDownAndVerify(t, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e"`)
 }
+
+func TestCreateExecutionFuncInvalid(t *testing.T) {
+	setup()
+	createExecutionSetup()
+	executionConfig.Relaunch = ""
+	executionConfig.ExecFile = ""
+	err = createExecutionCommand(ctx, args, cmdCtx)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Errorf("executionConfig or relaunch can't be empty. Run the flytectl get task/launchplan to generate the config"), err)
+	executionConfig.ExecFile = "Invalid-file"
+	err = createExecutionCommand(ctx, args, cmdCtx)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Errorf("unable to read from %v yaml file", executionConfig.ExecFile), err)
+	executionConfig.ExecFile = testDataFolder + "invalid_execution_spec.yaml"
+	err = createExecutionCommand(ctx, args, cmdCtx)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Errorf("either one of task or workflow name should be specified to launch an execution"), err)
+}

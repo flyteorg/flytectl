@@ -2,7 +2,6 @@ package create
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"strings"
@@ -149,7 +148,7 @@ func resolveOverrides(toBeOverridden *ExecutionConfig, project string, domain st
 func readConfigAndValidate(project string, domain string) (ExecutionParams, error) {
 	executionParams := ExecutionParams{}
 	if executionConfig.ExecFile == "" && executionConfig.Relaunch == "" {
-		return executionParams, errors.New("executionConfig or relaunch can't be empty. Run the flytectl get task/launchplan to generate the config")
+		return executionParams, fmt.Errorf("executionConfig or relaunch can't be empty. Run the flytectl get task/launchplan to generate the config")
 	}
 	if executionConfig.Relaunch != "" {
 		resolveOverrides(executionConfig, project, domain)
@@ -166,7 +165,7 @@ func readConfigAndValidate(project string, domain string) (ExecutionParams, erro
 	isTask := readExecutionConfig.Task != ""
 	isWorkflow := readExecutionConfig.Workflow != ""
 	if isTask == isWorkflow {
-		return executionParams, errors.New("either one of task or workflow name should be specified to launch an execution")
+		return executionParams, fmt.Errorf("either one of task or workflow name should be specified to launch an execution")
 	}
 	name := readExecutionConfig.Task
 	execType := Task
