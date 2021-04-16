@@ -13,7 +13,6 @@ import (
 const (
 	updateLPShort = "Updates launch plan metadata"
 	updateLPLong  = `
-Updates launchplan metadata.
 Following command updates the description on the launchplan.
 ::
 

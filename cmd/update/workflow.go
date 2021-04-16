@@ -11,9 +11,8 @@ import (
 )
 
 const (
-	updateWorkflowShort = "Updates launch plan metadata"
+	updateWorkflowShort = "Updates workflow metadata"
 	updateWorkflowLong  = `
-Updates workflow metadata.
 Following command updates the description on the workflow.
 ::
 

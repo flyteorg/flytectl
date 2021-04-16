@@ -13,7 +13,6 @@ import (
 const (
 	updateTaskShort = "Updates task metadata"
 	updateTaskLong  = `
-Updates task metadata.
 Following command updates the description on the task.
 ::
 
