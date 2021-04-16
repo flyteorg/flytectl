@@ -118,7 +118,7 @@ func TestArchiveProjectFuncWithError(t *testing.T) {
 
 func TestEmptyProjectInput(t *testing.T) {
 	setup()
-	defer teardownAndVerify(t, "Project  not found\n")
+	defer teardownAndVerify(t, "Project  not passed\n")
 	config.GetConfig().Project = ""
 	modifyProjectFlags(&(projectConfig.ArchiveProject), false, &(projectConfig.ActivateProject), true)
 	mockClient.OnUpdateProjectMatch(ctx, projectUpdateRequest).Return(nil, nil)
