@@ -26,7 +26,7 @@ func (n NamedEntityConfig) UpdateNamedEntity(ctx context.Context, name string, p
 	archiveProject := n.Archive
 	activateProject := n.Activate
 	if activateProject == archiveProject && activateProject {
-		return fmt.Errorf(clierrors.ErrInvalidUpdate)
+		return fmt.Errorf(clierrors.ErrInvalidStateUpdate)
 	}
 	var nameEntityState admin.NamedEntityState
 	if activateProject {

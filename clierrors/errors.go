@@ -1,7 +1,7 @@
 package clierrors
 
 var (
-	ErrInvalidUpdate = "Invalid state passed. Specify either activate or archive\n"
+	ErrInvalidStateUpdate = "Invalid state passed. Specify either activate or archive\n"
 
 	ErrProjectNotPassed    = "Project not passed\n"
 	ErrFailedProjectUpdate = "Project %v failed to get updated to %v state due to %v\n"

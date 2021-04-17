@@ -78,7 +78,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	archiveProject := projectConfig.ArchiveProject
 	activateProject := projectConfig.ActivateProject
 	if activateProject == archiveProject {
-		return fmt.Errorf(clierrors.ErrInvalidUpdate)
+		return fmt.Errorf(clierrors.ErrInvalidStateUpdate)
 	}
 	projectState := admin.Project_ACTIVE
 	if archiveProject {
@@ -90,7 +90,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	})
 	if err != nil {
 		fmt.Printf(clierrors.ErrFailedProjectUpdate, id, projectState, err)
-		return nil
+		return err
 	}
 	fmt.Printf("Project %v updated to %v state\n", id, projectState)
 	return nil
