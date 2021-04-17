@@ -84,7 +84,7 @@ func TestActivateProjectFuncWithError(t *testing.T) {
 	modifyProjectFlags(&(projectConfig.ArchiveProject), false, &(projectConfig.ActivateProject), true)
 	mockClient.OnUpdateProjectMatch(ctx, projectUpdateRequest).Return(nil, errors.New("Error Updating Project"))
 	err := updateProjectsFunc(ctx, args, cmdCtx)
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 	mockClient.AssertCalled(t, "UpdateProject", ctx, projectUpdateRequest)
 }
 
@@ -112,7 +112,7 @@ func TestArchiveProjectFuncWithError(t *testing.T) {
 	}
 	mockClient.OnUpdateProjectMatch(ctx, projectUpdateRequest).Return(nil, errors.New("Error Updating Project"))
 	err := updateProjectsFunc(ctx, args, cmdCtx)
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 	mockClient.AssertCalled(t, "UpdateProject", ctx, projectUpdateRequest)
 }
 
