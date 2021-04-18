@@ -10,8 +10,6 @@ import (
 	cmdGet "github.com/flyteorg/flytectl/cmd/get"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
-	"github.com/flyteorg/flytestdlib/logger"
-
 	"github.com/google/uuid"
 	"sigs.k8s.io/yaml"
 )
@@ -70,27 +68,19 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 	return createExecutionRequest(ID, inputs, authRole), nil
 }
 
-func createExecutionRequestForRelaunch(ctx context.Context, executionName string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
-	var exec *admin.Execution
-	var err error
-	// Fetch the execution
-	if exec, err = cmdGet.DefaultFetcher.FetchExecution(ctx, executionName, project, domain, cmdCtx); err != nil {
-		return nil, err
+func relaunchExecution(ctx context.Context, executionName string, project string, domain string, cmdCtx cmdCore.CommandContext) error {
+	relaunchedExec, _err := cmdCtx.AdminClient().RelaunchExecution(ctx, &admin.ExecutionRelaunchRequest{
+		Id: &core.WorkflowExecutionIdentifier{
+			Name:    executionName,
+			Project: project,
+			Domain:  domain,
+		},
+	})
+	if _err != nil {
+		return _err
 	}
-	logger.Debugf(ctx, "fetched execution %v with project %v and domain %v", exec.Id.Name, exec.Id.Project, exec.Id.Domain)
-	// Fetch the launch plan from execution
-	var lp *admin.LaunchPlan
-	// Fetch the launch plan
-	if lp, err = cmdGet.DefaultFetcher.FetchLPVersion(ctx, exec.Spec.LaunchPlan.Name, exec.Spec.LaunchPlan.Version, project, domain, cmdCtx); err != nil {
-		return nil, err
-	}
-	logger.Debugf(ctx, "fetched launch plan with name %v project %v domain %v and version %v", lp.Id.Name, lp.Id.Project, lp.Id.Domain, lp.Id.Version)
-	// Create params from the existing execution
-	var inputs = &core.LiteralMap{
-		Literals: exec.Spec.Inputs.Literals,
-	}
-	ID := lp.Id
-	return createExecutionRequest(ID, inputs, nil), nil
+	fmt.Printf("execution identifier %v\n", relaunchedExec.Id)
+	return nil
 }
 
 func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, authRole *admin.AuthRole) *admin.ExecutionCreateRequest {

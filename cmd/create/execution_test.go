@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	"github.com/flyteorg/flytectl/cmd/config"
-	cmdGet "github.com/flyteorg/flytectl/cmd/get"
-	"github.com/flyteorg/flytectl/cmd/get/interfaces/mocks"
 	"github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
@@ -183,45 +181,26 @@ func TestCreateLaunchPlanExecutionFunc(t *testing.T) {
 func TestCreateRelaunchExecutionFunc(t *testing.T) {
 	setup()
 	createExecutionSetup()
-	executionCreateResponseLP := &admin.ExecutionCreateResponse{
+	relaunchExecResponse := &admin.ExecutionCreateResponse{
 		Id: &core.WorkflowExecutionIdentifier{
 			Project: "flytesnacks",
 			Domain:  "development",
 			Name:    "f652ea3596e7f4d80a0e",
 		},
 	}
-	literalMap := &core.LiteralMap{
-		Literals: nil,
-	}
-	exec = &admin.Execution{
+
+	executionConfig.Relaunch = relaunchExecResponse.Id.Name
+	relaunchRequest := &admin.ExecutionRelaunchRequest{
 		Id: &core.WorkflowExecutionIdentifier{
+			Name:    executionConfig.Relaunch,
 			Project: config.GetConfig().Project,
 			Domain:  config.GetConfig().Domain,
-			Name:    "ffb31066a0f8b4d52b77",
-		},
-		Spec: &admin.ExecutionSpec{
-			LaunchPlan: &core.Identifier{
-				Name:    "core.advanced.run_merge_sort.merge_sort",
-				Version: "v3",
-			},
-			Inputs: literalMap,
 		},
 	}
-	launchPlan = &admin.LaunchPlan{
-		Id: &core.Identifier{
-			Name:    "core.advanced.run_merge_sort.merge_sort",
-			Version: "v3",
-		},
-	}
-	mockFetcher = &mocks.Fetcher{}
-	cmdGet.DefaultFetcher = mockFetcher
-	mockFetcher.OnFetchExecutionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(exec, nil)
-	mockFetcher.OnFetchLPVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(launchPlan, nil)
-	mockClient.OnCreateExecutionMatch(ctx, mock.Anything).Return(executionCreateResponseLP, nil)
-	executionConfig.Relaunch = "xb5317xbty"
+	mockClient.OnRelaunchExecutionMatch(ctx, relaunchRequest).Return(relaunchExecResponse, nil)
 	err = createExecutionCommand(ctx, args, cmdCtx)
 	assert.Nil(t, err)
-	mockClient.AssertCalled(t, "CreateExecution", ctx, mock.Anything)
+	mockClient.AssertCalled(t, "RelaunchExecution", ctx, relaunchRequest)
 	tearDownAndVerify(t, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e"`)
 }
 

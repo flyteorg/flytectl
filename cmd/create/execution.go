@@ -7,7 +7,6 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
-	"github.com/flyteorg/flytestdlib/logger"
 )
 
 const (
@@ -126,13 +125,10 @@ func createExecutionCommand(ctx context.Context, args []string, cmdCtx cmdCore.C
 	if execParams, err = readConfigAndValidate(config.GetConfig().Project, config.GetConfig().Domain); err != nil {
 		return err
 	}
-	logger.Infof(ctx, "execution config %v of type %v", execParams.name, execParams.execType)
 	var executionRequest *admin.ExecutionCreateRequest
 	switch execParams.execType {
 	case Relaunch:
-		if executionRequest, err = createExecutionRequestForRelaunch(ctx, execParams.name, sourceProject, sourceDomain, cmdCtx); err != nil {
-			return err
-		}
+		return relaunchExecution(ctx, execParams.name, sourceProject, sourceDomain, cmdCtx)
 	case Task:
 		if executionRequest, err = createExecutionRequestForTask(ctx, execParams.name, sourceProject, sourceDomain, cmdCtx); err != nil {
 			return err
