@@ -69,15 +69,15 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 }
 
 func relaunchExecution(ctx context.Context, executionName string, project string, domain string, cmdCtx cmdCore.CommandContext) error {
-	relaunchedExec, _err := cmdCtx.AdminClient().RelaunchExecution(ctx, &admin.ExecutionRelaunchRequest{
+	relaunchedExec, err := cmdCtx.AdminClient().RelaunchExecution(ctx, &admin.ExecutionRelaunchRequest{
 		Id: &core.WorkflowExecutionIdentifier{
 			Name:    executionName,
 			Project: project,
 			Domain:  domain,
 		},
 	})
-	if _err != nil {
-		return _err
+	if err != nil {
+		return err
 	}
 	fmt.Printf("execution identifier %v\n", relaunchedExec.Id)
 	return nil
