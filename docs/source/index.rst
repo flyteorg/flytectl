@@ -41,7 +41,8 @@ Basic Configuration
    :hidden:
 
    Getting Started <https://docs.flyte.org/en/latest/getting_started.html>
-   Tutorials <https://flytecookbook.readthedocs.io>
+   User Guide <https://flytecookbook.readthedocs.io>
+   Concepts <https://docs.flyte.org/en/latest/concepts/index.html>
    reference/index
    Community <https://docs.flyte.org/en/latest/community/index.html>
 
