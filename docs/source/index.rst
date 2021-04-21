@@ -35,7 +35,6 @@ Basic Configuration
     show-source: true
     level: 1
 
-
 .. toctree::
    :maxdepth: 1
    :hidden:
