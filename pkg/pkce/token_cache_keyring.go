@@ -14,6 +14,11 @@ type TokenCacheKeyringProvider struct {
 	ServiceUser string
 }
 
+const(
+	KeyRingServiceUser = "flytectl-user"
+	KeyRingServiceName = "flytectl"
+)
+
 func (t TokenCacheKeyringProvider) SaveToken(token *oauth2.Token) error {
 	var tokenBytes []byte
 	if token.AccessToken == "" {
