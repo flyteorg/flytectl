@@ -14,7 +14,7 @@ type TokenCacheKeyringProvider struct {
 	ServiceUser string
 }
 
-const(
+const (
 	KeyRingServiceUser = "flytectl-user"
 	KeyRingServiceName = "flytectl"
 )
