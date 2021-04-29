@@ -3,6 +3,7 @@ package cmdcore
 import (
 	"context"
 	"fmt"
+	"github.com/flyteorg/flytectl/pkg/pkce"
 
 	"github.com/spf13/pflag"
 
@@ -56,11 +57,14 @@ func generateCommandFunc(cmdEntry CommandEntry) func(cmd *cobra.Command, args []
 		if _, err := config.GetConfig().OutputFormat(); err != nil {
 			return err
 		}
-
-		adminClient, err := admin.InitializeAdminClientFromConfig(ctx)
+		clientSet, err := admin.ClientSetBuilder().WithContext(ctx).WithConfig(admin.GetConfig(ctx)).
+			WithTokenCache(pkce.TokenCacheKeyringProvider{
+				ServiceUser: "flytectl-user",
+				ServiceName: "flytectl",
+		}).Build()
 		if err != nil {
 			return err
 		}
-		return cmdEntry.CmdFunc(ctx, args, NewCommandContext(adminClient, cmd.OutOrStdout()))
+		return cmdEntry.CmdFunc(ctx, args, NewCommandContext(clientSet.AdminClient(), cmd.OutOrStdout()))
 	}
 }
