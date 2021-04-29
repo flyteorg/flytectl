@@ -56,14 +56,16 @@ func generateCommandFunc(cmdEntry CommandEntry) func(cmd *cobra.Command, args []
 		if _, err := config.GetConfig().OutputFormat(); err != nil {
 			return err
 		}
-		clientSet, err := admin.ClientSetBuilder().WithContext(ctx).WithConfig(admin.GetConfig(ctx)).
+
+		clientSet, err := admin.ClientSetBuilder().WithConfig(admin.GetConfig(ctx)).
 			WithTokenCache(pkce.TokenCacheKeyringProvider{
 				ServiceUser: pkce.KeyRingServiceUser,
 				ServiceName: pkce.KeyRingServiceName,
-			}).Build()
+			}).Build(ctx)
 		if err != nil {
 			return err
 		}
+
 		return cmdEntry.CmdFunc(ctx, args, NewCommandContext(clientSet.AdminClient(), cmd.OutOrStdout()))
 	}
 }
