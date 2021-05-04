@@ -3,6 +3,7 @@ package testutils
 import (
 	"bytes"
 	"context"
+	mocks2 "github.com/flyteorg/flytectl/cmd/get/interfaces/mocks"
 	"io"
 	"log"
 	"os"
@@ -26,6 +27,7 @@ var (
 	Err           error
 	Ctx           context.Context
 	MockClient    *mocks.AdminServiceClient
+	MockFetcher   *mocks2.Fetcher
 	mockOutStream io.Writer
 	CmdCtx        cmdCore.CommandContext
 	stdOut        *os.File
@@ -44,8 +46,10 @@ func Setup() {
 	os.Stderr = writer
 	log.SetOutput(writer)
 	MockClient = new(mocks.AdminServiceClient)
+	MockFetcher = new(mocks2.Fetcher)
 	mockOutStream = writer
-	CmdCtx = cmdCore.NewCommandContext(MockClient, mockOutStream)
+	CmdCtx, _ = cmdCore.CmdContextBuilder().WithAdminClient(MockClient).WithWriter(mockOutStream).
+		WithFetcher(MockFetcher).Build()
 	config.GetConfig().Project = projectValue
 	config.GetConfig().Domain = domainValue
 	config.GetConfig().Output = output

@@ -69,7 +69,8 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 	var executions []*admin.Execution
 	if len(args) > 0 {
 		name := args[0]
-		execution, err := DefaultFetcher.FetchExecution(ctx, name, config.GetConfig().Project, config.GetConfig().Domain, cmdCtx)
+		execution, err := cmdCtx.Fetcher().FetchExecution(ctx, cmdCtx.AdminClient(), name, config.GetConfig().Project,
+			config.GetConfig().Domain)
 		if err != nil {
 			return err
 		}
@@ -88,7 +89,8 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 		executions = executionList.Executions
 	}
 	logger.Infof(ctx, "Retrieved %v executions", len(executions))
-	err := adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns, ExecutionToProtoMessages(executions)...)
+	err := adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns,
+		ExecutionToProtoMessages(executions)...)
 	if err != nil {
 		return err
 	}

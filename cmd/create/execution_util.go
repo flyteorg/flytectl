@@ -14,11 +14,13 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func createExecutionRequestForWorkflow(ctx context.Context, workflowName string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
+func createExecutionRequestForWorkflow(ctx context.Context, workflowName, project, domain string,
+	cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
 	var lp *admin.LaunchPlan
 	var err error
 	// Fetch the launch plan
-	if lp, err = cmdGet.DefaultFetcher.FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain, cmdCtx); err != nil {
+	if lp, err = cmdCtx.Fetcher().FetchLPVersion(ctx, cmdCtx.AdminClient(), workflowName, executionConfig.Version,
+		project, domain); err != nil {
 		return nil, err
 	}
 	// Create workflow params literal map
@@ -34,11 +36,13 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName string,
 	return createExecutionRequest(ID, inputs, nil), nil
 }
 
-func createExecutionRequestForTask(ctx context.Context, taskName string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
+func createExecutionRequestForTask(ctx context.Context, taskName string, project string, domain string,
+	cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
 	var task *admin.Task
 	var err error
 	// Fetch the task
-	if task, err = cmdGet.FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain, cmdCtx); err != nil {
+	if task, err = cmdGet.FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain, cmdCtx);
+	err != nil {
 		return nil, err
 	}
 	// Create task variables literal map
@@ -68,7 +72,8 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 	return createExecutionRequest(ID, inputs, authRole), nil
 }
 
-func relaunchExecution(ctx context.Context, executionName string, project string, domain string, cmdCtx cmdCore.CommandContext) error {
+func relaunchExecution(ctx context.Context, executionName string, project string, domain string,
+	cmdCtx cmdCore.CommandContext) error {
 	relaunchedExec, err := cmdCtx.AdminClient().RelaunchExecution(ctx, &admin.ExecutionRelaunchRequest{
 		Id: &core.WorkflowExecutionIdentifier{
 			Name:    executionName,
@@ -83,7 +88,8 @@ func relaunchExecution(ctx context.Context, executionName string, project string
 	return nil
 }
 
-func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, authRole *admin.AuthRole) *admin.ExecutionCreateRequest {
+func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap,
+	authRole *admin.AuthRole) *admin.ExecutionCreateRequest {
 	return &admin.ExecutionCreateRequest{
 		Project: executionConfig.TargetProject,
 		Domain:  executionConfig.TargetDomain,
@@ -138,7 +144,8 @@ func resolveOverrides(toBeOverridden *ExecutionConfig, project string, domain st
 func readConfigAndValidate(project string, domain string) (ExecutionParams, error) {
 	executionParams := ExecutionParams{}
 	if executionConfig.ExecFile == "" && executionConfig.Relaunch == "" {
-		return executionParams, fmt.Errorf("executionConfig or relaunch can't be empty. Run the flytectl get task/launchplan to generate the config")
+		return executionParams, fmt.Errorf("executionConfig or relaunch can't be empty." +
+			" Run the flytectl get task/launchplan to generate the config")
 	}
 	if executionConfig.Relaunch != "" {
 		resolveOverrides(executionConfig, project, domain)
@@ -155,7 +162,8 @@ func readConfigAndValidate(project string, domain string) (ExecutionParams, erro
 	isTask := readExecutionConfig.Task != ""
 	isWorkflow := readExecutionConfig.Workflow != ""
 	if isTask == isWorkflow {
-		return executionParams, fmt.Errorf("either one of task or workflow name should be specified to launch an execution")
+		return executionParams, fmt.Errorf("either one of task or workflow name should be specified" +
+			" to launch an execution")
 	}
 	name := readExecutionConfig.Task
 	execType := Task

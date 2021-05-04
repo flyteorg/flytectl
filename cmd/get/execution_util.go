@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/service"
 	"io/ioutil"
 	"os"
 
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
 	"github.com/flyteorg/flyteidl/clients/go/coreutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -29,8 +29,9 @@ type ExecutionConfig struct {
 	Inputs          map[string]interface{} `json:"inputs"`
 }
 
-func (f FetcherImpl) FetchExecution(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.Execution, error) {
-	e, err := cmdCtx.AdminClient().GetExecution(ctx, &admin.WorkflowExecutionGetRequest{
+func (f FetcherImpl) FetchExecution(ctx context.Context, adminClient service.AdminServiceClient, name, project,
+	domain string) (*admin.Execution, error) {
+	e, err := adminClient.GetExecution(ctx, &admin.WorkflowExecutionGetRequest{
 		Id: &core.WorkflowExecutionIdentifier{
 			Project: project,
 			Domain:  domain,

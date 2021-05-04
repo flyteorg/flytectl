@@ -46,9 +46,9 @@ func CreateGetCommand() *cobra.Command {
 		"workflow": {CmdFunc: getWorkflowFunc, Aliases: []string{"workflows"}, Short: workflowShort,
 			Long: workflowLong},
 		"launchplan": {CmdFunc: getLaunchPlanFunc, Aliases: []string{"launchplans"}, Short: launchPlanShort,
-			Long: launchPlanLong, PFlagProvider: launchPlanConfig},
+			Long: launchPlanLong, PFlagProvider: launchPlanConfig, Fetcher: DefaultFetcher},
 		"execution": {CmdFunc: getExecutionFunc, Aliases: []string{"executions"}, Short: executionShort,
-			Long: executionLong},
+			Long: executionLong, Fetcher: DefaultFetcher},
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)

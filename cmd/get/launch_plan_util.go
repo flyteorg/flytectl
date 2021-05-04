@@ -3,35 +3,38 @@ package get
 import (
 	"context"
 	"fmt"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/service"
 
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 )
 
-// Reads the launchplan config to drive fetching the correct launch plans.
-func FetchLPForName(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.LaunchPlan, error) {
+// FetchLPForName fetches the launchplan give it name.
+func (f FetcherImpl) FetchLPForName(ctx context.Context, adminClient service.AdminServiceClient, name, project,
+	domain string) ([]*admin.LaunchPlan, error) {
 	var launchPlans []*admin.LaunchPlan
 	var lp *admin.LaunchPlan
 	var err error
 	if launchPlanConfig.Latest {
-		if lp, err = FetchLPLatestVersion(ctx, name, project, domain, cmdCtx); err != nil {
+		if lp, err = f.FetchLPLatestVersion(ctx, adminClient, name, project, domain); err != nil {
 			return nil, err
 		}
 		launchPlans = append(launchPlans, lp)
 	} else if launchPlanConfig.Version != "" {
-		if lp, err = DefaultFetcher.FetchLPVersion(ctx, name, launchPlanConfig.Version, project, domain, cmdCtx); err != nil {
+		if lp, err = f.FetchLPVersion(ctx, adminClient, name, launchPlanConfig.Version,
+			project, domain); err != nil {
 			return nil, err
 		}
 		launchPlans = append(launchPlans, lp)
 	} else {
-		launchPlans, err = FetchAllVerOfLP(ctx, name, project, domain, cmdCtx)
+		launchPlans, err = f.FetchAllVerOfLP(ctx, adminClient, name, project, domain)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if launchPlanConfig.ExecFile != "" {
-		// There would be atleast one launchplan object when code reaches here and hence the length assertion is not required.
+		// There would be atleast one launchplan object when code reaches here and hence the length
+		// assertion is not required.
 		lp = launchPlans[0]
 		// Only write the first task from the tasks object.
 		if err = CreateAndWriteExecConfigForWorkflow(lp, launchPlanConfig.ExecFile); err != nil {
@@ -41,8 +44,10 @@ func FetchLPForName(ctx context.Context, name string, project string, domain str
 	return launchPlans, nil
 }
 
-func FetchAllVerOfLP(ctx context.Context, lpName string, project string, domain string, cmdCtx cmdCore.CommandContext) ([]*admin.LaunchPlan, error) {
-	tList, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, &admin.ResourceListRequest{
+// FetchAllVerOfLP fetches all the versions for give launchplan name
+func (f FetcherImpl) FetchAllVerOfLP(ctx context.Context, adminClient service.AdminServiceClient, lpName, project,
+	domain string) ([]*admin.LaunchPlan, error) {
+	tList, err := adminClient.ListLaunchPlans(ctx, &admin.ResourceListRequest{
 		Id: &admin.NamedEntityIdentifier{
 			Project: project,
 			Domain:  domain,
@@ -63,9 +68,12 @@ func FetchAllVerOfLP(ctx context.Context, lpName string, project string, domain 
 	return tList.LaunchPlans, nil
 }
 
-func FetchLPLatestVersion(ctx context.Context, name string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.LaunchPlan, error) {
+
+// FetchLPLatestVersion fetches latest version for give launchplan name
+func (f FetcherImpl) FetchLPLatestVersion(ctx context.Context, adminClient service.AdminServiceClient, name, project,
+	domain string) (*admin.LaunchPlan, error) {
 	// Fetch the latest version of the task.
-	lpVersions, err := FetchAllVerOfLP(ctx, name, project, domain, cmdCtx)
+	lpVersions, err := f.FetchAllVerOfLP(ctx, adminClient, name, project, domain)
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +81,9 @@ func FetchLPLatestVersion(ctx context.Context, name string, project string, doma
 	return lp, nil
 }
 
-func (f FetcherImpl) FetchLPVersion(ctx context.Context, name string, version string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.LaunchPlan, error) {
-	lp, err := cmdCtx.AdminClient().GetLaunchPlan(ctx, &admin.ObjectGetRequest{
+func (f FetcherImpl) FetchLPVersion(ctx context.Context, adminClient service.AdminServiceClient, name, version,
+	project, domain string) (*admin.LaunchPlan, error) {
+	lp, err := adminClient.GetLaunchPlan(ctx, &admin.ObjectGetRequest{
 		Id: &core.Identifier{
 			ResourceType: core.ResourceType_LAUNCH_PLAN,
 			Project:      project,

@@ -108,21 +108,25 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		name := args[0]
 		var launchPlans []*admin.LaunchPlan
 		var err error
-		if launchPlans, err = FetchLPForName(ctx, name, project, domain, cmdCtx); err != nil {
+		if launchPlans, err = cmdCtx.Fetcher().FetchLPForName(ctx, cmdCtx.AdminClient(), name, project, domain);
+		err != nil {
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
-		err = launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplanColumns, LaunchplanToProtoMessages(launchPlans)...)
+		err = launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplanColumns,
+			LaunchplanToProtoMessages(launchPlans)...)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
 
-	launchPlans, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListLaunchPlanIds, adminutils.ListRequest{Project: project, Domain: domain})
+	launchPlans, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListLaunchPlanIds,
+		adminutils.ListRequest{Project: project, Domain: domain})
 	if err != nil {
 		return err
 	}
 	logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
-	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), entityColumns, adminutils.NamedEntityToProtoMessage(launchPlans)...)
+	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), entityColumns,
+		adminutils.NamedEntityToProtoMessage(launchPlans)...)
 }
