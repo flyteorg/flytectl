@@ -49,7 +49,7 @@ func Setup() {
 	MockClient = new(mocks.AdminServiceClient)
 	Fetcher = impl.FetcherImpl{AdminServiceClient: MockClient}
 	mockOutStream = writer
-	CmdCtx = cmdCore.NewCommandContext(MockClient,mockOutStream)
+	CmdCtx = cmdCore.NewCommandContext(MockClient, mockOutStream)
 	config.GetConfig().Project = projectValue
 	config.GetConfig().Domain = domainValue
 	config.GetConfig().Output = output
