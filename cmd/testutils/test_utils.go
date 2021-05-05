@@ -66,5 +66,5 @@ func TearDownAndVerify(t *testing.T, expectedLog string) {
 }
 
 func santizeString(str string) string {
-	return strings.Trim(strings.ReplaceAll(strings.ReplaceAll(str, "\n", ""), "\t", "")," \t")
+	return strings.Trim(strings.ReplaceAll(strings.ReplaceAll(str, "\n", ""), "\t", ""), " \t")
 }

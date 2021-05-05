@@ -14,5 +14,3 @@ type FetcherImpl struct {
 func NewFetcherImpl(adminClient service.AdminServiceClient) interfaces.Fetcher {
 	return FetcherImpl{adminClient}
 }
-
-
