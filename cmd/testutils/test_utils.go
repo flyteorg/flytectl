@@ -3,7 +3,6 @@ package testutils
 import (
 	"bytes"
 	"context"
-	mocks2 "github.com/flyteorg/flytectl/cmd/get/interfaces/mocks"
 	"io"
 	"log"
 	"os"
@@ -12,6 +11,8 @@ import (
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces"
+	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/impl"
 	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
 
 	"github.com/stretchr/testify/assert"
@@ -27,7 +28,7 @@ var (
 	Err           error
 	Ctx           context.Context
 	MockClient    *mocks.AdminServiceClient
-	MockFetcher   *mocks2.Fetcher
+	Fetcher       interfaces.Fetcher
 	mockOutStream io.Writer
 	CmdCtx        cmdCore.CommandContext
 	stdOut        *os.File
@@ -46,10 +47,9 @@ func Setup() {
 	os.Stderr = writer
 	log.SetOutput(writer)
 	MockClient = new(mocks.AdminServiceClient)
-	MockFetcher = new(mocks2.Fetcher)
+	Fetcher = impl.FetcherImpl{AdminServiceClient: MockClient}
 	mockOutStream = writer
-	CmdCtx, _ = cmdCore.CmdContextBuilder().WithAdminClient(MockClient).WithWriter(mockOutStream).
-		WithFetcher(MockFetcher).Build()
+	CmdCtx = cmdCore.NewCommandContext(MockClient,mockOutStream)
 	config.GetConfig().Project = projectValue
 	config.GetConfig().Domain = domainValue
 	config.GetConfig().Output = output
@@ -61,6 +61,10 @@ func TearDownAndVerify(t *testing.T, expectedLog string) {
 	os.Stderr = stderr
 	var buf bytes.Buffer
 	if _, err := io.Copy(&buf, reader); err == nil {
-		assert.Equal(t, strings.Trim(expectedLog, "\n "), strings.Trim(buf.String(), "\n "))
+		assert.Equal(t, santizeString(expectedLog), santizeString(buf.String()))
 	}
+}
+
+func santizeString(str string) string {
+	return strings.Trim(strings.ReplaceAll(strings.ReplaceAll(str, "\n", ""), "\t", "")," \t")
 }

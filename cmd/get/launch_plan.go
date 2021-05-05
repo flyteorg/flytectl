@@ -6,6 +6,8 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/adminutils"
+	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces"
+	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/impl"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -104,11 +106,12 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 	launchPlanPrinter := printer.Printer{}
 	project := config.GetConfig().Project
 	domain := config.GetConfig().Domain
+	fetcher := impl.FetcherImpl{AdminServiceClient: cmdCtx.AdminClient()}
 	if len(args) == 1 {
 		name := args[0]
 		var launchPlans []*admin.LaunchPlan
 		var err error
-		if launchPlans, err = cmdCtx.Fetcher().FetchLPForName(ctx, cmdCtx.AdminClient(), name, project, domain);
+		if launchPlans, err = FetchLPForName(ctx, fetcher, name, project, domain)
 		err != nil {
 			return err
 		}
@@ -129,4 +132,39 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 	logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
 	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), entityColumns,
 		adminutils.NamedEntityToProtoMessage(launchPlans)...)
+}
+
+// FetchLPForName fetches the launchplan give it name.
+func FetchLPForName(ctx context.Context, fetcher interfaces.Fetcher, name, project,
+	domain string) ([]*admin.LaunchPlan, error) {
+	var launchPlans []*admin.LaunchPlan
+	var lp *admin.LaunchPlan
+	var err error
+	if launchPlanConfig.Latest {
+		if lp, err = fetcher.FetchLPLatestVersion(ctx, name, project, domain); err != nil {
+			return nil, err
+		}
+		launchPlans = append(launchPlans, lp)
+	} else if launchPlanConfig.Version != "" {
+		if lp, err = fetcher.FetchLPVersion(ctx,  name, launchPlanConfig.Version,
+			project, domain); err != nil {
+			return nil, err
+		}
+		launchPlans = append(launchPlans, lp)
+	} else {
+		launchPlans, err = fetcher.FetchAllVerOfLP(ctx, name, project, domain)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if launchPlanConfig.ExecFile != "" {
+		// There would be atleast one launchplan object when code reaches here and hence the length
+		// assertion is not required.
+		lp = launchPlans[0]
+		// Only write the first task from the tasks object.
+		if err = CreateAndWriteExecConfigForWorkflow(lp, launchPlanConfig.ExecFile); err != nil {
+			return nil, err
+		}
+	}
+	return launchPlans, nil
 }

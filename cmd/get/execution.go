@@ -3,13 +3,13 @@ package get
 import (
 	"context"
 
+	"github.com/flyteorg/flytectl/cmd/config"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/impl"
+	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
 	"github.com/golang/protobuf/proto"
-
-	"github.com/flyteorg/flytectl/cmd/config"
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytectl/pkg/printer"
 )
 
 const (
@@ -67,10 +67,10 @@ func ExecutionToProtoMessages(l []*admin.Execution) []proto.Message {
 func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
 	var executions []*admin.Execution
+	fetcher := impl.FetcherImpl{AdminServiceClient: cmdCtx.AdminClient()}
 	if len(args) > 0 {
 		name := args[0]
-		execution, err := cmdCtx.Fetcher().FetchExecution(ctx, cmdCtx.AdminClient(), name, config.GetConfig().Project,
-			config.GetConfig().Domain)
+		execution, err := fetcher.FetchExecution(ctx, name, config.GetConfig().Project, config.GetConfig().Domain)
 		if err != nil {
 			return err
 		}

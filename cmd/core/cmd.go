@@ -3,8 +3,8 @@ package cmdcore
 import (
 	"context"
 	"fmt"
+
 	"github.com/flyteorg/flytectl/cmd/config"
-	"github.com/flyteorg/flytectl/cmd/get/interfaces"
 	"github.com/flyteorg/flytectl/pkg/pkce"
 	"github.com/flyteorg/flyteidl/clients/go/admin"
 
@@ -23,7 +23,6 @@ type CommandEntry struct {
 	Short                    string
 	Long                     string
 	PFlagProvider            PFlagProvider
-	Fetcher                  interfaces.Fetcher
 }
 
 func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CommandEntry) {
@@ -66,14 +65,6 @@ func generateCommandFunc(cmdEntry CommandEntry) func(cmd *cobra.Command, args []
 		if err != nil {
 			return err
 		}
-		cmdCtxBuilder := CmdContextBuilder().WithAdminClient(clientSet.AdminClient()).WithWriter(cmd.OutOrStdout())
-		if cmdEntry.Fetcher != nil {
-			cmdCtxBuilder.WithFetcher(cmdEntry.Fetcher)
-		}
-		var cmdCtx CommandContext
-		if cmdCtx, err = cmdCtxBuilder.Build(); err != nil {
-			return err
-		}
-		return cmdEntry.CmdFunc(ctx, args, cmdCtx)
+		return cmdEntry.CmdFunc(ctx, args, NewCommandContext(clientSet.AdminClient(), cmd.OutOrStdout()))
 	}
 }

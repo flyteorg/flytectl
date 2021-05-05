@@ -8,6 +8,7 @@ import (
 
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	cmdGet "github.com/flyteorg/flytectl/cmd/get"
+	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/impl"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/google/uuid"
@@ -18,20 +19,24 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName, projec
 	cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
 	var lp *admin.LaunchPlan
 	var err error
+
 	// Fetch the launch plan
-	if lp, err = cmdCtx.Fetcher().FetchLPVersion(ctx, cmdCtx.AdminClient(), workflowName, executionConfig.Version,
-		project, domain); err != nil {
+	fetcher := impl.FetcherImpl{AdminServiceClient: cmdCtx.AdminClient()}
+	if lp, err = fetcher.FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain); err != nil {
 		return nil, err
 	}
+
 	// Create workflow params literal map
 	var paramLiterals map[string]*core.Literal
 	workflowParams := cmdGet.WorkflowParams(lp)
+
 	if paramLiterals, err = MakeLiteralForParams(executionConfig.Inputs, workflowParams); err != nil {
 		return nil, err
 	}
 	var inputs = &core.LiteralMap{
 		Literals: paramLiterals,
 	}
+
 	ID := lp.Id
 	return createExecutionRequest(ID, inputs, nil), nil
 }
@@ -41,8 +46,8 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 	var task *admin.Task
 	var err error
 	// Fetch the task
-	if task, err = cmdGet.FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain, cmdCtx);
-	err != nil {
+	fetcher := impl.FetcherImpl{AdminServiceClient: cmdCtx.AdminClient()}
+	if task, err = fetcher.FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain); err != nil {
 		return nil, err
 	}
 	// Create task variables literal map

@@ -2,8 +2,7 @@ package get
 
 import (
 	cmdcore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytectl/cmd/get/interfaces"
-
+	
 	"github.com/spf13/cobra"
 )
 
@@ -17,17 +16,6 @@ Example get projects.
  bin/flytectl get project
 `
 )
-
-var (
-	DefaultFetcher = NewFetcherImpl()
-)
-
-func NewFetcherImpl() interfaces.Fetcher {
-	return FetcherImpl{}
-}
-
-type FetcherImpl struct {
-}
 
 // CreateGetCommand will return get command
 func CreateGetCommand() *cobra.Command {
@@ -46,9 +34,9 @@ func CreateGetCommand() *cobra.Command {
 		"workflow": {CmdFunc: getWorkflowFunc, Aliases: []string{"workflows"}, Short: workflowShort,
 			Long: workflowLong},
 		"launchplan": {CmdFunc: getLaunchPlanFunc, Aliases: []string{"launchplans"}, Short: launchPlanShort,
-			Long: launchPlanLong, PFlagProvider: launchPlanConfig, Fetcher: DefaultFetcher},
+			Long: launchPlanLong, PFlagProvider: launchPlanConfig},
 		"execution": {CmdFunc: getExecutionFunc, Aliases: []string{"executions"}, Short: executionShort,
-			Long: executionLong, Fetcher: DefaultFetcher},
+			Long: executionLong},
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)

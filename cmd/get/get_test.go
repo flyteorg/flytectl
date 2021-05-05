@@ -24,10 +24,10 @@ const workflowVersionValue = "wf_version"
 const testDataFolder = "../testdata/"
 
 var (
-	err        error
-	ctx        context.Context
-	mockClient *mocks.AdminServiceClient
-	cmdCtx     cmdCore.CommandContext
+	err         error
+	ctx         context.Context
+	mockClient  *mocks.AdminServiceClient
+	cmdCtx      cmdCore.CommandContext
 )
 var setup = testutils.Setup
 var tearDownAndVerify = testutils.TearDownAndVerify

@@ -1,10 +1,8 @@
 package get
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/service"
 	"io/ioutil"
 	"os"
 
@@ -27,21 +25,6 @@ type ExecutionConfig struct {
 	Task            string                 `json:"task,omitempty"`
 	Version         string                 `json:"version"`
 	Inputs          map[string]interface{} `json:"inputs"`
-}
-
-func (f FetcherImpl) FetchExecution(ctx context.Context, adminClient service.AdminServiceClient, name, project,
-	domain string) (*admin.Execution, error) {
-	e, err := adminClient.GetExecution(ctx, &admin.WorkflowExecutionGetRequest{
-		Id: &core.WorkflowExecutionIdentifier{
-			Project: project,
-			Domain:  domain,
-			Name:    name,
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return e, nil
 }
 
 func WriteExecConfigToFile(executionConfig ExecutionConfig, fileName string) error {
