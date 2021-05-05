@@ -1,6 +1,9 @@
 package get
 
 import (
+	"fmt"
+	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/mocks"
+	"github.com/stretchr/testify/mock"
 	"os"
 	"testing"
 
@@ -170,6 +173,40 @@ func getLaunchPlanSetup() {
 	launchPlanConfig.Latest = false
 	launchPlanConfig.Version = ""
 	launchPlanConfig.ExecFile = ""
+}
+
+func TestGetLaunchPlanFuncWithError(t *testing.T) {
+	t.Run("failure fetch latest", func(t *testing.T) {
+		setup()
+		getLaunchPlanSetup()
+		mockFetcher := new(mocks.Fetcher)
+		launchPlanConfig.Latest = true
+		mockFetcher.OnFetchLPLatestVersionMatch(mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything).Return(nil, fmt.Errorf("error fetching latest version"))
+		_, err = FetchLPForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("failure fetching version ", func(t *testing.T) {
+		setup()
+		getLaunchPlanSetup()
+		mockFetcher := new(mocks.Fetcher)
+		launchPlanConfig.Version = "v1"
+		mockFetcher.OnFetchLPVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything).Return(nil, fmt.Errorf("error fetching version"))
+		_, err = FetchLPForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("failure fetching all version ", func(t *testing.T) {
+		setup()
+		getLaunchPlanSetup()
+		mockFetcher := new(mocks.Fetcher)
+		mockFetcher.OnFetchAllVerOfLPMatch(mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything).Return(nil, fmt.Errorf("error fetching all version"))
+		_, err = FetchLPForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
+		assert.NotNil(t, err)
+	})
 }
 
 func TestGetLaunchPlanFunc(t *testing.T) {

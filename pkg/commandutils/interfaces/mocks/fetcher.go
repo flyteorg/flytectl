@@ -56,6 +56,47 @@ func (_m *Fetcher) FetchAllVerOfLP(ctx context.Context, lpName string, project s
 	return r0, r1
 }
 
+type Fetcher_FetchAllVerOfTask struct {
+	*mock.Call
+}
+
+func (_m Fetcher_FetchAllVerOfTask) Return(_a0 []*admin.Task, _a1 error) *Fetcher_FetchAllVerOfTask {
+	return &Fetcher_FetchAllVerOfTask{Call: _m.Call.Return(_a0, _a1)}
+}
+
+func (_m *Fetcher) OnFetchAllVerOfTask(ctx context.Context, name string, project string, domain string) *Fetcher_FetchAllVerOfTask {
+	c := _m.On("FetchAllVerOfTask", ctx, name, project, domain)
+	return &Fetcher_FetchAllVerOfTask{Call: c}
+}
+
+func (_m *Fetcher) OnFetchAllVerOfTaskMatch(matchers ...interface{}) *Fetcher_FetchAllVerOfTask {
+	c := _m.On("FetchAllVerOfTask", matchers...)
+	return &Fetcher_FetchAllVerOfTask{Call: c}
+}
+
+// FetchAllVerOfTask provides a mock function with given fields: ctx, name, project, domain
+func (_m *Fetcher) FetchAllVerOfTask(ctx context.Context, name string, project string, domain string) ([]*admin.Task, error) {
+	ret := _m.Called(ctx, name, project, domain)
+
+	var r0 []*admin.Task
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) []*admin.Task); ok {
+		r0 = rf(ctx, name, project, domain)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*admin.Task)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, name, project, domain)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 type Fetcher_FetchExecution struct {
 	*mock.Call
 }
@@ -166,6 +207,88 @@ func (_m *Fetcher) FetchLPVersion(ctx context.Context, name string, version stri
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*admin.LaunchPlan)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, string) error); ok {
+		r1 = rf(ctx, name, version, project, domain)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+type Fetcher_FetchTaskLatestVersion struct {
+	*mock.Call
+}
+
+func (_m Fetcher_FetchTaskLatestVersion) Return(_a0 *admin.Task, _a1 error) *Fetcher_FetchTaskLatestVersion {
+	return &Fetcher_FetchTaskLatestVersion{Call: _m.Call.Return(_a0, _a1)}
+}
+
+func (_m *Fetcher) OnFetchTaskLatestVersion(ctx context.Context, name string, project string, domain string) *Fetcher_FetchTaskLatestVersion {
+	c := _m.On("FetchTaskLatestVersion", ctx, name, project, domain)
+	return &Fetcher_FetchTaskLatestVersion{Call: c}
+}
+
+func (_m *Fetcher) OnFetchTaskLatestVersionMatch(matchers ...interface{}) *Fetcher_FetchTaskLatestVersion {
+	c := _m.On("FetchTaskLatestVersion", matchers...)
+	return &Fetcher_FetchTaskLatestVersion{Call: c}
+}
+
+// FetchTaskLatestVersion provides a mock function with given fields: ctx, name, project, domain
+func (_m *Fetcher) FetchTaskLatestVersion(ctx context.Context, name string, project string, domain string) (*admin.Task, error) {
+	ret := _m.Called(ctx, name, project, domain)
+
+	var r0 *admin.Task
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) *admin.Task); ok {
+		r0 = rf(ctx, name, project, domain)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*admin.Task)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string) error); ok {
+		r1 = rf(ctx, name, project, domain)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+type Fetcher_FetchTaskVersion struct {
+	*mock.Call
+}
+
+func (_m Fetcher_FetchTaskVersion) Return(_a0 *admin.Task, _a1 error) *Fetcher_FetchTaskVersion {
+	return &Fetcher_FetchTaskVersion{Call: _m.Call.Return(_a0, _a1)}
+}
+
+func (_m *Fetcher) OnFetchTaskVersion(ctx context.Context, name string, version string, project string, domain string) *Fetcher_FetchTaskVersion {
+	c := _m.On("FetchTaskVersion", ctx, name, version, project, domain)
+	return &Fetcher_FetchTaskVersion{Call: c}
+}
+
+func (_m *Fetcher) OnFetchTaskVersionMatch(matchers ...interface{}) *Fetcher_FetchTaskVersion {
+	c := _m.On("FetchTaskVersion", matchers...)
+	return &Fetcher_FetchTaskVersion{Call: c}
+}
+
+// FetchTaskVersion provides a mock function with given fields: ctx, name, version, project, domain
+func (_m *Fetcher) FetchTaskVersion(ctx context.Context, name string, version string, project string, domain string) (*admin.Task, error) {
+	ret := _m.Called(ctx, name, version, project, domain)
+
+	var r0 *admin.Task
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string) *admin.Task); ok {
+		r0 = rf(ctx, name, version, project, domain)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*admin.Task)
 		}
 	}
 

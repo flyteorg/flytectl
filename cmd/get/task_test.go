@@ -1,6 +1,9 @@
 package get
 
 import (
+	"fmt"
+	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/mocks"
+	"github.com/stretchr/testify/mock"
 	"os"
 	"testing"
 
@@ -139,6 +142,40 @@ func getTaskSetup() {
 	taskConfig.Latest = false
 	taskConfig.ExecFile = ""
 	taskConfig.Version = ""
+}
+
+func TestGetTaskFuncWithError(t *testing.T) {
+	t.Run("failure fetch latest", func(t *testing.T) {
+		setup()
+		getTaskSetup()
+		mockFetcher := new(mocks.Fetcher)
+		taskConfig.Latest = true
+		mockFetcher.OnFetchTaskLatestVersionMatch(mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything).Return(nil, fmt.Errorf("error fetching latest version"))
+		_, err = FetchTaskForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("failure fetching version ", func(t *testing.T) {
+		setup()
+		getTaskSetup()
+		mockFetcher := new(mocks.Fetcher)
+		taskConfig.Version = "v1"
+		mockFetcher.OnFetchTaskVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything).Return(nil, fmt.Errorf("error fetching version"))
+		_, err = FetchTaskForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("failure fetching all version ", func(t *testing.T) {
+		setup()
+		getTaskSetup()
+		mockFetcher := new(mocks.Fetcher)
+		mockFetcher.OnFetchAllVerOfTaskMatch(mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything).Return(nil, fmt.Errorf("error fetching all version"))
+		_, err = FetchTaskForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
+		assert.NotNil(t, err)
+	})
 }
 
 func TestGetTaskFunc(t *testing.T) {

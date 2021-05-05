@@ -16,4 +16,3 @@ func NewFetcherImpl(adminClient service.AdminServiceClient) interfaces.Fetcher {
 }
 
 
-
