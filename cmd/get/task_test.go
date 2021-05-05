@@ -2,14 +2,14 @@ package get
 
 import (
 	"fmt"
-	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/mocks"
-	"github.com/stretchr/testify/mock"
 	"os"
 	"testing"
 
 	"github.com/flyteorg/flytectl/cmd/testutils"
+	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/mocks"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -21,6 +21,8 @@ var (
 	namedIDRequestTask      *admin.NamedEntityIdentifierListRequest
 	taskListResponse        *admin.TaskList
 	argsTask                []string
+	namedIdentifierListTask *admin.NamedEntityIdentifierList
+	task2                   *admin.Task
 )
 
 func getTaskSetup() {
@@ -63,7 +65,7 @@ func getTaskSetup() {
 		},
 	}
 
-	task2 := &admin.Task{
+	task2 = &admin.Task{
 		Id: &core.Identifier{
 			Name:    "task1",
 			Version: "v2",
@@ -131,13 +133,9 @@ func getTaskSetup() {
 		Name:    "task2",
 	}
 	taskEntities = append(taskEntities, idTask1, idTask2)
-	namedIdentifierListTask := &admin.NamedEntityIdentifierList{
+	namedIdentifierListTask = &admin.NamedEntityIdentifierList{
 		Entities: taskEntities,
 	}
-
-	mockClient.OnListTasksMatch(ctx, resourceListRequestTask).Return(taskListResponse, nil)
-	mockClient.OnGetTaskMatch(ctx, objectGetRequestTask).Return(task2, nil)
-	mockClient.OnListTaskIdsMatch(ctx, namedIDRequestTask).Return(namedIdentifierListTask, nil)
 
 	taskConfig.Latest = false
 	taskConfig.ExecFile = ""
@@ -176,11 +174,24 @@ func TestGetTaskFuncWithError(t *testing.T) {
 		_, err = FetchTaskForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
 		assert.NotNil(t, err)
 	})
+
+	t.Run("failure fetching ", func(t *testing.T) {
+		setup()
+		getLaunchPlanSetup()
+		mockClient.OnListTasksMatch(ctx, resourceListRequestTask).Return(nil, fmt.Errorf("error fetching all version"))
+		mockClient.OnGetTaskMatch(ctx, objectGetRequestTask).Return(nil, fmt.Errorf("error fetching task"))
+		mockClient.OnListTaskIdsMatch(ctx, namedIDRequestTask).Return(nil, fmt.Errorf("error listing task ids"))
+		err = getTaskFunc(ctx, argsTask, cmdCtx)
+		assert.NotNil(t, err)
+	})
 }
 
 func TestGetTaskFunc(t *testing.T) {
 	setup()
 	getTaskSetup()
+	mockClient.OnListTasksMatch(ctx, resourceListRequestTask).Return(taskListResponse, nil)
+	mockClient.OnGetTaskMatch(ctx, objectGetRequestTask).Return(task2, nil)
+	mockClient.OnListTaskIdsMatch(ctx, namedIDRequestTask).Return(namedIdentifierListTask, nil)
 	err = getTaskFunc(ctx, argsTask, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "ListTasks", ctx, resourceListRequestTask)
@@ -257,6 +268,9 @@ func TestGetTaskFunc(t *testing.T) {
 func TestGetTaskFuncLatest(t *testing.T) {
 	setup()
 	getTaskSetup()
+	mockClient.OnListTasksMatch(ctx, resourceListRequestTask).Return(taskListResponse, nil)
+	mockClient.OnGetTaskMatch(ctx, objectGetRequestTask).Return(task2, nil)
+	mockClient.OnListTaskIdsMatch(ctx, namedIDRequestTask).Return(namedIdentifierListTask, nil)
 	taskConfig.Latest = true
 	err = getTaskFunc(ctx, argsTask, cmdCtx)
 	assert.Nil(t, err)
@@ -299,6 +313,9 @@ func TestGetTaskFuncLatest(t *testing.T) {
 func TestGetTaskWithVersion(t *testing.T) {
 	setup()
 	getTaskSetup()
+	mockClient.OnListTasksMatch(ctx, resourceListRequestTask).Return(taskListResponse, nil)
+	mockClient.OnGetTaskMatch(ctx, objectGetRequestTask).Return(task2, nil)
+	mockClient.OnListTaskIdsMatch(ctx, namedIDRequestTask).Return(namedIdentifierListTask, nil)
 	taskConfig.Version = "v2"
 	objectGetRequestTask.Id.ResourceType = core.ResourceType_TASK
 	err = getTaskFunc(ctx, argsTask, cmdCtx)
@@ -342,6 +359,9 @@ func TestGetTaskWithVersion(t *testing.T) {
 func TestGetTasks(t *testing.T) {
 	setup()
 	getTaskSetup()
+	mockClient.OnListTasksMatch(ctx, resourceListRequestTask).Return(taskListResponse, nil)
+	mockClient.OnGetTaskMatch(ctx, objectGetRequestTask).Return(task2, nil)
+	mockClient.OnListTaskIdsMatch(ctx, namedIDRequestTask).Return(namedIdentifierListTask, nil)
 	argsTask = []string{}
 	err = getTaskFunc(ctx, argsTask, cmdCtx)
 	assert.Nil(t, err)
@@ -363,6 +383,9 @@ func TestGetTasks(t *testing.T) {
 func TestGetTaskWithExecFile(t *testing.T) {
 	setup()
 	getTaskSetup()
+	mockClient.OnListTasksMatch(ctx, resourceListRequestTask).Return(taskListResponse, nil)
+	mockClient.OnGetTaskMatch(ctx, objectGetRequestTask).Return(task2, nil)
+	mockClient.OnListTaskIdsMatch(ctx, namedIDRequestTask).Return(namedIdentifierListTask, nil)
 	taskConfig.Version = "v2"
 	taskConfig.ExecFile = testDataFolder + "task_exec_file"
 	err = getTaskFunc(ctx, argsTask, cmdCtx)
