@@ -111,8 +111,7 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		name := args[0]
 		var launchPlans []*admin.LaunchPlan
 		var err error
-		if launchPlans, err = FetchLPForName(ctx, fetcher, name, project, domain)
-		err != nil {
+		if launchPlans, err = FetchLPForName(ctx, fetcher, name, project, domain); err != nil {
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
@@ -146,8 +145,7 @@ func FetchLPForName(ctx context.Context, fetcher interfaces.Fetcher, name, proje
 		}
 		launchPlans = append(launchPlans, lp)
 	} else if launchPlanConfig.Version != "" {
-		if lp, err = fetcher.FetchLPVersion(ctx,  name, launchPlanConfig.Version,
-			project, domain); err != nil {
+		if lp, err = fetcher.FetchLPVersion(ctx, name, launchPlanConfig.Version, project, domain); err != nil {
 			return nil, err
 		}
 		launchPlans = append(launchPlans, lp)
