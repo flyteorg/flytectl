@@ -1,4 +1,4 @@
-package impl
+package ext
 
 import (
 	"context"
@@ -9,8 +9,8 @@ import (
 )
 
 // FetchAllVerOfLP fetches all the versions for give launch plan name
-func (f FetcherImpl) FetchAllVerOfLP(ctx context.Context, lpName, project, domain string) ([]*admin.LaunchPlan, error) {
-	tList, err := f.ListLaunchPlans(ctx, &admin.ResourceListRequest{
+func (a *AdminFetcherExtClient) FetchAllVerOfLP(ctx context.Context, lpName, project, domain string) ([]*admin.LaunchPlan, error) {
+	tList, err := a.AdminServiceClient().ListLaunchPlans(ctx, &admin.ResourceListRequest{
 		Id: &admin.NamedEntityIdentifier{
 			Project: project,
 			Domain:  domain,
@@ -32,9 +32,9 @@ func (f FetcherImpl) FetchAllVerOfLP(ctx context.Context, lpName, project, domai
 }
 
 // FetchLPLatestVersion fetches latest version for give launch plan name
-func (f FetcherImpl) FetchLPLatestVersion(ctx context.Context, name, project, domain string) (*admin.LaunchPlan, error) {
+func (a *AdminFetcherExtClient) FetchLPLatestVersion(ctx context.Context, name, project, domain string) (*admin.LaunchPlan, error) {
 	// Fetch the latest version of the task.
-	lpVersions, err := f.FetchAllVerOfLP(ctx, name, project, domain)
+	lpVersions, err := a.FetchAllVerOfLP(ctx, name, project, domain)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +43,8 @@ func (f FetcherImpl) FetchLPLatestVersion(ctx context.Context, name, project, do
 }
 
 // FetchLPVersion fetches particular version of launch plan
-func (f FetcherImpl) FetchLPVersion(ctx context.Context, name, version, project, domain string) (*admin.LaunchPlan, error) {
-	lp, err := f.GetLaunchPlan(ctx, &admin.ObjectGetRequest{
+func (a *AdminFetcherExtClient) FetchLPVersion(ctx context.Context, name, version, project, domain string) (*admin.LaunchPlan, error) {
+	lp, err := a.AdminServiceClient().GetLaunchPlan(ctx, &admin.ObjectGetRequest{
 		Id: &core.Identifier{
 			ResourceType: core.ResourceType_LAUNCH_PLAN,
 			Project:      project,

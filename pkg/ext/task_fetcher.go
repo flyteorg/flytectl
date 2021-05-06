@@ -1,4 +1,4 @@
-package impl
+package ext
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 )
 
-func (f FetcherImpl) FetchAllVerOfTask(ctx context.Context, name, project, domain string) ([]*admin.Task, error) {
-	tList, err := f.ListTasks(ctx, &admin.ResourceListRequest{
+func (a *AdminFetcherExtClient) FetchAllVerOfTask(ctx context.Context, name, project, domain string) ([]*admin.Task, error) {
+	tList, err := a.AdminServiceClient().ListTasks(ctx, &admin.ResourceListRequest{
 		Id: &admin.NamedEntityIdentifier{
 			Project: project,
 			Domain:  domain,
@@ -30,12 +30,12 @@ func (f FetcherImpl) FetchAllVerOfTask(ctx context.Context, name, project, domai
 	return tList.Tasks, nil
 }
 
-func (f FetcherImpl) FetchTaskLatestVersion(ctx context.Context, name, project, domain string) (*admin.Task, error) {
+func (a *AdminFetcherExtClient) FetchTaskLatestVersion(ctx context.Context, name, project, domain string) (*admin.Task, error) {
 	var t *admin.Task
 	var err error
 	// Fetch the latest version of the task.
 	var taskVersions []*admin.Task
-	taskVersions, err = f.FetchAllVerOfTask(ctx, name, project, domain)
+	taskVersions, err = a.FetchAllVerOfTask(ctx, name, project, domain)
 	if err != nil {
 		return nil, err
 	}
@@ -43,8 +43,8 @@ func (f FetcherImpl) FetchTaskLatestVersion(ctx context.Context, name, project, 
 	return t, nil
 }
 
-func (f FetcherImpl) FetchTaskVersion(ctx context.Context, name, version, project, domain string) (*admin.Task, error) {
-	t, err := f.GetTask(ctx, &admin.ObjectGetRequest{
+func (a *AdminFetcherExtClient) FetchTaskVersion(ctx context.Context, name, version, project, domain string) (*admin.Task, error) {
+	t, err := a.AdminServiceClient().GetTask(ctx, &admin.ObjectGetRequest{
 		Id: &core.Identifier{
 			ResourceType: core.ResourceType_TASK,
 			Project:      project,

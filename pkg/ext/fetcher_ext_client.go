@@ -1,16 +1,19 @@
-package interfaces
+package ext
 
 import (
 	"context"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/service"
 )
 
 //go:generate mockery -all -case=underscore
 
-// Fetcher Interface for exposing the fetch capabilities from the admin and also allow this to be injectable into other
+// AdminFetcherExtInterface Interface for exposing the fetch capabilities from the admin and also allow this to be injectable into other
 // modules. eg : create execution which requires to fetch launchplan details to construct the execution spec.
-type Fetcher interface {
+type AdminFetcherExtInterface interface {
+	AdminServiceClient() service.AdminServiceClient
+
 	// FetchExecution fetches the execution based on name, project, domain
 	FetchExecution(ctx context.Context, name, project, domain string) (*admin.Execution, error)
 
@@ -31,4 +34,16 @@ type Fetcher interface {
 
 	// FetchTaskVersion fetches particular version of task in a  project, domain
 	FetchTaskVersion(ctx context.Context, name, version, project, domain string) (*admin.Task, error)
+}
+
+// AdminFetcherExtClient is used for interacting with extended features used for fetching data from admin service
+type AdminFetcherExtClient struct {
+	AdminClient service.AdminServiceClient
+}
+
+func (a *AdminFetcherExtClient) AdminServiceClient() service.AdminServiceClient {
+	if a == nil {
+		return nil
+	}
+	return a.AdminClient
 }

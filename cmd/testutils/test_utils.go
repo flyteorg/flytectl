@@ -11,8 +11,7 @@ import (
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces"
-	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/impl"
+	"github.com/flyteorg/flytectl/pkg/ext"
 	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
 
 	"github.com/stretchr/testify/assert"
@@ -28,7 +27,7 @@ var (
 	Err           error
 	Ctx           context.Context
 	MockClient    *mocks.AdminServiceClient
-	Fetcher       interfaces.Fetcher
+	FetcherExt    ext.AdminFetcherExtInterface
 	mockOutStream io.Writer
 	CmdCtx        cmdCore.CommandContext
 	stdOut        *os.File
@@ -47,7 +46,6 @@ func Setup() {
 	os.Stderr = writer
 	log.SetOutput(writer)
 	MockClient = new(mocks.AdminServiceClient)
-	Fetcher = impl.FetcherImpl{AdminServiceClient: MockClient}
 	mockOutStream = writer
 	CmdCtx = cmdCore.NewCommandContext(MockClient, mockOutStream)
 	config.GetConfig().Project = projectValue

@@ -1,4 +1,4 @@
-package impl
+package ext
 
 import (
 	"context"
@@ -7,8 +7,8 @@ import (
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 )
 
-func (f FetcherImpl) FetchExecution(ctx context.Context, name, project, domain string) (*admin.Execution, error) {
-	e, err := f.GetExecution(ctx, &admin.WorkflowExecutionGetRequest{
+func (a *AdminFetcherExtClient) FetchExecution(ctx context.Context, name, project, domain string) (*admin.Execution, error) {
+	e, err := a.AdminServiceClient().GetExecution(ctx, &admin.WorkflowExecutionGetRequest{
 		Id: &core.WorkflowExecutionIdentifier{
 			Project: project,
 			Domain:  domain,

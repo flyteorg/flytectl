@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/flyteorg/flytectl/cmd/testutils"
-	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/mocks"
+	"github.com/flyteorg/flytectl/pkg/ext/mocks"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/stretchr/testify/mock"
@@ -146,7 +146,7 @@ func TestGetTaskFuncWithError(t *testing.T) {
 	t.Run("failure fetch latest", func(t *testing.T) {
 		setup()
 		getTaskSetup()
-		mockFetcher := new(mocks.Fetcher)
+		mockFetcher := new(mocks.AdminFetcherExtInterface)
 		taskConfig.Latest = true
 		mockFetcher.OnFetchTaskLatestVersionMatch(mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything).Return(nil, fmt.Errorf("error fetching latest version"))
@@ -157,7 +157,7 @@ func TestGetTaskFuncWithError(t *testing.T) {
 	t.Run("failure fetching version ", func(t *testing.T) {
 		setup()
 		getTaskSetup()
-		mockFetcher := new(mocks.Fetcher)
+		mockFetcher := new(mocks.AdminFetcherExtInterface)
 		taskConfig.Version = "v1"
 		mockFetcher.OnFetchTaskVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything).Return(nil, fmt.Errorf("error fetching version"))
@@ -168,7 +168,7 @@ func TestGetTaskFuncWithError(t *testing.T) {
 	t.Run("failure fetching all version ", func(t *testing.T) {
 		setup()
 		getTaskSetup()
-		mockFetcher := new(mocks.Fetcher)
+		mockFetcher := new(mocks.AdminFetcherExtInterface)
 		mockFetcher.OnFetchAllVerOfTaskMatch(mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything).Return(nil, fmt.Errorf("error fetching all version"))
 		_, err = FetchTaskForName(ctx, mockFetcher, "lpName", projectValue, domainValue)

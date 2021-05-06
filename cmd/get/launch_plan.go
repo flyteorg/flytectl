@@ -6,8 +6,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/adminutils"
-	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces"
-	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/impl"
+	"github.com/flyteorg/flytectl/pkg/ext"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -106,12 +105,11 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 	launchPlanPrinter := printer.Printer{}
 	project := config.GetConfig().Project
 	domain := config.GetConfig().Domain
-	fetcher := impl.FetcherImpl{AdminServiceClient: cmdCtx.AdminClient()}
 	if len(args) == 1 {
 		name := args[0]
 		var launchPlans []*admin.LaunchPlan
 		var err error
-		if launchPlans, err = FetchLPForName(ctx, fetcher, name, project, domain); err != nil {
+		if launchPlans, err = FetchLPForName(ctx, cmdCtx.AdminFetcherExt(), name, project, domain); err != nil {
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
@@ -134,7 +132,7 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 }
 
 // FetchLPForName fetches the launchplan give it name.
-func FetchLPForName(ctx context.Context, fetcher interfaces.Fetcher, name, project,
+func FetchLPForName(ctx context.Context, fetcher ext.AdminFetcherExtInterface, name, project,
 	domain string) ([]*admin.LaunchPlan, error) {
 	var launchPlans []*admin.LaunchPlan
 	var lp *admin.LaunchPlan

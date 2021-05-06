@@ -8,7 +8,6 @@ import (
 
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	cmdGet "github.com/flyteorg/flytectl/cmd/get"
-	"github.com/flyteorg/flytectl/pkg/commandutils/interfaces/impl"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/google/uuid"
@@ -21,8 +20,7 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName, projec
 	var err error
 
 	// Fetch the launch plan
-	fetcher := impl.FetcherImpl{AdminServiceClient: cmdCtx.AdminClient()}
-	if lp, err = fetcher.FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain); err != nil {
+	if lp, err = cmdCtx.AdminFetcherExt().FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain); err != nil {
 		return nil, err
 	}
 
@@ -46,8 +44,7 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 	var task *admin.Task
 	var err error
 	// Fetch the task
-	fetcher := impl.FetcherImpl{AdminServiceClient: cmdCtx.AdminClient()}
-	if task, err = fetcher.FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain); err != nil {
+	if task, err = cmdCtx.AdminFetcherExt().FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain); err != nil {
 		return nil, err
 	}
 	// Create task variables literal map
