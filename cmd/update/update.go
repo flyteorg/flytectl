@@ -35,6 +35,8 @@ func CreateUpdateCommand() *cobra.Command {
 			Short: updateTaskShort, Long: updateTaskLong},
 		"workflow": {CmdFunc: updateWorkflowFunc, Aliases: []string{}, ProjectDomainNotRequired: false, PFlagProvider: namedEntityConfig,
 			Short: updateWorkflowShort, Long: updateWorkflowLong},
+		"task-resource-attribute": {CmdFunc: updateTaskResourceAttributesFunc, Aliases: []string{}, PFlagProvider: matchableTaskRsConfig,
+			Short: taskResourceAttributesShort, Long: taskResourceAttributesLong},
 	}
 	cmdCore.AddCommands(updateCmd, updateResourcesFuncs)
 	return updateCmd

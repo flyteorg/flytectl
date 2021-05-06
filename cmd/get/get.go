@@ -37,6 +37,9 @@ func CreateGetCommand() *cobra.Command {
 			Long: launchPlanLong, PFlagProvider: launchPlanConfig},
 		"execution": {CmdFunc: getExecutionFunc, Aliases: []string{"executions"}, Short: executionShort,
 			Long: executionLong},
+		"task-resource-attribute": {CmdFunc: getTaskResourceAttributes, Aliases: []string{"task-resource-attributes"},
+			Short: taskResourceAttributesShort,
+			Long:  taskResourceAttributesLong},
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)
