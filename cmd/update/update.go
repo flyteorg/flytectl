@@ -2,6 +2,7 @@ package update
 
 import (
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/clusterresourceattribute"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionclusterlabel"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/taskresourceattribute"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -45,6 +46,8 @@ func CreateUpdateCommand() *cobra.Command {
 			Short: clusterResourceAttributesShort, Long: clusterResourceAttributesLong, ProjectDomainNotRequired: true},
 		"execution-queue-attribute": {CmdFunc: updateExecutionQueueAttributesFunc, Aliases: []string{}, PFlagProvider: executionqueueattribute.DefaultUpdateConfig,
 			Short: executionQueueAttributesShort, Long: executionQueueAttributesLong, ProjectDomainNotRequired: true},
+		"execution-cluster-label": {CmdFunc: updateExecutionClusterLabelFunc, Aliases: []string{}, PFlagProvider: executionclusterlabel.DefaultUpdateConfig,
+			Short: executionClusterLabelShort, Long: executionClusterLabelLong, ProjectDomainNotRequired: true},
 	}
 	cmdCore.AddCommands(updateCmd, updateResourcesFuncs)
 	return updateCmd

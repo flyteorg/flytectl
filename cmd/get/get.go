@@ -2,6 +2,7 @@ package get
 
 import (
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/clusterresourceattribute"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionclusterlabel"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/taskresourceattribute"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflow"
@@ -17,7 +18,7 @@ const (
 Example get projects.
 ::
 
- bin/flytectl get project
+ flytectl get project
 `
 )
 
@@ -50,6 +51,9 @@ func CreateGetCommand() *cobra.Command {
 		"execution-queue-attribute": {CmdFunc: getExecutionQueueAttributes, Aliases: []string{"execution-queue-attributes"},
 			Short: executionQueueAttributesShort,
 			Long:  executionQueueAttributesLong, PFlagProvider: executionqueueattribute.DefaultFetchConfig},
+		"execution-cluster-label": {CmdFunc: getExecutionClusterLabel, Aliases: []string{"execution-cluster-labels"},
+			Short: executionClusterLabelShort,
+			Long:  executionClusterLabelLong, PFlagProvider: executionclusterlabel.DefaultFetchConfig},
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)

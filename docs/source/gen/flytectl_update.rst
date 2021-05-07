@@ -74,6 +74,7 @@ SEE ALSO
 
 * :doc:`flytectl` 	 - flyetcl CLI tool
 * :doc:`flytectl_update_cluster-resource-attribute` 	 - Updates matchable resources of cluster attributes
+* :doc:`flytectl_update_execution-cluster-label` 	 - Updates matchable resources of execution cluster label
 * :doc:`flytectl_update_execution-queue-attribute` 	 - Updates matchable resources of execution queue attributes
 * :doc:`flytectl_update_launchplan` 	 - Updates launch plan metadata
 * :doc:`flytectl_update_project` 	 - Updates project resources

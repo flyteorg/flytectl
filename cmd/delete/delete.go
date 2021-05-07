@@ -2,6 +2,7 @@ package delete
 
 import (
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/clusterresourceattribute"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionclusterlabel"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/taskresourceattribute"
 	cmdcore "github.com/flyteorg/flytectl/cmd/core"
@@ -36,6 +37,9 @@ func RemoteDeleteCommand() *cobra.Command {
 		"cluster-resource-attribute": {CmdFunc: deleteClusterResourceAttributes, Aliases: []string{"cluster-resource-attributes"},
 			Short: clusterResourceAttributesShort,
 			Long:  clusterResourceAttributesLong, PFlagProvider: clusterresourceattribute.DefaultDelConfig, ProjectDomainNotRequired: true},
+		"execution-cluster-label": {CmdFunc: deleteExecutionClusterLabel, Aliases: []string{"execution-cluster-labels"},
+			Short: executionClusterLabelShort,
+			Long:  executionClusterLabelLong, PFlagProvider: executionclusterlabel.DefaultDelConfig, ProjectDomainNotRequired: true},
 		"execution-queue-attribute": {CmdFunc: deleteExecutionQueueAttributes, Aliases: []string{"execution-queue-attributes"},
 			Short: executionQueueAttributesShort,
 			Long:  executionQueueAttributesLong, PFlagProvider: executionqueueattribute.DefaultDelConfig, ProjectDomainNotRequired: true},

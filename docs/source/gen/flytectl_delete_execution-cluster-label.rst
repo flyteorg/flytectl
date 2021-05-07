@@ -1,72 +1,61 @@
-.. _flytectl_get_cluster-resource-attribute:
+.. _flytectl_delete_execution-cluster-label:
 
-flytectl get cluster-resource-attribute
+flytectl delete execution-cluster-label
 ---------------------------------------
 
-Gets matchable resources of cluster resource attributes
+Deletes matchable resources of execution cluster label
 
 Synopsis
 ~~~~~~~~
 
 
 
-Retrieves cluster resource attributes for given project and domain combination or additionally with workflow name.
+Deletes execution cluster label for given project and domain combination or additionally with workflow name.
 
-Retrieves cluster resource attribute for project and domain
-Here the command get cluster resource attributes for  project flytectldemo and development domain.
+Deletes execution cluster label for project and domain
+Here the command delete execution cluster label for project flytectldemo and development domain.
 ::
 
- flytectl get cluster-resource-attribute -p flytectldemo -d development 
+ flytectl delete execution-cluster-label -p flytectldemo -d development 
 
-eg : output from the command
 
-.. code-block:: json
-
- {"project":"flytectldemo","domain":"development","attributes":{"buzz":"lightyear","foo":"bar"}}
-
-Retrieves cluster resource attribute for project and domain and workflow
-Here the command get cluster resource attributes for  project flytectldemo, development domain and workflow core.control_flow.run_merge_sort.merge_sort
-::
-
- flytectl get cluster-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
-
-eg : output from the command
-
-.. code-block:: json
-
- {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","attributes":{"buzz":"lightyear","foo":"bar"}}
-
-Writing the cluster resource attribute to a file. If there are no cluster resource attributes , command would return an error.
-Here the command gets task resource attributes and writes the config file to cra.yaml
-eg:  content of cra.yaml
+Deletes execution cluster label using config file which was used for creating it.
+Here the command deletes execution cluster label from the config file ecl.yaml
+Value is optional in the file as its unread during the delete command but can be kept as the same file can be used for get, update or delete 
+eg:  content of ecl.yaml which will use the project domain and workflow name for deleting the resource
 
 ::
 
- flytectl get task-resource-attribute --attrFile cra.yaml
+ flytectl delete execution-cluster-label --attrFile ecl.yaml
 
 
 .. code-block:: yaml
-
+	
     domain: development
     project: flytectldemo
-    attributes:
-      foo: "bar"
-      buzz: "lightyear"
+    value: foo
+
+Deletes execution cluster label for a workflow
+Here the command deletes execution cluster label for a workflow core.control_flow.run_merge_sort.merge_sort
+
+::
+
+ flytectl delete execution-cluster-label -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
 Usage
 
 
 ::
 
-  flytectl get cluster-resource-attribute [flags]
+  flytectl delete execution-cluster-label [flags]
 
 Options
 ~~~~~~~
 
 ::
 
-      --attrFile string   attribute file name to be used for generating attribute for the resource type.
-  -h, --help              help for cluster-resource-attribute
+      --attrFile string   attribute file name to be used for delete attribute for the resource type.
+  -h, --help              help for execution-cluster-label
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,5 +104,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_get` 	 - Used for fetching various flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_delete` 	 - Used for terminating/deleting various flyte resources including tasks/workflows/launchplans/executions/project.
 

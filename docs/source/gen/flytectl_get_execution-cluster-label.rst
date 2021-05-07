@@ -1,64 +1,62 @@
-.. _flytectl_get_cluster-resource-attribute:
+.. _flytectl_get_execution-cluster-label:
 
-flytectl get cluster-resource-attribute
----------------------------------------
+flytectl get execution-cluster-label
+------------------------------------
 
-Gets matchable resources of cluster resource attributes
+Gets matchable resources of execution cluster label
 
 Synopsis
 ~~~~~~~~
 
 
 
-Retrieves cluster resource attributes for given project and domain combination or additionally with workflow name.
+Retrieves execution cluster label for given project and domain combination or additionally with workflow name.
 
-Retrieves cluster resource attribute for project and domain
-Here the command get cluster resource attributes for  project flytectldemo and development domain.
+Retrieves execution cluster label for project and domain
+Here the command get execution cluster label for project flytectldemo and development domain.
 ::
 
- flytectl get cluster-resource-attribute -p flytectldemo -d development 
+ flytectl get execution-cluster-label -p flytectldemo -d development 
 
 eg : output from the command
 
 .. code-block:: json
 
- {"project":"flytectldemo","domain":"development","attributes":{"buzz":"lightyear","foo":"bar"}}
+ {"project":"flytectldemo","domain":"development","value":"foo"}
 
-Retrieves cluster resource attribute for project and domain and workflow
-Here the command get cluster resource attributes for  project flytectldemo, development domain and workflow core.control_flow.run_merge_sort.merge_sort
+Retrieves execution cluster label for project and domain and workflow
+Here the command get execution cluster label for  project flytectldemo, development domain and workflow core.control_flow.run_merge_sort.merge_sort
 ::
 
- flytectl get cluster-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
+ flytectl get execution-cluster-label -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
 eg : output from the command
 
 .. code-block:: json
 
- {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","attributes":{"buzz":"lightyear","foo":"bar"}}
+ {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","value":"foo"}
 
-Writing the cluster resource attribute to a file. If there are no cluster resource attributes , command would return an error.
-Here the command gets task resource attributes and writes the config file to cra.yaml
-eg:  content of cra.yaml
+Writing the execution cluster label to a file. If there are no execution cluster label, command would return an error.
+Here the command gets execution cluster label and writes the config file to ecl.yaml
+eg:  content of ecl.yaml
 
 ::
 
- flytectl get task-resource-attribute --attrFile cra.yaml
+ flytectl get execution-cluster-label --attrFile ecl.yaml
 
 
 .. code-block:: yaml
 
     domain: development
     project: flytectldemo
-    attributes:
-      foo: "bar"
-      buzz: "lightyear"
+    value: foo
 
 Usage
 
 
 ::
 
-  flytectl get cluster-resource-attribute [flags]
+  flytectl get execution-cluster-label [flags]
 
 Options
 ~~~~~~~
@@ -66,7 +64,7 @@ Options
 ::
 
       --attrFile string   attribute file name to be used for generating attribute for the resource type.
-  -h, --help              help for cluster-resource-attribute
+  -h, --help              help for execution-cluster-label
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

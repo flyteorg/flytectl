@@ -32,18 +32,18 @@ func TestUpdateCommand(t *testing.T) {
 	assert.Equal(t, updateCommand.Use, updateUse)
 	assert.Equal(t, updateCommand.Short, updateShort)
 	assert.Equal(t, updateCommand.Long, updatecmdLong)
-	assert.Equal(t, len(updateCommand.Commands()), 7)
+	assert.Equal(t, len(updateCommand.Commands()), 8)
 	cmdNouns := updateCommand.Commands()
 	// Sort by Use value.
 	sort.Slice(cmdNouns, func(i, j int) bool {
 		return cmdNouns[i].Use < cmdNouns[j].Use
 	})
-	useArray := []string{"cluster-resource-attribute", "execution-queue-attribute", "launchplan", "project", "task",
+	useArray := []string{"cluster-resource-attribute", "execution-cluster-label", "execution-queue-attribute", "launchplan", "project", "task",
 		"task-resource-attribute", "workflow"}
-	aliases := [][]string{{}, {}, {}, {}, {}, {}, {}}
-	shortArray := []string{clusterResourceAttributesShort, executionQueueAttributesShort, updateLPShort, projectShort, updateTaskShort,
+	aliases := [][]string{{}, {}, {}, {}, {}, {}, {}, {}}
+	shortArray := []string{clusterResourceAttributesShort, executionClusterLabelShort, executionQueueAttributesShort, updateLPShort, projectShort, updateTaskShort,
 		taskResourceAttributesShort, updateWorkflowShort}
-	longArray := []string{clusterResourceAttributesLong, executionQueueAttributesLong, updateLPLong, projectLong, updateTaskLong,
+	longArray := []string{clusterResourceAttributesLong, executionClusterLabelLong, executionQueueAttributesLong, updateLPLong, projectLong, updateTaskLong,
 		taskResourceAttributesLong, updateWorkflowLong}
 	for i := range cmdNouns {
 		assert.Equal(t, cmdNouns[i].Use, useArray[i])

@@ -1,72 +1,64 @@
-.. _flytectl_get_cluster-resource-attribute:
+.. _flytectl_update_execution-cluster-label:
 
-flytectl get cluster-resource-attribute
+flytectl update execution-cluster-label
 ---------------------------------------
 
-Gets matchable resources of cluster resource attributes
+Updates matchable resources of execution cluster label
 
 Synopsis
 ~~~~~~~~
 
 
 
-Retrieves cluster resource attributes for given project and domain combination or additionally with workflow name.
+Updates execution cluster label for given project and domain combination or additionally with workflow name.
 
-Retrieves cluster resource attribute for project and domain
-Here the command get cluster resource attributes for  project flytectldemo and development domain.
-::
-
- flytectl get cluster-resource-attribute -p flytectldemo -d development 
-
-eg : output from the command
-
-.. code-block:: json
-
- {"project":"flytectldemo","domain":"development","attributes":{"buzz":"lightyear","foo":"bar"}}
-
-Retrieves cluster resource attribute for project and domain and workflow
-Here the command get cluster resource attributes for  project flytectldemo, development domain and workflow core.control_flow.run_merge_sort.merge_sort
-::
-
- flytectl get cluster-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
-
-eg : output from the command
-
-.. code-block:: json
-
- {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","attributes":{"buzz":"lightyear","foo":"bar"}}
-
-Writing the cluster resource attribute to a file. If there are no cluster resource attributes , command would return an error.
-Here the command gets task resource attributes and writes the config file to cra.yaml
-eg:  content of cra.yaml
-
-::
-
- flytectl get task-resource-attribute --attrFile cra.yaml
-
+Updating to the execution cluster label is only available from a generated file. See the get section for generating this file.
+Also this will completely overwrite any existing custom label on project and domain and workflow combination.
+Would be preferable to do get and generate an attribute file if there is an existing attribute already set and then update it to have new values
+Refer to get execution-cluster-label section on how to generate this file
+Here the command updates takes the input for execution cluster label from the config file ecl.yaml
+eg:  content of ecl.yaml
 
 .. code-block:: yaml
 
     domain: development
     project: flytectldemo
-    attributes:
-      foo: "bar"
-      buzz: "lightyear"
+    value: foo
+
+::
+
+ flytectl update execution-cluster-label --attrFile ecl.yaml
+
+Updating execution cluster label for project and domain and workflow combination. This will take precedence over any other
+execution cluster label defined at project domain level.
+Update the execution cluster label for workflow core.control_flow.run_merge_sort.merge_sort in flytectldemo, development domain
+
+.. code-block:: yaml
+
+    domain: development
+    project: flytectldemo
+    workflow: core.control_flow.run_merge_sort.merge_sort
+    value: foo
+
+::
+
+ flytectl update execution-cluster-label --attrFile ecl.yaml
 
 Usage
 
 
+
 ::
 
-  flytectl get cluster-resource-attribute [flags]
+  flytectl update execution-cluster-label [flags]
 
 Options
 ~~~~~~~
 
 ::
 
-      --attrFile string   attribute file name to be used for generating attribute for the resource type.
-  -h, --help              help for cluster-resource-attribute
+      --attrFile string   attribute file name to be used for updating attribute for the resource type.
+  -h, --help              help for execution-cluster-label
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -115,5 +107,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_get` 	 - Used for fetching various flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_update` 	 - Used for updating flyte resources eg: project.
 
