@@ -25,7 +25,7 @@ eg:  content of tra.yaml which will use the project domain and workflow name for
 
 ::
 
- flytectl delete task-resource-attribute --attrFile tra.yaml
+ flytectl get task-resource-attribute --attrFile tra.yaml
 
 
 .. code-block:: yaml
