@@ -19,20 +19,19 @@ Here the command delete task resource attributes for  project flytectldemo and d
  flytectl delete task-resource-attribute -p flytectldemo -d development 
 
 
-Deleting task resource attribute using config file
+Deleting task resource attribute using config file which was used for creating it.
 Here the command deletes task resource attributes from the config file tra.yaml
 eg:  content of tra.yaml which will use the project domain and workflow name for deleting the resource
 
 ::
 
- flytectl get task-resource-attribute --attrFile tra.yaml
+ flytectl delete task-resource-attribute --attrFile tra.yaml
 
 
 .. code-block:: yaml
 
-	Domain: development
-	Project: flytectldemo
-	Workflow: ""
+	domain: development
+	project: flytectldemo
 	defaults:
 	  cpu: "1"
 	  memory: 150Mi

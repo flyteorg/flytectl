@@ -33,9 +33,8 @@ eg:  content of tra.yaml which will use the project domain and workflow name for
 
 .. code-block:: yaml
 
-	Domain: development
-	Project: flytectldemo
-	Workflow: ""
+	domain: development
+	project: flytectldemo
 	defaults:
 	  cpu: "1"
 	  memory: 150Mi

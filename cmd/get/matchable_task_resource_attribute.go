@@ -38,9 +38,8 @@ eg:  content of tra.yaml
 
 .. code-block:: yaml
 
-	Domain: development
-	Project: flytectldemo
-	Workflow: ""
+	domain: development
+	project: flytectldemo
 	defaults:
 	  cpu: "1"
 	  memory: 150Mi

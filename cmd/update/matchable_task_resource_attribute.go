@@ -20,9 +20,8 @@ eg:  content of tra.yaml
 
 .. code-block:: yaml
 
-	Domain: development
-	Project: flytectldemo
-	Workflow: ""
+	domain: development
+	project: flytectldemo
 	defaults:
 	  cpu: "1"
 	  memory: 150Mi
@@ -39,9 +38,9 @@ resource attribute defined at project domain level.
 Update the resource attributes for workflow core.control_flow.run_merge_sort.merge_sort in flytectldemo , development domain
 .. code-block:: yaml
 
-	Domain: development
-	Project: flytectldemo
-	Workflow: core.control_flow.run_merge_sort.merge_sort
+	domain: development
+	project: flytectldemo
+	workflow: core.control_flow.run_merge_sort.merge_sort
 	defaults:
 	  cpu: "1"
 	  memory: 150Mi
