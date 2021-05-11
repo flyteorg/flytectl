@@ -73,7 +73,6 @@ func getTaskResourceAttributes(ctx context.Context, args []string, cmdCtx cmdCor
 		workflowAttr, err := cmdCtx.AdminFetcherExt().FetchWorkflowAttributes(ctx,
 			project, domain, workflowName, admin.MatchableResource_TASK_RESOURCE)
 		if err != nil {
-			taskResourceAttrFileConfig.DumpTaskResourceAttr(ctx, fileName)
 			return err
 		}
 		if workflowAttr.GetAttributes() == nil || workflowAttr.GetAttributes().GetMatchingAttributes() == nil {
@@ -86,7 +85,6 @@ func getTaskResourceAttributes(ctx context.Context, args []string, cmdCtx cmdCor
 		projectDomainAttr, err := cmdCtx.AdminFetcherExt().FetchProjectDomainAttributes(ctx,
 			project, domain, admin.MatchableResource_TASK_RESOURCE)
 		if err != nil {
-			taskResourceAttrFileConfig.DumpTaskResourceAttr(ctx, fileName)
 			return err
 		}
 		if projectDomainAttr.GetAttributes() == nil || projectDomainAttr.GetAttributes().GetMatchingAttributes() == nil {

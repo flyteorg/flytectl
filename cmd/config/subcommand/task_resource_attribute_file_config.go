@@ -18,9 +18,9 @@ import (
 // The shadow config is not using ProjectDomainAttribute/Workflowattribute directly inorder to simplify the inputs.
 // As the same structure is being used for both ProjectDomainAttribute/Workflowattribute
 type TaskResourceAttrFileConfig struct {
-	Project  string
-	Domain   string
-	Workflow string
+	Project  string `json:"project,omitempty"`
+	Domain   string `json:"domain,omitempty"`
+	Workflow string `json:"workflow,omitempty"`
 	*admin.TaskResourceAttributes
 }
 
@@ -28,7 +28,7 @@ type TaskResourceAttrFileConfig struct {
 func (t TaskResourceAttrFileConfig) WriteConfigToFile(fileName string) error {
 	d, err := yaml.Marshal(t)
 	if err != nil {
-		fmt.Printf("error: %v", err)
+		return fmt.Errorf("error: %v", err)
 	}
 	if _, err = os.Stat(fileName); err == nil {
 		if !cmdUtil.AskForConfirmation(fmt.Sprintf("warning file %v will be overwritten", fileName)) {
@@ -79,7 +79,7 @@ func (t TaskResourceAttrFileConfig) DumpTaskResourceAttr(ctx context.Context, fi
 			logger.Warnf(ctx, "error dumping in file due to %v", err)
 			return
 		}
-		fmt.Printf("written the config to file %v", fileName)
+		fmt.Printf("wrote the config to file %v", fileName)
 	} else {
 		fmt.Printf("%v", t)
 	}
