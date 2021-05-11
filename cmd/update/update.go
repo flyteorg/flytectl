@@ -1,8 +1,9 @@
 package update
 
 import (
-	"github.com/flyteorg/flytectl/cmd/config/subcommand"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/taskresourceattribute"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+
 	"github.com/spf13/cobra"
 )
 
@@ -36,8 +37,10 @@ func CreateUpdateCommand() *cobra.Command {
 			Short: updateTaskShort, Long: updateTaskLong},
 		"workflow": {CmdFunc: updateWorkflowFunc, Aliases: []string{}, ProjectDomainNotRequired: false, PFlagProvider: namedEntityConfig,
 			Short: updateWorkflowShort, Long: updateWorkflowLong},
-		"task-resource-attribute": {CmdFunc: updateTaskResourceAttributesFunc, Aliases: []string{}, PFlagProvider: subcommand.DefaultTaskResourceUpdateConfig,
+		"task-resource-attribute": {CmdFunc: updateTaskResourceAttributesFunc, Aliases: []string{}, PFlagProvider: taskresourceattribute.DefaultUpdateConfig,
 			Short: taskResourceAttributesShort, Long: taskResourceAttributesLong, ProjectDomainNotRequired: true},
+		"cluster-resource-attribute": {CmdFunc: updateClusterResourceAttributesFunc, Aliases: []string{}, PFlagProvider: taskresourceattribute.DefaultUpdateConfig,
+			Short: clusterResourceAttributesShort, Long: clusterResourceAttributesLong, ProjectDomainNotRequired: true},
 	}
 	cmdCore.AddCommands(updateCmd, updateResourcesFuncs)
 	return updateCmd
