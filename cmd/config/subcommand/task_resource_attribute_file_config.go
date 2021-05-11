@@ -18,8 +18,8 @@ import (
 // The shadow config is not using ProjectDomainAttribute/Workflowattribute directly inorder to simplify the inputs.
 // As the same structure is being used for both ProjectDomainAttribute/Workflowattribute
 type TaskResourceAttrFileConfig struct {
-	Project  string `json:"project,omitempty"`
-	Domain   string `json:"domain,omitempty"`
+	Project  string `json:"project"`
+	Domain   string `json:"domain"`
 	Workflow string `json:"workflow,omitempty"`
 	*admin.TaskResourceAttributes
 }
