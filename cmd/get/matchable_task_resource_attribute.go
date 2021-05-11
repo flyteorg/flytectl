@@ -75,7 +75,7 @@ func getTaskResourceAttributes(ctx context.Context, args []string, cmdCtx cmdCor
 			return err
 		}
 		if workflowAttr.GetAttributes() == nil || workflowAttr.GetAttributes().GetMatchingAttributes() == nil {
-			return fmt.Errorf("invalid matching attribute returned with nil data")
+			return fmt.Errorf("attribute doesn't exist")
 		}
 		// Update the shadow config with the fetched taskResourceAttribute which can then be written to a file which can then be called for an update.
 		taskResourceAttrFileConfig.TaskResourceAttributes = workflowAttr.GetAttributes().GetMatchingAttributes().GetTaskResourceAttributes()
@@ -87,7 +87,7 @@ func getTaskResourceAttributes(ctx context.Context, args []string, cmdCtx cmdCor
 			return err
 		}
 		if projectDomainAttr.GetAttributes() == nil || projectDomainAttr.GetAttributes().GetMatchingAttributes() == nil {
-			return fmt.Errorf("invalid matching attribute returned with nil data")
+			return fmt.Errorf("attribute doesn't exist")
 		}
 		// Update the shadow config with the fetched taskResourceAttribute which can then be written to a file which can then be called for an update.
 		taskResourceAttrFileConfig.TaskResourceAttributes = projectDomainAttr.GetAttributes().GetMatchingAttributes().GetTaskResourceAttributes()
