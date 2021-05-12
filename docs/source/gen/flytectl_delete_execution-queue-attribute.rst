@@ -1,27 +1,64 @@
-.. _flytectl_get:
+.. _flytectl_delete_execution-queue-attribute:
 
-flytectl get
-------------
+flytectl delete execution-queue-attribute
+-----------------------------------------
 
-Used for fetching various flyte resources including tasks/workflows/launchplans/executions/project.
+Deletes matchable resources of execution queue attributes
 
 Synopsis
 ~~~~~~~~
 
 
 
-Example get projects.
+Deletes execution queue attributes for given project and domain combination or additionally with workflow name.
+
+Deletes execution queue attribute for project and domain
+Here the command delete execution queue attributes for project flytectldemo and development domain.
 ::
 
- bin/flytectl get project
+ flytectl delete execution-queue-attribute -p flytectldemo -d development 
 
+
+Deleting execution queue attribute using config file which was used for creating it.
+Here the command deletes execution queue attributes from the config file cra.yaml
+eg:  content of cra.yaml which will use the project domain and workflow name for deleting the resource
+
+::
+
+ flytectl delete execution-queue-attribute --attrFile era.yaml
+
+
+.. code-block:: yaml
+	
+	domain: development
+	project: flytectldemo
+	tags:
+		- foo
+		- bar
+		- buzz
+		- lightyear
+
+Deleting execution queue attribute for a workflow
+Here the command execution queue attributes for a workflow
+
+::
+
+ flytectl delete execution-queue-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
+
+Usage
+
+
+::
+
+  flytectl delete execution-queue-attribute [flags]
 
 Options
 ~~~~~~~
 
 ::
 
-  -h, --help   help for get
+      --attrFile string   attribute file name to be used for delete attribute for the resource type.
+  -h, --help              help for execution-queue-attribute
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -70,13 +107,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - flyetcl CLI tool
-* :doc:`flytectl_get_cluster-resource-attribute` 	 - Gets matchable resources of cluster resource attributes
-* :doc:`flytectl_get_execution` 	 - Gets execution resources
-* :doc:`flytectl_get_execution-queue-attribute` 	 - Gets matchable resources of execution queue attributes
-* :doc:`flytectl_get_launchplan` 	 - Gets launch plan resources
-* :doc:`flytectl_get_project` 	 - Gets project resources
-* :doc:`flytectl_get_task` 	 - Gets task resources
-* :doc:`flytectl_get_task-resource-attribute` 	 - Gets matchable resources of task attributes
-* :doc:`flytectl_get_workflow` 	 - Gets workflow resources
+* :doc:`flytectl_delete` 	 - Used for terminating/deleting various flyte resources including tasks/workflows/launchplans/executions/project.
 

@@ -21,8 +21,8 @@ eg:  content of tra.yaml
 	domain: development
 	project: flytectldemo
 	attributes:
-		foo: "bar"
-		buzz: "lightyear"
+	  foo: "bar"
+	  buzz: "lightyear"
 
 ::
 
@@ -37,8 +37,8 @@ Update the cluster resource attributes for workflow core.control_flow.run_merge_
 	project: flytectldemo
 	workflow: core.control_flow.run_merge_sort.merge_sort
 	attributes:
-		foo: "bar"
-		buzz: "lightyear"
+	  foo: "bar"
+	  buzz: "lightyear"
 
 ::
 

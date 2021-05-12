@@ -38,8 +38,8 @@ eg:  content of tra.yaml
 	domain: development
 	project: flytectldemo
 	attributes:
-		foo: "bar"
-		buzz: "lightyear"
+	  foo: "bar"
+	  buzz: "lightyear"
 
 Usage
 
