@@ -32,6 +32,11 @@ var (
 var setup = testutils.Setup
 var tearDownAndVerify = testutils.TearDownAndVerify
 
+const (
+	testDataTempFile            = "temp-output-file"
+	testDataNotExistentTempFile = "non-existent-dir/temp-output-file"
+)
+
 func TestCreateGetCommand(t *testing.T) {
 	getCommand := CreateGetCommand()
 	assert.Equal(t, getCommand.Use, "get")

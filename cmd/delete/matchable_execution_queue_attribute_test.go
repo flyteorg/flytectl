@@ -2,10 +2,10 @@ package delete
 
 import (
 	"fmt"
-	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
 	"testing"
 
 	"github.com/flyteorg/flytectl/cmd/config"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 
@@ -107,7 +107,7 @@ func TestDeleteExecutionQueueAttributes(t *testing.T) {
 		setup()
 		deleteTaskResourceAttributeSetup()
 		// Empty attribute file
-		executionqueueattribute.DefaultDelConfig.AttrFile = "testdata/non-existent"
+		executionqueueattribute.DefaultDelConfig.AttrFile = testDataNonExistentFile
 		// No args implying project domain attribute deletion
 		u.DeleterExt.OnDeleteWorkflowAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything, mock.Anything).Return(nil)
@@ -121,7 +121,7 @@ func TestDeleteExecutionQueueAttributes(t *testing.T) {
 		setup()
 		deleteTaskResourceAttributeSetup()
 		// Empty attribute file
-		executionqueueattribute.DefaultDelConfig.AttrFile = "testdata/invalid_attribute.yaml"
+		executionqueueattribute.DefaultDelConfig.AttrFile = testDataInvalidAttrFile
 		// No args implying project domain attribute deletion
 		err = deleteExecutionQueueAttributes(ctx, args, cmdCtx)
 		assert.NotNil(t, err)

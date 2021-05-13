@@ -23,35 +23,36 @@ eg:  content of era.yaml
 
 .. code-block:: yaml
 
-	domain: development
-	project: flytectldemo
-	tags:
-		- foo
-		- bar
-		- buzz
-		- lightyear
+    domain: development
+    project: flytectldemo
+    tags:
+      - foo
+      - bar
+      - buzz
+      - lightyear
 
 ::
 
- flytectl update execution-queue-attribute -attrFile era.yaml
+ flytectl update execution-queue-attribute --attrFile era.yaml
 
 Updating execution queue attribute for project and domain and workflow combination. This will take precedence over any other
 execution queue attribute defined at project domain level.
 Update the execution queue attributes for workflow core.control_flow.run_merge_sort.merge_sort in flytectldemo , development domain
+
 .. code-block:: yaml
 
-	domain: development
-	project: flytectldemo
-	workflow: core.control_flow.run_merge_sort.merge_sort
-	tags:
-		- foo
-		- bar
-		- buzz
-		- lightyear
+    domain: development
+    project: flytectldemo
+    workflow: core.control_flow.run_merge_sort.merge_sort
+    tags:
+      - foo
+      - bar
+      - buzz
+      - lightyear
 
 ::
 
- flytectl update execution-queue-attribute -attrFile era.yaml
+ flytectl update execution-queue-attribute --attrFile era.yaml
 
 Usage
 

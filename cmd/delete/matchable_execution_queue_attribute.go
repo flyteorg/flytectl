@@ -22,9 +22,10 @@ Here the command delete execution queue attributes for project flytectldemo and 
  flytectl delete execution-queue-attribute -p flytectldemo -d development 
 
 
-Deleting execution queue attribute using config file which was used for creating it.
-Here the command deletes execution queue attributes from the config file cra.yaml
-eg:  content of cra.yaml which will use the project domain and workflow name for deleting the resource
+Deletes execution queue attribute using config file which was used for creating it.
+Here the command deletes execution queue attributes from the config file era.yaml
+Tags are optional in the file as they are unread during the delete command but can be kept as the same file can be used for get, update or delete 
+eg:  content of era.yaml which will use the project domain and workflow name for deleting the resource
 
 ::
 
@@ -33,16 +34,16 @@ eg:  content of cra.yaml which will use the project domain and workflow name for
 
 .. code-block:: yaml
 	
-	domain: development
-	project: flytectldemo
-	tags:
-		- foo
-		- bar
-		- buzz
-		- lightyear
+    domain: development
+    project: flytectldemo
+    tags:
+      - foo
+      - bar
+      - buzz
+      - lightyear
 
 Deleting execution queue attribute for a workflow
-Here the command execution queue attributes for a workflow
+Here the command deletes the execution queue attributes for a workflow
 
 ::
 

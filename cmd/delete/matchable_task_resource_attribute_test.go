@@ -107,7 +107,7 @@ func TestDeleteTaskResourceAttributes(t *testing.T) {
 		setup()
 		deleteTaskResourceAttributeSetup()
 		// Empty attribute file
-		taskresourceattribute.DefaultDelConfig.AttrFile = "testdata/non-existent"
+		taskresourceattribute.DefaultDelConfig.AttrFile = testDataNonExistentFile
 		// No args implying project domain attribute deletion
 		u.DeleterExt.OnDeleteWorkflowAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything, mock.Anything).Return(nil)
@@ -121,7 +121,7 @@ func TestDeleteTaskResourceAttributes(t *testing.T) {
 		setup()
 		deleteTaskResourceAttributeSetup()
 		// Empty attribute file
-		taskresourceattribute.DefaultDelConfig.AttrFile = "testdata/invalid_attribute.yaml"
+		taskresourceattribute.DefaultDelConfig.AttrFile = testDataInvalidAttrFile
 		// No args implying project domain attribute deletion
 		err = deleteTaskResourceAttributes(ctx, args, cmdCtx)
 		assert.NotNil(t, err)

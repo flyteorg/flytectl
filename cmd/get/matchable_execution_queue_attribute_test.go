@@ -2,11 +2,11 @@ package get
 
 import (
 	"fmt"
-	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
 	"os"
 	"testing"
 
 	"github.com/flyteorg/flytectl/cmd/config"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 
@@ -20,7 +20,7 @@ func getExecutionQueueAttributeSetup() {
 	mockClient = u.MockClient
 	executionqueueattribute.DefaultFetchConfig = &executionqueueattribute.AttrFetchConfig{}
 	// Clean up the temp directory.
-	_ = os.Remove("temp-output-file")
+	_ = os.Remove(testDataTempFile)
 }
 
 func TestGetExecutionQueueAttributes(t *testing.T) {
@@ -67,7 +67,7 @@ func TestGetExecutionQueueAttributes(t *testing.T) {
 		var args []string
 		setup()
 		getExecutionQueueAttributeSetup()
-		executionqueueattribute.DefaultFetchConfig.AttrFile = "temp-output-file"
+		executionqueueattribute.DefaultFetchConfig.AttrFile = testDataTempFile
 		// No args implying project domain attribute deletion
 		u.FetcherExt.OnFetchProjectDomainAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything).Return(projectDomainResp, nil)
@@ -81,7 +81,7 @@ func TestGetExecutionQueueAttributes(t *testing.T) {
 		var args []string
 		setup()
 		getExecutionQueueAttributeSetup()
-		executionqueueattribute.DefaultFetchConfig.AttrFile = "non-existent-dir/temp-output-file"
+		executionqueueattribute.DefaultFetchConfig.AttrFile = testDataNotExistentTempFile
 		// No args implying project domain attribute deletion
 		u.FetcherExt.OnFetchProjectDomainAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything).Return(projectDomainResp, nil)

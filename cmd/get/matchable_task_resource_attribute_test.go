@@ -20,7 +20,7 @@ func getTaskResourceAttributeSetup() {
 	mockClient = u.MockClient
 	taskresourceattribute.DefaultFetchConfig = &taskresourceattribute.AttrFetchConfig{}
 	// Clean up the temp directory.
-	_ = os.Remove("temp-output-file")
+	_ = os.Remove(testDataTempFile)
 }
 
 func TestGetTaskResourceAttributes(t *testing.T) {
@@ -74,7 +74,7 @@ func TestGetTaskResourceAttributes(t *testing.T) {
 		var args []string
 		setup()
 		getTaskResourceAttributeSetup()
-		taskresourceattribute.DefaultFetchConfig.AttrFile = "temp-output-file"
+		taskresourceattribute.DefaultFetchConfig.AttrFile = testDataTempFile
 		// No args implying project domain attribute deletion
 		u.FetcherExt.OnFetchProjectDomainAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything).Return(projectDomainResp, nil)
@@ -88,7 +88,7 @@ func TestGetTaskResourceAttributes(t *testing.T) {
 		var args []string
 		setup()
 		getTaskResourceAttributeSetup()
-		taskresourceattribute.DefaultFetchConfig.AttrFile = "non-existent-dir/temp-output-file"
+		taskresourceattribute.DefaultFetchConfig.AttrFile = testDataNotExistentTempFile
 		// No args implying project domain attribute deletion
 		u.FetcherExt.OnFetchProjectDomainAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything).Return(projectDomainResp, nil)

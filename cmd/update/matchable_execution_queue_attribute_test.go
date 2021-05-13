@@ -76,16 +76,16 @@ func TestExecutionQueueAttributes(t *testing.T) {
 	t.Run("non existent file", func(t *testing.T) {
 		setup()
 		updateExecutionQueueAttributeSetup()
-		executionqueueattribute.DefaultUpdateConfig.AttrFile = "testdata/non-existent-filel"
+		executionqueueattribute.DefaultUpdateConfig.AttrFile = testDataNonExistentFile
 		err = updateExecutionQueueAttributesFunc(ctx, nil, cmdCtx)
 		assert.NotNil(t, err)
-		assert.Equal(t, fmt.Errorf("unable to read from testdata/non-existent-filel yaml file"), err)
+		assert.Equal(t, fmt.Errorf("unable to read from testdata/non-existent-file yaml file"), err)
 		tearDownAndVerify(t, ``)
 	})
 	t.Run("invalid update file", func(t *testing.T) {
 		setup()
 		updateExecutionQueueAttributeSetup()
-		executionqueueattribute.DefaultUpdateConfig.AttrFile = "testdata/invalid_attribute.yaml"
+		executionqueueattribute.DefaultUpdateConfig.AttrFile = testDataInvalidAttrFile
 		err = updateExecutionQueueAttributesFunc(ctx, nil, cmdCtx)
 		assert.NotNil(t, err)
 		assert.Equal(t, fmt.Errorf("error unmarshaling JSON: while decoding JSON: json: unknown field \"InvalidDomain\""), err)

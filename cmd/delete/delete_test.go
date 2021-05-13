@@ -18,6 +18,12 @@ var (
 	mockClient *mocks.AdminServiceClient
 	cmdCtx     cmdCore.CommandContext
 )
+
+const (
+	testDataNonExistentFile = "testdata/non-existent-file"
+	testDataInvalidAttrFile = "testdata/invalid_attribute.yaml"
+)
+
 var setup = testutils.Setup
 var tearDownAndVerify = testutils.TearDownAndVerify
 

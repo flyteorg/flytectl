@@ -76,16 +76,16 @@ func TestUpdateClusterResourceAttributes(t *testing.T) {
 	t.Run("non existent file", func(t *testing.T) {
 		setup()
 		updateClusterResourceAttributeSetup()
-		clusterresourceattribute.DefaultUpdateConfig.AttrFile = "testdata/non-existent-filel"
+		clusterresourceattribute.DefaultUpdateConfig.AttrFile = testDataNonExistentFile
 		err = updateClusterResourceAttributesFunc(ctx, nil, cmdCtx)
 		assert.NotNil(t, err)
-		assert.Equal(t, fmt.Errorf("unable to read from testdata/non-existent-filel yaml file"), err)
+		assert.Equal(t, fmt.Errorf("unable to read from testdata/non-existent-file yaml file"), err)
 		tearDownAndVerify(t, ``)
 	})
 	t.Run("invalid update file", func(t *testing.T) {
 		setup()
 		updateClusterResourceAttributeSetup()
-		clusterresourceattribute.DefaultUpdateConfig.AttrFile = "testdata/invalid_attribute.yaml"
+		clusterresourceattribute.DefaultUpdateConfig.AttrFile = testDataInvalidAttrFile
 		err = updateClusterResourceAttributesFunc(ctx, nil, cmdCtx)
 		assert.NotNil(t, err)
 		assert.Equal(t, fmt.Errorf("error unmarshaling JSON: while decoding JSON: json: unknown field \"InvalidDomain\""), err)

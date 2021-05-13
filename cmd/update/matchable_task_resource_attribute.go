@@ -23,37 +23,38 @@ eg:  content of tra.yaml
 
 .. code-block:: yaml
 
-	domain: development
-	project: flytectldemo
-	defaults:
-		cpu: "1"
-		memory: "150Mi"
-	limits:
-		cpu: "2"
-		memory: "450Mi"
+    domain: development
+    project: flytectldemo
+    defaults:
+      cpu: "1"
+      memory: "150Mi"
+    limits:
+      cpu: "2"
+      memory: "450Mi"
 
 ::
 
- flytectl update task-resource-attribute -attrFile tra.yaml
+ flytectl update task-resource-attribute --attrFile tra.yaml
 
 Updating task resource attribute for project and domain and workflow combination. This will take precedence over any other
 resource attribute defined at project domain level.
 Update the resource attributes for workflow core.control_flow.run_merge_sort.merge_sort in flytectldemo , development domain
+
 .. code-block:: yaml
 
-	domain: development
-	project: flytectldemo
-	workflow: core.control_flow.run_merge_sort.merge_sort
-	defaults:
-		cpu: "1"
-		memory: "150Mi"
-	limits:
-		cpu: "2"
-		memory: "450Mi"
+    domain: development
+    project: flytectldemo
+    workflow: core.control_flow.run_merge_sort.merge_sort
+    defaults:
+      cpu: "1"
+      memory: "150Mi"
+    limits:
+      cpu: "2"
+      memory: "450Mi"
 
 ::
 
- flytectl update task-resource-attribute -attrFile tra.yaml
+ flytectl update task-resource-attribute --attrFile tra.yaml
 
 Usage
 

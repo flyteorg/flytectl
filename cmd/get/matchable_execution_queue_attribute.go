@@ -21,11 +21,23 @@ Here the command get execution queue attributes for  project flytectldemo and de
 
  flytectl get execution-queue-attribute -p flytectldemo -d development 
 
-eg : O/P
+eg : output from the command
 
 .. code-block:: json
 
  {"project":"flytectldemo","domain":"development","tags":["foo", "bar"]}
+
+Retrieves execution queue attribute for project and domain and workflow
+Here the command get execution queue attributes for  project flytectldemo ,development domain and workflow core.control_flow.run_merge_sort.merge_sort
+::
+
+ flytectl get execution-queue-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
+
+eg : output from the command
+
+.. code-block:: json
+
+ {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","tags":["foo", "bar"]}
 
 Writing the execution queue attribute to a file. If there are no execution queue attributes, command would return an error.
 Here the command gets execution queue attributes and writes the config file to era.yaml
@@ -38,13 +50,13 @@ eg:  content of era.yaml
 
 .. code-block:: yaml
 
-	domain: development
-	project: flytectldemo
-	tags:
-		- foo
-		- bar
-		- buzz
-		- lightyear
+    domain: development
+    project: flytectldemo
+    tags:
+      - foo
+      - bar
+      - buzz
+      - lightyear
 
 Usage
 `
