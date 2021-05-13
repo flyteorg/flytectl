@@ -37,7 +37,7 @@ eg:  content of cra.yaml which will use the project domain and workflow name for
       foo: "bar"
       buzz: "lightyear"
 
-Deleting cluster resource attribute for a workflow
+Deletes cluster resource attribute for a workflow
 Here the command deletes cluster resource attributes for a workflow
 
 ::

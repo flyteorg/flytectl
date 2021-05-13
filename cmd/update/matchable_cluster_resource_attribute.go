@@ -20,11 +20,11 @@ eg:  content of cra.yaml
 
 .. code-block:: yaml
 
-	domain: development
-	project: flytectldemo
-	attributes:
-	  foo: "bar"
-	  buzz: "lightyear"
+    domain: development
+    project: flytectldemo
+    attributes:
+      foo: "bar"
+      buzz: "lightyear"
 
 ::
 

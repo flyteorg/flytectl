@@ -43,7 +43,7 @@ eg:  content of tra.yaml which will use the project domain and workflow name for
       cpu: "2"
       memory: "450Mi"
 
-Deleting task resource attribute for a workflow
+Deletes task resource attribute for a workflow
 Here the command deletes task resource attributes for a workflow
 
 ::

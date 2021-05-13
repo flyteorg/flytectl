@@ -30,7 +30,7 @@ eg:  content of era.yaml which will use the project domain and workflow name for
 
 
 .. code-block:: yaml
-	
+
     domain: development
     project: flytectldemo
     tags:
@@ -39,7 +39,7 @@ eg:  content of era.yaml which will use the project domain and workflow name for
       - buzz
       - lightyear
 
-Deleting execution queue attribute for a workflow
+Deletes execution queue attribute for a workflow
 Here the command deletes the execution queue attributes for a workflow
 
 ::
