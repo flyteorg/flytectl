@@ -15,6 +15,9 @@ const (
 Updates task  resource attributes for given project and domain combination or additionally with workflow name.
 
 Updating the task resource attribute is only available from a generated file. See the get section for generating this file.
+Also this will completely overwrite any existing custom project and domain and workflow combination attributes.
+Would be preferable to do get and generate an attribute file if there is an existing attribute already set and then update it to have new values
+Refer to get task-resource-attribute section on how to generate this file
 Here the command updates takes the input for task resource attributes from the config file tra.yaml
 eg:  content of tra.yaml
 
