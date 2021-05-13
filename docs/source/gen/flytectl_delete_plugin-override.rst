@@ -1,29 +1,66 @@
-.. _flytectl_update:
+.. _flytectl_delete_plugin-override:
 
-flytectl update
----------------
+flytectl delete plugin-override
+-------------------------------
 
-Used for updating flyte resources eg: project.
+Deletes matchable resources of plugin overrides
 
 Synopsis
 ~~~~~~~~
 
 
 
-Currently this command only provides subcommands to update project.
-Takes input project which need to be archived or unarchived. Name of the project to be updated is mandatory field.
-Example update project to activate it.
+Deletes plugin override for given project and domain combination or additionally with workflow name.
+
+Deletes plugin override for project and domain
+Here the command deletes plugin override for project flytectldemo and development domain.
 ::
 
- bin/flytectl update project -p flytesnacks --activateProject
+ flytectl delete plugin-override -p flytectldemo -d development 
 
+
+Deletes plugin override using config file which was used for creating it.
+Here the command deletes plugin overrides from the config file po.yaml
+Overrides are optional in the file as they are unread during the delete command but can be kept as the same file can be used for get, update or delete 
+eg:  content of po.yaml which will use the project domain and workflow name for deleting the resource
+
+::
+
+ flytectl delete plugin-override --attrFile po.yaml
+
+
+.. code-block:: yaml
+
+    domain: development
+    project: flytectldemo
+    overrides:
+       - task_type: python_task # Task type for which to apply plugin implementation overrides
+         plugin_id:             # Plugin id(s) to be used in place of the default for the task type.
+           - plugin_override1
+           - plugin_override2
+         missing_plugin_behavior: 1 # Behavior when no specified plugin_id has an associated handler. 0 : FAIL , 1: DEFAULT
+
+Deletes plugin override for a workflow
+Here the command deletes the plugin override for a workflow core.control_flow.run_merge_sort.merge_sort
+
+::
+
+ flytectl delete plugin-override -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
+
+Usage
+
+
+::
+
+  flytectl delete plugin-override [flags]
 
 Options
 ~~~~~~~
 
 ::
 
-  -h, --help   help for update
+      --attrFile string   attribute file name to be used for delete attribute for the resource type.
+  -h, --help              help for plugin-override
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,14 +109,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - flyetcl CLI tool
-* :doc:`flytectl_update_cluster-resource-attribute` 	 - Updates matchable resources of cluster attributes
-* :doc:`flytectl_update_execution-cluster-label` 	 - Updates matchable resources of execution cluster label
-* :doc:`flytectl_update_execution-queue-attribute` 	 - Updates matchable resources of execution queue attributes
-* :doc:`flytectl_update_launchplan` 	 - Updates launch plan metadata
-* :doc:`flytectl_update_plugin-override` 	 - Updates matchable resources of plugin overrides
-* :doc:`flytectl_update_project` 	 - Updates project resources
-* :doc:`flytectl_update_task` 	 - Updates task metadata
-* :doc:`flytectl_update_task-resource-attribute` 	 - Updates matchable resources of task attributes
-* :doc:`flytectl_update_workflow` 	 - Updates workflow metadata
+* :doc:`flytectl_delete` 	 - Used for terminating/deleting various flyte resources including tasks/workflows/launchplans/executions/project.
 

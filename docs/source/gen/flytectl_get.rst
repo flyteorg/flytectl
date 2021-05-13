@@ -76,6 +76,7 @@ SEE ALSO
 * :doc:`flytectl_get_execution-cluster-label` 	 - Gets matchable resources of execution cluster label
 * :doc:`flytectl_get_execution-queue-attribute` 	 - Gets matchable resources of execution queue attributes
 * :doc:`flytectl_get_launchplan` 	 - Gets launch plan resources
+* :doc:`flytectl_get_plugin-override` 	 - Gets matchable resources of plugin override
 * :doc:`flytectl_get_project` 	 - Gets project resources
 * :doc:`flytectl_get_task` 	 - Gets task resources
 * :doc:`flytectl_get_task-resource-attribute` 	 - Gets matchable resources of task attributes
