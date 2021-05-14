@@ -13,9 +13,6 @@ Synopsis
 Updates execution cluster label for given project and domain combination or additionally with workflow name.
 
 Updating to the execution cluster label is only available from a generated file. See the get section for generating this file.
-Also this will completely overwrite any existing custom label on project and domain and workflow combination.
-Would be preferable to do get and generate an attribute file if there is an existing attribute already set and then update it to have new values
-Refer to get execution-cluster-label section on how to generate this file
 Here the command updates takes the input for execution cluster label from the config file ecl.yaml
 eg:  content of ecl.yaml
 

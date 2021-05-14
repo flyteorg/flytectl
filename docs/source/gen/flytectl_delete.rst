@@ -75,5 +75,6 @@ SEE ALSO
 * :doc:`flytectl_delete_execution` 	 - Terminate/Delete execution resources.
 * :doc:`flytectl_delete_execution-cluster-label` 	 - Deletes matchable resources of execution cluster label
 * :doc:`flytectl_delete_execution-queue-attribute` 	 - Deletes matchable resources of execution queue attributes
+* :doc:`flytectl_delete_plugin-override` 	 - Deletes matchable resources of plugin overrides
 * :doc:`flytectl_delete_task-resource-attribute` 	 - Deletes matchable resources of task attributes
 

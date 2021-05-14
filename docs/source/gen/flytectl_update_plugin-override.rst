@@ -1,29 +1,74 @@
-.. _flytectl_update:
+.. _flytectl_update_plugin-override:
 
-flytectl update
----------------
+flytectl update plugin-override
+-------------------------------
 
-Used for updating flyte resources eg: project.
+Updates matchable resources of plugin overrides
 
 Synopsis
 ~~~~~~~~
 
 
 
-Currently this command only provides subcommands to update project.
-Takes input project which need to be archived or unarchived. Name of the project to be updated is mandatory field.
-Example update project to activate it.
+Updates plugin overrides for given project and domain combination or additionally with workflow name.
+
+Updating to the plugin override is only available from a generated file. See the get section for generating this file.
+Also this will completely overwrite any existing plugins overrides on custom project and domain and workflow combination.
+Would be preferable to do get and generate an plugin override file if there is an existing override already set and then update it to have new values
+Refer to get plugin-override section on how to generate this file
+Here the command updates takes the input for plugin overrides from the config file po.yaml
+eg:  content of po.yaml
+
+.. code-block:: yaml
+
+    domain: development
+    project: flytectldemo
+    overrides:
+       - task_type: python_task # Task type for which to apply plugin implementation overrides
+         plugin_id:             # Plugin id(s) to be used in place of the default for the task type.
+           - plugin_override1
+           - plugin_override2
+         missing_plugin_behavior: 1 # Behavior when no specified plugin_id has an associated handler. 0 : FAIL , 1: DEFAULT
+
 ::
 
- bin/flytectl update project -p flytesnacks --activateProject
+ flytectl update plugin-override --attrFile po.yaml
 
+Updating plugin override for project and domain and workflow combination. This will take precedence over any other
+plugin overrides defined at project domain level.
+Update the plugin overrides for workflow core.control_flow.run_merge_sort.merge_sort in flytectldemo , development domain
+
+.. code-block:: yaml
+
+    domain: development
+    project: flytectldemo
+    workflow: core.control_flow.run_merge_sort.merge_sort
+    overrides:
+       - task_type: python_task # Task type for which to apply plugin implementation overrides
+         plugin_id:             # Plugin id(s) to be used in place of the default for the task type.
+           - plugin_override1
+           - plugin_override2
+         missing_plugin_behavior: 1 # Behavior when no specified plugin_id has an associated handler. 0 : FAIL , 1: DEFAULT
+
+::
+
+ flytectl update plugin-override --attrFile po.yaml
+
+Usage
+
+
+
+::
+
+  flytectl update plugin-override [flags]
 
 Options
 ~~~~~~~
 
 ::
 
-  -h, --help   help for update
+      --attrFile string   attribute file name to be used for updating attribute for the resource type.
+  -h, --help              help for plugin-override
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -72,14 +117,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - flyetcl CLI tool
-* :doc:`flytectl_update_cluster-resource-attribute` 	 - Updates matchable resources of cluster attributes
-* :doc:`flytectl_update_execution-cluster-label` 	 - Updates matchable resources of execution cluster label
-* :doc:`flytectl_update_execution-queue-attribute` 	 - Updates matchable resources of execution queue attributes
-* :doc:`flytectl_update_launchplan` 	 - Updates launch plan metadata
-* :doc:`flytectl_update_plugin-override` 	 - Updates matchable resources of plugin overrides
-* :doc:`flytectl_update_project` 	 - Updates project resources
-* :doc:`flytectl_update_task` 	 - Updates task metadata
-* :doc:`flytectl_update_task-resource-attribute` 	 - Updates matchable resources of task attributes
-* :doc:`flytectl_update_workflow` 	 - Updates workflow metadata
+* :doc:`flytectl_update` 	 - Used for updating flyte resources eg: project.
 

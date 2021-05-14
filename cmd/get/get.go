@@ -4,6 +4,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/clusterresourceattribute"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionclusterlabel"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
+	pluginoverride "github.com/flyteorg/flytectl/cmd/config/subcommand/plugin_override"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/taskresourceattribute"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflow"
 	cmdcore "github.com/flyteorg/flytectl/cmd/core"
@@ -54,6 +55,9 @@ func CreateGetCommand() *cobra.Command {
 		"execution-cluster-label": {CmdFunc: getExecutionClusterLabel, Aliases: []string{"execution-cluster-labels"},
 			Short: executionClusterLabelShort,
 			Long:  executionClusterLabelLong, PFlagProvider: executionclusterlabel.DefaultFetchConfig},
+		"plugin-override": {CmdFunc: getPluginOverridesFunc, Aliases: []string{"plugin-overrides"},
+			Short: pluginOverrideShort,
+			Long:  pluginOverrideLong, PFlagProvider: pluginoverride.DefaultFetchConfig},
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)
