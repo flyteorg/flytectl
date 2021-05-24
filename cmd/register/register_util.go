@@ -42,10 +42,10 @@ type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-var Client HTTPClient
+var httpClient HTTPClient
 
 func init() {
-	Client = &http.Client{}
+	httpClient = &http.Client{}
 }
 
 var projectColumns = []printer.Column{
@@ -216,7 +216,7 @@ func DownloadFileFromHTTP(ctx context.Context, ref storage.DataReference) (io.Re
 	if err != nil {
 		return nil, err
 	}
-	resp, err := Client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
