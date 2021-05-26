@@ -1,25 +1,54 @@
 package update
 
 import (
+	"context"
 	"sort"
 	"testing"
 
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/cmd/testutils"
+	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
+
 	"github.com/stretchr/testify/assert"
 )
+
+var (
+	err        error
+	ctx        context.Context
+	mockClient *mocks.AdminServiceClient
+	cmdCtx     cmdCore.CommandContext
+)
+
+const (
+	testDataNonExistentFile = "testdata/non-existent-file"
+	testDataInvalidAttrFile = "testdata/invalid_attribute.yaml"
+)
+
+var setup = testutils.Setup
+var tearDownAndVerify = testutils.TearDownAndVerify
 
 func TestUpdateCommand(t *testing.T) {
 	updateCommand := CreateUpdateCommand()
 	assert.Equal(t, updateCommand.Use, updateUse)
 	assert.Equal(t, updateCommand.Short, updateShort)
 	assert.Equal(t, updateCommand.Long, updatecmdLong)
-	assert.Equal(t, len(updateCommand.Commands()), 1)
+	assert.Equal(t, len(updateCommand.Commands()), 9)
 	cmdNouns := updateCommand.Commands()
 	// Sort by Use value.
 	sort.Slice(cmdNouns, func(i, j int) bool {
 		return cmdNouns[i].Use < cmdNouns[j].Use
 	})
-	assert.Equal(t, cmdNouns[0].Use, "project")
-	assert.Equal(t, cmdNouns[0].Aliases, []string{"projects"})
-	assert.Equal(t, cmdNouns[0].Short, projectShort)
-	assert.Equal(t, cmdNouns[0].Long, projectLong)
+	useArray := []string{"cluster-resource-attribute", "execution-cluster-label", "execution-queue-attribute", "launchplan",
+		"plugin-override", "project", "task", "task-resource-attribute", "workflow"}
+	aliases := [][]string{{}, {}, {}, {}, {}, {}, {}, {}, {}}
+	shortArray := []string{clusterResourceAttributesShort, executionClusterLabelShort, executionQueueAttributesShort, updateLPShort,
+		pluginOverrideShort, projectShort, updateTaskShort, taskResourceAttributesShort, updateWorkflowShort}
+	longArray := []string{clusterResourceAttributesLong, executionClusterLabelLong, executionQueueAttributesLong, updateLPLong,
+		pluginOverrideLong, projectLong, updateTaskLong, taskResourceAttributesLong, updateWorkflowLong}
+	for i := range cmdNouns {
+		assert.Equal(t, cmdNouns[i].Use, useArray[i])
+		assert.Equal(t, cmdNouns[i].Aliases, aliases[i])
+		assert.Equal(t, cmdNouns[i].Short, shortArray[i])
+		assert.Equal(t, cmdNouns[i].Long, longArray[i])
+	}
 }

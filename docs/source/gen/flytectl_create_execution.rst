@@ -70,6 +70,12 @@ The root project and domain flags of -p and -d should point to task/launch plans
 
  flytectl create execution --execFile execution_spec.yaml -p flytectldemo -d development --targetProject flytesnacks
 
+Also an execution can be relaunched by passing in current execution id.
+
+::
+
+ flytectl create execution --relaunch ffb31066a0f8b4d52b77 -p flytectldemo -d development
+
 Usage
 
 
@@ -86,6 +92,7 @@ Options
   -h, --help                     help for execution
       --iamRoleARN string        iam role ARN AuthRole for launching execution.
       --kubeServiceAcct string   kubernetes service account AuthRole for launching execution.
+      --relaunch string          execution id to be relaunched.
       --targetDomain string      project where execution needs to be created.If not specified configured domain would be used.
       --targetProject string     project where execution needs to be created.If not specified configured project would be used.
 
@@ -95,24 +102,24 @@ Options inherited from parent commands
 ::
 
       --admin.authorizationHeader string           Custom metadata header to pass JWT
-      --admin.authorizationServerUrl string        This is the URL to your IDP's authorization server'
-      --admin.clientId string                      Client ID
-      --admin.clientSecretLocation string          File containing the client secret
+      --admin.authorizationServerUrl string        This is the URL to your IdP's authorization server. It'll default to Endpoint
+      --admin.clientId string                      Client ID (default "flytepropeller")
+      --admin.clientSecretLocation string          File containing the client secret (default "/etc/secrets/client_secret")
       --admin.endpoint string                      For admin types,  specify where the uri of the service is located.
       --admin.insecure                             Use insecure connection.
       --admin.maxBackoffDelay string               Max delay for grpc backoff (default "8s")
       --admin.maxRetries int                       Max number of gRPC retries (default 4)
       --admin.perRetryTimeout string               gRPC per retry timeout (default "15s")
       --admin.scopes strings                       List of scopes to request
-      --admin.tokenUrl string                      Your IDPs token endpoint
-      --admin.useAuth                              Whether or not to try to authenticate with options below
+      --admin.tokenUrl string                      OPTIONAL: Your IdP's token endpoint. It'll be discovered from flyte admin's OAuth Metadata endpoint if not provided.
+      --admin.useAuth                              Deprecated: Auth will be enabled/disabled based on admin's dynamically discovered information.
       --adminutils.batchSize int                   Maximum number of records to retrieve per call. (default 100)
       --adminutils.maxRecords int                  Maximum number of records to retrieve. (default 500)
-      --asc                                        Specifies the sorting order
-      --config string                              config file (default is $HOME/config.yaml)
+      --asc                                        Specifies the sorting order. By default flytectl sort result in descending order
+      --config string                              config file (default is $HOME/.flyte/config.yaml)
   -d, --domain string                              Specifies the Flyte project's domain.
   -f, --field-selector string                      Specifies the Field selector
-      --limit int32                                Specifies the limit on results (default 100)
+      --limit int32                                Specifies the limit ofmake results (default 100)
       --logger.formatter.type string               Sets logging format type. (default "json")
       --logger.level int                           Sets the minimum logging level. (default 4)
       --logger.mute                                Mutes all logs regardless of severity. Intended for benchmarks/tests only.

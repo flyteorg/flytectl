@@ -1,7 +1,12 @@
 package update
 
 import (
-	cmdcore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/clusterresourceattribute"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionclusterlabel"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
+	pluginoverride "github.com/flyteorg/flytectl/cmd/config/subcommand/plugin_override"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/taskresourceattribute"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 
 	"github.com/spf13/cobra"
 )
@@ -27,13 +32,26 @@ func CreateUpdateCommand() *cobra.Command {
 		Short: updateShort,
 		Long:  updatecmdLong,
 	}
-
-	updateResourcesFuncs := map[string]cmdcore.CommandEntry{
-		"project": {CmdFunc: updateProjectsFunc, Aliases: []string{"projects"}, ProjectDomainNotRequired: true, PFlagProvider: projectConfig,
-			Short: projectShort,
-			Long:  projectLong},
+	updateResourcesFuncs := map[string]cmdCore.CommandEntry{
+		"launchplan": {CmdFunc: updateLPFunc, Aliases: []string{}, ProjectDomainNotRequired: false, PFlagProvider: namedEntityConfig,
+			Short: updateLPShort, Long: updateLPLong},
+		"project": {CmdFunc: updateProjectsFunc, Aliases: []string{}, ProjectDomainNotRequired: true, PFlagProvider: projectConfig,
+			Short: projectShort, Long: projectLong},
+		"task": {CmdFunc: updateTaskFunc, Aliases: []string{}, ProjectDomainNotRequired: false, PFlagProvider: namedEntityConfig,
+			Short: updateTaskShort, Long: updateTaskLong},
+		"workflow": {CmdFunc: updateWorkflowFunc, Aliases: []string{}, ProjectDomainNotRequired: false, PFlagProvider: namedEntityConfig,
+			Short: updateWorkflowShort, Long: updateWorkflowLong},
+		"task-resource-attribute": {CmdFunc: updateTaskResourceAttributesFunc, Aliases: []string{}, PFlagProvider: taskresourceattribute.DefaultUpdateConfig,
+			Short: taskResourceAttributesShort, Long: taskResourceAttributesLong, ProjectDomainNotRequired: true},
+		"cluster-resource-attribute": {CmdFunc: updateClusterResourceAttributesFunc, Aliases: []string{}, PFlagProvider: clusterresourceattribute.DefaultUpdateConfig,
+			Short: clusterResourceAttributesShort, Long: clusterResourceAttributesLong, ProjectDomainNotRequired: true},
+		"execution-queue-attribute": {CmdFunc: updateExecutionQueueAttributesFunc, Aliases: []string{}, PFlagProvider: executionqueueattribute.DefaultUpdateConfig,
+			Short: executionQueueAttributesShort, Long: executionQueueAttributesLong, ProjectDomainNotRequired: true},
+		"execution-cluster-label": {CmdFunc: updateExecutionClusterLabelFunc, Aliases: []string{}, PFlagProvider: executionclusterlabel.DefaultUpdateConfig,
+			Short: executionClusterLabelShort, Long: executionClusterLabelLong, ProjectDomainNotRequired: true},
+		"plugin-override": {CmdFunc: updatePluginOverridesFunc, Aliases: []string{}, PFlagProvider: pluginoverride.DefaultUpdateConfig,
+			Short: pluginOverrideShort, Long: pluginOverrideLong, ProjectDomainNotRequired: true},
 	}
-
-	cmdcore.AddCommands(updateCmd, updateResourcesFuncs)
+	cmdCore.AddCommands(updateCmd, updateResourcesFuncs)
 	return updateCmd
 }

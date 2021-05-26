@@ -12,6 +12,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/register"
 	"github.com/flyteorg/flytectl/cmd/update"
 	"github.com/flyteorg/flytectl/cmd/version"
+	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	stdConfig "github.com/flyteorg/flytestdlib/config"
 	"github.com/flyteorg/flytestdlib/config/viper"
@@ -26,6 +27,11 @@ var (
 	configAccessor = viper.NewAccessor(stdConfig.Options{StrictMode: true})
 )
 
+const (
+	configFileDir  = ".flyte"
+	configFileName = "config.yaml"
+)
+
 func newRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		PersistentPreRunE: initConfig,
@@ -36,18 +42,18 @@ func newRootCmd() *cobra.Command {
 	}
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "",
-		"config file (default is $HOME/config.yaml)")
+		"config file (default is $HOME/.flyte/config.yaml)")
 
 	configAccessor.InitializePflags(rootCmd.PersistentFlags())
 
-	// Due to https://github.com/lyft/flyte/issues/341, project flag will have to be specified as
+	// Due to https://github.com/flyteorg/flyte/issues/341, project flag will have to be specified as
 	// --root.project, this adds a convenience on top to allow --project to be used
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Project), "project", "p", "", "Specifies the Flyte project.")
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Domain), "domain", "d", "", "Specifies the Flyte project's domain.")
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Output), "output", "o", printer.OutputFormatTABLE.String(), fmt.Sprintf("Specifies the output type - supported formats %s", printer.OutputFormats()))
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().FieldSelector), "field-selector", "f", "", "Specifies the Field selector")
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().SortBy), "sort-by", "s", "", "Specifies which field to sort results ")
-	rootCmd.PersistentFlags().Int32Var(&(config.GetConfig().Limit), "limit", config.DefaultLimit, "Specifies the limit of results")
+	rootCmd.PersistentFlags().Int32Var(&(config.GetConfig().Limit), "limit", config.DefaultLimit, "Specifies the limit ofmake results")
 	rootCmd.PersistentFlags().BoolVar(&(config.GetConfig().Asc), "asc", false, "Specifies the sorting order. By default flytectl sort result in descending order")
 	rootCmd.AddCommand(viper.GetConfigCommand())
 	rootCmd.AddCommand(get.CreateGetCommand())
@@ -67,7 +73,7 @@ func newRootCmd() *cobra.Command {
 func initConfig(_ *cobra.Command, _ []string) error {
 	configAccessor = viper.NewAccessor(stdConfig.Options{
 		StrictMode:  true,
-		SearchPaths: []string{cfgFile},
+		SearchPaths: []string{cfgFile, f.FilePathJoin(f.UserHomeDir(), configFileDir, configFileName)},
 	})
 
 	err := configAccessor.UpdateConfig(context.TODO())

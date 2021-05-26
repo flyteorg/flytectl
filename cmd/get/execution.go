@@ -2,15 +2,14 @@ package get
 
 import (
 	"context"
-
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
-	"github.com/flyteorg/flytestdlib/logger"
-	"github.com/golang/protobuf/proto"
+	"github.com/flyteorg/flytectl/pkg/ext"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/flyteorg/flytestdlib/logger"
+	"github.com/golang/protobuf/proto"
 )
 
 const (
@@ -73,26 +72,21 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 	var executions []*admin.Execution
 	if len(args) > 0 {
 		name := args[0]
-		execution, err := cmdCtx.AdminClient().GetExecution(ctx, &admin.WorkflowExecutionGetRequest{
-			Id: &core.WorkflowExecutionIdentifier{
-				Project: config.GetConfig().Project,
-				Domain:  config.GetConfig().Domain,
-				Name:    name,
-			},
-		})
+		execution, err := cmdCtx.AdminFetcherExt().FetchExecution(ctx, name, config.GetConfig().Project, config.GetConfig().Domain)
 		if err != nil {
 			return err
 		}
 		executions = append(executions, execution)
 	} else {
-		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, buildResourceListRequestWithName(config.GetConfig(),""))
+		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, ext.BuildResourceListRequestWithName(config.GetConfig(),""))
 		if err != nil {
 			return err
 		}
 		executions = executionList.Executions
 	}
 	logger.Infof(ctx, "Retrieved %v executions", len(executions))
-	err := adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns, ExecutionToProtoMessages(executions)...)
+	err := adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns,
+		ExecutionToProtoMessages(executions)...)
 	if err != nil {
 		return err
 	}

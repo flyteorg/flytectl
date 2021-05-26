@@ -20,6 +20,12 @@ Configure
 =========
 Flytectl allows configuring using a YAML file or pass every configuration value
 on command-line. The follow configuration is useful to setup.
+Place this in $HOME/.flyte directory with name config.yaml.
+This file is searched in
+* $HOME/.flyte
+* currDir from where you run flytectl
+* /etc/flyte/config
+* You can pass it commandline using --config <config-file-path>
 
 Basic Configuration
 --------------------
@@ -31,60 +37,29 @@ Basic Configuration
     endpoint: dns:///flyte.lyft.net
     # Change insecure flag to ensure that you use the right setting for your environment
     insecure: true
+  logger:
     # Logger settings to control logger output. Useful to debug logger:
     show-source: true
     level: 1
 
 
-
 .. toctree::
    :maxdepth: 1
    :hidden:
 
-   Getting Started <https://docs.flyte.org/en/latest/getting_started.html>
-   Tutorials <https://flytecookbook.readthedocs.io>
-   reference/index
-   Community <https://docs.flyte.org/en/latest/community/index.html>
+   |plane| Getting Started <https://docs.flyte.org/en/latest/getting_started.html>
+   |book-reader| User Guide <https://docs.flyte.org/projects/cookbook/en/latest/user_guide.html>
+   |chalkboard| Tutorials <https://docs.flyte.org/projects/cookbook/en/latest/tutorials.html>
+   |project-diagram| Concepts <https://docs.flyte.org/en/latest/concepts/basics.html>
+   |book| API Reference <https://docs.flyte.org/en/latest/reference/index.html>
+   |hands-helping| Community <https://docs.flyte.org/en/latest/community/index.html>
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: -1
    :caption: Flytectl
    :hidden:
 
    Install and Configure <self>
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Verbs
-   :hidden:
-
-   gen/flytectl_create
-   gen/flytectl_get
-   gen/flytectl_update
-   gen/flytectl_delete
-   gen/flytectl_register
-   gen/flytectl_config
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Nouns
-   :hidden:
-
-   gen/flytectl_create_project
-   gen/flytectl_create_execution
-   gen/flytectl_get_execution
-   gen/flytectl_get_project
-   gen/flytectl_get_workflow
-   gen/flytectl_get_task
-   gen/flytectl_get_launchplan
-   gen/flytectl_update_project
-   gen/flytectl_register_files
-   gen/flytectl_version
-   gen/flytectl_config_validate
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contribute
-   :hidden:
-
-   contribute
+   verbs
+   nouns
+   Contribute <https://github.com/flyteorg/flytectl/blob/master/docs/CONTRIBUTING.md>

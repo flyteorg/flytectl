@@ -13,7 +13,7 @@ Synopsis
 Example get projects.
 ::
 
- bin/flytectl get project
+ flytectl get project
 
 
 Options
@@ -29,24 +29,24 @@ Options inherited from parent commands
 ::
 
       --admin.authorizationHeader string           Custom metadata header to pass JWT
-      --admin.authorizationServerUrl string        This is the URL to your IDP's authorization server'
-      --admin.clientId string                      Client ID
-      --admin.clientSecretLocation string          File containing the client secret
+      --admin.authorizationServerUrl string        This is the URL to your IdP's authorization server. It'll default to Endpoint
+      --admin.clientId string                      Client ID (default "flytepropeller")
+      --admin.clientSecretLocation string          File containing the client secret (default "/etc/secrets/client_secret")
       --admin.endpoint string                      For admin types,  specify where the uri of the service is located.
       --admin.insecure                             Use insecure connection.
       --admin.maxBackoffDelay string               Max delay for grpc backoff (default "8s")
       --admin.maxRetries int                       Max number of gRPC retries (default 4)
       --admin.perRetryTimeout string               gRPC per retry timeout (default "15s")
       --admin.scopes strings                       List of scopes to request
-      --admin.tokenUrl string                      Your IDPs token endpoint
-      --admin.useAuth                              Whether or not to try to authenticate with options below
+      --admin.tokenUrl string                      OPTIONAL: Your IdP's token endpoint. It'll be discovered from flyte admin's OAuth Metadata endpoint if not provided.
+      --admin.useAuth                              Deprecated: Auth will be enabled/disabled based on admin's dynamically discovered information.
       --adminutils.batchSize int                   Maximum number of records to retrieve per call. (default 100)
       --adminutils.maxRecords int                  Maximum number of records to retrieve. (default 500)
-      --asc                                        Specifies the sorting order
-      --config string                              config file (default is $HOME/config.yaml)
+      --asc                                        Specifies the sorting order. By default flytectl sort result in descending order
+      --config string                              config file (default is $HOME/.flyte/config.yaml)
   -d, --domain string                              Specifies the Flyte project's domain.
   -f, --field-selector string                      Specifies the Field selector
-      --limit int32                                Specifies the limit on results (default 100)
+      --limit int32                                Specifies the limit ofmake results (default 100)
       --logger.formatter.type string               Sets logging format type. (default "json")
       --logger.level int                           Sets the minimum logging level. (default 4)
       --logger.mute                                Mutes all logs regardless of severity. Intended for benchmarks/tests only.
@@ -79,9 +79,14 @@ SEE ALSO
 ~~~~~~~~
 
 * :doc:`flytectl` 	 - flyetcl CLI tool
+* :doc:`flytectl_get_cluster-resource-attribute` 	 - Gets matchable resources of cluster resource attributes
 * :doc:`flytectl_get_execution` 	 - Gets execution resources
+* :doc:`flytectl_get_execution-cluster-label` 	 - Gets matchable resources of execution cluster label
+* :doc:`flytectl_get_execution-queue-attribute` 	 - Gets matchable resources of execution queue attributes
 * :doc:`flytectl_get_launchplan` 	 - Gets launch plan resources
+* :doc:`flytectl_get_plugin-override` 	 - Gets matchable resources of plugin override
 * :doc:`flytectl_get_project` 	 - Gets project resources
 * :doc:`flytectl_get_task` 	 - Gets task resources
+* :doc:`flytectl_get_task-resource-attribute` 	 - Gets matchable resources of task attributes
 * :doc:`flytectl_get_workflow` 	 - Gets workflow resources
 
