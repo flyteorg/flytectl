@@ -26,7 +26,6 @@ func SplitTerms(filter string) []string {
 func Transform(filters []string) (string, error) {
 	adminFilter := ""
 	for _, f := range filters {
-		fmt.Println(f)
 		if lhs, op, rhs, ok := parse(f); ok {
 			unescapedRHS, err := UnescapeValue(rhs)
 			if err != nil {
@@ -42,8 +41,6 @@ func Transform(filters []string) (string, error) {
 			}
 		}
 	}
-
-	fmt.Println(adminFilter)
 	return adminFilter, nil
 }
 

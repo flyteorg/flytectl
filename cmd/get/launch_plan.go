@@ -137,7 +137,6 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		return nil
 	}
 	launchPlans, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListLaunchPlanIds, adminutils.ListRequest{Project: project, Domain: domain, Filters: fieldSelector})
-
 	if err != nil {
 		return err
 	}
