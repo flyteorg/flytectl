@@ -9,7 +9,7 @@ import (
 
 var (
 	Inreg         = regexp.MustCompile(` in `)
-	Containsreg         = regexp.MustCompile(` contains `)
+	Containsreg   = regexp.MustCompile(` contains `)
 	InRegValue    = regexp.MustCompile(`(?s)\((.*)\)`)
 	termOperators = []string{NotEquals, Equals, GreaterThanEquals, GreaterThan, LessThanEquals, LessThan, Contains, In}
 )
@@ -26,6 +26,7 @@ func SplitTerms(filter string) []string {
 func Transform(filters []string) (string, error) {
 	adminFilter := ""
 	for _, f := range filters {
+		fmt.Println(f)
 		if lhs, op, rhs, ok := parse(f); ok {
 			unescapedRHS, err := UnescapeValue(rhs)
 			if err != nil {
@@ -41,9 +42,10 @@ func Transform(filters []string) (string, error) {
 			}
 		}
 	}
+
+	fmt.Println(adminFilter)
 	return adminFilter, nil
 }
-
 
 // validate validate the field selector operation
 func validate(lhs, op, rhs string) bool {
@@ -127,22 +129,22 @@ func parse(filter string) (lhs, op, rhs string, ok bool) {
 		for _, op := range termOperators {
 			switch op {
 			case Contains:
-				if  Containsreg.MatchString(filter) {
+				if Containsreg.MatchString(filter) {
 					results = Containsreg.Split(filter, 2)
 					return results[0], op, results[1], true
 				}
-				break;
+				break
 			case In:
-				if  Inreg.MatchString(filter) {
+				if Inreg.MatchString(filter) {
 					results = Inreg.Split(filter, 2)
 					values := InRegValue.FindAllStringSubmatch(strings.TrimSpace(results[1]), -1)
 					return results[0], op, values[0][1], true
 				}
-				break;
+				break
 			default:
 				if strings.HasPrefix(remaining, op) {
-				   return filter[0:i], op, filter[i+len(op):], true
-			    }
+					return filter[0:i], op, filter[i+len(op):], true
+				}
 			}
 
 		}

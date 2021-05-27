@@ -2,6 +2,7 @@ package get
 
 import (
 	"context"
+
 	"github.com/flyteorg/flytectl/pkg/ext"
 
 	"github.com/flyteorg/flytectl/cmd/config"
@@ -28,7 +29,12 @@ Retrieves execution by name within project and domain.
 Retrieves all the execution with filters.
 ::
 
- bin/flytectl get execution -p flytesnacks -d development --field-selector="execution.name=oeh94k9r2r" 
+ bin/flytectl get execution -p flytesnacks -d development --field-selector="execution.phase in (FAILED)" 
+
+Retrieve specific execution with filters.
+::
+
+ bin/flytectl get execution -p flytesnacks -d development  y8n2wtuspj --field-selector="execution.phase in (FAILED)" 
 
 Retrieves all the execution with limit and sorting.
 ::
@@ -78,7 +84,7 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 		}
 		executions = append(executions, execution)
 	} else {
-		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, ext.BuildResourceListRequestWithName(config.GetConfig(),""))
+		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, ext.BuildResourceListRequestWithName(config.GetConfig(), ""))
 		if err != nil {
 			return err
 		}

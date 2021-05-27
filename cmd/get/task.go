@@ -6,8 +6,8 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/adminutils"
-	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/ext"
+	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -28,28 +28,17 @@ Retrieves all the task within project and domain.(task,tasks can be used interch
 Retrieves task by name within project and domain.
 ::
 
- bin/flytectl task -p flytesnacks -d development core.basic.lp.greet
+ bin/flytectl task -p flytesnacks -d development k8s_spark.pyspark_pi.print_every_time
 
-<<<<<<< HEAD
 Retrieves all the tasks with filters.
-=======
-Retrieves latest version of task by name within project and domain.
-
-::
-
- flytectl get task -p flytesnacks -d development  core.basic.lp.greet --latest
-
-Retrieves particular version of task by name within project and domain.
-
-::
-
- flytectl get workflow -p flytesnacks -d development  core.basic.lp.greet --version v2
-
-Retrieves project by filters.
->>>>>>> cdc1938c16f60328fbc0082f453ee7c932cff600
 ::
  
- bin/flytectl get task -p flytesnacks -d development --field-selector="task.name=core.basic.lp.greet" 
+ bin/flytectl get task -p flytesnacks -d development --field-selector="task.name=k8s_spark.pyspark_pi.print_every_time" 
+
+Retrieve a specific task with filters.
+::
+
+ bin/flytectl get task -p flytesnacks -d development k8s_spark.pyspark_pi.print_every_time --field-selector="task.version=v1" 
  
 Retrieves all the task with limit and sorting.
 ::
@@ -129,7 +118,7 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 	taskPrinter := printer.Printer{}
 	project := config.GetConfig().Project
 	domain := config.GetConfig().Domain
-	fieldSelector,err := filters.Transform(filters.SplitTerms(config.GetConfig().FieldSelector))
+	fieldSelector, err := filters.Transform(filters.SplitTerms(config.GetConfig().FieldSelector))
 	if err != nil {
 		return err
 	}

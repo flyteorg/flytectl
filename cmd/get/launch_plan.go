@@ -6,8 +6,8 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/adminutils"
-	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/ext"
+	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -29,27 +29,16 @@ Retrieves launch plan by name within project and domain.
 
  flytectl get launchplan -p flytesnacks -d development core.basic.lp.go_greet
 
-<<<<<<< HEAD
 Retrieves all the launch plans with filters.
-=======
-
-Retrieves latest version of task by name within project and domain.
-
-::
-
- flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --latest
-
-Retrieves particular version of launchplan by name within project and domain.
-
-::
-
- flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --version v2
-
-Retrieves launchplan by filters.
->>>>>>> cdc1938c16f60328fbc0082f453ee7c932cff600
 ::
 
  bin/flytectl get launchplan -p flytesnacks -d development --field-selector="launchplan.name=core.basic.lp.go_greet"
+
+Retrieves specific launch plans with filters.
+::
+
+ bin/flytectl get launchplan -p flytesnacks -d development core.basic.lp.go_greet --field-selector="launchplan.version=v1"
+
 
 Retrieves all the launch plans with limit and sorting.
 ::
@@ -128,7 +117,7 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 	launchPlanPrinter := printer.Printer{}
 	project := config.GetConfig().Project
 	domain := config.GetConfig().Domain
-	fieldSelector,err := filters.Transform(filters.SplitTerms(config.GetConfig().FieldSelector))
+	fieldSelector, err := filters.Transform(filters.SplitTerms(config.GetConfig().FieldSelector))
 	if err != nil {
 		return err
 	}

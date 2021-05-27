@@ -3,9 +3,9 @@ package get
 import (
 	"context"
 
-	"github.com/flyteorg/flytectl/pkg/filters"
 	workflowconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/workflow"
 	"github.com/flyteorg/flytectl/pkg/ext"
+	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytestdlib/logger"
 	"github.com/golang/protobuf/proto"
 
@@ -46,8 +46,12 @@ Retrieves particular version of workflow by name within project and domain.
 Retrieves all the workflows with filters.
 ::
 
- bin/flytectl get workflow -p flytesnacks -d development  --field-selector="workflow.name=core.basic.lp.go_greet"
+ bin/flytectl get workflow -p flytesnacks -d development  --field-selector="workflow.name=k8s_spark.dataframe_passing.my_smart_schema"
 
+ Retrieve specific workflow with filters.
+::
+
+ bin/flytectl get workflow -p flytesnacks -d development k8s_spark.dataframe_passing.my_smart_schema --field-selector="workflow.version=v1"
  
 Retrieves all the workflows with limit and sorting.
 ::
@@ -86,7 +90,7 @@ func WorkflowToProtoMessages(l []*admin.Workflow) []proto.Message {
 
 func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
-	fieldSelector,err := filters.Transform(filters.SplitTerms(config.GetConfig().FieldSelector))
+	fieldSelector, err := filters.Transform(filters.SplitTerms(config.GetConfig().FieldSelector))
 	if err != nil {
 		return err
 	}
