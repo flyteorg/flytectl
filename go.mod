@@ -7,6 +7,7 @@ require (
 	github.com/flyteorg/flyteidl v0.18.40
 	github.com/flyteorg/flytestdlib v0.3.21
 	github.com/ghodss/yaml v1.0.0
+	github.com/goccy/go-graphviz v0.0.9
 	github.com/golang/protobuf v1.4.3
 	github.com/google/uuid v1.1.2
 	github.com/kataras/tablewriter v0.0.0-20180708051242-e063d29b7c23
