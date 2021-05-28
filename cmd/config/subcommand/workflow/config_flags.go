@@ -42,6 +42,6 @@ func (Config) mustMarshalJSON(v json.Marshaler) string {
 func (cfg Config) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("Config", pflag.ExitOnError)
 	cmdFlags.StringVar(&(DefaultConfig.Version), fmt.Sprintf("%v%v", prefix, "version"), DefaultConfig.Version, "version of the workflow to be fetched.")
-	cmdFlags.BoolVar(&(DefaultConfig.Latest),fmt.Sprintf("%v%v", prefix, "latest"), DefaultConfig.Latest, " flag to indicate to fetch the latest version,  version flag will be ignored in this case")
+	cmdFlags.BoolVar(&(DefaultConfig.Latest), fmt.Sprintf("%v%v", prefix, "latest"), DefaultConfig.Latest, " flag to indicate to fetch the latest version,  version flag will be ignored in this case")
 	return cmdFlags
 }

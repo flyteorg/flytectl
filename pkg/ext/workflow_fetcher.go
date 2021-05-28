@@ -4,14 +4,15 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/flyteorg/flytectl/pkg/filters"
+
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
-	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 )
 
 // FetchAllVerOfWorkflow fetches all the versions for give workflow name
-func (a *AdminFetcherExtClient) FetchAllVerOfWorkflow(ctx context.Context, workflowName, project, domain string) ([]*admin.Workflow, error) {
-	wList, err := a.AdminServiceClient().ListWorkflows(ctx, BuildResourceListRequestWithName(config.GetConfig(),workflowName))
+func (a *AdminFetcherExtClient) FetchAllVerOfWorkflow(ctx context.Context, workflowName, project, domain string, filter filters.Filters) ([]*admin.Workflow, error) {
+	wList, err := a.AdminServiceClient().ListWorkflows(ctx, filters.BuildResourceListRequestWithName(filter, workflowName))
 	if err != nil {
 		return nil, err
 	}
@@ -22,9 +23,9 @@ func (a *AdminFetcherExtClient) FetchAllVerOfWorkflow(ctx context.Context, workf
 }
 
 // FetchWorkflowLatestVersion fetches latest version for given workflow name
-func (a *AdminFetcherExtClient) FetchWorkflowLatestVersion(ctx context.Context, name, project, domain string) (*admin.Workflow, error) {
+func (a *AdminFetcherExtClient) FetchWorkflowLatestVersion(ctx context.Context, name, project, domain string, filter filters.Filters) (*admin.Workflow, error) {
 	// Fetch the latest version of the workflow.
-	wVersions, err := a.FetchAllVerOfWorkflow(ctx, name, project, domain)
+	wVersions, err := a.FetchAllVerOfWorkflow(ctx, name, project, domain, filter)
 	if err != nil {
 		return nil, err
 	}

@@ -12,8 +12,7 @@ golang. To install simply copy paste the following into the command-line:
 
 .. prompt:: bash
 
-   $ brew tap flyteorg/homebrew-tap
-   $ brew install flytectl
+   curl -s https://raw.githubusercontent.com/lyft/flytectl/master/install.sh | bash
 
 
 Configure

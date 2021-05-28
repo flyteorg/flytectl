@@ -3,11 +3,11 @@ package get
 import (
 	"context"
 
+	"github.com/flyteorg/flytectl/pkg/filters"
+
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytectl/pkg/adminutils"
 	"github.com/flyteorg/flytectl/pkg/ext"
-	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -19,34 +19,44 @@ const (
 	taskShort = "Gets task resources"
 	taskLong  = `
 Retrieves all the task within project and domain.(task,tasks can be used interchangeably in these commands)
-
 ::
 
  bin/flytectl get task -p flytesnacks -d development
 
-
 Retrieves task by name within project and domain.
+
 ::
 
- bin/flytectl task -p flytesnacks -d development k8s_spark.pyspark_pi.print_every_time
+ bin/flytectl task -p flytesnacks -d development core.basic.lp.greet
+
+Retrieves latest version of task by name within project and domain.
+
+::
+
+ flytectl get task -p flytesnacks -d development  core.basic.lp.greet --latest
+
+Retrieves particular version of task by name within project and domain.
+
+::
+
+ flytectl get task -p flytesnacks -d development  core.basic.lp.greet --version v2
 
 Retrieves all the tasks with filters.
 ::
+  
+  bin/flytectl get task -p flytesnacks -d development --filter.field-selector="task.name=k8s_spark.pyspark_pi.print_every_time,task.version=v1" 
  
- bin/flytectl get task -p flytesnacks -d development --field-selector="task.name=k8s_spark.pyspark_pi.print_every_time" 
-
 Retrieve a specific task with filters.
 ::
-
- bin/flytectl get task -p flytesnacks -d development k8s_spark.pyspark_pi.print_every_time --field-selector="task.version=v1" 
  
+  bin/flytectl get task -p flytesnacks -d development k8s_spark.pyspark_pi.print_every_time --filter.field-selector="task.version=v1,created_at>=2021-05-24T21:43:12.325335Z" 
+  
 Retrieves all the task with limit and sorting.
 ::
-  
- bin/flytectl get -p flytesnacks -d development task  --sort-by=created_at --limit=1 --asc
+   
+  bin/flytectl get -p flytesnacks -d development task  --filter.sort-by=created_at --filter.limit=1 --filter.asc
 
 Retrieves all the tasks within project and domain in yaml format.
-
 ::
 
  bin/flytectl get task -p flytesnacks -d development -o yaml
@@ -87,14 +97,17 @@ Usage
 
 //go:generate pflags TaskConfig --default-var taskConfig
 var (
-	taskConfig = &TaskConfig{}
+	taskConfig = &TaskConfig{
+		Filter: filters.DefaultFilter,
+	}
 )
 
 // FilesConfig
 type TaskConfig struct {
-	ExecFile string `json:"execFile" pflag:",execution file name to be used for generating execution spec of a single task."`
-	Version  string `json:"version" pflag:",version of the task to be fetched."`
-	Latest   bool   `json:"latest" pflag:", flag to indicate to fetch the latest version, version flag will be ignored in this case"`
+	ExecFile string          `json:"execFile" pflag:",execution file name to be used for generating execution spec of a single task."`
+	Version  string          `json:"version" pflag:",version of the task to be fetched."`
+	Latest   bool            `json:"latest" pflag:", flag to indicate to fetch the latest version, version flag will be ignored in this case"`
+	Filter   filters.Filters `json:"filter" pflag:","`
 }
 
 var taskColumns = []printer.Column{
@@ -118,10 +131,6 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 	taskPrinter := printer.Printer{}
 	project := config.GetConfig().Project
 	domain := config.GetConfig().Domain
-	fieldSelector, err := filters.Transform(filters.SplitTerms(config.GetConfig().FieldSelector))
-	if err != nil {
-		return err
-	}
 	if len(args) == 1 {
 		name := args[0]
 		var tasks []*admin.Task
@@ -132,12 +141,17 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 		logger.Debugf(ctx, "Retrieved Task", tasks)
 		return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToProtoMessages(tasks)...)
 	}
-	tasks, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListTaskIds, adminutils.ListRequest{Project: project, Domain: domain, Filters: fieldSelector})
+	taskList, err := cmdCtx.AdminClient().ListTasks(ctx, filters.BuildResourceListRequestWithName(taskConfig.Filter, ""))
 	if err != nil {
 		return err
 	}
+	tasks := taskList.Tasks
+	if err != nil {
+		return err
+	}
+
 	logger.Debugf(ctx, "Retrieved %v Task", len(tasks))
-	return taskPrinter.Print(config.GetConfig().MustOutputFormat(), entityColumns, adminutils.NamedEntityToProtoMessage(tasks)...)
+	return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToProtoMessages(tasks)...)
 }
 
 // FetchTaskForName Reads the task config to drive fetching the correct tasks.
@@ -146,7 +160,7 @@ func FetchTaskForName(ctx context.Context, fetcher ext.AdminFetcherExtInterface,
 	var err error
 	var task *admin.Task
 	if taskConfig.Latest {
-		if task, err = fetcher.FetchTaskLatestVersion(ctx, name, project, domain); err != nil {
+		if task, err = fetcher.FetchTaskLatestVersion(ctx, name, project, domain, taskConfig.Filter); err != nil {
 			return nil, err
 		}
 		tasks = append(tasks, task)
@@ -156,7 +170,7 @@ func FetchTaskForName(ctx context.Context, fetcher ext.AdminFetcherExtInterface,
 		}
 		tasks = append(tasks, task)
 	} else {
-		tasks, err = fetcher.FetchAllVerOfTask(ctx, name, project, domain)
+		tasks, err = fetcher.FetchAllVerOfTask(ctx, name, project, domain, taskConfig.Filter)
 		if err != nil {
 			return nil, err
 		}

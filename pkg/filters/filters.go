@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	Inreg         = regexp.MustCompile(` in `)
-	Containsreg   = regexp.MustCompile(` contains `)
+	InReg         = regexp.MustCompile(` in `)
+	ContainsReg   = regexp.MustCompile(` contains `)
 	InRegValue    = regexp.MustCompile(`(?s)\((.*)\)`)
 	termOperators = []string{NotEquals, Equals, GreaterThanEquals, GreaterThan, LessThanEquals, LessThan, Contains, In}
 )
@@ -31,7 +31,7 @@ func Transform(filters []string) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			if ok := validate(lhs, op, rhs); ok {
+			if ok := validate(lhs, rhs); ok {
 				transformFilter := transform(lhs, op, unescapedRHS)
 				if len(adminFilter) > 0 {
 					adminFilter = fmt.Sprintf("%v+%v", adminFilter, transformFilter)
@@ -45,12 +45,8 @@ func Transform(filters []string) (string, error) {
 }
 
 // validate validate the field selector operation
-func validate(lhs, op, rhs string) bool {
+func validate(lhs, rhs string) bool {
 	// TODO Add Validation check with regular expression
-	switch op {
-	case Equals:
-		fmt.Println("Write more validation")
-	}
 	if len(lhs) > 0 && len(rhs) > 0 {
 		return true
 	}
@@ -122,28 +118,24 @@ func (i UnescapedRune) Error() string {
 func parse(filter string) (lhs, op, rhs string, ok bool) {
 	for i := range filter {
 		remaining := filter[i:]
-		results := []string{}
+		var results []string
 		for _, op := range termOperators {
-			switch op {
-			case Contains:
-				if Containsreg.MatchString(filter) {
-					results = Containsreg.Split(filter, 2)
+			if op == Contains {
+				if ContainsReg.MatchString(filter) {
+					results = ContainsReg.Split(filter, 2)
 					return results[0], op, results[1], true
 				}
-				break
-			case In:
-				if Inreg.MatchString(filter) {
-					results = Inreg.Split(filter, 2)
+			} else if op == In {
+				if InReg.MatchString(filter) {
+					results = InReg.Split(filter, 2)
 					values := InRegValue.FindAllStringSubmatch(strings.TrimSpace(results[1]), -1)
 					return results[0], op, values[0][1], true
 				}
-				break
-			default:
+			} else {
 				if strings.HasPrefix(remaining, op) {
 					return filter[0:i], op, filter[i+len(op):], true
 				}
 			}
-
 		}
 	}
 	return "", "", "", false

@@ -3,7 +3,7 @@ package get
 import (
 	"context"
 
-	"github.com/flyteorg/flytectl/pkg/ext"
+	"github.com/flyteorg/flytectl/pkg/filters"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -22,32 +22,35 @@ Retrieves all the executions within project and domain.(execution,executions can
  bin/flytectl get execution -p flytesnacks -d development
 
 Retrieves execution by name within project and domain.
+
 ::
 
  bin/flytectl get execution -p flytesnacks -d development oeh94k9r2r
 
 Retrieves all the execution with filters.
 ::
-
- bin/flytectl get execution -p flytesnacks -d development --field-selector="execution.phase in (FAILED)" 
-
+ 
+  bin/flytectl get execution -p flytesnacks -d development --filter.field-selector="execution.phase in (FAILED;SUCCEEDED),execution.duration<200" 
+ 
 Retrieve specific execution with filters.
 ::
-
- bin/flytectl get execution -p flytesnacks -d development  y8n2wtuspj --field-selector="execution.phase in (FAILED)" 
-
+ 
+  bin/flytectl get execution -p flytesnacks -d development  y8n2wtuspj --filter.field-selector="execution.phase in (FAILED),execution.duration<200" 
+ 
 Retrieves all the execution with limit and sorting.
 ::
-
- bin/flytectl get execution -p flytesnacks -d development --sort-by=created_at --limit=1 --asc
-
+  
+   bin/flytectl get execution -p flytesnacks -d development --filter.sort-by=created_at --filter.limit=1 --filter.asc
+   
 
 Retrieves all the execution within project and domain in yaml format
+
 ::
 
  bin/flytectl get execution -p flytesnacks -d development -o yaml
 
 Retrieves all the execution within project and domain in json format.
+
 ::
 
  bin/flytectl get execution -p flytesnacks -d development -o json
@@ -55,6 +58,18 @@ Retrieves all the execution within project and domain in json format.
 Usage
 `
 )
+
+//go:generate pflags ExecutionsConfig --default-var executionConfig
+var (
+	executionConfig = &ExecutionsConfig{
+		Filter: filters.DefaultFilter,
+	}
+)
+
+// ExecutionsConfig
+type ExecutionsConfig struct {
+	Filter filters.Filters `json:"filter" pflag:","`
+}
 
 var executionColumns = []printer.Column{
 	{Header: "Name", JSONPath: "$.id.name"},
@@ -84,7 +99,7 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 		}
 		executions = append(executions, execution)
 	} else {
-		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, ext.BuildResourceListRequestWithName(config.GetConfig(), ""))
+		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, filters.BuildResourceListRequestWithName(executionConfig.Filter, ""))
 		if err != nil {
 			return err
 		}

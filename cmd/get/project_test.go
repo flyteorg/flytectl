@@ -1,52 +1,69 @@
 package get
 
 import (
-	"io"
-	"testing"
-
-	"github.com/flyteorg/flytectl/cmd/config"
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytectl/cmd/testutils"
-	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
+	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
-func TestListProjectFunc(t *testing.T) {
-	ctx := testutils.Ctx
-	config.GetConfig().Output = output
-	config.GetConfig().SortBy = ""
-	var args []string
-	mockClient := new(mocks.AdminServiceClient)
-	mockOutStream := new(io.Writer)
-	cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
-	projectListRequest := &admin.ProjectListRequest{
-		Limit: 100,
+var (
+	resourceListRequestProject *admin.ProjectListRequest
+	projectListResponse *admin.Projects
+	argsProject []string
+	project1 *admin.Project
+ )
+
+func getProjectSetup(){
+	argsProject =  []string{"flyteexample"}
+	resourceListRequestProject = &admin.ProjectListRequest{
 	}
-	projectResponse := &admin.Project{
-		Id:   "flytesnacks",
-		Name: "flytesnacks",
+
+	project1 = &admin.Project{
+		Id: "flyteexample",
+		Name: "flyteexample",
 		Domains: []*admin.Domain{
 			{
-				Id:   "production",
-				Name: "production",
-			},
-			{
-				Id:   "staging",
-				Name: "staging",
-			},
-			{
-				Id:   "development",
+				Id :"development",
 				Name: "development",
 			},
 		},
 	}
-	projects := []*admin.Project{projectResponse}
-	projectList := &admin.Projects{
+
+	project2 := &admin.Project{
+		Id: "flytesnacks",
+		Name: "flytesnacks",
+		Domains: []*admin.Domain{
+			{
+				Id :"development",
+				Name: "development",
+			},
+		},
+	}
+
+	projects := []*admin.Project{project1, project2}
+
+	projectListResponse = &admin.Projects{
 		Projects: projects,
 	}
-	mockClient.OnListProjectsMatch(ctx, projectListRequest).Return(projectList, nil)
-	err := getProjectsFunc(ctx, args, cmdCtx)
+}
+
+func TestProjectFunc(t *testing.T) {
+	setup()
+	getProjectSetup()
+	projectConfig.Filter = filters.Filters{}
+	mockClient.OnListProjectsMatch(ctx, resourceListRequestProject).Return(projectListResponse, nil)
+	err = getProjectsFunc(ctx, argsProject, cmdCtx)
 	assert.Nil(t, err)
-	mockClient.AssertCalled(t, "ListProjects", ctx, projectListRequest)
+	mockClient.AssertCalled(t, "ListProjects", ctx, resourceListRequestProject)
+}
+
+func TestGetProjectFunc(t *testing.T) {
+	setup()
+	getProjectSetup()
+	projectConfig.Filter = filters.Filters{}
+	mockClient.OnListProjectsMatch(ctx, resourceListRequestProject).Return(projectListResponse, nil)
+	err = getProjectsFunc(ctx, argsProject, cmdCtx)
+	assert.Nil(t, err)
+	mockClient.AssertCalled(t, "ListProjects", ctx, resourceListRequestProject)
 }

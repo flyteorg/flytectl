@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/flyteorg/flytectl/pkg/filters"
+
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
-	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 )
 
-func (a *AdminFetcherExtClient) FetchAllVerOfTask(ctx context.Context, name, project, domain string) ([]*admin.Task, error) {
-	tList, err := a.AdminServiceClient().ListTasks(ctx, BuildResourceListRequestWithName(config.GetConfig(),name))
+func (a *AdminFetcherExtClient) FetchAllVerOfTask(ctx context.Context, name, project, domain string, filter filters.Filters) ([]*admin.Task, error) {
+	tList, err := a.AdminServiceClient().ListTasks(ctx, filters.BuildResourceListRequestWithName(filter, name))
 	if err != nil {
 		return nil, err
 	}
@@ -20,12 +21,12 @@ func (a *AdminFetcherExtClient) FetchAllVerOfTask(ctx context.Context, name, pro
 	return tList.Tasks, nil
 }
 
-func (a *AdminFetcherExtClient) FetchTaskLatestVersion(ctx context.Context, name, project, domain string) (*admin.Task, error) {
+func (a *AdminFetcherExtClient) FetchTaskLatestVersion(ctx context.Context, name, project, domain string, filter filters.Filters) (*admin.Task, error) {
 	var t *admin.Task
 	var err error
 	// Fetch the latest version of the task.
 	var taskVersions []*admin.Task
-	taskVersions, err = a.FetchAllVerOfTask(ctx, name, project, domain)
+	taskVersions, err = a.FetchAllVerOfTask(ctx, name, project, domain, filter)
 	if err != nil {
 		return nil, err
 	}

@@ -28,6 +28,15 @@ func (LaunchPlanConfig) elemValueOrNil(v interface{}) interface{} {
 	return v
 }
 
+func (LaunchPlanConfig) mustJsonMarshal(v interface{}) string {
+	raw, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(raw)
+}
+
 func (LaunchPlanConfig) mustMarshalJSON(v json.Marshaler) string {
 	raw, err := v.MarshalJSON()
 	if err != nil {
@@ -44,5 +53,10 @@ func (cfg LaunchPlanConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags.StringVar(&(launchPlanConfig.ExecFile), fmt.Sprintf("%v%v", prefix, "execFile"), launchPlanConfig.ExecFile, "execution file name to be used for generating execution spec of a single launchplan.")
 	cmdFlags.StringVar(&(launchPlanConfig.Version), fmt.Sprintf("%v%v", prefix, "version"), launchPlanConfig.Version, "version of the launchplan to be fetched.")
 	cmdFlags.BoolVar(&(launchPlanConfig.Latest), fmt.Sprintf("%v%v", prefix, "latest"), launchPlanConfig.Latest, "flag to indicate to fetch the latest version, version flag will be ignored in this case")
+
+	cmdFlags.StringVar(&(launchPlanConfig.Filter.FieldSelector), fmt.Sprintf("%v%v", prefix, "filter.field-selector"), *new(string), "Specifies the Field selector")
+	cmdFlags.StringVar((&launchPlanConfig.Filter.SortBy), fmt.Sprintf("%v%v", prefix, "filter.sort-by"), *new(string), "Specifies which field to sort results ")
+	cmdFlags.Int32Var((&launchPlanConfig.Filter.Limit), fmt.Sprintf("%v%v", prefix, "filter.limit"), 100, "Specifies the limit")
+	cmdFlags.BoolVar((&launchPlanConfig.Filter.Asc), fmt.Sprintf("%v%v", prefix, "filter.asc"), false, "Specifies the sorting order. By default flytectl sort result in descending order")
 	return cmdFlags
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
 	pluginoverride "github.com/flyteorg/flytectl/cmd/config/subcommand/plugin_override"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/taskresourceattribute"
-	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflow"
 	cmdcore "github.com/flyteorg/flytectl/cmd/core"
 
 	"github.com/spf13/cobra"
@@ -34,15 +33,15 @@ func CreateGetCommand() *cobra.Command {
 	getResourcesFuncs := map[string]cmdcore.CommandEntry{
 		"project": {CmdFunc: getProjectsFunc, Aliases: []string{"projects"}, ProjectDomainNotRequired: true,
 			Short: projectShort,
-			Long:  projectLong},
+			Long:  projectLong, PFlagProvider: projectConfig},
 		"task": {CmdFunc: getTaskFunc, Aliases: []string{"tasks"}, Short: taskShort,
 			Long: taskLong, PFlagProvider: taskConfig},
 		"workflow": {CmdFunc: getWorkflowFunc, Aliases: []string{"workflows"}, Short: workflowShort,
-			Long: workflowLong, PFlagProvider: workflow.DefaultConfig},
+			Long: workflowLong, PFlagProvider: workflowConfig},
 		"launchplan": {CmdFunc: getLaunchPlanFunc, Aliases: []string{"launchplans"}, Short: launchPlanShort,
 			Long: launchPlanLong, PFlagProvider: launchPlanConfig},
 		"execution": {CmdFunc: getExecutionFunc, Aliases: []string{"executions"}, Short: executionShort,
-			Long: executionLong},
+			Long: executionLong, PFlagProvider: executionConfig},
 		"task-resource-attribute": {CmdFunc: getTaskResourceAttributes, Aliases: []string{"task-resource-attributes"},
 			Short: taskResourceAttributesShort,
 			Long:  taskResourceAttributesLong, PFlagProvider: taskresourceattribute.DefaultFetchConfig},
@@ -61,5 +60,6 @@ func CreateGetCommand() *cobra.Command {
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)
+
 	return getCmd
 }

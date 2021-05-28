@@ -2,7 +2,8 @@ package get
 
 import (
 	"context"
-	"github.com/flyteorg/flytectl/pkg/ext"
+
+	"github.com/flyteorg/flytectl/pkg/filters"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -29,14 +30,13 @@ Retrieves project by name
 
 Retrieves all the projects with filters.
 ::
-
- bin/flytectl get project --field-selector="project.name=flytesnacks"
-
+ 
+  bin/flytectl get project --filter.field-selector="project.name=flytesnacks"
+ 
 Retrieves all the projects with limit and sorting.
 ::
-
- bin/flytectl get project --sort-by=created_at --limit=1 --asc
-
+ 
+  bin/flytectl get project --filter.sort-by=created_at --filter.limit=1 --filter.asc
 
 Retrieves all the projects in yaml format
 
@@ -54,6 +54,18 @@ Usage
 `
 )
 
+//go:generate pflags ProjectConfig --default-var projectConfig
+var (
+	projectConfig = &ProjectConfig{
+		Filter: filters.DefaultFilter,
+	}
+)
+
+// ProjectConfig
+type ProjectConfig struct {
+	Filter filters.Filters `json:"filter" pflag:","`
+}
+
 var projectColumns = []printer.Column{
 	{Header: "ID", JSONPath: "$.id"},
 	{Header: "Name", JSONPath: "$.name"},
@@ -70,7 +82,7 @@ func ProjectToProtoMessages(l []*admin.Project) []proto.Message {
 
 func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
-	projects, err := cmdCtx.AdminClient().ListProjects(ctx, ext.BuildProjectListRequest(config.GetConfig()))
+	projects, err := cmdCtx.AdminClient().ListProjects(ctx, filters.BuildProjectListRequest(projectConfig.Filter))
 	if err != nil {
 		return err
 	}

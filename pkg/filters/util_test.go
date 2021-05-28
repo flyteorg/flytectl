@@ -1,4 +1,4 @@
-package ext
+package filters
 
 import (
 	"testing"
@@ -12,14 +12,17 @@ var (
 	project = "flytesnack"
 	domain  = "staging"
 	name    = "test"
-	output = "json"
+	output  = "json"
 )
 
 func TestListRequestWithoutNameFunc(t *testing.T) {
 	config.GetConfig().Output = output
 	config.GetConfig().Project = project
 	config.GetConfig().Domain = domain
-	request := buildResourceListRequestWithName(config.GetConfig(),"")
+	filter := Filters{
+		Limit: 100,
+	}
+	request := BuildResourceListRequestWithName(filter, "")
 	expectedResponse := &admin.ResourceListRequest{
 		Id: &admin.NamedEntityIdentifier{
 			Project: project,
@@ -35,7 +38,10 @@ func TestProjectListRequestFunc(t *testing.T) {
 	config.GetConfig().Output = output
 	config.GetConfig().Project = project
 	config.GetConfig().Domain = domain
-	request := buildProjectListRequest(config.GetConfig())
+	filter := Filters{
+		Limit: 100,
+	}
+	request := BuildProjectListRequest(filter)
 	expectedResponse := &admin.ProjectListRequest{
 		Limit:   100,
 		Filters: "",
@@ -47,7 +53,10 @@ func TestListRequestWithNameFunc(t *testing.T) {
 	config.GetConfig().Output = output
 	config.GetConfig().Project = project
 	config.GetConfig().Domain = domain
-	request := buildResourceListRequestWithName(config.GetConfig(), name)
+	filter := Filters{
+		Limit: 100,
+	}
+	request := BuildResourceListRequestWithName(filter, name)
 	expectedResponse := &admin.ResourceListRequest{
 		Id: &admin.NamedEntityIdentifier{
 			Project: project,

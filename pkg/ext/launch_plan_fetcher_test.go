@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/flyteorg/flytectl/pkg/filters"
+
 	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
@@ -16,6 +18,7 @@ import (
 
 var (
 	launchPlanListResponse *admin.LaunchPlanList
+	lpFilters              = filters.Filters{}
 )
 
 func getLaunchPlanFetcherSetup() {
@@ -116,14 +119,14 @@ func getLaunchPlanFetcherSetup() {
 func TestFetchAllVerOfLP(t *testing.T) {
 	getLaunchPlanFetcherSetup()
 	adminClient.OnListLaunchPlansMatch(mock.Anything, mock.Anything).Return(launchPlanListResponse, nil)
-	_, err := adminFetcherExt.FetchAllVerOfLP(ctx, "lpName", "project", "domain")
+	_, err := adminFetcherExt.FetchAllVerOfLP(ctx, "lpName", "project", "domain", lpFilters)
 	assert.Nil(t, err)
 }
 
 func TestFetchAllVerOfLPError(t *testing.T) {
 	getLaunchPlanFetcherSetup()
 	adminClient.OnListLaunchPlansMatch(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed"))
-	_, err := adminFetcherExt.FetchAllVerOfLP(ctx, "lpName", "project", "domain")
+	_, err := adminFetcherExt.FetchAllVerOfLP(ctx, "lpName", "project", "domain", lpFilters)
 	assert.Equal(t, fmt.Errorf("failed"), err)
 }
 
@@ -131,14 +134,14 @@ func TestFetchAllVerOfLPEmptyResponse(t *testing.T) {
 	launchPlanListResponse := &admin.LaunchPlanList{}
 	getLaunchPlanFetcherSetup()
 	adminClient.OnListLaunchPlansMatch(mock.Anything, mock.Anything).Return(launchPlanListResponse, nil)
-	_, err := adminFetcherExt.FetchAllVerOfLP(ctx, "lpName", "project", "domain")
+	_, err := adminFetcherExt.FetchAllVerOfLP(ctx, "lpName", "project", "domain", lpFilters)
 	assert.Equal(t, fmt.Errorf("no launchplans retrieved for lpName"), err)
 }
 
 func TestFetchLPLatestVersion(t *testing.T) {
 	getLaunchPlanFetcherSetup()
 	adminClient.OnListLaunchPlansMatch(mock.Anything, mock.Anything).Return(launchPlanListResponse, nil)
-	_, err := adminFetcherExt.FetchLPLatestVersion(ctx, "lpName", "project", "domain")
+	_, err := adminFetcherExt.FetchLPLatestVersion(ctx, "lpName", "project", "domain", lpFilters)
 	assert.Nil(t, err)
 }
 
@@ -146,6 +149,6 @@ func TestFetchLPLatestVersionError(t *testing.T) {
 	launchPlanListResponse := &admin.LaunchPlanList{}
 	getLaunchPlanFetcherSetup()
 	adminClient.OnListLaunchPlansMatch(mock.Anything, mock.Anything).Return(launchPlanListResponse, nil)
-	_, err := adminFetcherExt.FetchLPLatestVersion(ctx, "lpName", "project", "domain")
+	_, err := adminFetcherExt.FetchLPLatestVersion(ctx, "lpName", "project", "domain", lpFilters)
 	assert.Equal(t, fmt.Errorf("no launchplans retrieved for lpName"), err)
 }

@@ -3,15 +3,16 @@ package ext
 import (
 	"context"
 	"fmt"
-	"github.com/flyteorg/flytectl/cmd/config"
+
+	"github.com/flyteorg/flytectl/pkg/filters"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 )
 
 // FetchAllVerOfLP fetches all the versions for give launch plan name
-func (a *AdminFetcherExtClient) FetchAllVerOfLP(ctx context.Context, lpName, project, domain string) ([]*admin.LaunchPlan, error) {
-	tList, err := a.AdminServiceClient().ListLaunchPlans(ctx, BuildResourceListRequestWithName(config.GetConfig(),lpName))
+func (a *AdminFetcherExtClient) FetchAllVerOfLP(ctx context.Context, lpName, project, domain string, filter filters.Filters) ([]*admin.LaunchPlan, error) {
+	tList, err := a.AdminServiceClient().ListLaunchPlans(ctx, filters.BuildResourceListRequestWithName(filter, lpName))
 	if err != nil {
 		return nil, err
 	}
@@ -22,9 +23,9 @@ func (a *AdminFetcherExtClient) FetchAllVerOfLP(ctx context.Context, lpName, pro
 }
 
 // FetchLPLatestVersion fetches latest version for give launch plan name
-func (a *AdminFetcherExtClient) FetchLPLatestVersion(ctx context.Context, name, project, domain string) (*admin.LaunchPlan, error) {
+func (a *AdminFetcherExtClient) FetchLPLatestVersion(ctx context.Context, name, project, domain string, filter filters.Filters) (*admin.LaunchPlan, error) {
 	// Fetch the latest version of the task.
-	lpVersions, err := a.FetchAllVerOfLP(ctx, name, project, domain)
+	lpVersions, err := a.FetchAllVerOfLP(ctx, name, project, domain, filter)
 	if err != nil {
 		return nil, err
 	}

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/flyteorg/flytectl/pkg/filters"
+
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflow"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flytectl/pkg/ext/mocks"
@@ -23,10 +25,11 @@ func TestGetWorkflowFuncWithError(t *testing.T) {
 	t.Run("failure fetch latest", func(t *testing.T) {
 		setup()
 		getWorkflowSetup()
-		mockFetcher := new(mocks.AdminFetcherExtInterface)
+		workflowConfig.Filter = filters.Filters{}
 		workflow.DefaultConfig.Latest = true
+		mockFetcher := new(mocks.AdminFetcherExtInterface)
 		mockFetcher.OnFetchWorkflowLatestVersionMatch(mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything).Return(nil, fmt.Errorf("error fetching latest version"))
+			mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error fetching latest version"))
 		_, err = FetchWorkflowForName(ctx, mockFetcher, "workflowName", projectValue, domainValue)
 		assert.NotNil(t, err)
 	})
@@ -35,9 +38,9 @@ func TestGetWorkflowFuncWithError(t *testing.T) {
 		setup()
 		getWorkflowSetup()
 		mockFetcher := new(mocks.AdminFetcherExtInterface)
+		workflowConfig.Filter = filters.Filters{}
 		workflow.DefaultConfig.Version = "v1"
-		mockFetcher.OnFetchWorkflowVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything).Return(nil, fmt.Errorf("error fetching version"))
+		mockFetcher.OnFetchWorkflowVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error fetching version"))
 		_, err = FetchWorkflowForName(ctx, mockFetcher, "workflowName", projectValue, domainValue)
 		assert.NotNil(t, err)
 	})
@@ -46,8 +49,9 @@ func TestGetWorkflowFuncWithError(t *testing.T) {
 		setup()
 		getWorkflowSetup()
 		mockFetcher := new(mocks.AdminFetcherExtInterface)
+		workflowConfig.Filter = filters.Filters{}
 		mockFetcher.OnFetchAllVerOfWorkflowMatch(mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything).Return(nil, fmt.Errorf("error fetching all version"))
+			mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error fetching all version"))
 		_, err = FetchWorkflowForName(ctx, mockFetcher, "workflowName", projectValue, domainValue)
 		assert.NotNil(t, err)
 	})
@@ -57,8 +61,9 @@ func TestGetWorkflowFuncWithError(t *testing.T) {
 		getWorkflowSetup()
 		workflow.DefaultConfig.Latest = true
 		args := []string{"workflowName"}
+		workflowConfig.Filter = filters.Filters{}
 		u.FetcherExt.OnFetchWorkflowLatestVersionMatch(mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything).Return(nil, fmt.Errorf("error fetching latest version"))
+			mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error fetching latest version"))
 		err = getWorkflowFunc(ctx, args, cmdCtx)
 		assert.NotNil(t, err)
 	})

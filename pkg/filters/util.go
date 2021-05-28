@@ -1,13 +1,12 @@
-package ext
+package filters
 
 import (
 	"github.com/flyteorg/flytectl/cmd/config"
-	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
-func BuildResourceListRequestWithName(c *config.Config, name string) *admin.ResourceListRequest {
-	fieldSelector, err := filters.Transform(filters.SplitTerms(c.FieldSelector))
+func BuildResourceListRequestWithName(c Filters, name string) *admin.ResourceListRequest {
+	fieldSelector, err := Transform(SplitTerms(c.FieldSelector))
 	if err != nil {
 		fieldSelector = ""
 	}
@@ -15,8 +14,8 @@ func BuildResourceListRequestWithName(c *config.Config, name string) *admin.Reso
 		Limit:   uint32(c.Limit),
 		Filters: fieldSelector,
 		Id: &admin.NamedEntityIdentifier{
-			Project: c.Project,
-			Domain:  c.Domain,
+			Project: config.GetConfig().Project,
+			Domain:  config.GetConfig().Domain,
 		},
 	}
 	if len(name) > 0 {
@@ -28,8 +27,8 @@ func BuildResourceListRequestWithName(c *config.Config, name string) *admin.Reso
 	return request
 }
 
-func BuildProjectListRequest(c *config.Config) *admin.ProjectListRequest {
-	fieldSelector, err := filters.Transform(filters.SplitTerms(c.FieldSelector))
+func BuildProjectListRequest(c Filters) *admin.ProjectListRequest {
+	fieldSelector, err := Transform(SplitTerms(c.FieldSelector))
 	if err != nil {
 		fieldSelector = ""
 	}
@@ -43,7 +42,7 @@ func BuildProjectListRequest(c *config.Config) *admin.ProjectListRequest {
 	return request
 }
 
-func buildSortingRequest(c *config.Config) *admin.Sort {
+func buildSortingRequest(c Filters) *admin.Sort {
 	if len(c.SortBy) > 0 {
 		sortingOrder := admin.Sort_DESCENDING
 		if c.Asc {

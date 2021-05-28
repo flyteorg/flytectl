@@ -28,6 +28,15 @@ func (TaskConfig) elemValueOrNil(v interface{}) interface{} {
 	return v
 }
 
+func (TaskConfig) mustJsonMarshal(v interface{}) string {
+	raw, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(raw)
+}
+
 func (TaskConfig) mustMarshalJSON(v json.Marshaler) string {
 	raw, err := v.MarshalJSON()
 	if err != nil {
@@ -40,9 +49,14 @@ func (TaskConfig) mustMarshalJSON(v json.Marshaler) string {
 // GetPFlagSet will return strongly types pflags for all fields in TaskConfig and its nested types. The format of the
 // flags is json-name.json-sub-name... etc.
 func (cfg TaskConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
-	cmdFlags := pflag.NewFlagSet("TaskResourceAttrConfig", pflag.ExitOnError)
+	cmdFlags := pflag.NewFlagSet("TaskConfig", pflag.ExitOnError)
 	cmdFlags.StringVar(&(taskConfig.ExecFile), fmt.Sprintf("%v%v", prefix, "execFile"), taskConfig.ExecFile, "execution file name to be used for generating execution spec of a single task.")
 	cmdFlags.StringVar(&(taskConfig.Version), fmt.Sprintf("%v%v", prefix, "version"), taskConfig.Version, "version of the task to be fetched.")
 	cmdFlags.BoolVar(&(taskConfig.Latest), fmt.Sprintf("%v%v", prefix, "latest"), taskConfig.Latest, "flag to indicate to fetch the latest version, version flag will be ignored in this case")
+
+	cmdFlags.StringVar(&(taskConfig.Filter.FieldSelector), fmt.Sprintf("%v%v", prefix, "filter.field-selector"), *new(string), "Specifies the Field selector")
+	cmdFlags.StringVar((&taskConfig.Filter.SortBy), fmt.Sprintf("%v%v", prefix, "filter.sort-by"), *new(string), "Specifies which field to sort results ")
+	cmdFlags.Int32Var((&taskConfig.Filter.Limit), fmt.Sprintf("%v%v", prefix, "filter.limit"), 100, "Specifies the limit")
+	cmdFlags.BoolVar((&taskConfig.Filter.Asc), fmt.Sprintf("%v%v", prefix, "filter.asc"), false, "Specifies the sorting order. By default flytectl sort result in descending order")
 	return cmdFlags
 }

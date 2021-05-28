@@ -5,7 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/flyteorg/flytectl/cmd/config"
+	"github.com/flyteorg/flytectl/pkg/filters"
+
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flytectl/pkg/ext/mocks"
@@ -19,6 +20,7 @@ import (
 
 var (
 	resourceListRequest    *admin.ResourceListRequest
+	resourceGetRequest     *admin.ResourceListRequest
 	objectGetRequest       *admin.ObjectGetRequest
 	namedIDRequest         *admin.NamedEntityIdentifierListRequest
 	launchPlanListResponse *admin.LaunchPlanList
@@ -117,18 +119,20 @@ func getLaunchPlanSetup() {
 	}
 
 	launchPlans := []*admin.LaunchPlan{launchPlan2, launchPlan1}
-	config.GetConfig().SortBy = "created_at"
+
 	resourceListRequest = &admin.ResourceListRequest{
+		Id: &admin.NamedEntityIdentifier{
+			Project: projectValue,
+			Domain:  domainValue,
+		},
+	}
+
+	resourceGetRequest = &admin.ResourceListRequest{
 		Id: &admin.NamedEntityIdentifier{
 			Project: projectValue,
 			Domain:  domainValue,
 			Name:    argsLp[0],
 		},
-		SortBy: &admin.Sort{
-			Key:       "created_at",
-			Direction: admin.Sort_DESCENDING,
-		},
-		Limit: 100,
 	}
 
 	launchPlanListResponse = &admin.LaunchPlanList{
@@ -148,11 +152,6 @@ func getLaunchPlanSetup() {
 	namedIDRequest = &admin.NamedEntityIdentifierListRequest{
 		Project: projectValue,
 		Domain:  domainValue,
-		SortBy: &admin.Sort{
-			Key:       "name",
-			Direction: admin.Sort_ASCENDING,
-		},
-		Limit: 100,
 	}
 
 	var entities []*admin.NamedEntityIdentifier
@@ -174,6 +173,7 @@ func getLaunchPlanSetup() {
 	launchPlanConfig.Latest = false
 	launchPlanConfig.Version = ""
 	launchPlanConfig.ExecFile = ""
+	launchPlanConfig.Filter = filters.Filters{}
 }
 
 func TestGetLaunchPlanFuncWithError(t *testing.T) {
@@ -182,8 +182,9 @@ func TestGetLaunchPlanFuncWithError(t *testing.T) {
 		getLaunchPlanSetup()
 		mockFetcher := new(mocks.AdminFetcherExtInterface)
 		launchPlanConfig.Latest = true
+		launchPlanConfig.Filter = filters.Filters{}
 		mockFetcher.OnFetchLPLatestVersionMatch(mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything).Return(nil, fmt.Errorf("error fetching latest version"))
+			mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error fetching latest version"))
 		_, err = FetchLPForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
 		assert.NotNil(t, err)
 	})
@@ -193,6 +194,7 @@ func TestGetLaunchPlanFuncWithError(t *testing.T) {
 		getLaunchPlanSetup()
 		mockFetcher := new(mocks.AdminFetcherExtInterface)
 		launchPlanConfig.Version = "v1"
+		launchPlanConfig.Filter = filters.Filters{}
 		mockFetcher.OnFetchLPVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything).Return(nil, fmt.Errorf("error fetching version"))
 		_, err = FetchLPForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
@@ -202,9 +204,11 @@ func TestGetLaunchPlanFuncWithError(t *testing.T) {
 	t.Run("failure fetching all version ", func(t *testing.T) {
 		setup()
 		getLaunchPlanSetup()
+		launchPlanConfig.Filter = filters.Filters{}
+		launchPlanConfig.Filter = filters.Filters{}
 		mockFetcher := new(mocks.AdminFetcherExtInterface)
 		mockFetcher.OnFetchAllVerOfLPMatch(mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything).Return(nil, fmt.Errorf("error fetching all version"))
+			mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error fetching all version"))
 		_, err = FetchLPForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
 		assert.NotNil(t, err)
 	})
@@ -212,9 +216,18 @@ func TestGetLaunchPlanFuncWithError(t *testing.T) {
 	t.Run("failure fetching ", func(t *testing.T) {
 		setup()
 		getLaunchPlanSetup()
-		mockClient.OnListLaunchPlansMatch(ctx, resourceListRequest).Return(nil, fmt.Errorf("error fetching all version"))
+		mockClient.OnListLaunchPlansMatch(ctx, resourceGetRequest).Return(nil, fmt.Errorf("error fetching all version"))
 		mockClient.OnGetLaunchPlanMatch(ctx, objectGetRequest).Return(nil, fmt.Errorf("error fetching lanuch plan"))
 		mockClient.OnListLaunchPlanIdsMatch(ctx, namedIDRequest).Return(nil, fmt.Errorf("error listing lanuch plan ids"))
+		err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("failure fetching list", func(t *testing.T) {
+		setup()
+		getLaunchPlanSetup()
+		argsLp = []string{}
+		mockClient.OnListLaunchPlansMatch(ctx, resourceListRequest).Return(nil, fmt.Errorf("error fetching all version"))
 		err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
 		assert.NotNil(t, err)
 	})
@@ -223,12 +236,12 @@ func TestGetLaunchPlanFuncWithError(t *testing.T) {
 func TestGetLaunchPlanFunc(t *testing.T) {
 	setup()
 	getLaunchPlanSetup()
-	mockClient.OnListLaunchPlansMatch(ctx, resourceListRequest).Return(launchPlanListResponse, nil)
+	mockClient.OnListLaunchPlansMatch(ctx, resourceGetRequest).Return(launchPlanListResponse, nil)
 	mockClient.OnGetLaunchPlanMatch(ctx, objectGetRequest).Return(launchPlan2, nil)
 	mockClient.OnListLaunchPlanIdsMatch(ctx, namedIDRequest).Return(namedIdentifierList, nil)
 	err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
 	assert.Nil(t, err)
-	mockClient.AssertCalled(t, "ListLaunchPlans", ctx, resourceListRequest)
+	mockClient.AssertCalled(t, "ListLaunchPlans", ctx, resourceGetRequest)
 	tearDownAndVerify(t, `[
 	{
 		"id": {
@@ -395,12 +408,12 @@ func TestGetLaunchPlanFuncLatest(t *testing.T) {
 	setup()
 	getLaunchPlanSetup()
 	launchPlanConfig.Latest = true
-	mockClient.OnListLaunchPlansMatch(ctx, resourceListRequest).Return(launchPlanListResponse, nil)
+	launchPlanConfig.Filter = filters.Filters{}
+	mockClient.OnListLaunchPlansMatch(ctx, resourceGetRequest).Return(launchPlanListResponse, nil)
 	mockClient.OnGetLaunchPlanMatch(ctx, objectGetRequest).Return(launchPlan2, nil)
-	mockClient.OnListLaunchPlanIdsMatch(ctx, namedIDRequest).Return(namedIdentifierList, nil)
 	err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
 	assert.Nil(t, err)
-	mockClient.AssertCalled(t, "ListLaunchPlans", ctx, resourceListRequest)
+	mockClient.AssertCalled(t, "ListLaunchPlans", ctx, resourceGetRequest)
 	tearDownAndVerify(t, `{
 	"id": {
 		"name": "launchplan1",
@@ -578,23 +591,10 @@ func TestGetLaunchPlans(t *testing.T) {
 	getLaunchPlanSetup()
 	mockClient.OnListLaunchPlansMatch(ctx, resourceListRequest).Return(launchPlanListResponse, nil)
 	mockClient.OnGetLaunchPlanMatch(ctx, objectGetRequest).Return(launchPlan2, nil)
-	mockClient.OnListLaunchPlanIdsMatch(ctx, namedIDRequest).Return(namedIdentifierList, nil)
 	argsLp = []string{}
 	err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
 	assert.Nil(t, err)
-	mockClient.AssertCalled(t, "ListLaunchPlanIds", ctx, namedIDRequest)
-	tearDownAndVerify(t, `[
-	{
-		"project": "dummyProject",
-		"domain": "dummyDomain",
-		"name": "launchplan1"
-	},
-	{
-		"project": "dummyProject",
-		"domain": "dummyDomain",
-		"name": "launchplan2"
-	}
-]`)
+	tearDownAndVerify(t, `[{"id": {"name": "launchplan1","version": "v2"},"spec": {"defaultInputs": {"parameters": {"numbers": {"var": {"type": {"collectionType": {"simple": "INTEGER"}}}},"numbers_count": {"var": {"type": {"simple": "INTEGER"}}},"run_local_at_count": {"var": {"type": {"simple": "INTEGER"}},"default": {"scalar": {"primitive": {"integer": "10"}}}}}}},"closure": {"expectedInputs": {"parameters": {"numbers": {"var": {"type": {"collectionType": {"simple": "INTEGER"}}}},"numbers_count": {"var": {"type": {"simple": "INTEGER"}}},"run_local_at_count": {"var": {"type": {"simple": "INTEGER"}},"default": {"scalar": {"primitive": {"integer": "10"}}}}}},"createdAt": "1970-01-01T00:00:01Z"}},{"id": {"name": "launchplan1","version": "v1"},"spec": {"defaultInputs": {"parameters": {"numbers": {"var": {"type": {"collectionType": {"simple": "INTEGER"}}}},"numbers_count": {"var": {"type": {"simple": "INTEGER"}}},"run_local_at_count": {"var": {"type": {"simple": "INTEGER"}},"default": {"scalar": {"primitive": {"integer": "10"}}}}}}},"closure": {"expectedInputs": {"parameters": {"numbers": {"var": {"type": {"collectionType": {"simple": "INTEGER"}}}},"numbers_count": {"var": {"type": {"simple": "INTEGER"}}},"run_local_at_count": {"var": {"type": {"simple": "INTEGER"}},"default": {"scalar": {"primitive": {"integer": "10"}}}}}},"createdAt": "1970-01-01T00:00:00Z"}}]`)
 }
 
 func TestGetLaunchPlansWithExecFile(t *testing.T) {

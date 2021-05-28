@@ -3,11 +3,11 @@ package get
 import (
 	"context"
 
+	"github.com/flyteorg/flytectl/pkg/filters"
+
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytectl/pkg/adminutils"
 	"github.com/flyteorg/flytectl/pkg/ext"
-	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -29,29 +29,43 @@ Retrieves launch plan by name within project and domain.
 
  flytectl get launchplan -p flytesnacks -d development core.basic.lp.go_greet
 
+
+Retrieves latest version of task by name within project and domain.
+
+::
+
+ flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --latest
+
+Retrieves particular version of launchplan by name within project and domain.
+
+::
+
+ flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --version v2
+
 Retrieves all the launch plans with filters.
 ::
-
- bin/flytectl get launchplan -p flytesnacks -d development --field-selector="launchplan.name=core.basic.lp.go_greet"
-
+ 
+  bin/flytectl get launchplan -p flytesnacks -d development --filter.field-selector="name=core.basic.lp.go_greet"
+ 
 Retrieves specific launch plans with filters.
 ::
-
- bin/flytectl get launchplan -p flytesnacks -d development core.basic.lp.go_greet --field-selector="launchplan.version=v1"
-
-
+ 
+  bin/flytectl get launchplan -p flytesnacks -d development k8s_spark.dataframe_passing.my_smart_schema --filter.field-selector="version=v1"
+ 
+ 
 Retrieves all the launch plans with limit and sorting.
 ::
+ 
+  bin/flytectl get launchplan -p flytesnacks -d development --filter.sort-by=created_at --filter.limit=1 --filter.asc
+ 
 
- bin/flytectl get launchplan -p flytesnacks -d development --sort-by=created_at --limit=1 --asc
-
-Retrieves all the launch plans within project and domain in yaml format.
+Retrieves all the launchplan within project and domain in yaml format.
 
 ::
 
  flytectl get launchplan -p flytesnacks -d development -o yaml
 
-Retrieves all the launch plans within project and domain in json format
+Retrieves all the launchplan within project and domain in json format
 
 ::
 
@@ -87,22 +101,34 @@ Usage
 
 //go:generate pflags LaunchPlanConfig --default-var launchPlanConfig
 var (
-	launchPlanConfig = &LaunchPlanConfig{}
+	launchPlanConfig = &LaunchPlanConfig{
+		Filter: filters.DefaultFilter,
+	}
 )
 
 // LaunchPlanConfig
 type LaunchPlanConfig struct {
-	ExecFile string `json:"execFile" pflag:",execution file name to be used for generating execution spec of a single launchplan."`
-	Version  string `json:"version" pflag:",version of the launchplan to be fetched."`
-	Latest   bool   `json:"latest" pflag:", flag to indicate to fetch the latest version, version flag will be ignored in this case"`
+	ExecFile string          `json:"execFile" pflag:",execution file name to be used for generating execution spec of a single launchplan."`
+	Version  string          `json:"version" pflag:",version of the launchplan to be fetched."`
+	Latest   bool            `json:"latest" pflag:", flag to indicate to fetch the latest version, version flag will be ignored in this case"`
+	Filter   filters.Filters `json:"filter" pflag:","`
 }
 
+// Column structure for get specific launchplan
 var launchplanColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
 	{Header: "Name", JSONPath: "$.id.name"},
 	{Header: "Type", JSONPath: "$.closure.compiledTask.template.type"},
 	{Header: "State", JSONPath: "$.spec.state"},
 	{Header: "Schedule", JSONPath: "$.spec.entityMetadata.schedule"},
+}
+
+// Column structure for get all launchplans
+var launchplansColumns = []printer.Column{
+	{Header: "Version", JSONPath: "$.id.version"},
+	{Header: "Name", JSONPath: "$.id.name"},
+	{Header: "Type", JSONPath: "$.id.resourceType"},
+	{Header: "CreatedAt", JSONPath: "$.closure.createdAt"},
 }
 
 func LaunchplanToProtoMessages(l []*admin.LaunchPlan) []proto.Message {
@@ -117,10 +143,6 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 	launchPlanPrinter := printer.Printer{}
 	project := config.GetConfig().Project
 	domain := config.GetConfig().Domain
-	fieldSelector, err := filters.Transform(filters.SplitTerms(config.GetConfig().FieldSelector))
-	if err != nil {
-		return err
-	}
 	if len(args) == 1 {
 		name := args[0]
 		var launchPlans []*admin.LaunchPlan
@@ -136,13 +158,18 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		}
 		return nil
 	}
-	launchPlans, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListLaunchPlanIds, adminutils.ListRequest{Project: project, Domain: domain, Filters: fieldSelector})
+
+	launchPlanList, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, filters.BuildResourceListRequestWithName(launchPlanConfig.Filter, ""))
+	if err != nil {
+		return err
+	}
+	launchPlans := launchPlanList.LaunchPlans
 	if err != nil {
 		return err
 	}
 	logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
-	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), entityColumns,
-		adminutils.NamedEntityToProtoMessage(launchPlans)...)
+	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplansColumns,
+		LaunchplanToProtoMessages(launchPlans)...)
 }
 
 // FetchLPForName fetches the launchplan give it name.
@@ -152,7 +179,7 @@ func FetchLPForName(ctx context.Context, fetcher ext.AdminFetcherExtInterface, n
 	var lp *admin.LaunchPlan
 	var err error
 	if launchPlanConfig.Latest {
-		if lp, err = fetcher.FetchLPLatestVersion(ctx, name, project, domain); err != nil {
+		if lp, err = fetcher.FetchLPLatestVersion(ctx, name, project, domain, launchPlanConfig.Filter); err != nil {
 			return nil, err
 		}
 		launchPlans = append(launchPlans, lp)
@@ -162,7 +189,7 @@ func FetchLPForName(ctx context.Context, fetcher ext.AdminFetcherExtInterface, n
 		}
 		launchPlans = append(launchPlans, lp)
 	} else {
-		launchPlans, err = fetcher.FetchAllVerOfLP(ctx, name, project, domain)
+		launchPlans, err = fetcher.FetchAllVerOfLP(ctx, name, project, domain, launchPlanConfig.Filter)
 		if err != nil {
 			return nil, err
 		}
