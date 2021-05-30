@@ -18,11 +18,9 @@ func RenderWorkflow(w *core.CompiledWorkflowClosure, file string) error {
 	g := graphviz.New()
 	graph, err := g.Graph(graphviz.Directed)
 	if err != nil {
-		logger.Fatal(context.TODO(), err)
-	}
-	if err != nil {
 		return errors.Wrapf("GraphInitFailure", err, "failed to initialize graphviz")
 	}
+	graph.SetRankDir(cgraph.LRRank)
 
 	defer func() {
 		if err = graph.Close(); err != nil {
@@ -30,8 +28,10 @@ func RenderWorkflow(w *core.CompiledWorkflowClosure, file string) error {
 		}
 	}()
 
-	_ = createNodesAndEdgesFromWorkflow(graph, w)
-	//createNodesAndEdges(graph)
+	if err = createNodesAndEdgesFromWorkflow(graph, w) ; err != nil {
+		return err
+	}
+
 	var buf bytes.Buffer
 	if err = g.Render(graph, "dot", &buf); err != nil {
 		logger.Fatal(context.TODO(), err)
@@ -52,66 +52,59 @@ func RenderWorkflow(w *core.CompiledWorkflowClosure, file string) error {
 
 func createNodesAndEdgesFromWorkflow(graph *cgraph.Graph,  w *core.CompiledWorkflowClosure) error {
 	graphNodes := make(map[string]*cgraph.Node)
-	var node *cgraph.Node
-	var err error
-
 	for _, n := range w.Primary.Template.Nodes {
 		name := n.Id
 		if n.Id == "start-node" || n.Id == "end-node" {
-			node, err = graph.CreateNode(name)
+			node, err := graph.CreateNode(name)
 			if err != nil {
 				return err
 			}
+			node.SetShape(cgraph.DoubleCircleShape)
+			node.SetColor("#ff00ff")
 			graphNodes[name] = node
 		} else {
 			switch n.Target.(type) {
 			case *core.Node_TaskNode:
-				node, err = graph.CreateNode(name)
+				node, err := graph.CreateNode(name)
 				if err != nil {
 					return err
 				}
 				graphNodes[name] = node
+				node.SetColor("#0000ff")
+				node.SetShape(cgraph.HouseShape)
 			case *core.Node_BranchNode:
-				node, err = graph.CreateNode(name)
+				node, err := graph.CreateNode(name)
 				if err != nil {
 					return err
 				}
+				node.SetShape(cgraph.DiamondShape)
+				node.SetColor("#00ff00")
 				graphNodes[name] = node
 			case *core.Node_WorkflowNode:
-				node, err = graph.CreateNode(name)
+				node, err := graph.CreateNode(name)
 				if err != nil {
 					return err
 				}
 				graphNodes[name] = node
+				node.SetColor("#ff0000")
+				node.SetShape(cgraph.DoubleOctagonShape)
 			}
 		}
 	}
+	return createEdges(graphNodes, graph, w)
+}
 
-	var graphNode *cgraph.Node
-	var graphNodeName string
-	var edge *cgraph.Edge
-
-	// downStream node variables
-	var dNode *cgraph.Node
-	var ok bool
-	var downStreamNodeId string
-	var downstreamNodes *core.ConnectionSet_IdList
-
-	// upstream node variables
-	var upstreamNodes *core.ConnectionSet_IdList
-	var upStreamNodeId string
-	var uNode *cgraph.Node
-
-	for graphNodeName, graphNode = range graphNodes {
-		upstreamNodes, _ = w.Primary.Connections.Upstream[graphNodeName]
-		downstreamNodes, _ = w.Primary.Connections.Downstream[graphNodeName]
+func createEdges(graphNodes map[string]*cgraph.Node, graph *cgraph.Graph, w *core.CompiledWorkflowClosure) error {
+	for graphNodeName, graphNode := range graphNodes {
+		upstreamNodes, _ := w.Primary.Connections.Upstream[graphNodeName]
+		downstreamNodes, _ := w.Primary.Connections.Downstream[graphNodeName]
 		if downstreamNodes != nil {
-			for _, downStreamNodeId = range downstreamNodes.Ids {
-				dNode, ok = graphNodes[downStreamNodeId]
+			for _, downStreamNodeId := range downstreamNodes.Ids {
+				dNode, ok := graphNodes[downStreamNodeId]
 				if !ok {
 					return fmt.Errorf("node[%s], downstream from[%s] referenced before creation", downStreamNodeId, graphNodeName)
 				}
-				edge, err = graph.CreateEdge(fmt.Sprintf("%s-%s", graphNodeName, downStreamNodeId), graphNode, dNode)
+				edge, err := graph.CreateEdge(fmt.Sprintf("%s-%s", graphNodeName, downStreamNodeId), graphNode, dNode)
 				if err != nil {
 					return err
 				}
@@ -119,12 +112,12 @@ func createNodesAndEdgesFromWorkflow(graph *cgraph.Graph,  w *core.CompiledWorkf
 			}
 		}
 		if upstreamNodes != nil {
-			for _, upStreamNodeId = range upstreamNodes.Ids {
-				uNode, ok = graphNodes[upStreamNodeId]
+			for _, upStreamNodeId := range upstreamNodes.Ids {
+				uNode, ok := graphNodes[upStreamNodeId]
 				if !ok {
 					return fmt.Errorf("node[%s], upstream from[%s] referenced before creation", upStreamNodeId, graphNodeName)
 				}
-				edge, err = graph.CreateEdge(fmt.Sprintf("%s-%s", upStreamNodeId, graphNodeName), node, uNode)
+				edge, err := graph.CreateEdge(fmt.Sprintf("%s-%s", upStreamNodeId, graphNodeName), graphNode, uNode)
 				if err != nil {
 					return err
 				}
