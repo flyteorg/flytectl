@@ -11,111 +11,126 @@ import (
 	"github.com/goccy/go-graphviz/cgraph"
 )
 
-func constructGraph(prefix string, graph *cgraph.Graph, w *core.CompiledWorkflow, subWf map[string]*cgraph.Graph) error {
-	grapNodes := make(map[string]*cgraph.Node)
-	for _, n := range w.Template.Nodes {
-		name := n.Id
-		if prefix != "" {
-			name = prefix + "-" + n.Id
-		}
+// RenderWorkflow Renders the workflow graph to the given file
+func RenderWorkflow(w *core.CompiledWorkflowClosure, file string) error {
+	logger.Infof(context.TODO(), "outputting file: %s", file)
 
-		if n.Id == "start-node" || n.Id == "end-node"{
-			gn, err := graph.CreateNode(name)
-			if err != nil {
-				return err
-			}
-			grapNodes[name] = gn
-		} else {
-			switch n.Target.(type) {
-			case *core.Node_TaskNode:
-				gn, err := graph.CreateNode(name)
-				if err != nil {
-					return err
-				}
-				grapNodes[name] = gn
-			case *core.Node_BranchNode:
-				gn, err := graph.CreateNode(name)
-				if err != nil {
-					return err
-				}
-				grapNodes[name] = gn
-			case *core.Node_WorkflowNode:
-				gn, err := graph.CreateNode(name)
-				if err != nil {
-					return err
-				}
-				grapNodes[name] = gn
-			}
-		}
-	}
-
-	for name, node := range grapNodes {
-		upstreamNodes, _ := w.Connections.Upstream[name]
-		downstreamNodes, _ := w.Connections.Downstream[name]
-		if downstreamNodes != nil {
-			for _, n := range downstreamNodes.Ids {
-				dNode, ok := grapNodes[n]
-				if !ok {
-					return fmt.Errorf("node[%s], downstream from[%s] referenced before creation", n, name)
-				}
-				_, err := graph.CreateEdge(fmt.Sprintf("%s-%s", name, n), node, dNode)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		if upstreamNodes != nil {
-			for _, n := range upstreamNodes.Ids {
-				uNode, ok := grapNodes[n]
-				if !ok {
-					return fmt.Errorf("node[%s], upstream from[%s] referenced before creation", n, name)
-				}
-				_, err := graph.CreateEdge(fmt.Sprintf("%s-%s", n, name), node, uNode)
-				if err != nil {
-					return err
-				}
-			}
-		}
-	}
-	return nil
-}
-
-func CompiledWorkflowClosureToGraph(g *graphviz.Graphviz, w *core.CompiledWorkflowClosure) (*cgraph.Graph, error) {
+	g := graphviz.New()
 	graph, err := g.Graph(graphviz.Directed)
 	if err != nil {
-		return nil, errors.Wrapf("GraphInitFailure", err, "failed to initialize graphviz")
+		logger.Fatal(context.TODO(), err)
+	}
+	if err != nil {
+		return errors.Wrapf("GraphInitFailure", err, "failed to initialize graphviz")
 	}
 
 	defer func() {
-		if err := graph.Close(); err != nil {
+		if err = graph.Close(); err != nil {
 			logger.Fatalf(context.TODO(), "Failed to close the graphviz Graph. err: %s", err)
 		}
 	}()
 
-	return graph, constructGraph("", graph, w.Primary, nil)
+	_ = createNodesAndEdgesFromWorkflow(graph, w)
+	//createNodesAndEdges(graph)
+	var buf bytes.Buffer
+	if err = g.Render(graph, "dot", &buf); err != nil {
+		logger.Fatal(context.TODO(), err)
+	}
+	fmt.Println(buf.String())
+
+	// 1. write encoded PNG data to buffer
+	if err = g.Render(graph, graphviz.SVG, &buf); err != nil {
+		logger.Fatal(context.TODO(), err)
+	}
+
+	// 3. write to file directly
+	if err = g.RenderFilename(graph, graphviz.SVG, file); err != nil {
+		logger.Fatal(context.TODO(), err)
+	}
+	return nil
 }
 
-// RenderWorkflow Renders the workflow graph to the given file
-func RenderWorkflow(w *core.CompiledWorkflowClosure, file string) error {
-	g := graphviz.New()
-	defer func() {
-		if err := g.Close(); err != nil {
-			logger.Fatalf(context.TODO(), "failed to close graphviz. err: %s", err)
+func createNodesAndEdgesFromWorkflow(graph *cgraph.Graph,  w *core.CompiledWorkflowClosure) error {
+	graphNodes := make(map[string]*cgraph.Node)
+	var node *cgraph.Node
+	var err error
+
+	for _, n := range w.Primary.Template.Nodes {
+		name := n.Id
+		if n.Id == "start-node" || n.Id == "end-node" {
+			node, err = graph.CreateNode(name)
+			if err != nil {
+				return err
+			}
+			graphNodes[name] = node
+		} else {
+			switch n.Target.(type) {
+			case *core.Node_TaskNode:
+				node, err = graph.CreateNode(name)
+				if err != nil {
+					return err
+				}
+				graphNodes[name] = node
+			case *core.Node_BranchNode:
+				node, err = graph.CreateNode(name)
+				if err != nil {
+					return err
+				}
+				graphNodes[name] = node
+			case *core.Node_WorkflowNode:
+				node, err = graph.CreateNode(name)
+				if err != nil {
+					return err
+				}
+				graphNodes[name] = node
+			}
 		}
-	}()
-	graph, err := CompiledWorkflowClosureToGraph(g, w)
-	if err != nil {
-		return err
 	}
 
-	logger.Infof(context.TODO(), "outputing file: %s", file)
-	var buf bytes.Buffer
-	if err := g.Render(graph, graphviz.XDOT, &buf); err != nil {
-		return err
-	}
-	logger.Infof(context.TODO(), buf.String())
-	if err := g.RenderFilename(graph, graphviz.SVG, file); err != nil {
-		return err
+	var graphNode *cgraph.Node
+	var graphNodeName string
+	var edge *cgraph.Edge
+
+	// downStream node variables
+	var dNode *cgraph.Node
+	var ok bool
+	var downStreamNodeId string
+	var downstreamNodes *core.ConnectionSet_IdList
+
+	// upstream node variables
+	var upstreamNodes *core.ConnectionSet_IdList
+	var upStreamNodeId string
+	var uNode *cgraph.Node
+
+	for graphNodeName, graphNode = range graphNodes {
+		upstreamNodes, _ = w.Primary.Connections.Upstream[graphNodeName]
+		downstreamNodes, _ = w.Primary.Connections.Downstream[graphNodeName]
+		if downstreamNodes != nil {
+			for _, downStreamNodeId = range downstreamNodes.Ids {
+				dNode, ok = graphNodes[downStreamNodeId]
+				if !ok {
+					return fmt.Errorf("node[%s], downstream from[%s] referenced before creation", downStreamNodeId, graphNodeName)
+				}
+				edge, err = graph.CreateEdge(fmt.Sprintf("%s-%s", graphNodeName, downStreamNodeId), graphNode, dNode)
+				if err != nil {
+					return err
+				}
+				edge.SetLabel(fmt.Sprintf("%s-%s", graphNodeName, downStreamNodeId))
+			}
+		}
+		if upstreamNodes != nil {
+			for _, upStreamNodeId = range upstreamNodes.Ids {
+				uNode, ok = graphNodes[upStreamNodeId]
+				if !ok {
+					return fmt.Errorf("node[%s], upstream from[%s] referenced before creation", upStreamNodeId, graphNodeName)
+				}
+				edge, err = graph.CreateEdge(fmt.Sprintf("%s-%s", upStreamNodeId, graphNodeName), node, uNode)
+				if err != nil {
+					return err
+				}
+				edge.SetLabel(fmt.Sprintf("%s-%s", graphNodeName, upStreamNodeId))
+			}
+		}
 	}
 	return nil
 }
