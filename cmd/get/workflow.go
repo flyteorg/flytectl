@@ -89,7 +89,7 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		}
 		logger.Debugf(ctx, "Retrieved %v workflow", len(workflows))
 		if config.GetConfig().MustOutputFormat() == printer.OutputFormatSVG {
-			return visualize.RenderWorkflow(workflows[0].Closure.CompiledWorkflow, "/tmp/test.svg")
+			return visualize.RenderWorkflow(workflows[0].Closure.CompiledWorkflow, workflowconfig.DefaultConfig.OutputFileName)
 		} else {
 			err = adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflowColumns, WorkflowToProtoMessages(workflows)...)
 			if err != nil {

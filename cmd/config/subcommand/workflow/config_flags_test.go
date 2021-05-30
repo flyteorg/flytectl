@@ -84,7 +84,7 @@ func testDecodeJson_Config(t *testing.T, val, result interface{}) {
 	assert.NoError(t, decode_Config(val, result))
 }
 
-func testDecodeSlice_Config(t *testing.T, vStringSlice, result interface{}) {
+func testDecodeRaw_Config(t *testing.T, vStringSlice, result interface{}) {
 	assert.NoError(t, decode_Config(vStringSlice, result))
 }
 
@@ -100,14 +100,6 @@ func TestConfig_SetFlags(t *testing.T) {
 	assert.True(t, cmdFlags.HasFlags())
 
 	t.Run("Test_version", func(t *testing.T) {
-		t.Run("DefaultValue", func(t *testing.T) {
-			// Test that default value is set properly
-			if vString, err := cmdFlags.GetString("version"); err == nil {
-				assert.Equal(t, string(DefaultConfig.Version), vString)
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -122,14 +114,6 @@ func TestConfig_SetFlags(t *testing.T) {
 		})
 	})
 	t.Run("Test_latest", func(t *testing.T) {
-		t.Run("DefaultValue", func(t *testing.T) {
-			// Test that default value is set properly
-			if vBool, err := cmdFlags.GetBool("latest"); err == nil {
-				assert.Equal(t, bool(DefaultConfig.Latest), vBool)
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
@@ -137,6 +121,20 @@ func TestConfig_SetFlags(t *testing.T) {
 			cmdFlags.Set("latest", testValue)
 			if vBool, err := cmdFlags.GetBool("latest"); err == nil {
 				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.Latest)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_opFileName", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("opFileName", testValue)
+			if vString, err := cmdFlags.GetString("opFileName"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.OutputFileName)
 
 			} else {
 				assert.FailNow(t, err.Error())
