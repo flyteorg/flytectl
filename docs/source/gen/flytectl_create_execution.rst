@@ -76,6 +76,22 @@ Also an execution can be relaunched by passing in current execution id.
 
  flytectl create execution --relaunch ffb31066a0f8b4d52b77 -p flytectldemo -d development
 
+Generic data types are also supported for execution in similar way.Following is sample of how the inputs need to be escaped while creating the execution.
+Notice '>' used for escaping the json input which is passed as generic data for execution
+::
+
+  iamRoleARN: "arn:aws:iam::123456789:role/dummy"
+  inputs:
+    "x" : >
+          {"x":1,"y":"ydatafory","z":{}}
+    "y" : >
+          {"x":2,"y":"ydataforx","z":{}}
+  kubeServiceAcct: ""
+  targetDomain: ""
+  targetProject: ""
+  task: core.type_system.custom_objects.add
+  version: v2
+
 Usage
 
 
