@@ -2,6 +2,7 @@ package get
 
 import (
 	"context"
+	"fmt"
 	"github.com/flyteorg/flytectl/pkg/visualize"
 
 	workflowconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/workflow"
@@ -89,7 +90,11 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		}
 		logger.Debugf(ctx, "Retrieved %v workflow", len(workflows))
 		if config.GetConfig().MustOutputFormat() == printer.OutputFormatSVG {
-			return visualize.RenderWorkflow(workflows[0].Closure.CompiledWorkflow, "/tmp/test.svg")
+			b, err := visualize.RenderWorkflow(workflows[0].Closure.CompiledWorkflow)
+			if err != nil {
+				return err
+			}
+			fmt.Println(string(b))
 		} else {
 			err = adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflowColumns, WorkflowToProtoMessages(workflows)...)
 			if err != nil {
