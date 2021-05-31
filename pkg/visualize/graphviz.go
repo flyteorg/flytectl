@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/flyteorg/flytestdlib/errors"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -19,9 +20,9 @@ func getName(prefix, id string) string {
 }
 
 type graphBuilder struct {
-	graphNodes  map[string]*cgraph.Node
-	graphEdges  map[string]*cgraph.Edge
-	subWf       map[string]*cgraph.Graph
+	graphNodes map[string]*cgraph.Node
+	graphEdges map[string]*cgraph.Edge
+	subWf      map[string]*cgraph.Graph
 }
 
 func (gb *graphBuilder) addSubNodeEdge(graph *cgraph.Graph, parentNode, n *cgraph.Node) error {
@@ -125,8 +126,8 @@ func (gb *graphBuilder) constructGraph(prefix string, graph *cgraph.Graph, w *co
 	}
 
 	for name, node := range gb.graphNodes {
-		upstreamNodes, _ := w.Connections.Upstream[name]
-		downstreamNodes, _ := w.Connections.Downstream[name]
+		upstreamNodes := w.Connections.Upstream[name]
+		downstreamNodes := w.Connections.Downstream[name]
 		if downstreamNodes != nil {
 			for _, n := range downstreamNodes.Ids {
 				dNode, ok := gb.graphNodes[n]
@@ -172,7 +173,7 @@ func (gb *graphBuilder) CompiledWorkflowClosureToGraph(g *graphviz.Graphviz, w *
 	return graph, gb.constructGraph("", graph, w.Primary)
 }
 
-func NewGraphBuilder() *graphBuilder {
+func newGraphBuilder() *graphBuilder {
 	return &graphBuilder{
 		graphNodes: make(map[string]*cgraph.Node),
 		graphEdges: make(map[string]*cgraph.Edge),
@@ -188,7 +189,7 @@ func RenderWorkflow(w *core.CompiledWorkflowClosure) ([]byte, error) {
 			logger.Fatalf(context.TODO(), "failed to close graphviz. err: %s", err)
 		}
 	}()
-	gb := NewGraphBuilder()
+	gb := newGraphBuilder()
 	graph, err := gb.CompiledWorkflowClosureToGraph(g, w)
 	if err != nil {
 		return nil, err
