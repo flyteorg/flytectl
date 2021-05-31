@@ -12,14 +12,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       -
-        name: GCC multilib
-        run: |
-          sudo apt-get install gcc-multilib g++-multilib
-      - name: Run GoReleaser dry run
-        uses: goreleaser/goreleaser-action@v2
-        with:
-          version: latest
-          args: --snapshot  --skip-publish --rm-dist 
+        name: 'goreleaser-xgo'
+        description: 'Action to do cross compilation of go packages including support for cgo'
+        runs:
+          using: 'docker'
+          image: 'mailchain/goreleaser-xcgo'
+          args: --snapshot  --skip-publish --rm-dist
       - name: Unit Tests
         uses: cedrickring/golang-action@1.5.2
         env:
