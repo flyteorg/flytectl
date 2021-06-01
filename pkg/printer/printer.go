@@ -22,7 +22,6 @@ const (
 	OutputFormatTABLE OutputFormat = iota
 	OutputFormatJSON
 	OutputFormatYAML
-	OutputFormatSVG
 )
 
 func OutputFormats() []string {
@@ -116,8 +115,6 @@ func (p Printer) Print(format OutputFormat, columns []Column, messages ...proto.
 
 	// Factory Method for all printer
 	switch format {
-	case OutputFormatSVG:
-		return fmt.Errorf("OutputFormat SVG is only support for Workflow type of object currently")
 	case OutputFormatJSON, OutputFormatYAML: // Print protobuf to json
 		buf := new(bytes.Buffer)
 		encoder := json.NewEncoder(buf)

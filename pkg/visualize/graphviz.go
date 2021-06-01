@@ -119,6 +119,9 @@ func (gb *graphBuilder) constructNode(prefix string, graph *cgraph.Graph, n *cor
 }
 
 func (gb *graphBuilder) constructGraph(prefix string, graph *cgraph.Graph, w *core.CompiledWorkflow) error {
+	if w == nil || w.Template == nil {
+		return nil
+	}
 	for _, n := range w.Template.Nodes {
 		if _, err := gb.constructNode(prefix, graph, n); err != nil {
 			return err
@@ -182,7 +185,7 @@ func newGraphBuilder() *graphBuilder {
 }
 
 // RenderWorkflow Renders the workflow graph to the given file
-func RenderWorkflow(w *core.CompiledWorkflowClosure) ([]byte, error) {
+func RenderWorkflow(w *core.CompiledWorkflowClosure, o graphviz.Format) ([]byte, error) {
 	g := graphviz.New()
 	defer func() {
 		if err := g.Close(); err != nil {
@@ -201,7 +204,7 @@ func RenderWorkflow(w *core.CompiledWorkflowClosure) ([]byte, error) {
 	}()
 
 	var buf bytes.Buffer
-	if err := g.Render(graph, graphviz.SVG, &buf); err != nil {
+	if err := g.Render(graph, o, &buf); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
