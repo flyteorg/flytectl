@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/goccy/go-graphviz"
-	"strings"
 )
 
 //go:generate pflags Config --default-var DefaultConfig
