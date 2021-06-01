@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/flyteorg/flyteidl/clients/go/coreutils"
 	"strings"
+
+	"github.com/flyteorg/flyteidl/clients/go/coreutils"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/flyteorg/flytestdlib/errors"
@@ -117,9 +118,9 @@ type graphBuilder struct {
 	// Mutated as graph is built. lookup table for all graphviz compiled edges.
 	graphEdges map[string]*cgraph.Edge
 	// lookup table for all graphviz compiled subgraphs
-	subWf      map[string]*core.CompiledWorkflow
+	subWf map[string]*core.CompiledWorkflow
 	// a lookup table for all tasks in the graph
-	tasks      map[string]*core.CompiledTask
+	tasks map[string]*core.CompiledTask
 	// a lookup for all node clusters. This is to remap the edges to the cluster itself (instead of the node)
 	// this is useful in the case of branchNodes and subworkflow nodes
 	nodeClusters map[string]*cgraph.Graph
@@ -320,8 +321,8 @@ func (gb *graphBuilder) CompiledWorkflowClosureToGraph(g *graphviz.Graphviz, w *
 
 func newGraphBuilder() *graphBuilder {
 	return &graphBuilder{
-		graphNodes: make(map[string]*cgraph.Node),
-		graphEdges: make(map[string]*cgraph.Edge),
+		graphNodes:   make(map[string]*cgraph.Node),
+		graphEdges:   make(map[string]*cgraph.Edge),
 		nodeClusters: make(map[string]*cgraph.Graph),
 	}
 }
