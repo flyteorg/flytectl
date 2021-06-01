@@ -2,7 +2,8 @@ package visualize
 
 import (
 	"bytes"
-	"fmt"
+	"github.com/goccy/go-graphviz"
+	"io/fs"
 	"io/ioutil"
 	"testing"
 
@@ -20,8 +21,8 @@ func TestRenderWorkflow(t *testing.T) {
 	c := &core.CompiledWorkflowClosure{}
 	err = jsonpb.Unmarshal(i, c)
 	assert.NoError(t, err)
-	b, err := RenderWorkflow(c)
+	b, err := RenderWorkflow(c, graphviz.PNG)
 	assert.NoError(t, err)
 	assert.NotNil(t, b)
-	fmt.Println(string(b))
+	ioutil.WriteFile("/tmp/image.png", b, fs.ModePerm)
 }
