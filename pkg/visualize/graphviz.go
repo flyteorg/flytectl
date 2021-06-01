@@ -35,7 +35,8 @@ func constructEndNode(graph *cgraph.Graph) (*cgraph.Node, error)  {
 	return gn, nil
 }
 
-func constructTaskNode(name string, graph *cgraph.Graph, n *core.Node) (*cgraph.Node, error)  {
+func constructTaskNode(name string, graph *cgraph.Graph, n *core.Node, t *core.CompiledTask) (*cgraph.Node, error)  {
+	// TODO Add task task type and other information from the task template
 	gn, err := graph.CreateNode(name)
 	if err != nil {
 		return nil, err
@@ -81,6 +82,7 @@ type graphBuilder struct {
 	graphNodes map[string]*cgraph.Node
 	graphEdges map[string]*cgraph.Edge
 	subWf      map[string]*cgraph.Graph
+	// TODO Add tasks
 }
 
 func (gb *graphBuilder) addSubNodeEdge(graph *cgraph.Graph, parentNode, n *cgraph.Node) error {
@@ -160,7 +162,8 @@ func (gb *graphBuilder) constructNode(prefix string, graph *cgraph.Graph, n *cor
 	} else {
 		switch n.Target.(type) {
 		case *core.Node_TaskNode:
-			gn, err = constructTaskNode(name, graph, n)
+			// TODO add task lookup
+			gn, err = constructTaskNode(name, graph, n, nil)
 		case *core.Node_BranchNode:
 			branch := graph.SubGraph(fmt.Sprintf("cluster_"+n.Metadata.Name), 2)
 			gn, err = gb.constructBranchNode(prefix, branch, n)
