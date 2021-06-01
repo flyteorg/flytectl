@@ -46,8 +46,8 @@ func booleanExprToString(expr *core.BooleanExpression) string {
 	return comparisonToString(expr.GetComparison())
 }
 
-func constructStartNode(graph *cgraph.Graph) (*cgraph.Node, error) {
-	gn, err := graph.CreateNode("start-node")
+func constructStartNode(n string, graph *cgraph.Graph) (*cgraph.Node, error) {
+	gn, err := graph.CreateNode(n)
 	if err != nil {
 		return nil, err
 	}
@@ -57,8 +57,8 @@ func constructStartNode(graph *cgraph.Graph) (*cgraph.Node, error) {
 	return gn, nil
 }
 
-func constructEndNode(graph *cgraph.Graph) (*cgraph.Node, error) {
-	gn, err := graph.CreateNode("end-node")
+func constructEndNode(n string, graph *cgraph.Graph) (*cgraph.Node, error) {
+	gn, err := graph.CreateNode(n)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ type graphBuilder struct {
 	// Mutated as graph is built. lookup table for all graphviz compiled edges.
 	graphEdges map[string]*cgraph.Edge
 	// lookup table for all graphviz compiled subgraphs
-	subWf      map[string]*cgraph.Graph
+	subWf      map[string]*core.CompiledWorkflow
 	// a lookup table for all tasks in the graph
 	tasks      map[string]*core.CompiledTask
 	// a lookup for all node clusters. This is to remap the edges to the cluster itself (instead of the node)
@@ -146,7 +146,7 @@ func (gb *graphBuilder) constructBranchNode(prefix string, graph *cgraph.Graph, 
 	if err != nil {
 		return nil, err
 	}
-	gb.graphNodes[parentBranchNode.Name()] = parentBranchNode
+	gb.graphNodes[n.Id] = parentBranchNode
 
 	if n.GetBranchNode().GetIfElse() == nil {
 		return parentBranchNode, nil
@@ -200,9 +200,9 @@ func (gb *graphBuilder) constructNode(prefix string, graph *cgraph.Graph, n *cor
 	var gn *cgraph.Node
 
 	if n.Id == "start-node" {
-		gn, err = constructStartNode(graph)
+		gn, err = constructStartNode(name, graph)
 	} else if n.Id == "end-node" {
-		gn, err = constructEndNode(graph)
+		gn, err = constructEndNode(name, graph)
 	} else {
 		switch n.Target.(type) {
 		case *core.Node_TaskNode:
@@ -217,13 +217,27 @@ func (gb *graphBuilder) constructNode(prefix string, graph *cgraph.Graph, n *cor
 			gn, err = gb.constructBranchNode(prefix, branch, n)
 			gb.nodeClusters[name] = branch
 		case *core.Node_WorkflowNode:
-			gn, err = graph.CreateNode(name)
+			if n.GetWorkflowNode().GetLaunchplanRef() != nil {
+				gn, err = graph.CreateNode(name)
+			} else {
+				subWfGraph := graph.SubGraph("cluster_"+name, 2)
+				subGB := graphBuilderFromParent(gb)
+				swf, ok := gb.subWf[n.GetWorkflowNode().GetSubWorkflowRef().String()]
+				if !ok {
+					return nil, fmt.Errorf("subworkfow [%s] not found", n.GetWorkflowNode().GetSubWorkflowRef().String())
+				}
+				if err := subGB.constructGraph(name, subWfGraph, swf); err != nil {
+					return nil, err
+				}
+				gn = subGB.graphNodes["start-node"]
+				gb.nodeClusters[gn.Name()] = subWfGraph
+			}
 		}
 	}
 	if err != nil {
 		return nil, err
 	}
-	gb.graphNodes[name] = gn
+	gb.graphNodes[n.Id] = gn
 	return gn, nil
 }
 
@@ -233,7 +247,7 @@ func (gb *graphBuilder) addEdge(fromNodeName, toNodeName string, graph *cgraph.G
 	if !toOk || !fromOk {
 		return fmt.Errorf("nodes[%s] -> [%s] referenced before creation", fromNodeName, toNodeName)
 	}
-	edgeName := fmt.Sprintf("%s-%s", fromNodeName, toNodeName)
+	edgeName := fmt.Sprintf("%s-%s", fromNode.Name(), toNode.Name())
 	if _, ok := gb.graphEdges[edgeName]; !ok {
 		edge, err := graph.CreateEdge(edgeName, fromNode, toNode)
 		if err != nil {
@@ -241,11 +255,11 @@ func (gb *graphBuilder) addEdge(fromNodeName, toNodeName string, graph *cgraph.G
 		}
 		// Now lets check that the toNode or the fromNode is a cluster. If so then following this thread,
 		// https://stackoverflow.com/questions/2012036/graphviz-how-to-connect-subgraphs, we will connect the cluster
-		if c, ok := gb.nodeClusters[toNodeName]; ok {
-			edge.SetLogicalHead(c.Name())
-		}
-		if c, ok := gb.nodeClusters[fromNodeName]; ok {
+		if c, ok := gb.nodeClusters[fromNode.Name()]; ok {
 			edge.SetLogicalTail(c.Name())
+		}
+		if c, ok := gb.nodeClusters[toNode.Name()]; ok {
+			edge.SetLogicalHead(c.Name())
 		}
 		gb.graphEdges[edgeName] = edge
 	}
@@ -262,7 +276,7 @@ func (gb *graphBuilder) constructGraph(prefix string, graph *cgraph.Graph, w *co
 		}
 	}
 
-	for name, _ := range gb.graphNodes {
+	for name := range gb.graphNodes {
 		upstreamNodes := w.Connections.Upstream[name]
 		downstreamNodes := w.Connections.Downstream[name]
 		if downstreamNodes != nil {
@@ -295,6 +309,11 @@ func (gb *graphBuilder) CompiledWorkflowClosureToGraph(g *graphviz.Graphviz, w *
 		tLookup[t.Template.Id.String()] = t
 	}
 	gb.tasks = tLookup
+	wLookup := make(map[string]*core.CompiledWorkflow)
+	for _, swf := range w.SubWorkflows {
+		wLookup[swf.Template.Id.String()] = swf
+	}
+	gb.subWf = wLookup
 
 	return graph, gb.constructGraph("", graph, w.Primary)
 }
@@ -303,9 +322,15 @@ func newGraphBuilder() *graphBuilder {
 	return &graphBuilder{
 		graphNodes: make(map[string]*cgraph.Node),
 		graphEdges: make(map[string]*cgraph.Edge),
-		subWf:      make(map[string]*cgraph.Graph),
 		nodeClusters: make(map[string]*cgraph.Graph),
 	}
+}
+
+func graphBuilderFromParent(gb *graphBuilder) *graphBuilder {
+	newGB := newGraphBuilder()
+	newGB.subWf = gb.subWf
+	newGB.tasks = gb.tasks
+	return newGB
 }
 
 // RenderWorkflow Renders the workflow graph to the given file
