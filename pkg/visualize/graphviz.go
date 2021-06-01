@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/flyteorg/flyteidl/clients/go/coreutils"
 	"strings"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
@@ -13,58 +14,90 @@ import (
 	"github.com/goccy/go-graphviz/cgraph"
 )
 
-func constructStartNode(graph *cgraph.Graph) (*cgraph.Node, error)  {
+func operandToString(op *core.Operand) string {
+	if op.GetPrimitive() != nil {
+		l, err := coreutils.ExtractFromLiteral(&core.Literal{Value: &core.Literal_Scalar{
+			Scalar: &core.Scalar{
+				Value: &core.Scalar_Primitive{
+					Primitive: op.GetPrimitive(),
+				},
+			},
+		}})
+		if err != nil {
+			return err.Error()
+		}
+		return fmt.Sprintf("%v", l)
+	}
+	return op.GetVar()
+}
+
+func comparisonToString(expr *core.ComparisonExpression) string {
+	return fmt.Sprintf("%s %s %s", operandToString(expr.LeftValue), expr.Operator.String(), operandToString(expr.RightValue))
+}
+
+func conjunctionToString(expr *core.ConjunctionExpression) string {
+	return fmt.Sprintf("(%s) %s (%s)", booleanExprToString(expr.LeftExpression), expr.Operator.String(), booleanExprToString(expr.RightExpression))
+}
+
+func booleanExprToString(expr *core.BooleanExpression) string {
+	if expr.GetConjunction() != nil {
+		return conjunctionToString(expr.GetConjunction())
+	}
+	return comparisonToString(expr.GetComparison())
+}
+
+func constructStartNode(graph *cgraph.Graph) (*cgraph.Node, error) {
 	gn, err := graph.CreateNode("start-node")
 	if err != nil {
 		return nil, err
 	}
 	gn.SetLabel("start")
-	gn.SetShape(cgraph.CircleShape)
+	gn.SetShape(cgraph.DoubleCircleShape)
 	gn.SetColor("green")
 	return gn, nil
 }
 
-func constructEndNode(graph *cgraph.Graph) (*cgraph.Node, error)  {
+func constructEndNode(graph *cgraph.Graph) (*cgraph.Node, error) {
 	gn, err := graph.CreateNode("end-node")
 	if err != nil {
 		return nil, err
 	}
 	gn.SetLabel("end")
-	gn.SetShape(cgraph.CircleShape)
+	gn.SetShape(cgraph.DoubleCircleShape)
 	gn.SetColor("red")
 	return gn, nil
 }
 
-func constructTaskNode(name string, graph *cgraph.Graph, n *core.Node, t *core.CompiledTask) (*cgraph.Node, error)  {
-	// TODO Add task task type and other information from the task template
+func constructTaskNode(name string, graph *cgraph.Graph, n *core.Node, t *core.CompiledTask) (*cgraph.Node, error) {
 	gn, err := graph.CreateNode(name)
 	if err != nil {
 		return nil, err
 	}
-	if n.Metadata != nil && n.Metadata.Name != ""{
+	if n.Metadata != nil && n.Metadata.Name != "" {
 		v := strings.LastIndexAny(n.Metadata.Name, ".")
-		gn.SetLabel(n.Metadata.Name[v+1:])
+		gn.SetLabel(fmt.Sprintf("%s [%s]", n.Metadata.Name[v+1:], t.Template.Type))
 	}
 	gn.SetShape(cgraph.BoxShape)
 	return gn, nil
 }
 
-func constructErrorNode(name string, graph *cgraph.Graph, m string) (*cgraph.Node, error)  {
+func constructErrorNode(name string, graph *cgraph.Graph, m string) (*cgraph.Node, error) {
 	gn, err := graph.CreateNode(name)
 	if err != nil {
 		return nil, err
 	}
 	gn.SetLabel(m)
-	gn.SetShape(cgraph.PentagonShape)
+	gn.SetShape(cgraph.BoxShape)
+	gn.SetColor("red")
 	return gn, nil
 }
 
-func constructBranchConditionNode(name string, graph *cgraph.Graph, n *core.Node) (*cgraph.Node, error)  {
+func constructBranchConditionNode(name string, graph *cgraph.Graph, n *core.Node) (*cgraph.Node, error) {
 	gn, err := graph.CreateNode(name)
 	if err != nil {
 		return nil, err
 	}
-	if n.Metadata != nil && n.Metadata.Name != ""{
+	if n.Metadata != nil && n.Metadata.Name != "" {
 		gn.SetLabel(n.Metadata.Name)
 	}
 	gn.SetShape(cgraph.DiamondShape)
@@ -79,18 +112,29 @@ func getName(prefix, id string) string {
 }
 
 type graphBuilder struct {
+	// Mutated as graph is built
 	graphNodes map[string]*cgraph.Node
+	// Mutated as graph is built. lookup table for all graphviz compiled edges.
 	graphEdges map[string]*cgraph.Edge
+	// lookup table for all graphviz compiled subgraphs
 	subWf      map[string]*cgraph.Graph
-	// TODO Add tasks
+	// a lookup table for all tasks in the graph
+	tasks      map[string]*core.CompiledTask
+	// a lookup for all node clusters. This is to remap the edges to the cluster itself (instead of the node)
+	// this is useful in the case of branchNodes and subworkflow nodes
+	nodeClusters map[string]*cgraph.Graph
 }
 
-func (gb *graphBuilder) addSubNodeEdge(graph *cgraph.Graph, parentNode, n *cgraph.Node) error {
+func (gb *graphBuilder) addBranchSubNodeEdge(graph *cgraph.Graph, parentNode, n *cgraph.Node, label string) error {
 	edgeName := fmt.Sprintf("%s-%s", parentNode.Name(), n.Name())
 	if _, ok := gb.graphEdges[edgeName]; !ok {
 		edge, err := graph.CreateEdge(edgeName, parentNode, n)
 		if err != nil {
 			return err
+		}
+		edge.SetLabel(label)
+		if c, ok := gb.nodeClusters[n.Name()]; ok {
+			edge.SetLogicalHead(c.Name())
 		}
 		gb.graphEdges[edgeName] = edge
 	}
@@ -112,7 +156,7 @@ func (gb *graphBuilder) constructBranchNode(prefix string, graph *cgraph.Graph, 
 	if err != nil {
 		return nil, err
 	}
-	if err := gb.addSubNodeEdge(graph, parentBranchNode, subNode); err != nil {
+	if err := gb.addBranchSubNodeEdge(graph, parentBranchNode, subNode, booleanExprToString(n.GetBranchNode().GetIfElse().Case.Condition)); err != nil {
 		return nil, err
 	}
 
@@ -123,7 +167,7 @@ func (gb *graphBuilder) constructBranchNode(prefix string, graph *cgraph.Graph, 
 			return nil, err
 		}
 		gb.graphNodes[name] = subNode
-		if err := gb.addSubNodeEdge(graph, parentBranchNode, subNode); err != nil {
+		if err := gb.addBranchSubNodeEdge(graph, parentBranchNode, subNode, "orElse - Fail"); err != nil {
 			return nil, err
 		}
 	} else {
@@ -131,7 +175,7 @@ func (gb *graphBuilder) constructBranchNode(prefix string, graph *cgraph.Graph, 
 		if err != nil {
 			return nil, err
 		}
-		if err := gb.addSubNodeEdge(graph, parentBranchNode, subNode); err != nil {
+		if err := gb.addBranchSubNodeEdge(graph, parentBranchNode, subNode, "orElse"); err != nil {
 			return nil, err
 		}
 	}
@@ -142,7 +186,7 @@ func (gb *graphBuilder) constructBranchNode(prefix string, graph *cgraph.Graph, 
 			if err != nil {
 				return nil, err
 			}
-			if err := gb.addSubNodeEdge(graph, parentBranchNode, subNode); err != nil {
+			if err := gb.addBranchSubNodeEdge(graph, parentBranchNode, subNode, booleanExprToString(c.Condition)); err != nil {
 				return nil, err
 			}
 		}
@@ -155,18 +199,23 @@ func (gb *graphBuilder) constructNode(prefix string, graph *cgraph.Graph, n *cor
 	var err error
 	var gn *cgraph.Node
 
-	if n.Id == "start-node"{
+	if n.Id == "start-node" {
 		gn, err = constructStartNode(graph)
 	} else if n.Id == "end-node" {
 		gn, err = constructEndNode(graph)
 	} else {
 		switch n.Target.(type) {
 		case *core.Node_TaskNode:
-			// TODO add task lookup
-			gn, err = constructTaskNode(name, graph, n, nil)
+			tID := n.GetTaskNode().GetReferenceId().String()
+			t, ok := gb.tasks[tID]
+			if !ok {
+				return nil, fmt.Errorf("failed to find task [%s] in closure", tID)
+			}
+			gn, err = constructTaskNode(name, graph, n, t)
 		case *core.Node_BranchNode:
 			branch := graph.SubGraph(fmt.Sprintf("cluster_"+n.Metadata.Name), 2)
 			gn, err = gb.constructBranchNode(prefix, branch, n)
+			gb.nodeClusters[name] = branch
 		case *core.Node_WorkflowNode:
 			gn, err = graph.CreateNode(name)
 		}
@@ -176,6 +225,31 @@ func (gb *graphBuilder) constructNode(prefix string, graph *cgraph.Graph, n *cor
 	}
 	gb.graphNodes[name] = gn
 	return gn, nil
+}
+
+func (gb *graphBuilder) addEdge(fromNodeName, toNodeName string, graph *cgraph.Graph) error {
+	toNode, toOk := gb.graphNodes[toNodeName]
+	fromNode, fromOk := gb.graphNodes[fromNodeName]
+	if !toOk || !fromOk {
+		return fmt.Errorf("nodes[%s] -> [%s] referenced before creation", fromNodeName, toNodeName)
+	}
+	edgeName := fmt.Sprintf("%s-%s", fromNodeName, toNodeName)
+	if _, ok := gb.graphEdges[edgeName]; !ok {
+		edge, err := graph.CreateEdge(edgeName, fromNode, toNode)
+		if err != nil {
+			return err
+		}
+		// Now lets check that the toNode or the fromNode is a cluster. If so then following this thread,
+		// https://stackoverflow.com/questions/2012036/graphviz-how-to-connect-subgraphs, we will connect the cluster
+		if c, ok := gb.nodeClusters[toNodeName]; ok {
+			edge.SetLogicalHead(c.Name())
+		}
+		if c, ok := gb.nodeClusters[fromNodeName]; ok {
+			edge.SetLogicalTail(c.Name())
+		}
+		gb.graphEdges[edgeName] = edge
+	}
+	return nil
 }
 
 func (gb *graphBuilder) constructGraph(prefix string, graph *cgraph.Graph, w *core.CompiledWorkflow) error {
@@ -188,38 +262,20 @@ func (gb *graphBuilder) constructGraph(prefix string, graph *cgraph.Graph, w *co
 		}
 	}
 
-	for name, node := range gb.graphNodes {
+	for name, _ := range gb.graphNodes {
 		upstreamNodes := w.Connections.Upstream[name]
 		downstreamNodes := w.Connections.Downstream[name]
 		if downstreamNodes != nil {
 			for _, n := range downstreamNodes.Ids {
-				dNode, ok := gb.graphNodes[n]
-				if !ok {
-					return fmt.Errorf("node[%s], downstream from[%s] referenced before creation", n, name)
-				}
-				edgeName := fmt.Sprintf("%s-%s", name, n)
-				if _, ok := gb.graphEdges[edgeName]; !ok {
-					edge, err := graph.CreateEdge(edgeName, node, dNode)
-					if err != nil {
-						return err
-					}
-					gb.graphEdges[edgeName] = edge
+				if err := gb.addEdge(name, n, graph); err != nil {
+					return err
 				}
 			}
 		}
 		if upstreamNodes != nil {
 			for _, n := range upstreamNodes.Ids {
-				uNode, ok := gb.graphNodes[n]
-				if !ok {
-					return fmt.Errorf("node[%s], upstream from[%s] referenced before creation", n, name)
-				}
-				edgeName := fmt.Sprintf("%s-%s", n, name)
-				if _, ok := gb.graphEdges[edgeName]; !ok {
-					edge, err := graph.CreateEdge(edgeName, uNode, node)
-					if err != nil {
-						return err
-					}
-					gb.graphEdges[edgeName] = edge
+				if err := gb.addEdge(n, name, graph); err != nil {
+					return err
 				}
 			}
 		}
@@ -233,6 +289,13 @@ func (gb *graphBuilder) CompiledWorkflowClosureToGraph(g *graphviz.Graphviz, w *
 		return nil, errors.Wrapf("GraphInitFailure", err, "failed to initialize graphviz")
 	}
 
+	graph.SetCompound(true)
+	tLookup := make(map[string]*core.CompiledTask)
+	for _, t := range w.Tasks {
+		tLookup[t.Template.Id.String()] = t
+	}
+	gb.tasks = tLookup
+
 	return graph, gb.constructGraph("", graph, w.Primary)
 }
 
@@ -241,6 +304,7 @@ func newGraphBuilder() *graphBuilder {
 		graphNodes: make(map[string]*cgraph.Node),
 		graphEdges: make(map[string]*cgraph.Edge),
 		subWf:      make(map[string]*cgraph.Graph),
+		nodeClusters: make(map[string]*cgraph.Graph),
 	}
 }
 
