@@ -183,4 +183,48 @@ func TestConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
+	t.Run("Test_visualize", func(t *testing.T) {
+		t.Run("DefaultValue", func(t *testing.T) {
+			// Test that default value is set properly
+			if vString, err := cmdFlags.GetString("visualize"); err == nil {
+				assert.Equal(t, string(DefaultConfig.Visualize), vString)
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("visualize", testValue)
+			if vString, err := cmdFlags.GetString("visualize"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.Visualize)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_output_file", func(t *testing.T) {
+		t.Run("DefaultValue", func(t *testing.T) {
+			// Test that default value is set properly
+			if vString, err := cmdFlags.GetString("output_file"); err == nil {
+				assert.Equal(t, string(DefaultConfig.OutputFile), vString)
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("output_file", testValue)
+			if vString, err := cmdFlags.GetString("output_file"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.OutputFile)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
 }

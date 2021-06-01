@@ -3,6 +3,10 @@ package get
 import (
 	"context"
 	"fmt"
+	"io/fs"
+	"io/ioutil"
+
+	"github.com/flyteorg/flytestdlib/errors"
 
 	"github.com/flyteorg/flytectl/pkg/visualize"
 
@@ -99,17 +103,26 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v workflow", len(workflows))
-		if config.GetConfig().MustOutputFormat() == printer.OutputFormatSVG {
-			b, err := visualize.RenderWorkflow(workflows[0].Closure.CompiledWorkflow)
+		err = adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflowColumns, WorkflowToProtoMessages(workflows)...)
+		if err != nil {
+			return err
+		}
+		if len(workflows) > 0 && workflowconfig.DefaultConfig.Visualize != "" {
+			f, err := workflowconfig.DefaultConfig.GraphvizFormat()
 			if err != nil {
 				return err
 			}
-			fmt.Println(string(b))
-		} else {
-			err = adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflowColumns, WorkflowToProtoMessages(workflows)...)
-			if err != nil {
-				return err
+			if workflowconfig.DefaultConfig.OutputFile == "" {
+				return fmt.Errorf("--visualize should be accompanied with a file-name using --output_file option")
 			}
+			b, err := visualize.RenderWorkflow(workflows[0].Closure.CompiledWorkflow, f)
+			if err != nil {
+				return errors.Wrapf("VisualizationError", err, "failed to visualize workflow")
+			}
+			if err := ioutil.WriteFile(workflowconfig.DefaultConfig.OutputFile, b, fs.ModePerm); err != nil {
+				return errors.Wrapf("FileWriteError", err, "failed to write visualization file")
+			}
+			fmt.Printf("File [%s] written", workflowconfig.DefaultConfig.OutputFile)
 		}
 		return nil
 	}
