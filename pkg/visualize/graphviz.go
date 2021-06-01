@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/flyteorg/flytestdlib/errors"
@@ -11,6 +12,63 @@ import (
 	"github.com/goccy/go-graphviz"
 	"github.com/goccy/go-graphviz/cgraph"
 )
+
+func constructStartNode(graph *cgraph.Graph) (*cgraph.Node, error)  {
+	gn, err := graph.CreateNode("start-node")
+	if err != nil {
+		return nil, err
+	}
+	gn.SetLabel("start")
+	gn.SetShape(cgraph.CircleShape)
+	gn.SetColor("green")
+	return gn, nil
+}
+
+func constructEndNode(graph *cgraph.Graph) (*cgraph.Node, error)  {
+	gn, err := graph.CreateNode("end-node")
+	if err != nil {
+		return nil, err
+	}
+	gn.SetLabel("end")
+	gn.SetShape(cgraph.CircleShape)
+	gn.SetColor("red")
+	return gn, nil
+}
+
+func constructTaskNode(name string, graph *cgraph.Graph, n *core.Node) (*cgraph.Node, error)  {
+	gn, err := graph.CreateNode(name)
+	if err != nil {
+		return nil, err
+	}
+	if n.Metadata != nil && n.Metadata.Name != ""{
+		v := strings.LastIndexAny(n.Metadata.Name, ".")
+		gn.SetLabel(n.Metadata.Name[v+1:])
+	}
+	gn.SetShape(cgraph.BoxShape)
+	return gn, nil
+}
+
+func constructErrorNode(name string, graph *cgraph.Graph, m string) (*cgraph.Node, error)  {
+	gn, err := graph.CreateNode(name)
+	if err != nil {
+		return nil, err
+	}
+	gn.SetLabel(m)
+	gn.SetShape(cgraph.PentagonShape)
+	return gn, nil
+}
+
+func constructBranchConditionNode(name string, graph *cgraph.Graph, n *core.Node) (*cgraph.Node, error)  {
+	gn, err := graph.CreateNode(name)
+	if err != nil {
+		return nil, err
+	}
+	if n.Metadata != nil && n.Metadata.Name != ""{
+		gn.SetLabel(n.Metadata.Name)
+	}
+	gn.SetShape(cgraph.DiamondShape)
+	return gn, nil
+}
 
 func getName(prefix, id string) string {
 	if prefix != "" {
@@ -38,13 +96,11 @@ func (gb *graphBuilder) addSubNodeEdge(graph *cgraph.Graph, parentNode, n *cgrap
 }
 
 func (gb *graphBuilder) constructBranchNode(prefix string, graph *cgraph.Graph, n *core.Node) (*cgraph.Node, error) {
-	parentBranchNodeName := getName(prefix, n.Id)
-	parentBranchNode, err := graph.CreateNode(parentBranchNodeName)
+	parentBranchNode, err := constructBranchConditionNode(getName(prefix, n.Id), graph, n)
 	if err != nil {
 		return nil, err
 	}
-	parentBranchNode.SetLabel(n.Metadata.Name)
-	gb.graphNodes[parentBranchNodeName] = parentBranchNode
+	gb.graphNodes[parentBranchNode.Name()] = parentBranchNode
 
 	if n.GetBranchNode().GetIfElse() == nil {
 		return parentBranchNode, nil
@@ -60,8 +116,7 @@ func (gb *graphBuilder) constructBranchNode(prefix string, graph *cgraph.Graph, 
 
 	if n.GetBranchNode().GetIfElse().GetError() != nil {
 		name := fmt.Sprintf("%s-error", parentBranchNode.Name())
-		subNode, err := graph.CreateNode(name)
-		subNode.SetLabel(n.GetBranchNode().GetIfElse().GetError().Message)
+		subNode, err := constructErrorNode(name, graph, n.GetBranchNode().GetIfElse().GetError().Message)
 		if err != nil {
 			return nil, err
 		}
@@ -98,12 +153,14 @@ func (gb *graphBuilder) constructNode(prefix string, graph *cgraph.Graph, n *cor
 	var err error
 	var gn *cgraph.Node
 
-	if n.Id == "start-node" || n.Id == "end-node" {
-		gn, err = graph.CreateNode(name)
+	if n.Id == "start-node"{
+		gn, err = constructStartNode(graph)
+	} else if n.Id == "end-node" {
+		gn, err = constructEndNode(graph)
 	} else {
 		switch n.Target.(type) {
 		case *core.Node_TaskNode:
-			gn, err = graph.CreateNode(name)
+			gn, err = constructTaskNode(name, graph, n)
 		case *core.Node_BranchNode:
 			branch := graph.SubGraph(fmt.Sprintf("cluster_"+n.Metadata.Name), 2)
 			gn, err = gb.constructBranchNode(prefix, branch, n)
