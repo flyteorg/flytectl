@@ -8,9 +8,9 @@ import (
 	"fmt"
 )
 
-const _OutputFormatName = "TABLEJSONYAMLSVG"
+const _OutputFormatName = "TABLEJSONYAML"
 
-var _OutputFormatIndex = [...]uint8{0, 5, 9, 13, 16}
+var _OutputFormatIndex = [...]uint8{0, 5, 9, 13}
 
 func (i OutputFormat) String() string {
 	if i >= OutputFormat(len(_OutputFormatIndex)-1) {
@@ -19,13 +19,12 @@ func (i OutputFormat) String() string {
 	return _OutputFormatName[_OutputFormatIndex[i]:_OutputFormatIndex[i+1]]
 }
 
-var _OutputFormatValues = []OutputFormat{0, 1, 2, 3}
+var _OutputFormatValues = []OutputFormat{0, 1, 2}
 
 var _OutputFormatNameToValueMap = map[string]OutputFormat{
-	_OutputFormatName[0:5]:   0,
-	_OutputFormatName[5:9]:   1,
-	_OutputFormatName[9:13]:  2,
-	_OutputFormatName[13:16]: 3,
+	_OutputFormatName[0:5]:  0,
+	_OutputFormatName[5:9]:  1,
+	_OutputFormatName[9:13]: 2,
 }
 
 // OutputFormatString retrieves an enum value from the enum constants string name.
