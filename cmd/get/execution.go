@@ -6,6 +6,7 @@ import (
 	"github.com/flyteorg/flytectl/pkg/filters"
 
 	"github.com/flyteorg/flytectl/cmd/config"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/execution"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -27,15 +28,11 @@ Retrieves execution by name within project and domain.
 
  bin/flytectl get execution -p flytesnacks -d development oeh94k9r2r
 
-Retrieves all the execution with filters.
+Retrieves all the executions with filters.
 ::
  
   bin/flytectl get execution -p flytesnacks -d development --filter.field-selector="execution.phase in (FAILED;SUCCEEDED),execution.duration<200" 
- 
-Retrieve specific execution with filters.
-::
- 
-  bin/flytectl get execution -p flytesnacks -d development  y8n2wtuspj --filter.field-selector="execution.phase in (FAILED),execution.duration<200" 
+
  
 Retrieves all the execution with limit and sorting.
 ::
@@ -58,18 +55,6 @@ Retrieves all the execution within project and domain in json format.
 Usage
 `
 )
-
-//go:generate pflags ExecutionsConfig --default-var executionConfig
-var (
-	executionConfig = &ExecutionsConfig{
-		Filter: filters.DefaultFilter,
-	}
-)
-
-// ExecutionsConfig
-type ExecutionsConfig struct {
-	Filter filters.Filters `json:"filter" pflag:","`
-}
 
 var executionColumns = []printer.Column{
 	{Header: "Name", JSONPath: "$.id.name"},
@@ -99,17 +84,17 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 		}
 		executions = append(executions, execution)
 	} else {
-		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, filters.BuildResourceListRequestWithName(executionConfig.Filter, ""))
+		transformFilters, err := filters.BuildResourceListRequestWithName(execution.DefaultConfig.Filter, config.GetConfig().Project, config.GetConfig().Domain, "")
+		if err != nil {
+			return err
+		}
+		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, transformFilters)
 		if err != nil {
 			return err
 		}
 		executions = executionList.Executions
 	}
 	logger.Infof(ctx, "Retrieved %v executions", len(executions))
-	err := adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns,
+	return adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns,
 		ExecutionToProtoMessages(executions)...)
-	if err != nil {
-		return err
-	}
-	return nil
 }

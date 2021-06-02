@@ -6,12 +6,12 @@ import (
 	"github.com/flyteorg/flytectl/pkg/filters"
 
 	"github.com/flyteorg/flytectl/cmd/config"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/launchplan"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/ext"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
-
 	"github.com/golang/protobuf/proto"
 )
 
@@ -47,7 +47,7 @@ Retrieves all the launch plans with filters.
  
   bin/flytectl get launchplan -p flytesnacks -d development --filter.field-selector="name=core.basic.lp.go_greet"
  
-Retrieves specific launch plans with filters.
+Retrieves launch plans entity search across all versions with filters.
 ::
  
   bin/flytectl get launchplan -p flytesnacks -d development k8s_spark.dataframe_passing.my_smart_schema --filter.field-selector="version=v1"
@@ -99,21 +99,6 @@ Usage
 `
 )
 
-//go:generate pflags LaunchPlanConfig --default-var launchPlanConfig
-var (
-	launchPlanConfig = &LaunchPlanConfig{
-		Filter: filters.DefaultFilter,
-	}
-)
-
-// LaunchPlanConfig
-type LaunchPlanConfig struct {
-	ExecFile string          `json:"execFile" pflag:",execution file name to be used for generating execution spec of a single launchplan."`
-	Version  string          `json:"version" pflag:",version of the launchplan to be fetched."`
-	Latest   bool            `json:"latest" pflag:", flag to indicate to fetch the latest version, version flag will be ignored in this case"`
-	Filter   filters.Filters `json:"filter" pflag:","`
-}
-
 // Column structure for get specific launchplan
 var launchplanColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
@@ -158,8 +143,11 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		}
 		return nil
 	}
-
-	launchPlanList, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, filters.BuildResourceListRequestWithName(launchPlanConfig.Filter, ""))
+	transformFilters, err := filters.BuildResourceListRequestWithName(launchplan.DefaultConfig.Filter, config.GetConfig().Project, config.GetConfig().Domain, "")
+	if err != nil {
+		return err
+	}
+	launchPlanList, err := cmdCtx.AdminClient().ListLaunchPlans(ctx, transformFilters)
 	if err != nil {
 		return err
 	}
@@ -178,28 +166,28 @@ func FetchLPForName(ctx context.Context, fetcher ext.AdminFetcherExtInterface, n
 	var launchPlans []*admin.LaunchPlan
 	var lp *admin.LaunchPlan
 	var err error
-	if launchPlanConfig.Latest {
-		if lp, err = fetcher.FetchLPLatestVersion(ctx, name, project, domain, launchPlanConfig.Filter); err != nil {
+	if launchplan.DefaultConfig.Latest {
+		if lp, err = fetcher.FetchLPLatestVersion(ctx, name, project, domain, launchplan.DefaultConfig.Filter); err != nil {
 			return nil, err
 		}
 		launchPlans = append(launchPlans, lp)
-	} else if launchPlanConfig.Version != "" {
-		if lp, err = fetcher.FetchLPVersion(ctx, name, launchPlanConfig.Version, project, domain); err != nil {
+	} else if launchplan.DefaultConfig.Version != "" {
+		if lp, err = fetcher.FetchLPVersion(ctx, name, launchplan.DefaultConfig.Version, project, domain); err != nil {
 			return nil, err
 		}
 		launchPlans = append(launchPlans, lp)
 	} else {
-		launchPlans, err = fetcher.FetchAllVerOfLP(ctx, name, project, domain, launchPlanConfig.Filter)
+		launchPlans, err = fetcher.FetchAllVerOfLP(ctx, name, project, domain, launchplan.DefaultConfig.Filter)
 		if err != nil {
 			return nil, err
 		}
 	}
-	if launchPlanConfig.ExecFile != "" {
+	if launchplan.DefaultConfig.ExecFile != "" {
 		// There would be atleast one launchplan object when code reaches here and hence the length
 		// assertion is not required.
 		lp = launchPlans[0]
 		// Only write the first task from the tasks object.
-		if err = CreateAndWriteExecConfigForWorkflow(lp, launchPlanConfig.ExecFile); err != nil {
+		if err = CreateAndWriteExecConfigForWorkflow(lp, launchplan.DefaultConfig.ExecFile); err != nil {
 			return nil, err
 		}
 	}

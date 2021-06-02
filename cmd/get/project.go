@@ -3,6 +3,8 @@ package get
 import (
 	"context"
 
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
+
 	"github.com/flyteorg/flytectl/pkg/filters"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -54,18 +56,6 @@ Usage
 `
 )
 
-//go:generate pflags ProjectConfig --default-var projectConfig
-var (
-	projectConfig = &ProjectConfig{
-		Filter: filters.DefaultFilter,
-	}
-)
-
-// ProjectConfig
-type ProjectConfig struct {
-	Filter filters.Filters `json:"filter" pflag:","`
-}
-
 var projectColumns = []printer.Column{
 	{Header: "ID", JSONPath: "$.id"},
 	{Header: "Name", JSONPath: "$.name"},
@@ -82,7 +72,11 @@ func ProjectToProtoMessages(l []*admin.Project) []proto.Message {
 
 func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
-	projects, err := cmdCtx.AdminClient().ListProjects(ctx, filters.BuildProjectListRequest(projectConfig.Filter))
+	transformFilters, err := filters.BuildProjectListRequest(project.DefaultConfig.Filter)
+	if err != nil {
+		return err
+	}
+	projects, err := cmdCtx.AdminClient().ListProjects(ctx, transformFilters)
 	if err != nil {
 		return err
 	}

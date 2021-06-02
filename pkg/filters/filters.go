@@ -38,6 +38,9 @@ func Transform(filters []string) (string, error) {
 				} else {
 					adminFilter = fmt.Sprintf("%v", transformFilter)
 				}
+			} else {
+				// TODO(Yuvraj): Add filters docs in error
+				return "", fmt.Errorf("Please add a valid field selector")
 			}
 		}
 	}

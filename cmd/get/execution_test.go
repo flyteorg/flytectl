@@ -25,6 +25,9 @@ func TestListExecutionFunc(t *testing.T) {
 	cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 	execListRequest := &admin.ResourceListRequest{
 		Limit: 100,
+		SortBy: &admin.Sort{
+			Key: "created_at",
+		},
 		Id: &admin.NamedEntityIdentifier{
 			Project: projectValue,
 			Domain:  domainValue,
@@ -75,6 +78,9 @@ func TestListExecutionFuncWithError(t *testing.T) {
 	cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 	execListRequest := &admin.ResourceListRequest{
 		Limit: 100,
+		SortBy: &admin.Sort{
+			Key: "created_at",
+		},
 		Id: &admin.NamedEntityIdentifier{
 			Project: projectValue,
 			Domain:  domainValue,

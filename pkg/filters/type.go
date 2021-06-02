@@ -1,11 +1,13 @@
 package filters
 
-import "github.com/flyteorg/flytectl/cmd/config"
-
-var DefaultFilter = Filters{
-	Limit: config.DefaultLimit,
-	Asc:   false,
-}
+var (
+	DefaultLimit  int32 = 100
+	DefaultFilter       = Filters{
+		Limit:  DefaultLimit,
+		Asc:    false,
+		SortBy: "created_at",
+	}
+)
 
 type Filters struct {
 	FieldSelector string `json:"field-selector" pflag:",Specifies the Field selector"`

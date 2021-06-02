@@ -12,7 +12,11 @@ import (
 
 // FetchAllVerOfLP fetches all the versions for give launch plan name
 func (a *AdminFetcherExtClient) FetchAllVerOfLP(ctx context.Context, lpName, project, domain string, filter filters.Filters) ([]*admin.LaunchPlan, error) {
-	tList, err := a.AdminServiceClient().ListLaunchPlans(ctx, filters.BuildResourceListRequestWithName(filter, lpName))
+	transformFilters, err := filters.BuildResourceListRequestWithName(filter, project, domain, lpName)
+	if err != nil {
+		return nil, err
+	}
+	tList, err := a.AdminServiceClient().ListLaunchPlans(ctx, transformFilters)
 	if err != nil {
 		return nil, err
 	}

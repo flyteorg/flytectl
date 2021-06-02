@@ -7,6 +7,7 @@ import (
 
 	"github.com/flyteorg/flytectl/pkg/filters"
 
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/launchplan"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flytectl/pkg/ext/mocks"
@@ -125,6 +126,7 @@ func getLaunchPlanSetup() {
 			Project: projectValue,
 			Domain:  domainValue,
 		},
+		SortBy: &admin.Sort{},
 	}
 
 	resourceGetRequest = &admin.ResourceListRequest{
@@ -133,6 +135,7 @@ func getLaunchPlanSetup() {
 			Domain:  domainValue,
 			Name:    argsLp[0],
 		},
+		SortBy: &admin.Sort{},
 	}
 
 	launchPlanListResponse = &admin.LaunchPlanList{
@@ -170,10 +173,10 @@ func getLaunchPlanSetup() {
 		Entities: entities,
 	}
 
-	launchPlanConfig.Latest = false
-	launchPlanConfig.Version = ""
-	launchPlanConfig.ExecFile = ""
-	launchPlanConfig.Filter = filters.Filters{}
+	launchplan.DefaultConfig.Latest = false
+	launchplan.DefaultConfig.Version = ""
+	launchplan.DefaultConfig.ExecFile = ""
+	launchplan.DefaultConfig.Filter = filters.Filters{}
 }
 
 func TestGetLaunchPlanFuncWithError(t *testing.T) {
@@ -181,8 +184,8 @@ func TestGetLaunchPlanFuncWithError(t *testing.T) {
 		setup()
 		getLaunchPlanSetup()
 		mockFetcher := new(mocks.AdminFetcherExtInterface)
-		launchPlanConfig.Latest = true
-		launchPlanConfig.Filter = filters.Filters{}
+		launchplan.DefaultConfig.Latest = true
+		launchplan.DefaultConfig.Filter = filters.Filters{}
 		mockFetcher.OnFetchLPLatestVersionMatch(mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error fetching latest version"))
 		_, err = FetchLPForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
@@ -193,8 +196,8 @@ func TestGetLaunchPlanFuncWithError(t *testing.T) {
 		setup()
 		getLaunchPlanSetup()
 		mockFetcher := new(mocks.AdminFetcherExtInterface)
-		launchPlanConfig.Version = "v1"
-		launchPlanConfig.Filter = filters.Filters{}
+		launchplan.DefaultConfig.Version = "v1"
+		launchplan.DefaultConfig.Filter = filters.Filters{}
 		mockFetcher.OnFetchLPVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything).Return(nil, fmt.Errorf("error fetching version"))
 		_, err = FetchLPForName(ctx, mockFetcher, "lpName", projectValue, domainValue)
@@ -204,8 +207,8 @@ func TestGetLaunchPlanFuncWithError(t *testing.T) {
 	t.Run("failure fetching all version ", func(t *testing.T) {
 		setup()
 		getLaunchPlanSetup()
-		launchPlanConfig.Filter = filters.Filters{}
-		launchPlanConfig.Filter = filters.Filters{}
+		launchplan.DefaultConfig.Filter = filters.Filters{}
+		launchplan.DefaultConfig.Filter = filters.Filters{}
 		mockFetcher := new(mocks.AdminFetcherExtInterface)
 		mockFetcher.OnFetchAllVerOfLPMatch(mock.Anything, mock.Anything, mock.Anything,
 			mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error fetching all version"))
@@ -407,8 +410,8 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 func TestGetLaunchPlanFuncLatest(t *testing.T) {
 	setup()
 	getLaunchPlanSetup()
-	launchPlanConfig.Latest = true
-	launchPlanConfig.Filter = filters.Filters{}
+	launchplan.DefaultConfig.Latest = true
+	launchplan.DefaultConfig.Filter = filters.Filters{}
 	mockClient.OnListLaunchPlansMatch(ctx, resourceGetRequest).Return(launchPlanListResponse, nil)
 	mockClient.OnGetLaunchPlanMatch(ctx, objectGetRequest).Return(launchPlan2, nil)
 	err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
@@ -498,7 +501,7 @@ func TestGetLaunchPlanFuncLatest(t *testing.T) {
 func TestGetLaunchPlanWithVersion(t *testing.T) {
 	setup()
 	getLaunchPlanSetup()
-	launchPlanConfig.Version = "v2"
+	launchplan.DefaultConfig.Version = "v2"
 	mockClient.OnListLaunchPlansMatch(ctx, resourceListRequest).Return(launchPlanListResponse, nil)
 	mockClient.OnGetLaunchPlanMatch(ctx, objectGetRequest).Return(launchPlan2, nil)
 	mockClient.OnListLaunchPlanIdsMatch(ctx, namedIDRequest).Return(namedIdentifierList, nil)
@@ -603,10 +606,10 @@ func TestGetLaunchPlansWithExecFile(t *testing.T) {
 	mockClient.OnListLaunchPlansMatch(ctx, resourceListRequest).Return(launchPlanListResponse, nil)
 	mockClient.OnGetLaunchPlanMatch(ctx, objectGetRequest).Return(launchPlan2, nil)
 	mockClient.OnListLaunchPlanIdsMatch(ctx, namedIDRequest).Return(namedIdentifierList, nil)
-	launchPlanConfig.Version = "v2"
-	launchPlanConfig.ExecFile = testDataFolder + "exec_file"
+	launchplan.DefaultConfig.Version = "v2"
+	launchplan.DefaultConfig.ExecFile = testDataFolder + "exec_file"
 	err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
-	os.Remove(launchPlanConfig.ExecFile)
+	os.Remove(launchplan.DefaultConfig.ExecFile)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "GetLaunchPlan", ctx, objectGetRequest)
 	tearDownAndVerify(t, `{

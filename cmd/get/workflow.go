@@ -117,14 +117,15 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		return nil
 	}
 
-	workflowList, err := cmdCtx.AdminClient().ListWorkflows(ctx, filters.BuildResourceListRequestWithName(workflowConfig.Filter, ""))
+	transformFilters, err := filters.BuildResourceListRequestWithName(workflowConfig.Filter, config.GetConfig().Project, config.GetConfig().Domain, "")
+	if err != nil {
+		return err
+	}
+	workflowList, err := cmdCtx.AdminClient().ListWorkflows(ctx, transformFilters)
 	if err != nil {
 		return err
 	}
 	workflows := workflowList.Workflows
-	if err != nil {
-		return err
-	}
 
 	logger.Debugf(ctx, "Retrieved %v workflows", len(workflows))
 	return adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflowColumns, WorkflowToProtoMessages(workflows)...)

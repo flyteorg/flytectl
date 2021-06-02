@@ -12,7 +12,11 @@ import (
 
 // FetchAllVerOfWorkflow fetches all the versions for give workflow name
 func (a *AdminFetcherExtClient) FetchAllVerOfWorkflow(ctx context.Context, workflowName, project, domain string, filter filters.Filters) ([]*admin.Workflow, error) {
-	wList, err := a.AdminServiceClient().ListWorkflows(ctx, filters.BuildResourceListRequestWithName(filter, workflowName))
+	tranformFilters, err := filters.BuildResourceListRequestWithName(filter, project, domain, workflowName)
+	if err != nil {
+		return nil, err
+	}
+	wList, err := a.AdminServiceClient().ListWorkflows(ctx, tranformFilters)
 	if err != nil {
 		return nil, err
 	}

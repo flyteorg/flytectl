@@ -11,7 +11,11 @@ import (
 )
 
 func (a *AdminFetcherExtClient) FetchAllVerOfTask(ctx context.Context, name, project, domain string, filter filters.Filters) ([]*admin.Task, error) {
-	tList, err := a.AdminServiceClient().ListTasks(ctx, filters.BuildResourceListRequestWithName(filter, name))
+	transformFilters, err := filters.BuildResourceListRequestWithName(filter, project, domain, name)
+	if err != nil {
+		return nil, err
+	}
+	tList, err := a.AdminServiceClient().ListTasks(ctx, transformFilters)
 	if err != nil {
 		return nil, err
 	}

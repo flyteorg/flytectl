@@ -12,9 +12,8 @@ import (
 //go:generate pflags Config
 
 var (
-	DefaultLimit  int32 = 100
-	defaultConfig       = &Config{}
-	section             = config.MustRegisterSection("root", defaultConfig)
+	defaultConfig = &Config{}
+	section       = config.MustRegisterSection("root", defaultConfig)
 )
 
 // Config hold configration for flytectl flag
