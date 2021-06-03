@@ -20,9 +20,7 @@ var (
 
 func getProjectSetup() {
 	argsProject = []string{"flyteexample"}
-	resourceListRequestProject = &admin.ProjectListRequest{
-		SortBy: &admin.Sort{},
-	}
+	resourceListRequestProject = &admin.ProjectListRequest{}
 
 	project1 = &admin.Project{
 		Id:   "flyteexample",

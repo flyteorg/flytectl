@@ -101,8 +101,7 @@ func getTaskSetup() {
 			Domain:  domainValue,
 			Name:    argsTask[0],
 		},
-		SortBy: &admin.Sort{},
-		Limit:  100,
+		Limit: 100,
 	}
 	resourceListRequestTask = &admin.ResourceListRequest{
 		Id: &admin.NamedEntityIdentifier{
@@ -110,7 +109,6 @@ func getTaskSetup() {
 			Domain:  domainValue,
 			Name:    argsTask[0],
 		},
-		SortBy: &admin.Sort{},
 	}
 
 	resourceListTaskRequest = &admin.ResourceListRequest{
@@ -118,7 +116,6 @@ func getTaskSetup() {
 			Project: projectValue,
 			Domain:  domainValue,
 		},
-		SortBy: &admin.Sort{},
 	}
 
 	resourceListFilterRequestTask = &admin.ResourceListRequest{
@@ -128,7 +125,6 @@ func getTaskSetup() {
 			Name:    argsTask[0],
 		},
 		Filters: "eq(task.name,task1)+eq(task.version,v1)",
-		SortBy:  &admin.Sort{},
 	}
 
 	taskListResponse = &admin.TaskList{

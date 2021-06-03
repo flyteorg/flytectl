@@ -44,8 +44,11 @@ func buildSortingRequest(c Filters) *admin.Sort {
 	if c.Asc {
 		sortingOrder = admin.Sort_ASCENDING
 	}
-	return &admin.Sort{
-		Key:       c.SortBy,
-		Direction: sortingOrder,
+	if len(c.SortBy) > 0 {
+		return &admin.Sort{
+			Key:       c.SortBy,
+			Direction: sortingOrder,
+		}
 	}
+	return nil
 }

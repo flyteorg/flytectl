@@ -126,7 +126,6 @@ func getLaunchPlanSetup() {
 			Project: projectValue,
 			Domain:  domainValue,
 		},
-		SortBy: &admin.Sort{},
 	}
 
 	resourceGetRequest = &admin.ResourceListRequest{
@@ -135,7 +134,6 @@ func getLaunchPlanSetup() {
 			Domain:  domainValue,
 			Name:    argsLp[0],
 		},
-		SortBy: &admin.Sort{},
 	}
 
 	launchPlanListResponse = &admin.LaunchPlanList{

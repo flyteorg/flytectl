@@ -29,7 +29,6 @@ func getWorkflowSetup() {
 			Project: projectValue,
 			Domain:  domainValue,
 		},
-		SortBy: &admin.Sort{},
 	}
 
 	workflow1 := &admin.Workflow{
