@@ -73,7 +73,7 @@ Retrieves a launch plans within project and domain for a version and generate th
 
 ::
 
- flytectl get launchplan -d development -p flytectldemo core.advanced.run_merge_sort.merge_sort --execFile execution_spec.yam
+ flytectl get launchplan -d development -p flytectldemo core.advanced.run_merge_sort.merge_sort --execFile execution_spec.yaml
 
 The generated file would look similar to this
 
@@ -146,6 +146,7 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 	if err != nil {
 		return err
 	}
+
 	logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
 	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplansColumns,
 		LaunchplanToProtoMessages(launchPlans)...)
