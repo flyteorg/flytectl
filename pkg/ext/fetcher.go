@@ -54,6 +54,9 @@ type AdminFetcherExtInterface interface {
 
 	// FetchProjectDomainAttributes fetches project domain attributes particular resource type in a  project, domain
 	FetchProjectDomainAttributes(ctx context.Context, project, domain string, rsType admin.MatchableResource) (*admin.ProjectDomainAttributesGetResponse, error)
+
+	// ListProjects fetches all projects
+	ListProjects(ctx context.Context, filter filters.Filters) (*admin.Projects, error)
 }
 
 // AdminFetcherExtClient is used for interacting with extended features used for fetching data from admin service

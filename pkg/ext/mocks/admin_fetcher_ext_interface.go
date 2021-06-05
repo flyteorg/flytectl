@@ -585,3 +585,44 @@ func (_m *AdminFetcherExtInterface) ListExecution(ctx context.Context, project s
 
 	return r0, r1
 }
+
+type AdminFetcherExtInterface_ListProjects struct {
+	*mock.Call
+}
+
+func (_m AdminFetcherExtInterface_ListProjects) Return(_a0 *admin.Projects, _a1 error) *AdminFetcherExtInterface_ListProjects {
+	return &AdminFetcherExtInterface_ListProjects{Call: _m.Call.Return(_a0, _a1)}
+}
+
+func (_m *AdminFetcherExtInterface) OnListProjects(ctx context.Context, filter filters.Filters) *AdminFetcherExtInterface_ListProjects {
+	c := _m.On("ListProjects", ctx, filter)
+	return &AdminFetcherExtInterface_ListProjects{Call: c}
+}
+
+func (_m *AdminFetcherExtInterface) OnListProjectsMatch(matchers ...interface{}) *AdminFetcherExtInterface_ListProjects {
+	c := _m.On("ListProjects", matchers...)
+	return &AdminFetcherExtInterface_ListProjects{Call: c}
+}
+
+// ListProjects provides a mock function with given fields: ctx, filter
+func (_m *AdminFetcherExtInterface) ListProjects(ctx context.Context, filter filters.Filters) (*admin.Projects, error) {
+	ret := _m.Called(ctx, filter)
+
+	var r0 *admin.Projects
+	if rf, ok := ret.Get(0).(func(context.Context, filters.Filters) *admin.Projects); ok {
+		r0 = rf(ctx, filter)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*admin.Projects)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, filters.Filters) error); ok {
+		r1 = rf(ctx, filter)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}

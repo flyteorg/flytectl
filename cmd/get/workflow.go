@@ -3,8 +3,6 @@ package get
 import (
 	"context"
 
-	"github.com/flyteorg/flytectl/pkg/filters"
-
 	workflowconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/workflow"
 	"github.com/flyteorg/flytectl/pkg/ext"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -74,18 +72,6 @@ Usage
 `
 )
 
-//go:generate pflags WorkflowConfig --default-var workflowConfig
-var (
-	workflowConfig = &WorkflowConfig{
-		Filter: filters.DefaultFilter,
-	}
-)
-
-// WorkflowConfig
-type WorkflowConfig struct {
-	Filter filters.Filters `json:"filter" pflag:","`
-}
-
 var workflowColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
 	{Header: "Name", JSONPath: "$.id.name"},
@@ -110,11 +96,7 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v workflow", len(workflows))
-		err = adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflowColumns, WorkflowToProtoMessages(workflows)...)
-		if err != nil {
-			return err
-		}
-		return nil
+		return adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflowColumns, WorkflowToProtoMessages(workflows)...)
 	}
 
 	workflows, err = cmdCtx.AdminFetcherExt().FetchAllVerOfWorkflow(ctx, "", config.GetConfig().Project, config.GetConfig().Domain, workflowconfig.DefaultConfig.Filter)
@@ -133,7 +115,7 @@ func FetchWorkflowForName(ctx context.Context, fetcher ext.AdminFetcherExtInterf
 	var workflow *admin.Workflow
 	var err error
 	if workflowconfig.DefaultConfig.Latest {
-		if workflow, err = fetcher.FetchWorkflowLatestVersion(ctx, name, project, domain, workflowConfig.Filter); err != nil {
+		if workflow, err = fetcher.FetchWorkflowLatestVersion(ctx, name, project, domain, workflowconfig.DefaultConfig.Filter); err != nil {
 			return nil, err
 		}
 		workflows = append(workflows, workflow)
@@ -143,7 +125,7 @@ func FetchWorkflowForName(ctx context.Context, fetcher ext.AdminFetcherExtInterf
 		}
 		workflows = append(workflows, workflow)
 	} else {
-		workflows, err = fetcher.FetchAllVerOfWorkflow(ctx, name, project, domain, workflowConfig.Filter)
+		workflows, err = fetcher.FetchAllVerOfWorkflow(ctx, name, project, domain, workflowconfig.DefaultConfig.Filter)
 		if err != nil {
 			return nil, err
 		}
