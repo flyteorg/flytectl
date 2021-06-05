@@ -102,10 +102,10 @@ func WorkflowToProtoMessages(l []*admin.Workflow) []proto.Message {
 
 func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
+	var workflows []*admin.Workflow
+	var err error
 	if len(args) > 0 {
 		name := args[0]
-		var workflows []*admin.Workflow
-		var err error
 		if workflows, err = FetchWorkflowForName(ctx, cmdCtx.AdminFetcherExt(), name, config.GetConfig().Project, config.GetConfig().Domain); err != nil {
 			return err
 		}
@@ -117,15 +117,10 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 		return nil
 	}
 
-	transformFilters, err := filters.BuildResourceListRequestWithName(workflowConfig.Filter, config.GetConfig().Project, config.GetConfig().Domain, "")
+	workflows, err = cmdCtx.AdminFetcherExt().FetchAllVerOfWorkflow(ctx, "", config.GetConfig().Project, config.GetConfig().Domain, workflowconfig.DefaultConfig.Filter)
 	if err != nil {
 		return err
 	}
-	workflowList, err := cmdCtx.AdminClient().ListWorkflows(ctx, transformFilters)
-	if err != nil {
-		return err
-	}
-	workflows := workflowList.Workflows
 
 	logger.Debugf(ctx, "Retrieved %v workflows", len(workflows))
 	return adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflowColumns, WorkflowToProtoMessages(workflows)...)

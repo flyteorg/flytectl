@@ -19,6 +19,9 @@ type AdminFetcherExtInterface interface {
 	// FetchExecution fetches the execution based on name, project, domain
 	FetchExecution(ctx context.Context, name, project, domain string) (*admin.Execution, error)
 
+	// ListExecution fetches the all versions of  based on name, project, domain
+	ListExecution(ctx context.Context, project, domain string, filter filters.Filters) (*admin.ExecutionList, error)
+
 	// FetchAllVerOfLP fetches all versions of launch plan in a  project, domain
 	FetchAllVerOfLP(ctx context.Context, lpName, project, domain string, filter filters.Filters) ([]*admin.LaunchPlan, error)
 
