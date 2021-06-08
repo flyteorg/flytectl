@@ -93,3 +93,11 @@ func TestTearDownSandbox(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Nil(t, cleanup(cli))
 }
+
+func TestStartContainer(t *testing.T) {
+	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	assert.Nil(t, cleanup(cli))
+	id, err := startContainer(cli)
+	assert.Nil(t, err)
+	assert.Greater(t, len(id), 0)
+}
