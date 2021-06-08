@@ -2,12 +2,14 @@ package sandbox
 
 import (
 	"context"
-	"os"
+	"fmt"
+	"strings"
+
+	"github.com/enescakir/emoji"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 )
 
 const (
@@ -16,7 +18,12 @@ const (
 Teardown will remove docker container and all the flyte config 
 ::
 
- bin/flytectl teardown 
+ bin/flytectl sandbox teardown 
+
+Stop will remove docker container and all the flyte config 
+::
+
+ bin/flytectl sandbox stop 
 
 
 Usage
@@ -30,27 +37,31 @@ func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.C
 		return err
 	}
 
-	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
+	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{
+		All: true,
+	})
 	if err != nil {
 		return err
 	}
-
+	var containerID string
+	var isExist = false
 	for _, container := range containers {
-		if err := cli.ContainerStop(ctx, container.ID, nil); err != nil {
-			return err
+		if strings.Contains(container.Names[0], SandboxClusterName) {
+			containerID = container.ID
+			isExist = true
 		}
-		if err := cli.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{}); err != nil {
+	}
+	if isExist {
+		if err := cli.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{
+			Force: true,
+		}); err != nil {
 			return err
 		}
 	}
 
-	err = os.Remove(f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml"))
-	if err != nil {
-		return err
+	if err := ConfigCleanup(); err != nil {
+		fmt.Printf("Config cleanup failed. You can manually remove them from ~/.flyte directory. %v \n ", err)
 	}
-	err = os.Remove(f.FilePathJoin(f.UserHomeDir(), ".flyte", "kube.yaml"))
-	if err != nil {
-		return err
-	}
+	fmt.Printf("Sandbox cluster is removed successfully %v \n", emoji.Rocket)
 	return nil
 }

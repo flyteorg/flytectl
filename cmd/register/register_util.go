@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -12,6 +13,8 @@ import (
 	"os"
 	"sort"
 	"strings"
+
+	"github.com/google/go-github/github"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
@@ -43,10 +46,10 @@ type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-var FlyteSnacksRelease []FlyteSnacks
+var FlyteSnacksRelease []FlyteSnack
 
-// FlyteSnacks Defines flyte test manifest structure
-type FlyteSnacks struct {
+// FlyteSnack Defines flyte test manifest structure
+type FlyteSnack struct {
 	Name          string    `json:"name"`
 	Priority      string    `json:"priority"`
 	Path          string    `json:"path"`
@@ -409,4 +412,29 @@ func getJSONSpec(message proto.Message) string {
 	}
 	jsonSpec, _ := marshaller.MarshalToString(message)
 	return jsonSpec
+}
+
+func getFlyteTestManifest() ([]FlyteSnack, string, error) {
+	c := github.NewClient(nil)
+	opt := &github.ListOptions{Page: 1, PerPage: 1}
+	releases, _, err := c.Repositories.ListReleases(context.Background(), githubOrg, githubRepository, opt)
+	if err != nil {
+		return nil, "", err
+	}
+	response, err := http.Get(fmt.Sprintf(flyteManifest, *releases[0].TagName))
+	if err != nil {
+		return nil, "", err
+	}
+	defer response.Body.Close()
+
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, "", err
+	}
+
+	err = json.Unmarshal(data, &FlyteSnacksRelease)
+	if err != nil {
+		return nil, "", err
+	}
+	return FlyteSnacksRelease, *releases[0].TagName, nil
 }

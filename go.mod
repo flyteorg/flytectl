@@ -7,6 +7,7 @@ require (
 	github.com/containerd/containerd v1.5.2 // indirect
 	github.com/docker/docker v20.10.7+incompatible
 	github.com/docker/go-connections v0.4.0
+	github.com/enescakir/emoji v1.0.0
 	github.com/flyteorg/flyteidl v0.18.51
 	github.com/flyteorg/flytestdlib v0.3.21
 	github.com/ghodss/yaml v1.0.0
@@ -33,6 +34,7 @@ require (
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.4.0
+	gotest.tools v2.2.0+incompatible // indirect
 	sigs.k8s.io/yaml v1.2.0
 )
 
