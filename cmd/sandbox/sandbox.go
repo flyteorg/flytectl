@@ -28,10 +28,7 @@ func CreateSandboxCommand() *cobra.Command {
 		"start": {CmdFunc: startSandboxCluster, Aliases: []string{"create"}, ProjectDomainNotRequired: true,
 			Short: startShort,
 			Long:  sandboxLong},
-		"register": {CmdFunc: registerSandboxCluster, Aliases: []string{}, ProjectDomainNotRequired: false,
-			Short: registerShort,
-			Long:  registerLong},
-		"teardown": {CmdFunc: teardownSandboxCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
+		"teardown": {CmdFunc: teardownSandboxCluster, Aliases: []string{"stop"}, ProjectDomainNotRequired: true,
 			Short: teardownShort,
 			Long:  teardownLong},
 	}

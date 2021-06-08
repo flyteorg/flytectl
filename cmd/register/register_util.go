@@ -43,6 +43,21 @@ type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
+var  FlyteSnacksRelease []FlyteSnacks
+
+// FlyteSnacks Defines flyte test manifest structure
+type FlyteSnacks struct {
+	Name   string `json:"name"`
+	Priority   string `json:"priority"`
+	Path   string `json:"path"`
+	ExitCondition   Condition `json:"exitCondition"`
+}
+
+type Condition struct {
+	ExitSuccess   bool `json:"exit_success"`
+	ExitMessage   string `json:"exit_message"`
+}
+
 var httpClient HTTPClient
 
 func init() {

@@ -11,8 +11,16 @@ import (
 
 
 const (
-	teardownShort = "Gets project resources"
-	teardownLong  = ``
+	teardownShort = "Teardown will cleanup the sandbox environment"
+	teardownLong  = `
+Teardown will remove docker container and all the flyte config 
+::
+
+ bin/flytectl teardown 
+
+
+Usage
+`
 )
 
 func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {

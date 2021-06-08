@@ -11,18 +11,23 @@ import (
 	"github.com/docker/go-connections/nat"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
-	git "gopkg.in/src-d/go-git.v4"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
 )
 
 
 const (
-	startShort = "Gets project resources"
-	startLong  = ``
+	startShort = "Start the flyte sandbox"
+	startLong  = `
+Start will run the flyte sandbox cluster inside a docker container and setup the config that is required 
+::
+
+ bin/flytectl start
+
+Usage
+	`
 	ImageName = "ghcr.io/flyteorg/flyte-sandbox:dind"
 )
 
@@ -49,14 +54,6 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		return err
 	}
 
-	err = os.RemoveAll(filepath.Join(f.FilePathJoin(f.UserHomeDir(), ".flyte", "flytesnacks")))
-	if err != nil {
-		return err
-	}
-	_, err = git.PlainClone(f.FilePathJoin(f.UserHomeDir(), ".flyte", "flytesnacks"), false, &git.CloneOptions{
-		URL: "https://github.com/flyteorg/flytesnacks.git",
-	})
-
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return err
@@ -82,10 +79,6 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	}, &container.HostConfig{
 		Mounts: []mount.Mount{
 			{
-				Type:   mount.TypeBind,
-				Source: f.FilePathJoin(f.UserHomeDir(), ".flyte", "flytesnacks"),
-				Target: "/usr/src",
-			},{
 				Type:   mount.TypeBind,
 				Source: f.FilePathJoin(f.UserHomeDir(), "kubeconfig"),
 				Target: "/etc/rancher/",
