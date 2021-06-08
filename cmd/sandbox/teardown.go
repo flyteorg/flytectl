@@ -2,13 +2,13 @@ package sandbox
 
 import (
 	"context"
+	"os"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
-	"os"
 )
-
 
 const (
 	teardownShort = "Teardown will cleanup the sandbox environment"
@@ -44,13 +44,13 @@ func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.C
 		}
 	}
 
-	err = os.Remove(f.FilePathJoin(f.UserHomeDir(), ".flyte","config.yaml"))
+	err = os.Remove(f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml"))
 	if err != nil {
 		return err
 	}
-	err = os.Remove(f.FilePathJoin(f.UserHomeDir(), ".flyte","kube.yaml"))
+	err = os.Remove(f.FilePathJoin(f.UserHomeDir(), ".flyte", "kube.yaml"))
 	if err != nil {
 		return err
 	}
-	return  nil
+	return nil
 }

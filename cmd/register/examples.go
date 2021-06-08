@@ -45,7 +45,7 @@ func registerExampleFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		return err
 	}
 
-	err = ioutil.WriteFile(f.FilePathJoin(f.UserHomeDir(), ".flyte", "flytesnacks.yaml"), data, 0644)
+	err = ioutil.WriteFile(f.FilePathJoin(f.UserHomeDir(), ".flyte", "flytesnacks.yaml"), data, 0600)
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,9 @@ func registerExampleFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		args := []string{
 			fmt.Sprintf("https://github.com/flyteorg/flytesnacks/releases/download/%s/flytesnacks-%s.tgz", *releases[0].TagName, v.Name),
 		}
-		Register(ctx, args, cmdCtx)
+		if err := Register(ctx, args, cmdCtx); err != nil {
+			return err
+		}
 	}
 	return nil
 }

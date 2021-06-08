@@ -27,7 +27,7 @@ func CreateSandboxCommand() *cobra.Command {
 	sandboxResourcesFuncs := map[string]cmdcore.CommandEntry{
 		"start": {CmdFunc: startSandboxCluster, Aliases: []string{"create"}, ProjectDomainNotRequired: true,
 			Short: startShort,
-			Long:  sandboxLong},
+			Long:  startLong},
 		"teardown": {CmdFunc: teardownSandboxCluster, Aliases: []string{"stop"}, ProjectDomainNotRequired: true,
 			Short: teardownShort,
 			Long:  teardownLong},

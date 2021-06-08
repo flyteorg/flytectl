@@ -32,7 +32,8 @@ require (
 	google.golang.org/grpc v1.35.0
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
-	gopkg.in/src-d/go-git.v4 v4.13.1
 	gopkg.in/yaml.v2 v2.4.0
 	sigs.k8s.io/yaml v1.2.0
 )
+
+replace github.com/flyteorg/flyteidl => github.com/flyteorg/flyteidl v0.18.51-0.20210602050605-9ebebd25056e
