@@ -3,7 +3,6 @@ package sandbox
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/enescakir/emoji"
 
@@ -37,30 +36,17 @@ func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.C
 		return err
 	}
 
-	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{
-		All: true,
-	})
-	if err != nil {
-		return err
-	}
-	var containerID string
-	var isExist = false
-	for _, container := range containers {
-		if strings.Contains(container.Names[0], SandboxClusterName) {
-			containerID = container.ID
-			isExist = true
-		}
-	}
-	if isExist {
-		if err := cli.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{
+	container := getSandbox(cli)
+	if container != nil {
+		if err := cli.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{
 			Force: true,
 		}); err != nil {
 			return err
 		}
 	}
 
-	if err := ConfigCleanup(); err != nil {
-		fmt.Printf("Config cleanup failed. You can manually remove them from ~/.flyte directory. %v \n ", err)
+	if err := configCleanup(); err != nil {
+		fmt.Printf("Config cleanup failed. Which Failed due to %v \n ", err)
 	}
 	fmt.Printf("Sandbox cluster is removed successfully %v \n", emoji.Rocket)
 	return nil
