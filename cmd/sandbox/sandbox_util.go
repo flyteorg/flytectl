@@ -49,7 +49,7 @@ func configCleanup() error {
 	if err != nil {
 		return err
 	}
-	err = os.Remove(KUBECONFIG)
+	err = os.RemoveAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s"))
 	if err != nil {
 		return err
 	}

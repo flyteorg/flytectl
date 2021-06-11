@@ -2,7 +2,6 @@ package sandbox
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -85,18 +84,6 @@ func TestGetSandbox(t *testing.T) {
 	assert.Nil(t, container)
 	assert.Nil(t, cleanup(cli))
 
-}
-
-func TestGetSandboxErr(t *testing.T) {
-	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	assert.Nil(t, cleanup(cli))
-	id, err := startContainer(cli)
-	assert.Nil(t, err)
-	assert.Greater(t, len(id), 0)
-	container := getSandbox(cli)
-	assert.NotNil(t, container)
-	assert.Equal(t, container.Names[0], fmt.Sprintf("/%v", SandboxClusterName))
-	assert.Nil(t, cleanup(cli))
 }
 
 func TestTearDownSandbox(t *testing.T) {
