@@ -21,7 +21,7 @@ Generating docs locally can be accomplished by running make gendocs from within 
 ## Installation
 
 ```bash
-$ brew tap flyteorg/homebrew-tap/flytectl
+$ brew install flyteorg/homebrew-tap/flytectl
 ```
 ## Get Started 
 
