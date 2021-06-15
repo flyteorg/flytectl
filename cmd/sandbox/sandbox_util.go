@@ -4,6 +4,13 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -11,12 +18,6 @@ import (
 	"github.com/docker/go-connections/nat"
 	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	"github.com/tj/go-spin"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"strings"
-	"time"
 
 	"github.com/enescakir/emoji"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
@@ -109,7 +110,7 @@ func startContainer(cli *client.Client) (string, error) {
 		//},
 	}
 	if len(sandboxConfig.DefaultConfig.Source) > 0 {
-		volumes = append(volumes,mount.Mount{
+		volumes = append(volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: "/usr/src",
@@ -121,7 +122,7 @@ func startContainer(cli *client.Client) (string, error) {
 		Tty:          false,
 		ExposedPorts: ExposedPorts,
 	}, &container.HostConfig{
-		Mounts: volumes,
+		Mounts:       volumes,
 		PortBindings: PortBindings,
 		Privileged:   true,
 	}, nil,
@@ -181,7 +182,7 @@ func readLogs(cli *client.Client, id string) error {
 func spinLoader() {
 	s := spin.New()
 	s.Set(spin.Spin1)
-	for true {
+	for {
 		fmt.Printf("\r  \033[36mIt will take couple of minutes, We will bring up a fresh flyte cluster %v \033[m %s", emoji.ManTechnologist, s.Next())
 		time.Sleep(100 * time.Millisecond)
 	}

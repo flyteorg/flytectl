@@ -17,8 +17,17 @@ const (
 Start will run the flyte sandbox cluster inside a docker container and setup the config that is required 
 ::
 
- bin/flytectl start
+ bin/flytectl sandbox start
+	
+Start will run the flyte sandbox cluster inside a docker container and setup the config that is required in a debug mode
+::
 
+ bin/flytectl sandbox start --debug 
+	
+Mount your repository inside sandbox 
+::
+
+ bin/flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
 Usage
 	`
 )
