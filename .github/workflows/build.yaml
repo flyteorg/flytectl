@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build flytectl
+    name: Run tests and lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,10 +23,6 @@ jobs:
         with:
           version: latest
           args: --snapshot  --skip-publish --rm-dist
-  test:
-    name: Run tests and lint
-    runs-on: ubuntu-latest
-    steps:
       - name: Checkout
         uses: actions/checkout@v2
       - uses: actions/cache@v2
