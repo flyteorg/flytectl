@@ -50,25 +50,25 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	}
 
 	ID, err := startContainer(cli)
-	if err == nil {
-		os.Setenv("KUBECONFIG", Kubeconfig)
-
-		defer func() {
-			if r := recover(); r != nil {
-				fmt.Println("Something goes wrong with container status", r)
-			}
-		}()
-
-		go watchError(cli, ID)
-		if err := readLogs(cli, ID); err != nil {
-			return err
-		}
-
-		fmt.Printf("Add (KUBECONFIG) to your environment variabl \n")
-		fmt.Printf("export KUBECONFIG=%v \n", Kubeconfig)
+	if err != nil {
+		fmt.Println("Something goes wrong. We are not able to start sandbox container, Please check your docker client and try again \n", emoji.Rocket)
+		fmt.Printf("error: %v", err)
 		return nil
 	}
-	fmt.Println("Something goes wrong. We are not able to start sandbox container, Please check your docker client and try again \n", emoji.Rocket)
-	fmt.Printf("error: %v", err)
+
+	os.Setenv("KUBECONFIG", Kubeconfig)
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Something goes wrong with container status", r)
+		}
+	}()
+
+	go watchError(cli, ID)
+	if err := readLogs(cli, ID); err != nil {
+		return err
+	}
+
+	fmt.Printf("Add (KUBECONFIG) to your environment variabl \n")
+	fmt.Printf("export KUBECONFIG=%v \n", Kubeconfig)
 	return nil
 }

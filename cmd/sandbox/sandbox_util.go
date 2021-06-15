@@ -4,17 +4,19 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"os"
-	"strings"
-
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
+	"github.com/tj/go-spin"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"strings"
+	"time"
 
 	"github.com/enescakir/emoji"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
@@ -87,34 +89,44 @@ func startContainer(cli *client.Client) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	if _, err := io.Copy(os.Stdout, r); err != nil {
-		return "", err
+	if sandboxConfig.DefaultConfig.Debug {
+		if _, err := io.Copy(os.Stdout, r); err != nil {
+			return "", err
+		}
 	}
 
+	volumes := []mount.Mount{
+		{
+			Type:   mount.TypeBind,
+			Source: f.FilePathJoin(f.UserHomeDir(), ".flyte"),
+			Target: "/etc/rancher/",
+		},
+		// TODO (Yuvraj) Add flytectl config in sandbox and mount with host file system
+		//{
+		//	Type:   mount.TypeBind,
+		//	Source: f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml"),
+		//	Target: "/.flyte/",
+		//},
+	}
+	if len(sandboxConfig.DefaultConfig.Source) > 0 {
+		volumes = append(volumes,mount.Mount{
+			Type:   mount.TypeBind,
+			Source: sandboxConfig.DefaultConfig.Source,
+			Target: "/usr/src",
+		})
+	}
 	resp, err := cli.ContainerCreate(context.Background(), &container.Config{
 		Env:          Environment,
 		Image:        ImageName,
 		Tty:          false,
 		ExposedPorts: ExposedPorts,
 	}, &container.HostConfig{
-		Mounts: []mount.Mount{
-			{
-				Type:   mount.TypeBind,
-				Source: f.FilePathJoin(f.UserHomeDir(), ".flyte"),
-				Target: "/etc/rancher/",
-			},
-			// TODO (Yuvraj) Add flytectl config in sandbox and mount with host file system
-			//{
-			//	Type:   mount.TypeBind,
-			//	Source: f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml"),
-			//	Target: "/.flyte/",
-			//},
-		},
+		Mounts: volumes,
 		PortBindings: PortBindings,
 		Privileged:   true,
 	}, nil,
 		nil, SandboxClusterName)
+
 	if err != nil {
 		return "", err
 	}
@@ -127,6 +139,7 @@ func startContainer(cli *client.Client) (string, error) {
 
 func watchError(cli *client.Client, id string) {
 	statusCh, errCh := cli.ContainerWait(context.Background(), id, container.WaitConditionNotRunning)
+
 	select {
 	case err := <-errCh:
 		if err != nil {
@@ -147,6 +160,9 @@ func readLogs(cli *client.Client, id string) error {
 		return err
 	}
 	scanner := bufio.NewScanner(reader)
+	if !sandboxConfig.DefaultConfig.Debug {
+		go spinLoader()
+	}
 	for scanner.Scan() {
 		if strings.Contains(scanner.Text(), SuccessMessage) {
 			fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, SuccessMessage, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
@@ -154,7 +170,19 @@ func readLogs(cli *client.Client, id string) error {
 			fmt.Printf("Register all flytesnacks example by running 'flytectl register examples  -d development  -p flytesnacks' \n")
 			break
 		}
-		fmt.Println(scanner.Text())
+		if sandboxConfig.DefaultConfig.Debug {
+			fmt.Println(scanner.Text())
+			continue
+		}
 	}
 	return nil
+}
+
+func spinLoader() {
+	s := spin.New()
+	s.Set(spin.Spin1)
+	for true {
+		fmt.Printf("\r  \033[36mIt will take couple of minutes, We will bring up a fresh flyte cluster %v \033[m %s", emoji.ManTechnologist, s.Next())
+		time.Sleep(100 * time.Millisecond)
+	}
 }
