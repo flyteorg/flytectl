@@ -26,8 +26,8 @@ jobs:
           restore-keys: docs-pip-
       - uses: crazy-max/ghaction-import-gpg@v3
         with:
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          gpg-private-key: ${{ secrets.FLYTE_BOT_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.FLYTE_BOT_GPG_PASSPHRASE }}
           git-user-signingkey: true
           git-commit-gpgsign: true
       - name: Install Dependencies
