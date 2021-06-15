@@ -15,6 +15,8 @@ Install flytectl with homebrew tap
 .. prompt:: bash
 
    brew install flyteorg/homebrew-tap/flytectl
+   # Upgrade flytectl
+   brew upgrade flytectl
 
 Install flytectl with shell script
 
