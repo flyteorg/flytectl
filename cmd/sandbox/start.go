@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
+
 	"github.com/docker/docker/client"
 	"github.com/enescakir/emoji"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -58,7 +60,7 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		}
 	}
 
-	ID, err := startContainer(cli)
+	ID, err := startContainer(cli, sandboxConfig.DefaultConfig.Debug)
 	if err != nil {
 		fmt.Println("Something goes wrong. We are not able to start sandbox container, Please check your docker client and try again \n", emoji.Rocket)
 		fmt.Printf("error: %v", err)
@@ -73,7 +75,7 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	}()
 
 	go watchError(cli, ID)
-	if err := readLogs(cli, ID); err != nil {
+	if err := readLogs(cli, ID, sandboxConfig.DefaultConfig.Debug); err != nil {
 		return err
 	}
 

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -29,7 +31,7 @@ func cleanup(client *client.Client) error {
 		return err
 	}
 	for _, v := range containers {
-		if strings.Contains(v.Names[0], SandboxClusterName) {
+		if strings.Contains(v.Names[0], FLyteSandboxClusterName) {
 			if err := client.ContainerRemove(context.Background(), v.ID, types.ContainerRemoveOptions{}); err != nil {
 				return err
 			}
@@ -93,8 +95,27 @@ func TestTearDownSandbox(t *testing.T) {
 
 func TestStartContainer(t *testing.T) {
 	setupSandbox()
+	sandboxConfig.DefaultConfig.Debug = false
 	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	assert.Nil(t, cleanup(cli))
 	err := startSandboxCluster(context.Background(), []string{}, cmdCtx)
 	assert.Nil(t, err)
+
+	assert.Nil(t, cleanup(cli))
+	setupSandbox()
+	sandboxConfig.DefaultConfig.Debug = true
+	err = startSandboxCluster(context.Background(), []string{}, cmdCtx)
+	assert.Nil(t, err)
+
+	assert.Nil(t, cleanup(cli))
+	setupSandbox()
+	sandboxConfig.DefaultConfig.Debug = true
+	sandboxConfig.DefaultConfig.SnacksRepo = f.FilePathJoin(f.UserHomeDir(), ".flyte")
+	err = startSandboxCluster(context.Background(), []string{}, cmdCtx)
+	assert.Nil(t, err)
+
+	setupSandbox()
+	sandboxConfig.DefaultConfig.Debug = true
+	err = startSandboxCluster(context.Background(), []string{}, cmdCtx)
+	assert.NotNil(t, err)
 }

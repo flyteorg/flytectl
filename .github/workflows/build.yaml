@@ -7,16 +7,34 @@ on:
 
 jobs:
   build:
+    name: Build flytectl
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+      - name: Run GoReleaser dry run
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: --snapshot  --skip-publish --rm-dist
+  test:
     name: Run tests and lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Run GoReleaser dry run
-        uses: goreleaser/goreleaser-action@v2
+      - uses: actions/cache@v2
         with:
-          version: latest
-          args: --snapshot  --skip-publish --rm-dist 
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
       - name: Unit Tests
         uses: cedrickring/golang-action@1.5.2
         env:

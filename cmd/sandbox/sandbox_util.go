@@ -24,12 +24,14 @@ import (
 )
 
 var (
-	Kubeconfig         = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
-	FlytectlConfig     = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml")
-	SuccessMessage     = "Flyte is ready! Flyte UI is available at http://localhost:30081/console"
-	ImageName          = "ghcr.io/flyteorg/flyte-sandbox:dind"
-	SandboxClusterName = "flyte-sandbox"
-	Environment        = []string{"SANDBOX=1", "KUBERNETES_API_PORT=30086", "FLYTE_HOST=localhost:30081", "FLYTE_AWS_ENDPOINT=http://localhost:30084"}
+	Kubeconfig              = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
+	FlytectlConfig          = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml")
+	SuccessMessage          = "Flyte is ready! Flyte UI is available at http://localhost:30081/console"
+	ImageName               = "ghcr.io/flyteorg/flyte-sandbox:dind"
+	FLyteSandboxClusterName = "flyte-sandbox"
+	Environment             = []string{"SANDBOX=1", "KUBERNETES_API_PORT=30086", "FLYTE_HOST=localhost:30081", "FLYTE_AWS_ENDPOINT=http://localhost:30084"}
+	FlytesnackDir           = "/usr/src"
+	K3sDir                  = "/etc/rancher/"
 )
 
 func setupFlytectlConfig() error {
@@ -72,14 +74,14 @@ func getSandbox(cli *client.Client) *types.Container {
 		return nil
 	}
 	for _, v := range containers {
-		if strings.Contains(v.Names[0], SandboxClusterName) {
+		if strings.Contains(v.Names[0], FLyteSandboxClusterName) {
 			return &v
 		}
 	}
 	return nil
 }
 
-func startContainer(cli *client.Client) (string, error) {
+func startContainer(cli *client.Client, debug bool) (string, error) {
 	ExposedPorts, PortBindings, _ := nat.ParsePortSpecs([]string{
 		"127.0.0.1:30086:30086",
 		"127.0.0.1:30081:30081",
@@ -90,7 +92,7 @@ func startContainer(cli *client.Client) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if sandboxConfig.DefaultConfig.Debug {
+	if debug {
 		if _, err := io.Copy(os.Stdout, r); err != nil {
 			return "", err
 		}
@@ -100,7 +102,7 @@ func startContainer(cli *client.Client) (string, error) {
 		{
 			Type:   mount.TypeBind,
 			Source: f.FilePathJoin(f.UserHomeDir(), ".flyte"),
-			Target: "/etc/rancher/",
+			Target: K3sDir,
 		},
 		// TODO (Yuvraj) Add flytectl config in sandbox and mount with host file system
 		//{
@@ -109,11 +111,11 @@ func startContainer(cli *client.Client) (string, error) {
 		//	Target: "/.flyte/",
 		//},
 	}
-	if len(sandboxConfig.DefaultConfig.Source) > 0 {
+	if len(sandboxConfig.DefaultConfig.SnacksRepo) > 0 {
 		volumes = append(volumes, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.Source,
-			Target: "/usr/src",
+			Source: sandboxConfig.DefaultConfig.SnacksRepo,
+			Target: FlytesnackDir,
 		})
 	}
 	resp, err := cli.ContainerCreate(context.Background(), &container.Config{
@@ -126,7 +128,7 @@ func startContainer(cli *client.Client) (string, error) {
 		PortBindings: PortBindings,
 		Privileged:   true,
 	}, nil,
-		nil, SandboxClusterName)
+		nil, FLyteSandboxClusterName)
 
 	if err != nil {
 		return "", err
@@ -150,7 +152,7 @@ func watchError(cli *client.Client, id string) {
 	}
 }
 
-func readLogs(cli *client.Client, id string) error {
+func readLogs(cli *client.Client, id string, debug bool) error {
 	reader, err := cli.ContainerLogs(context.Background(), id, types.ContainerLogsOptions{
 		ShowStderr: true,
 		ShowStdout: true,
@@ -161,7 +163,8 @@ func readLogs(cli *client.Client, id string) error {
 		return err
 	}
 	scanner := bufio.NewScanner(reader)
-	if !sandboxConfig.DefaultConfig.Debug {
+
+	if !debug {
 		go spinLoader()
 	}
 	for scanner.Scan() {
@@ -171,9 +174,8 @@ func readLogs(cli *client.Client, id string) error {
 			fmt.Printf("Register all flytesnacks example by running 'flytectl register examples  -d development  -p flytesnacks' \n")
 			break
 		}
-		if sandboxConfig.DefaultConfig.Debug {
+		if debug {
 			fmt.Println(scanner.Text())
-			continue
 		}
 	}
 	return nil
