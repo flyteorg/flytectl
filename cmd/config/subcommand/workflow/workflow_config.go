@@ -1,9 +1,7 @@
 package workflow
 
 import (
-	"fmt"
 	"github.com/flyteorg/flytectl/pkg/filters"
-	"github.com/goccy/go-graphviz"
 )
 
 //go:generate pflags Config --default-var DefaultConfig
