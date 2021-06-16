@@ -8,7 +8,7 @@ on:
 jobs:
   bump-version:
     name: Bump Version
-    if: github.event.commits[0].author.name != 'flyte-bot'
+    if: github.event.head_commit.name != 'flyte-bot'
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.bump-version.outputs.tag }}
