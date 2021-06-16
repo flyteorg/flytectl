@@ -108,14 +108,14 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 			return err
 		}
 		if len(workflows) > 0 && workflowconfig.DefaultConfig.Visualize != "" {
-			f, err := workflowconfig.DefaultConfig.GraphvizFormat()
-			if err != nil {
-				return err
-			}
+			//f, err := workflowconfig.DefaultConfig.GraphvizFormat()
+			//if err != nil {
+			//	return err
+			//}
 			if workflowconfig.DefaultConfig.OutputFile == "" {
 				return fmt.Errorf("--visualize should be accompanied with a file-name using --output_file option")
 			}
-			b, err := visualize.RenderWorkflow(workflows[0].Closure.CompiledWorkflow, f)
+			b, err := visualize.RenderWorkflow(workflows[0].Closure.CompiledWorkflow)
 			if err != nil {
 				return errors.Wrapf("VisualizationError", err, "failed to visualize workflow")
 			}

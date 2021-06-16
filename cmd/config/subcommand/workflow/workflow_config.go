@@ -22,18 +22,3 @@ type Config struct {
 	Visualize  string `json:"visualize" pflag:",optional flag to visualize a workflow as one of [png, dot, svg, jpg]"`
 	OutputFile string `json:"output_file" pflag:",path and a filename of where the output image should be dumped. This can only be used in concert with visualize"`
 }
-
-// GraphvizFormat returns the graphviz format based on the user-specified value or an error
-func (cfg *Config) GraphvizFormat() (graphviz.Format, error) {
-	switch strings.ToLower(cfg.Visualize) {
-	case "png":
-		return graphviz.PNG, nil
-	case "svg":
-		return graphviz.SVG, nil
-	case "dot":
-		return graphviz.XDOT, nil
-	case "jpg":
-		return graphviz.JPG, nil
-	}
-	return graphviz.SVG, fmt.Errorf("unsupported visualization format [%s]. Supported [png, dot, svg, jpg]", cfg.Visualize)
-}
