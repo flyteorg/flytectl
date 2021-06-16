@@ -3,7 +3,7 @@ package sandbox
 //go:generate pflags Config --default-var DefaultConfig
 var (
 	DefaultConfig = &Config{
-		Debug: true,
+		Debug: false,
 	}
 )
 
