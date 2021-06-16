@@ -18,12 +18,7 @@ Teardown will remove docker container and all the flyte config
 ::
 
  bin/flytectl sandbox teardown 
-
-Stop will remove docker container and all the flyte config 
-::
-
- bin/flytectl sandbox stop 
-
+	
 
 Usage
 `

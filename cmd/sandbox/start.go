@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
+
 	"github.com/docker/docker/client"
 	"github.com/enescakir/emoji"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -17,8 +19,17 @@ const (
 Start will run the flyte sandbox cluster inside a docker container and setup the config that is required 
 ::
 
- bin/flytectl start
+ bin/flytectl sandbox start
+	
+Start will run the flyte sandbox cluster inside a docker container and setup the config that is required in a debug mode
+::
 
+ bin/flytectl sandbox start --debug 
+	
+Mount your repository inside sandbox 
+::
+
+ bin/flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
 Usage
 	`
 )
@@ -49,26 +60,26 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		}
 	}
 
-	ID, err := startContainer(cli)
-	if err == nil {
-		os.Setenv("KUBECONFIG", Kubeconfig)
-
-		defer func() {
-			if r := recover(); r != nil {
-				fmt.Println("Something goes wrong with container status", r)
-			}
-		}()
-
-		go watchError(cli, ID)
-		if err := readLogs(cli, ID); err != nil {
-			return err
-		}
-
-		fmt.Printf("Add (KUBECONFIG) to your environment variabl \n")
-		fmt.Printf("export KUBECONFIG=%v \n", Kubeconfig)
+	ID, err := startContainer(cli, sandboxConfig.DefaultConfig.Debug)
+	if err != nil {
+		fmt.Println("Something goes wrong. We are not able to start sandbox container, Please check your docker client and try again \n", emoji.Rocket)
+		fmt.Printf("error: %v", err)
 		return nil
 	}
-	fmt.Println("Something goes wrong. We are not able to start sandbox container, Please check your docker client and try again \n", emoji.Rocket)
-	fmt.Printf("error: %v", err)
+
+	os.Setenv("KUBECONFIG", Kubeconfig)
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Something goes wrong with container status", r)
+		}
+	}()
+
+	go watchError(cli, ID)
+	if err := readLogs(cli, ID, sandboxConfig.DefaultConfig.Debug); err != nil {
+		return err
+	}
+
+	fmt.Printf("Add (KUBECONFIG) to your environment variabl \n")
+	fmt.Printf("export KUBECONFIG=%v \n", Kubeconfig)
 	return nil
 }
