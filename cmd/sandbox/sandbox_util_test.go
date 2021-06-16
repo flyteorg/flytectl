@@ -9,6 +9,8 @@ import (
 
 	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 
+	//sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -91,13 +93,18 @@ func TestTearDownSandbox(t *testing.T) {
 	err := teardownSandboxCluster(context.Background(), []string{}, cmdCtx)
 	assert.Nil(t, err)
 	assert.Nil(t, cleanup(cli))
+
+	sandboxConfig.DefaultConfig.Debug = false
+	_ = startSandboxCluster(context.Background(), []string{}, cmdCtx)
+	err = teardownSandboxCluster(context.Background(), []string{}, cmdCtx)
+	assert.Nil(t, err)
 }
 
 func TestStartContainer(t *testing.T) {
-	setupSandbox()
 	sandboxConfig.DefaultConfig.Debug = false
 	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	assert.Nil(t, cleanup(cli))
+	setupSandbox()
 	err := startSandboxCluster(context.Background(), []string{}, cmdCtx)
 	assert.Nil(t, err)
 
@@ -114,8 +121,4 @@ func TestStartContainer(t *testing.T) {
 	err = startSandboxCluster(context.Background(), []string{}, cmdCtx)
 	assert.Nil(t, err)
 
-	setupSandbox()
-	sandboxConfig.DefaultConfig.Debug = true
-	err = startSandboxCluster(context.Background(), []string{}, cmdCtx)
-	assert.NotNil(t, err)
 }
