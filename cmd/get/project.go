@@ -3,6 +3,8 @@ package get
 import (
 	"context"
 
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
+
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
 	"github.com/golang/protobuf/proto"
@@ -26,10 +28,15 @@ Retrieves project by name
 
  bin/flytectl get project flytesnacks
 
-Retrieves project by filters
+Retrieves all the projects with filters.
 ::
-
- Not yet implemented
+ 
+  bin/flytectl get project --filter.field-selector="project.name=flytesnacks"
+ 
+Retrieves all the projects with limit and sorting.
+::
+ 
+  bin/flytectl get project --filter.sort-by=created_at --filter.limit=1 --filter.asc
 
 Retrieves all the projects in yaml format
 
@@ -63,7 +70,8 @@ func ProjectToProtoMessages(l []*admin.Project) []proto.Message {
 
 func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
-	projects, err := cmdCtx.AdminClient().ListProjects(ctx, &admin.ProjectListRequest{})
+
+	projects, err := cmdCtx.AdminFetcherExt().ListProjects(ctx, project.DefaultConfig.Filter)
 	if err != nil {
 		return err
 	}

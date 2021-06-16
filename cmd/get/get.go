@@ -1,8 +1,17 @@
 package get
 
 import (
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/clusterresourceattribute"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/execution"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionclusterlabel"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/launchplan"
+	pluginoverride "github.com/flyteorg/flytectl/cmd/config/subcommand/plugin_override"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/task"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/taskresourceattribute"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflow"
 	cmdcore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytectl/cmd/get/interfaces"
 
 	"github.com/spf13/cobra"
 )
@@ -14,20 +23,9 @@ const (
 Example get projects.
 ::
 
- bin/flytectl get project
+ flytectl get project
 `
 )
-
-var (
-	DefaultFetcher = NewFetcherImpl()
-)
-
-func NewFetcherImpl() interfaces.Fetcher {
-	return FetcherImpl{}
-}
-
-type FetcherImpl struct {
-}
 
 // CreateGetCommand will return get command
 func CreateGetCommand() *cobra.Command {
@@ -40,15 +38,30 @@ func CreateGetCommand() *cobra.Command {
 	getResourcesFuncs := map[string]cmdcore.CommandEntry{
 		"project": {CmdFunc: getProjectsFunc, Aliases: []string{"projects"}, ProjectDomainNotRequired: true,
 			Short: projectShort,
-			Long:  projectLong},
+			Long:  projectLong, PFlagProvider: project.DefaultConfig},
 		"task": {CmdFunc: getTaskFunc, Aliases: []string{"tasks"}, Short: taskShort,
-			Long: taskLong, PFlagProvider: taskConfig},
+			Long: taskLong, PFlagProvider: task.DefaultConfig},
 		"workflow": {CmdFunc: getWorkflowFunc, Aliases: []string{"workflows"}, Short: workflowShort,
-			Long: workflowLong},
+			Long: workflowLong, PFlagProvider: workflow.DefaultConfig},
 		"launchplan": {CmdFunc: getLaunchPlanFunc, Aliases: []string{"launchplans"}, Short: launchPlanShort,
-			Long: launchPlanLong, PFlagProvider: launchPlanConfig},
+			Long: launchPlanLong, PFlagProvider: launchplan.DefaultConfig},
 		"execution": {CmdFunc: getExecutionFunc, Aliases: []string{"executions"}, Short: executionShort,
-			Long: executionLong},
+			Long: executionLong, PFlagProvider: execution.DefaultConfig},
+		"task-resource-attribute": {CmdFunc: getTaskResourceAttributes, Aliases: []string{"task-resource-attributes"},
+			Short: taskResourceAttributesShort,
+			Long:  taskResourceAttributesLong, PFlagProvider: taskresourceattribute.DefaultFetchConfig},
+		"cluster-resource-attribute": {CmdFunc: getClusterResourceAttributes, Aliases: []string{"cluster-resource-attributes"},
+			Short: clusterResourceAttributesShort,
+			Long:  clusterResourceAttributesLong, PFlagProvider: clusterresourceattribute.DefaultFetchConfig},
+		"execution-queue-attribute": {CmdFunc: getExecutionQueueAttributes, Aliases: []string{"execution-queue-attributes"},
+			Short: executionQueueAttributesShort,
+			Long:  executionQueueAttributesLong, PFlagProvider: executionqueueattribute.DefaultFetchConfig},
+		"execution-cluster-label": {CmdFunc: getExecutionClusterLabel, Aliases: []string{"execution-cluster-labels"},
+			Short: executionClusterLabelShort,
+			Long:  executionClusterLabelLong, PFlagProvider: executionclusterlabel.DefaultFetchConfig},
+		"plugin-override": {CmdFunc: getPluginOverridesFunc, Aliases: []string{"plugin-overrides"},
+			Short: pluginOverrideShort,
+			Long:  pluginOverrideLong, PFlagProvider: pluginoverride.DefaultFetchConfig},
 	}
 
 	cmdcore.AddCommands(getCmd, getResourcesFuncs)

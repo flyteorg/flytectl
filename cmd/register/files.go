@@ -5,25 +5,11 @@ import (
 	"encoding/json"
 	"os"
 
+	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flytestdlib/logger"
 )
-
-//go:generate pflags FilesConfig
-var (
-	filesConfig = &FilesConfig{
-		Version:         "v1",
-		ContinueOnError: false,
-	}
-)
-
-// FilesConfig
-type FilesConfig struct {
-	Version         string `json:"version" pflag:",version of the entity to be registered with flyte."`
-	ContinueOnError bool   `json:"continueOnError" pflag:",continue on error when registering files."`
-	Archive         bool   `json:"archive" pflag:",pass in archive file either an http link or local path."`
-}
 
 const (
 	registerFilesShort = "Registers file resources"
@@ -57,7 +43,7 @@ the continueOnError flag.
 Using short format of continueOnError flag
 ::
 
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks -c
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks --continueOnError
 
 Overriding the default version v1 using version string.
 ::
@@ -68,20 +54,42 @@ Change the o/p format has not effect on registration. The O/p is currently avail
 
 ::
 
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks -c -o yaml
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks --continueOnError -o yaml
+
+Override IamRole during registration.
+
+::
+
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks --continueOnError -v v2 -i "arn:aws:iam::123456789:role/dummy"
+
+Override Kubernetes service account during registration.
+
+::
+
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks --continueOnError -v v2 -k "kubernetes-service-account"
+
+Override Output location prefix during registration.
+
+::
+
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks --continueOnError -v v2 -l "s3://dummy/prefix"
 
 Usage
 `
 )
 
 func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
+	return Register(ctx, args, cmdCtx)
+}
+
+func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	dataRefs, tmpDir, _err := getSortedFileList(ctx, args)
 	if _err != nil {
 		logger.Errorf(ctx, "error while un-archiving files in tmp dir due to %v", _err)
 		return _err
 	}
 	logger.Infof(ctx, "Parsing files... Total(%v)", len(dataRefs))
-	fastFail := !filesConfig.ContinueOnError
+	fastFail := !rconfig.DefaultFilesConfig.ContinueOnError
 	var registerResults []Result
 	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
 		registerResults, _err = registerFile(ctx, dataRefs[i], registerResults, cmdCtx)
@@ -94,5 +102,5 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 			logger.Errorf(ctx, "unable to delete temp dir %v due to %v", tmpDir, _err)
 		}
 	}
-	return nil
+	return _err
 }

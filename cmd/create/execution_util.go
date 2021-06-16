@@ -14,12 +14,14 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func createExecutionRequestForWorkflow(ctx context.Context, workflowName string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
+func createExecutionRequestForWorkflow(ctx context.Context, workflowName, project, domain string,
+	cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
 	// Fetch the launch plan
-	lp, err := cmdGet.DefaultFetcher.FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain, cmdCtx)
+	lp, err := cmdCtx.AdminFetcherExt().FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain)
 	if err != nil {
 		return nil, err
 	}
+
 	// Create workflow params literal map
 	workflowParams := cmdGet.WorkflowParams(lp)
 	paramLiterals, err := MakeLiteralForParams(executionConfig.Inputs, workflowParams)
@@ -31,6 +33,7 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName string,
 		Literals: paramLiterals,
 	}
 
+	// Set both deprecated field and new field for security identity passing
 	authRole := &admin.AuthRole{
 		KubernetesServiceAccount: executionConfig.KubeServiceAcct,
 		AssumableIamRole:         executionConfig.IamRoleARN,
@@ -46,9 +49,10 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName string,
 	return createExecutionRequest(lp.Id, inputs, securityContext, authRole), nil
 }
 
-func createExecutionRequestForTask(ctx context.Context, taskName string, project string, domain string, cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
+func createExecutionRequestForTask(ctx context.Context, taskName string, project string, domain string,
+	cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
 	// Fetch the task
-	task, err := cmdGet.FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain, cmdCtx)
+	task, err := cmdCtx.AdminFetcherExt().FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain)
 	if err != nil {
 		return nil, err
 	}
@@ -63,6 +67,7 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 		Literals: variableLiterals,
 	}
 
+	// Set both deprecated field and new field for security identity passing
 	authRole := &admin.AuthRole{
 		KubernetesServiceAccount: executionConfig.KubeServiceAcct,
 		AssumableIamRole:         executionConfig.IamRoleARN,
@@ -86,7 +91,8 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 	return createExecutionRequest(id, inputs, securityContext, authRole), nil
 }
 
-func relaunchExecution(ctx context.Context, executionName string, project string, domain string, cmdCtx cmdCore.CommandContext) error {
+func relaunchExecution(ctx context.Context, executionName string, project string, domain string,
+	cmdCtx cmdCore.CommandContext) error {
 	relaunchedExec, err := cmdCtx.AdminClient().RelaunchExecution(ctx, &admin.ExecutionRelaunchRequest{
 		Id: &core.WorkflowExecutionIdentifier{
 			Name:    executionName,
@@ -159,7 +165,8 @@ func resolveOverrides(toBeOverridden *ExecutionConfig, project string, domain st
 func readConfigAndValidate(project string, domain string) (ExecutionParams, error) {
 	executionParams := ExecutionParams{}
 	if executionConfig.ExecFile == "" && executionConfig.Relaunch == "" {
-		return executionParams, fmt.Errorf("executionConfig or relaunch can't be empty. Run the flytectl get task/launchplan to generate the config")
+		return executionParams, fmt.Errorf("executionConfig or relaunch can't be empty." +
+			" Run the flytectl get task/launchplan to generate the config")
 	}
 	if executionConfig.Relaunch != "" {
 		resolveOverrides(executionConfig, project, domain)
@@ -176,7 +183,8 @@ func readConfigAndValidate(project string, domain string) (ExecutionParams, erro
 	isTask := readExecutionConfig.Task != ""
 	isWorkflow := readExecutionConfig.Workflow != ""
 	if isTask == isWorkflow {
-		return executionParams, fmt.Errorf("either one of task or workflow name should be specified to launch an execution")
+		return executionParams, fmt.Errorf("either one of task or workflow name should be specified" +
+			" to launch an execution")
 	}
 	name := readExecutionConfig.Task
 	execType := Task

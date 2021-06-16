@@ -3,6 +3,11 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
+
+	"github.com/flyteorg/flytectl/cmd/sandbox"
+
+	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -12,7 +17,6 @@ import (
 	"github.com/flyteorg/flytectl/cmd/register"
 	"github.com/flyteorg/flytectl/cmd/update"
 	"github.com/flyteorg/flytectl/cmd/version"
-	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	stdConfig "github.com/flyteorg/flytestdlib/config"
 	"github.com/flyteorg/flytestdlib/config/viper"
@@ -41,8 +45,7 @@ func newRootCmd() *cobra.Command {
 		DisableAutoGenTag: true,
 	}
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "",
-		"config file (default is $HOME/.flyte/config.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.flyte/config.yaml)")
 
 	configAccessor.InitializePflags(rootCmd.PersistentFlags())
 
@@ -57,6 +60,7 @@ func newRootCmd() *cobra.Command {
 	rootCmd.AddCommand(update.CreateUpdateCommand())
 	rootCmd.AddCommand(register.RemoteRegisterCommand())
 	rootCmd.AddCommand(delete.RemoteDeleteCommand())
+	rootCmd.AddCommand(sandbox.CreateSandboxCommand())
 	// Added version command
 	versioncmd := version.GetVersionCommand(rootCmd)
 	cmdCore.AddCommands(rootCmd, versioncmd)
@@ -67,9 +71,16 @@ func newRootCmd() *cobra.Command {
 }
 
 func initConfig(_ *cobra.Command, _ []string) error {
+	configFile := f.FilePathJoin(f.UserHomeDir(), configFileDir, configFileName)
+	if len(os.Getenv("FLYTECTL_CONFIG")) > 0 {
+		configFile = os.Getenv("FLYTECTL_CONFIG")
+	}
+	if len(cfgFile) > 0 {
+		configFile = cfgFile
+	}
 	configAccessor = viper.NewAccessor(stdConfig.Options{
 		StrictMode:  true,
-		SearchPaths: []string{cfgFile, f.FilePathJoin(f.UserHomeDir(), configFileDir, configFileName)},
+		SearchPaths: []string{configFile},
 	})
 
 	err := configAccessor.UpdateConfig(context.TODO())

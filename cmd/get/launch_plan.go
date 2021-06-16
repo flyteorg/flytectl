@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"github.com/flyteorg/flytectl/cmd/config"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/launchplan"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytectl/pkg/adminutils"
+	"github.com/flyteorg/flytectl/pkg/ext"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
-
 	"github.com/golang/protobuf/proto"
 )
 
@@ -27,10 +27,35 @@ Retrieves launch plan by name within project and domain.
 
  flytectl get launchplan -p flytesnacks -d development core.basic.lp.go_greet
 
-Retrieves launchplan by filters.
+
+Retrieves latest version of task by name within project and domain.
+
 ::
 
- Not yet implemented
+ flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --latest
+
+Retrieves particular version of launchplan by name within project and domain.
+
+::
+
+ flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --version v2
+
+Retrieves all the launch plans with filters.
+::
+ 
+  bin/flytectl get launchplan -p flytesnacks -d development --filter.field-selector="name=core.basic.lp.go_greet"
+ 
+Retrieves launch plans entity search across all versions with filters.
+::
+ 
+  bin/flytectl get launchplan -p flytesnacks -d development k8s_spark.dataframe_passing.my_smart_schema --filter.field-selector="version=v1"
+ 
+ 
+Retrieves all the launch plans with limit and sorting.
+::
+ 
+  bin/flytectl get launchplan -p flytesnacks -d development --filter.sort-by=created_at --filter.limit=1 --filter.asc
+ 
 
 Retrieves all the launchplan within project and domain in yaml format.
 
@@ -48,7 +73,7 @@ Retrieves a launch plans within project and domain for a version and generate th
 
 ::
 
- flytectl get launchplan -d development -p flytectldemo core.advanced.run_merge_sort.merge_sort --execFile execution_spec.yam
+ flytectl get launchplan -d development -p flytectldemo core.advanced.run_merge_sort.merge_sort --execFile execution_spec.yaml
 
 The generated file would look similar to this
 
@@ -72,24 +97,21 @@ Usage
 `
 )
 
-//go:generate pflags LaunchPlanConfig --default-var launchPlanConfig
-var (
-	launchPlanConfig = &LaunchPlanConfig{}
-)
-
-// LaunchPlanConfig
-type LaunchPlanConfig struct {
-	ExecFile string `json:"execFile" pflag:",execution file name to be used for generating execution spec of a single launchplan."`
-	Version  string `json:"version" pflag:",version of the launchplan to be fetched."`
-	Latest   bool   `json:"latest" pflag:", flag to indicate to fetch the latest version, version flag will be ignored in this case"`
-}
-
+// Column structure for get specific launchplan
 var launchplanColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
 	{Header: "Name", JSONPath: "$.id.name"},
 	{Header: "Type", JSONPath: "$.closure.compiledTask.template.type"},
 	{Header: "State", JSONPath: "$.spec.state"},
 	{Header: "Schedule", JSONPath: "$.spec.entityMetadata.schedule"},
+}
+
+// Column structure for get all launchplans
+var launchplansColumns = []printer.Column{
+	{Header: "Version", JSONPath: "$.id.version"},
+	{Header: "Name", JSONPath: "$.id.name"},
+	{Header: "Type", JSONPath: "$.id.resourceType"},
+	{Header: "CreatedAt", JSONPath: "$.closure.createdAt"},
 }
 
 func LaunchplanToProtoMessages(l []*admin.LaunchPlan) []proto.Message {
@@ -102,27 +124,64 @@ func LaunchplanToProtoMessages(l []*admin.LaunchPlan) []proto.Message {
 
 func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	launchPlanPrinter := printer.Printer{}
+	var launchPlans []*admin.LaunchPlan
 	project := config.GetConfig().Project
 	domain := config.GetConfig().Domain
 	if len(args) == 1 {
 		name := args[0]
-		var launchPlans []*admin.LaunchPlan
 		var err error
-		if launchPlans, err = FetchLPForName(ctx, name, project, domain, cmdCtx); err != nil {
+		if launchPlans, err = FetchLPForName(ctx, cmdCtx.AdminFetcherExt(), name, project, domain); err != nil {
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
-		err = launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplanColumns, LaunchplanToProtoMessages(launchPlans)...)
+		err = launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplanColumns,
+			LaunchplanToProtoMessages(launchPlans)...)
 		if err != nil {
 			return err
 		}
 		return nil
 	}
 
-	launchPlans, err := adminutils.GetAllNamedEntities(ctx, cmdCtx.AdminClient().ListLaunchPlanIds, adminutils.ListRequest{Project: project, Domain: domain})
+	launchPlans, err := cmdCtx.AdminFetcherExt().FetchAllVerOfLP(ctx, "", config.GetConfig().Project, config.GetConfig().Domain, launchplan.DefaultConfig.Filter)
 	if err != nil {
 		return err
 	}
+
 	logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
-	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), entityColumns, adminutils.NamedEntityToProtoMessage(launchPlans)...)
+	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplansColumns,
+		LaunchplanToProtoMessages(launchPlans)...)
+}
+
+// FetchLPForName fetches the launchplan give it name.
+func FetchLPForName(ctx context.Context, fetcher ext.AdminFetcherExtInterface, name, project,
+	domain string) ([]*admin.LaunchPlan, error) {
+	var launchPlans []*admin.LaunchPlan
+	var lp *admin.LaunchPlan
+	var err error
+	if launchplan.DefaultConfig.Latest {
+		if lp, err = fetcher.FetchLPLatestVersion(ctx, name, project, domain, launchplan.DefaultConfig.Filter); err != nil {
+			return nil, err
+		}
+		launchPlans = append(launchPlans, lp)
+	} else if launchplan.DefaultConfig.Version != "" {
+		if lp, err = fetcher.FetchLPVersion(ctx, name, launchplan.DefaultConfig.Version, project, domain); err != nil {
+			return nil, err
+		}
+		launchPlans = append(launchPlans, lp)
+	} else {
+		launchPlans, err = fetcher.FetchAllVerOfLP(ctx, name, project, domain, launchplan.DefaultConfig.Filter)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if launchplan.DefaultConfig.ExecFile != "" {
+		// There would be atleast one launchplan object when code reaches here and hence the length
+		// assertion is not required.
+		lp = launchPlans[0]
+		// Only write the first task from the tasks object.
+		if err = CreateAndWriteExecConfigForWorkflow(lp, launchplan.DefaultConfig.ExecFile); err != nil {
+			return nil, err
+		}
+	}
+	return launchPlans, nil
 }

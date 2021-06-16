@@ -3,13 +3,13 @@ package get
 import (
 	"context"
 
+	"github.com/flyteorg/flytectl/cmd/config"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/execution"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
 	"github.com/golang/protobuf/proto"
-
-	"github.com/flyteorg/flytectl/cmd/config"
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytectl/pkg/printer"
 )
 
 const (
@@ -26,10 +26,17 @@ Retrieves execution by name within project and domain.
 
  bin/flytectl get execution -p flytesnacks -d development oeh94k9r2r
 
-Retrieves execution by filters
+Retrieves all the executions with filters.
 ::
+ 
+  bin/flytectl get execution -p flytesnacks -d development --filter.field-selector="execution.phase in (FAILED;SUCCEEDED),execution.duration<200" 
 
- Not yet implemented
+ 
+Retrieves all the execution with limit and sorting.
+::
+  
+   bin/flytectl get execution -p flytesnacks -d development --filter.sort-by=created_at --filter.limit=1 --filter.asc
+   
 
 Retrieves all the execution within project and domain in yaml format
 
@@ -54,6 +61,8 @@ var executionColumns = []printer.Column{
 	{Header: "Phase", JSONPath: "$.closure.phase"},
 	{Header: "Started", JSONPath: "$.closure.startedAt"},
 	{Header: "Elapsed Time", JSONPath: "$.closure.duration"},
+	{Header: "Abort data", JSONPath: "$.closure.abortMetadata[\"cause\"]"},
+	{Header: "Error data", JSONPath: "$.closure.error[\"message\"]"},
 }
 
 func ExecutionToProtoMessages(l []*admin.Execution) []proto.Message {
@@ -69,28 +78,20 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 	var executions []*admin.Execution
 	if len(args) > 0 {
 		name := args[0]
-		execution, err := DefaultFetcher.FetchExecution(ctx, name, config.GetConfig().Project, config.GetConfig().Domain, cmdCtx)
+		execution, err := cmdCtx.AdminFetcherExt().FetchExecution(ctx, name, config.GetConfig().Project, config.GetConfig().Domain)
 		if err != nil {
 			return err
 		}
 		executions = append(executions, execution)
-	} else {
-		executionList, err := cmdCtx.AdminClient().ListExecutions(ctx, &admin.ResourceListRequest{
-			Limit: 100,
-			Id: &admin.NamedEntityIdentifier{
-				Project: config.GetConfig().Project,
-				Domain:  config.GetConfig().Domain,
-			},
-		})
-		if err != nil {
-			return err
-		}
-		executions = executionList.Executions
+		logger.Infof(ctx, "Retrieved %v executions", len(executions))
+		return adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns,
+			ExecutionToProtoMessages(executions)...)
 	}
-	logger.Infof(ctx, "Retrieved %v executions", len(executions))
-	err := adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns, ExecutionToProtoMessages(executions)...)
+	executionList, err := cmdCtx.AdminFetcherExt().ListExecution(ctx, config.GetConfig().Project, config.GetConfig().Domain, execution.DefaultConfig.Filter)
 	if err != nil {
 		return err
 	}
-	return nil
+	logger.Infof(ctx, "Retrieved %v executions", len(executionList.Executions))
+	return adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns,
+		ExecutionToProtoMessages(executionList.Executions)...)
 }

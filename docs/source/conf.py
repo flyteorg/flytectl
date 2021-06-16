@@ -42,6 +42,7 @@ extensions = [
     "sphinx-prompt",
     "sphinx_copybutton",
     "sphinx_search.extension",
+    "sphinx_fontawesome",
 ]
 
 # build the templated autosummary files
@@ -102,6 +103,11 @@ html_theme_options = {
 
 html_context = {
     "home_page": "https://docs.flyte.org",
+    # custom flyteorg furo theme options
+    "github_repo": "flytectl",
+    "github_username": "flyteorg",
+    "github_commit": "master",
+    "docs_path": "docs/source",  # path to documentation source
 }
 
 # The default sidebars (for documents that don't match any pattern) are

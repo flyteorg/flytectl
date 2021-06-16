@@ -76,6 +76,51 @@ Also an execution can be relaunched by passing in current execution id.
 
  flytectl create execution --relaunch ffb31066a0f8b4d52b77 -p flytectldemo -d development
 
+Generic data types are also supported for execution in similar way.Following is sample of how the inputs need to be specified while creating the execution.
+As usual the spec file should be generated first and then run the execution using the spec file.
+
+::
+
+ flytectl get task -d development -p flytectldemo  core.type_system.custom_objects.add --execFile adddatanum.yaml
+
+The generated file would look similar to this. Here you can see empty values dumped for generic data type x and y. 
+
+::
+
+    iamRoleARN: ""
+    inputs:
+      "x": {}
+      "y": {}
+    kubeServiceAcct: ""
+    targetDomain: ""
+    targetProject: ""
+    task: core.type_system.custom_objects.add
+    version: v3
+
+Modified file with struct data populated for x and y parameters for the task core.type_system.custom_objects.add
+
+::
+
+  iamRoleARN: "arn:aws:iam::123456789:role/dummy"
+  inputs:
+    "x":
+      "x": 2
+      "y": ydatafory
+      "z":
+        1 : "foo"
+        2 : "bar"
+    "y":
+      "x": 3
+      "y": ydataforx
+      "z":
+        3 : "buzz"
+        4 : "lightyear"
+  kubeServiceAcct: ""
+  targetDomain: ""
+  targetProject: ""
+  task: core.type_system.custom_objects.add
+  version: v3
+
 Usage
 
 
@@ -102,20 +147,20 @@ Options inherited from parent commands
 ::
 
       --admin.authorizationHeader string           Custom metadata header to pass JWT
-      --admin.authorizationServerUrl string        This is the URL to your IDP's authorization server'
-      --admin.clientId string                      Client ID
-      --admin.clientSecretLocation string          File containing the client secret
+      --admin.authorizationServerUrl string        This is the URL to your IdP's authorization server. It'll default to Endpoint
+      --admin.clientId string                      Client ID (default "flytepropeller")
+      --admin.clientSecretLocation string          File containing the client secret (default "/etc/secrets/client_secret")
       --admin.endpoint string                      For admin types,  specify where the uri of the service is located.
       --admin.insecure                             Use insecure connection.
       --admin.maxBackoffDelay string               Max delay for grpc backoff (default "8s")
       --admin.maxRetries int                       Max number of gRPC retries (default 4)
       --admin.perRetryTimeout string               gRPC per retry timeout (default "15s")
+      --admin.pkceConfig.refreshTime string         (default "5m0s")
+      --admin.pkceConfig.timeout string             (default "15s")
       --admin.scopes strings                       List of scopes to request
-      --admin.tokenUrl string                      Your IDPs token endpoint
-      --admin.useAuth                              Whether or not to try to authenticate with options below
-      --adminutils.batchSize int                   Maximum number of records to retrieve per call. (default 100)
-      --adminutils.maxRecords int                  Maximum number of records to retrieve. (default 500)
-      --config string                              config file (default is $HOME/config.yaml)
+      --admin.tokenUrl string                      OPTIONAL: Your IdP's token endpoint. It'll be discovered from flyte admin's OAuth Metadata endpoint if not provided.
+      --admin.useAuth                              Deprecated: Auth will be enabled/disabled based on admin's dynamically discovered information.
+      --config string                              config file (default is $HOME/.flyte/config.yaml)
   -d, --domain string                              Specifies the Flyte project's domain.
       --logger.formatter.type string               Sets logging format type. (default "json")
       --logger.level int                           Sets the minimum logging level. (default 4)

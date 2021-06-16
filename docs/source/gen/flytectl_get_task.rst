@@ -21,13 +21,34 @@ Retrieves task by name within project and domain.
 
  bin/flytectl task -p flytesnacks -d development core.basic.lp.greet
 
-Retrieves project by filters.
+Retrieves latest version of task by name within project and domain.
+
 ::
 
- Not yet implemented
+ flytectl get task -p flytesnacks -d development  core.basic.lp.greet --latest
+
+Retrieves particular version of task by name within project and domain.
+
+::
+
+ flytectl get task -p flytesnacks -d development  core.basic.lp.greet --version v2
+
+Retrieves all the tasks with filters.
+::
+  
+  bin/flytectl get task -p flytesnacks -d development --filter.field-selector="task.name=k8s_spark.pyspark_pi.print_every_time,task.version=v1" 
+ 
+Retrieve a specific task with filters.
+::
+ 
+  bin/flytectl get task -p flytesnacks -d development k8s_spark.pyspark_pi.print_every_time --filter.field-selector="task.version=v1,created_at>=2021-05-24T21:43:12.325335Z" 
+  
+Retrieves all the task with limit and sorting.
+::
+   
+  bin/flytectl get -p flytesnacks -d development task  --filter.sort-by=created_at --filter.limit=1 --filter.asc
 
 Retrieves all the tasks within project and domain in yaml format.
-
 ::
 
  bin/flytectl get task -p flytesnacks -d development -o yaml
@@ -74,10 +95,14 @@ Options
 
 ::
 
-      --execFile string   execution file name to be used for generating execution spec of a single task.
-  -h, --help              help for task
-      --latest            flag to indicate to fetch the latest version, version flag will be ignored in this case
-      --version string    version of the task to be fetched.
+      --execFile string                execution file name to be used for generating execution spec of a single task.
+      --filter.asc                     Specifies the sorting order. By default flytectl sort result in descending order
+      --filter.field-selector string   Specifies the Field selector
+      --filter.limit int32             Specifies the limit (default 100)
+      --filter.sort-by string          Specifies which field to sort results  (default "created_at")
+  -h, --help                           help for task
+      --latest                         flag to indicate to fetch the latest version, version flag will be ignored in this case
+      --version string                 version of the task to be fetched.
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,20 +110,20 @@ Options inherited from parent commands
 ::
 
       --admin.authorizationHeader string           Custom metadata header to pass JWT
-      --admin.authorizationServerUrl string        This is the URL to your IDP's authorization server'
-      --admin.clientId string                      Client ID
-      --admin.clientSecretLocation string          File containing the client secret
+      --admin.authorizationServerUrl string        This is the URL to your IdP's authorization server. It'll default to Endpoint
+      --admin.clientId string                      Client ID (default "flytepropeller")
+      --admin.clientSecretLocation string          File containing the client secret (default "/etc/secrets/client_secret")
       --admin.endpoint string                      For admin types,  specify where the uri of the service is located.
       --admin.insecure                             Use insecure connection.
       --admin.maxBackoffDelay string               Max delay for grpc backoff (default "8s")
       --admin.maxRetries int                       Max number of gRPC retries (default 4)
       --admin.perRetryTimeout string               gRPC per retry timeout (default "15s")
+      --admin.pkceConfig.refreshTime string         (default "5m0s")
+      --admin.pkceConfig.timeout string             (default "15s")
       --admin.scopes strings                       List of scopes to request
-      --admin.tokenUrl string                      Your IDPs token endpoint
-      --admin.useAuth                              Whether or not to try to authenticate with options below
-      --adminutils.batchSize int                   Maximum number of records to retrieve per call. (default 100)
-      --adminutils.maxRecords int                  Maximum number of records to retrieve. (default 500)
-      --config string                              config file (default is $HOME/config.yaml)
+      --admin.tokenUrl string                      OPTIONAL: Your IdP's token endpoint. It'll be discovered from flyte admin's OAuth Metadata endpoint if not provided.
+      --admin.useAuth                              Deprecated: Auth will be enabled/disabled based on admin's dynamically discovered information.
+      --config string                              config file (default is $HOME/.flyte/config.yaml)
   -d, --domain string                              Specifies the Flyte project's domain.
       --logger.formatter.type string               Sets logging format type. (default "json")
       --logger.level int                           Sets the minimum logging level. (default 4)

@@ -1,7 +1,6 @@
 package register
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -10,26 +9,27 @@ import (
 	"strings"
 	"testing"
 
+	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	u "github.com/flyteorg/flytectl/cmd/testutils"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-type MockClient struct {
+type MockHTTPClient struct {
 	DoFunc func(req *http.Request) (*http.Response, error)
 }
 
-func (m *MockClient) Do(req *http.Request) (*http.Response, error) {
+func (m *MockHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return GetDoFunc(req)
 }
 
-var (
-	ctx       context.Context
-	args      []string
-	GetDoFunc func(req *http.Request) (*http.Response, error)
-)
-
-func setup() {
-	ctx = context.Background()
-	Client = &MockClient{}
+func registerFilesSetup() {
+	httpClient = &MockHTTPClient{}
 	validTar, err := os.Open("testdata/valid-register.tar")
 	if err != nil {
 		fmt.Printf("unexpected error: %v", err)
@@ -41,11 +41,19 @@ func setup() {
 	GetDoFunc = func(*http.Request) (*http.Response, error) {
 		return response, nil
 	}
+	ctx = u.Ctx
+	mockAdminClient = u.MockClient
+	cmdCtx = cmdCore.NewCommandContext(mockAdminClient, u.MockOutStream)
+
+	rconfig.DefaultFilesConfig.AssumableIamRole = ""
+	rconfig.DefaultFilesConfig.K8ServiceAccount = ""
+	rconfig.DefaultFilesConfig.OutputLocationPrefix = ""
 }
 
 func TestGetSortedFileList(t *testing.T) {
 	setup()
-	filesConfig.Archive = false
+	registerFilesSetup()
+	rconfig.DefaultFilesConfig.Archive = false
 	args = []string{"file2", "file1"}
 	fileList, tmpDir, err := getSortedFileList(ctx, args)
 	assert.Equal(t, "file1", fileList[0])
@@ -56,7 +64,8 @@ func TestGetSortedFileList(t *testing.T) {
 
 func TestGetSortedArchivedFileWithParentFolderList(t *testing.T) {
 	setup()
-	filesConfig.Archive = true
+	registerFilesSetup()
+	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-parent-folder-register.tar"}
 	fileList, tmpDir, err := getSortedFileList(ctx, args)
 	assert.Equal(t, len(fileList), 4)
@@ -72,7 +81,8 @@ func TestGetSortedArchivedFileWithParentFolderList(t *testing.T) {
 
 func TestGetSortedArchivedFileList(t *testing.T) {
 	setup()
-	filesConfig.Archive = true
+	registerFilesSetup()
+	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-register.tar"}
 	fileList, tmpDir, err := getSortedFileList(ctx, args)
 	assert.Equal(t, len(fileList), 4)
@@ -88,7 +98,8 @@ func TestGetSortedArchivedFileList(t *testing.T) {
 
 func TestGetSortedArchivedFileUnorderedList(t *testing.T) {
 	setup()
-	filesConfig.Archive = true
+	registerFilesSetup()
+	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-unordered-register.tar"}
 	fileList, tmpDir, err := getSortedFileList(ctx, args)
 	assert.Equal(t, len(fileList), 4)
@@ -104,7 +115,8 @@ func TestGetSortedArchivedFileUnorderedList(t *testing.T) {
 
 func TestGetSortedArchivedCorruptedFileList(t *testing.T) {
 	setup()
-	filesConfig.Archive = true
+	registerFilesSetup()
+	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/invalid.tar"}
 	fileList, tmpDir, err := getSortedFileList(ctx, args)
 	assert.Equal(t, len(fileList), 0)
@@ -116,7 +128,8 @@ func TestGetSortedArchivedCorruptedFileList(t *testing.T) {
 
 func TestGetSortedArchivedTgzList(t *testing.T) {
 	setup()
-	filesConfig.Archive = true
+	registerFilesSetup()
+	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-register.tgz"}
 	fileList, tmpDir, err := getSortedFileList(ctx, args)
 	assert.Equal(t, len(fileList), 4)
@@ -132,7 +145,7 @@ func TestGetSortedArchivedTgzList(t *testing.T) {
 
 func TestGetSortedArchivedCorruptedTgzFileList(t *testing.T) {
 	setup()
-	filesConfig.Archive = true
+	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/invalid.tgz"}
 	fileList, tmpDir, err := getSortedFileList(ctx, args)
 	assert.Equal(t, 0, len(fileList))
@@ -144,7 +157,8 @@ func TestGetSortedArchivedCorruptedTgzFileList(t *testing.T) {
 
 func TestGetSortedArchivedInvalidArchiveFileList(t *testing.T) {
 	setup()
-	filesConfig.Archive = true
+	registerFilesSetup()
+	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/invalid-extension-register.zip"}
 	fileList, tmpDir, err := getSortedFileList(ctx, args)
 	assert.Equal(t, 0, len(fileList))
@@ -157,7 +171,7 @@ func TestGetSortedArchivedInvalidArchiveFileList(t *testing.T) {
 
 func TestGetSortedArchivedFileThroughInvalidHttpList(t *testing.T) {
 	setup()
-	filesConfig.Archive = true
+	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"http://invalidhost:invalidport/testdata/valid-register.tar"}
 	fileList, tmpDir, err := getSortedFileList(ctx, args)
 	assert.Equal(t, 0, len(fileList))
@@ -169,7 +183,8 @@ func TestGetSortedArchivedFileThroughInvalidHttpList(t *testing.T) {
 
 func TestGetSortedArchivedFileThroughValidHttpList(t *testing.T) {
 	setup()
-	filesConfig.Archive = true
+	registerFilesSetup()
+	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"http://dummyhost:80/testdata/valid-register.tar"}
 	fileList, tmpDir, err := getSortedFileList(ctx, args)
 	assert.Equal(t, len(fileList), 4)
@@ -185,7 +200,8 @@ func TestGetSortedArchivedFileThroughValidHttpList(t *testing.T) {
 
 func TestGetSortedArchivedFileThroughValidHttpWithNullContextList(t *testing.T) {
 	setup()
-	filesConfig.Archive = true
+	registerFilesSetup()
+	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"http://dummyhost:80/testdata/valid-register.tar"}
 	ctx = nil
 	fileList, tmpDir, err := getSortedFileList(ctx, args)
@@ -195,4 +211,110 @@ func TestGetSortedArchivedFileThroughValidHttpWithNullContextList(t *testing.T) 
 	assert.Equal(t, errors.New("net/http: nil Context"), err)
 	// Clean up the temp directory.
 	assert.Nil(t, os.RemoveAll(tmpDir), "unable to delete temp dir %v", tmpDir)
+}
+
+func TestRegisterFile(t *testing.T) {
+	t.Run("Successful run", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil, nil)
+		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
+		var registerResults []Result
+		results, err := registerFile(ctx, args[0], registerResults, cmdCtx)
+		assert.Equal(t, 1, len(results))
+		assert.Nil(t, err)
+	})
+	t.Run("Non existent file", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		args = []string{"testdata/non-existent.pb"}
+		var registerResults []Result
+		results, err := registerFile(ctx, args[0], registerResults, cmdCtx)
+		assert.Equal(t, 1, len(results))
+		assert.Equal(t, "Failed", results[0].Status)
+		assert.Equal(t, "Error reading file due to open testdata/non-existent.pb: no such file or directory", results[0].Info)
+		assert.NotNil(t, err)
+	})
+	t.Run("unmarhal failure", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		args = []string{"testdata/valid-register.tar"}
+		var registerResults []Result
+		results, err := registerFile(ctx, args[0], registerResults, cmdCtx)
+		assert.Equal(t, 1, len(results))
+		assert.Equal(t, "Failed", results[0].Status)
+		assert.Equal(t, "Error unmarshalling file due to failed unmarshalling file testdata/valid-register.tar", results[0].Info)
+		assert.NotNil(t, err)
+	})
+	t.Run("AlreadyExists", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil,
+			status.Error(codes.AlreadyExists, "AlreadyExists"))
+		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
+		var registerResults []Result
+		results, err := registerFile(ctx, args[0], registerResults, cmdCtx)
+		assert.Equal(t, 1, len(results))
+		assert.Equal(t, "Success", results[0].Status)
+		assert.Equal(t, "AlreadyExists", results[0].Info)
+		assert.Nil(t, err)
+	})
+	t.Run("Registration Error", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil,
+			status.Error(codes.InvalidArgument, "Invalid"))
+		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
+		var registerResults []Result
+		results, err := registerFile(ctx, args[0], registerResults, cmdCtx)
+		assert.Equal(t, 1, len(results))
+		assert.Equal(t, "Failed", results[0].Status)
+		assert.Equal(t, "Error registering file due to rpc error: code = InvalidArgument desc = Invalid", results[0].Info)
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHydrateLaunchPlanSpec(t *testing.T) {
+	t.Run("IamRole override", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		rconfig.DefaultFilesConfig.AssumableIamRole = "iamRole"
+		lpSpec := &admin.LaunchPlanSpec{}
+		hydrateLaunchPlanSpec(lpSpec)
+		assert.Equal(t, &admin.AuthRole{AssumableIamRole: "iamRole"}, lpSpec.AuthRole)
+	})
+	t.Run("k8Service account override", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		rconfig.DefaultFilesConfig.K8ServiceAccount = "k8Account"
+		lpSpec := &admin.LaunchPlanSpec{}
+		hydrateLaunchPlanSpec(lpSpec)
+		assert.Equal(t, &admin.AuthRole{KubernetesServiceAccount: "k8Account"}, lpSpec.AuthRole)
+	})
+	t.Run("Both k8Service and IamRole", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		rconfig.DefaultFilesConfig.AssumableIamRole = "iamRole"
+		rconfig.DefaultFilesConfig.K8ServiceAccount = "k8Account"
+		lpSpec := &admin.LaunchPlanSpec{}
+		hydrateLaunchPlanSpec(lpSpec)
+		assert.Equal(t, &admin.AuthRole{AssumableIamRole: "iamRole",
+			KubernetesServiceAccount: "k8Account"}, lpSpec.AuthRole)
+	})
+	t.Run("Output prefix", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		rconfig.DefaultFilesConfig.OutputLocationPrefix = "prefix"
+		lpSpec := &admin.LaunchPlanSpec{}
+		hydrateLaunchPlanSpec(lpSpec)
+		assert.Equal(t, &admin.RawOutputDataConfig{OutputLocationPrefix: "prefix"}, lpSpec.RawOutputDataConfig)
+	})
+}
+
+func TestFlyteManifest(t *testing.T) {
+	flytesnacks, tag, err := getFlyteTestManifest()
+	assert.Nil(t, err)
+	assert.Contains(t, tag, "v")
+	assert.NotEmpty(t, tag)
+	assert.Greater(t, len(flytesnacks), 1)
 }

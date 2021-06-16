@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -13,7 +14,10 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/google/go-github/github"
+
 	"github.com/flyteorg/flytectl/cmd/config"
+	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -23,6 +27,8 @@ import (
 
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const registrationProjectPattern = "{{ registration.project }}"
@@ -40,10 +46,25 @@ type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-var Client HTTPClient
+var FlyteSnacksRelease []FlyteSnack
+
+// FlyteSnack Defines flyte test manifest structure
+type FlyteSnack struct {
+	Name          string    `json:"name"`
+	Priority      string    `json:"priority"`
+	Path          string    `json:"path"`
+	ExitCondition Condition `json:"exitCondition"`
+}
+
+type Condition struct {
+	ExitSuccess bool   `json:"exit_success"`
+	ExitMessage string `json:"exit_message"`
+}
+
+var httpClient HTTPClient
 
 func init() {
-	Client = &http.Client{}
+	httpClient = &http.Client{}
 }
 
 var projectColumns = []printer.Column{
@@ -82,7 +103,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 				Project:      config.GetConfig().Project,
 				Domain:       config.GetConfig().Domain,
 				Name:         launchPlan.Id.Name,
-				Version:      filesConfig.Version,
+				Version:      rconfig.DefaultFilesConfig.Version,
 			},
 			Spec: launchPlan.Spec,
 		})
@@ -95,7 +116,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 				Project:      config.GetConfig().Project,
 				Domain:       config.GetConfig().Domain,
 				Name:         workflowSpec.Template.Id.Name,
-				Version:      filesConfig.Version,
+				Version:      rconfig.DefaultFilesConfig.Version,
 			},
 			Spec: workflowSpec,
 		})
@@ -108,7 +129,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 				Project:      config.GetConfig().Project,
 				Domain:       config.GetConfig().Domain,
 				Name:         taskSpec.Template.Id.Name,
-				Version:      filesConfig.Version,
+				Version:      rconfig.DefaultFilesConfig.Version,
 			},
 			Spec: taskSpec,
 		})
@@ -175,7 +196,24 @@ func hydrateIdentifier(identifier *core.Identifier) {
 		identifier.Domain = config.GetConfig().Domain
 	}
 	if identifier.Version == "" || identifier.Version == registrationVersionPattern {
-		identifier.Version = filesConfig.Version
+		identifier.Version = rconfig.DefaultFilesConfig.Version
+	}
+}
+
+func hydrateLaunchPlanSpec(lpSpec *admin.LaunchPlanSpec) {
+	assumableIamRole := len(rconfig.DefaultFilesConfig.AssumableIamRole) > 0
+	k8ServiceAcct := len(rconfig.DefaultFilesConfig.K8ServiceAccount) > 0
+	outputLocationPrefix := len(rconfig.DefaultFilesConfig.OutputLocationPrefix) > 0
+	if assumableIamRole || k8ServiceAcct {
+		lpSpec.AuthRole = &admin.AuthRole{
+			AssumableIamRole:         rconfig.DefaultFilesConfig.AssumableIamRole,
+			KubernetesServiceAccount: rconfig.DefaultFilesConfig.K8ServiceAccount,
+		}
+	}
+	if outputLocationPrefix {
+		lpSpec.RawOutputDataConfig = &admin.RawOutputDataConfig{
+			OutputLocationPrefix: rconfig.DefaultFilesConfig.OutputLocationPrefix,
+		}
 	}
 }
 
@@ -184,6 +222,7 @@ func hydrateSpec(message proto.Message) error {
 	case *admin.LaunchPlan:
 		launchPlan := message.(*admin.LaunchPlan)
 		hydrateIdentifier(launchPlan.Spec.WorkflowId)
+		hydrateLaunchPlanSpec(launchPlan.Spec)
 	case *admin.WorkflowSpec:
 		workflowSpec := message.(*admin.WorkflowSpec)
 		for _, Noderef := range workflowSpec.Template.Nodes {
@@ -214,7 +253,7 @@ func DownloadFileFromHTTP(ctx context.Context, ref storage.DataReference) (io.Re
 	if err != nil {
 		return nil, err
 	}
-	resp, err := Client.Do(req)
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +266,7 @@ If the archive flag is on then download the archives to temp directory and extra
 The o/p of this function would be sorted list of the file locations.
 */
 func getSortedFileList(ctx context.Context, args []string) ([]string, string, error) {
-	if !filesConfig.Archive {
+	if !rconfig.DefaultFilesConfig.Archive {
 		/*
 		 * Sorting is required for non-archived case since its possible for the user to pass in a list of unordered
 		 * serialized protobuf files , but flyte expects them to be registered in topologically sorted order that it had
@@ -320,7 +359,13 @@ func registerFile(ctx context.Context, fileName string, registerResults []Result
 	}
 	logger.Debugf(ctx, "Hydrated spec : %v", getJSONSpec(spec))
 	if err := register(ctx, spec, cmdCtx); err != nil {
-		registerResult = Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error registering file due to %v", err)}
+		// If error is AlreadyExists then dont consider this to be an error but just a warning state
+		if grpcError := status.Code(err); grpcError == codes.AlreadyExists {
+			registerResult = Result{Name: fileName, Status: "Success", Info: fmt.Sprintf("%v", grpcError.String())}
+			err = nil
+		} else {
+			registerResult = Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error registering file due to %v", err)}
+		}
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
 	}
@@ -367,4 +412,29 @@ func getJSONSpec(message proto.Message) string {
 	}
 	jsonSpec, _ := marshaller.MarshalToString(message)
 	return jsonSpec
+}
+
+func getFlyteTestManifest() ([]FlyteSnack, string, error) {
+	c := github.NewClient(nil)
+	opt := &github.ListOptions{Page: 1, PerPage: 1}
+	releases, _, err := c.Repositories.ListReleases(context.Background(), githubOrg, githubRepository, opt)
+	if err != nil {
+		return nil, "", err
+	}
+	response, err := http.Get(fmt.Sprintf(flyteManifest, *releases[0].TagName))
+	if err != nil {
+		return nil, "", err
+	}
+	defer response.Body.Close()
+
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, "", err
+	}
+
+	err = json.Unmarshal(data, &FlyteSnacksRelease)
+	if err != nil {
+		return nil, "", err
+	}
+	return FlyteSnacksRelease, *releases[0].TagName, nil
 }

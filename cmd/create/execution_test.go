@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/flyteorg/flytectl/cmd/config"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
@@ -17,8 +18,9 @@ import (
 // This function needs to be called after testutils.Steup()
 func createExecutionSetup() {
 	ctx = testutils.Ctx
-	cmdCtx = testutils.CmdCtx
 	mockClient = testutils.MockClient
+	// TODO: migrate to new command context from testutils
+	cmdCtx = cmdCore.NewCommandContext(mockClient, testutils.MockOutStream)
 	sortedListLiteralType := core.Variable{
 		Type: &core.LiteralType{
 			Type: &core.LiteralType_CollectionType{
@@ -142,7 +144,7 @@ func TestCreateTaskExecutionFunc(t *testing.T) {
 		},
 	}
 	mockClient.OnCreateExecutionMatch(ctx, mock.Anything).Return(executionCreateResponseTask, nil)
-	executionConfig.ExecFile = testDataFolder + "task_execution_spec.yaml"
+	executionConfig.ExecFile = testDataFolder + "task_execution_spec_with_iamrole.yaml"
 	err = createExecutionCommand(ctx, args, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "CreateExecution", ctx, mock.Anything)
@@ -175,7 +177,7 @@ func TestCreateLaunchPlanExecutionFunc(t *testing.T) {
 	err = createExecutionCommand(ctx, args, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "CreateExecution", ctx, mock.Anything)
-	tearDownAndVerify(t, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e"`)
+	tearDownAndVerify(t, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e" `)
 }
 
 func TestCreateRelaunchExecutionFunc(t *testing.T) {
