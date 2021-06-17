@@ -43,10 +43,6 @@ func cleanup(client *client.Client) error {
 func setupSandbox() {
 	mockAdminClient := u.MockClient
 	cmdCtx = cmdCore.NewCommandContext(mockAdminClient, u.MockOutStream)
-	_, err := os.Stat(f.FilePathJoin(f.UserHomeDir(), ".flyte"))
-	if os.IsNotExist(err) {
-		_ = os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755)
-	}
 	_ = setupFlytectlConfig()
 }
 

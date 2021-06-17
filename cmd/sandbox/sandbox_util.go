@@ -22,7 +22,7 @@ import (
 
 var (
 	Kubeconfig              = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
-	FlytectlConfig          = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml")
+	FlytectlConfig          = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config-sandbox.yaml")
 	SuccessMessage          = "Flyte is ready! Flyte UI is available at http://localhost:30081/console"
 	ImageName               = "ghcr.io/flyteorg/flyte-sandbox:dind"
 	flyteSandboxClusterName = "flyte-sandbox"
@@ -33,8 +33,6 @@ var (
 
 func setupFlytectlConfig() error {
 	_, err := os.Stat(f.FilePathJoin(f.UserHomeDir(), ".flyte"))
-	fmt.Println(f.UserHomeDir())
-	fmt.Println("==========")
 	if os.IsNotExist(err) {
 		_ = os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755)
 	}

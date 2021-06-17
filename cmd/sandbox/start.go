@@ -55,11 +55,12 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 
 	ID, err := startContainer(cli)
 	if err != nil {
-		fmt.Println("Something goes wrong. We are not able to start sandbox container, Please check your docker client and try again \n", emoji.Rocket)
+		fmt.Println("Something goes wrong. We are not able to start sandbox container, Please check your docker client and try again ")
 		return fmt.Errorf("error: %v", err)
 	}
 
 	os.Setenv("KUBECONFIG", Kubeconfig)
+	os.Setenv("FLYTECTL_CONFIG", FlytectlConfig)
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Println("Something goes wrong with container status", r)
@@ -71,7 +72,8 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		return err
 	}
 
-	fmt.Printf("Add (KUBECONFIG) to your environment variable \n")
+	fmt.Printf("Add KUBECONFIG and FLYTECTL_CONFIG to your environment variable \n")
 	fmt.Printf("export KUBECONFIG=%v \n", Kubeconfig)
+	fmt.Printf("export FLYTECTL_CONFIG=%v \n", FlytectlConfig)
 	return nil
 }
