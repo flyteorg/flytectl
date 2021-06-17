@@ -2,13 +2,10 @@ package sandbox
 
 //go:generate pflags Config --default-var DefaultConfig
 var (
-	DefaultConfig = &Config{
-		Debug: false,
-	}
+	DefaultConfig = &Config{}
 )
 
 // Config
 type Config struct {
-	Debug      bool   `json:"debug" pflag:", Enable debugging"`
-	SnacksRepo string `json:"flytesnacks-path" pflag:", Path of your flytesnacks repository"`
+	SnacksRepo string `json:"flytesnacks" pflag:", Path of your flytesnacks repository"`
 }

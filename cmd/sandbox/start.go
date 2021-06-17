@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
-
 	"github.com/docker/docker/client"
 	"github.com/enescakir/emoji"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -21,15 +19,10 @@ Start will run the flyte sandbox cluster inside a docker container and setup the
 
  bin/flytectl sandbox start
 	
-Start will run the flyte sandbox cluster inside a docker container and setup the config that is required in a debug mode
+Mount your flytesnacks repository code inside sandbox 
 ::
 
- bin/flytectl sandbox start --debug 
-	
-Mount your repository inside sandbox 
-::
-
- bin/flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
+ bin/flytectl sandbox start --flytesnacks=$HOME/flyteorg/flytesnacks 
 Usage
 	`
 )
@@ -60,11 +53,10 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		}
 	}
 
-	ID, err := startContainer(cli, sandboxConfig.DefaultConfig.Debug)
+	ID, err := startContainer(cli)
 	if err != nil {
 		fmt.Println("Something goes wrong. We are not able to start sandbox container, Please check your docker client and try again \n", emoji.Rocket)
-		fmt.Printf("error: %v", err)
-		return nil
+		return fmt.Errorf("error: %v", err)
 	}
 
 	os.Setenv("KUBECONFIG", Kubeconfig)
@@ -75,11 +67,11 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	}()
 
 	go watchError(cli, ID)
-	if err := readLogs(cli, ID, sandboxConfig.DefaultConfig.Debug); err != nil {
+	if err := readLogs(cli, ID); err != nil {
 		return err
 	}
 
-	fmt.Printf("Add (KUBECONFIG) to your environment variabl \n")
+	fmt.Printf("Add (KUBECONFIG) to your environment variable \n")
 	fmt.Printf("export KUBECONFIG=%v \n", Kubeconfig)
 	return nil
 }

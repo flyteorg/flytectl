@@ -50,7 +50,6 @@ func (Config) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg Config) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("Config", pflag.ExitOnError)
-	cmdFlags.BoolVar(&DefaultConfig.Debug, fmt.Sprintf("%v%v", prefix, "debug"), DefaultConfig.Debug, " Enable debugging")
-	cmdFlags.StringVar(&DefaultConfig.SnacksRepo, fmt.Sprintf("%v%v", prefix, "flytesnacks-path"), DefaultConfig.SnacksRepo, " Path of your flytesnacks repository")
+	cmdFlags.StringVar(&DefaultConfig.SnacksRepo, fmt.Sprintf("%v%v", prefix, "flytesnacks"), DefaultConfig.SnacksRepo, " Path of your flytesnacks repository")
 	return cmdFlags
 }
