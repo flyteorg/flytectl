@@ -2,14 +2,6 @@ package get
 
 import (
 	"context"
-	"fmt"
-	"io/fs"
-	"io/ioutil"
-
-	"github.com/flyteorg/flytestdlib/errors"
-
-	"github.com/flyteorg/flytectl/pkg/visualize"
-
 	workflowconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/workflow"
 	"github.com/flyteorg/flytectl/pkg/ext"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -75,6 +67,18 @@ Retrieves all the workflow within project and domain in json format.
 
  flytectl get workflow -p flytesnacks -d development -o json
 
+Visualize the graph for a workflow within project and domain in dot format.
+
+::
+
+ flytectl get workflow -p flytesnacks -d development -o dot
+
+Visualize the graph for a workflow within project and domain in a dot content render.
+
+::
+
+ flytectl get workflow -p flytesnacks -d development -o dot-url
+
 Usage
 `
 )
@@ -103,28 +107,7 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved %v workflow", len(workflows))
-		err = adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflowColumns, WorkflowToProtoMessages(workflows)...)
-		if err != nil {
-			return err
-		}
-		if len(workflows) > 0 && workflowconfig.DefaultConfig.Visualize != "" {
-			//f, err := workflowconfig.DefaultConfig.GraphvizFormat()
-			//if err != nil {
-			//	return err
-			//}
-			if workflowconfig.DefaultConfig.OutputFile == "" {
-				return fmt.Errorf("--visualize should be accompanied with a file-name using --output_file option")
-			}
-			b, err := visualize.RenderWorkflow(workflows[0].Closure.CompiledWorkflow)
-			if err != nil {
-				return errors.Wrapf("VisualizationError", err, "failed to visualize workflow")
-			}
-			if err := ioutil.WriteFile(workflowconfig.DefaultConfig.OutputFile, b, fs.ModePerm); err != nil {
-				return errors.Wrapf("FileWriteError", err, "failed to write visualization file")
-			}
-			fmt.Printf("File [%s] written", workflowconfig.DefaultConfig.OutputFile)
-		}
-		return nil
+		return adminPrinter.Print(config.GetConfig().MustOutputFormat(), workflowColumns, WorkflowToProtoMessages(workflows)...)
 	}
 
 	workflows, err = cmdCtx.AdminFetcherExt().FetchAllVerOfWorkflow(ctx, "", config.GetConfig().Project, config.GetConfig().Domain, workflowconfig.DefaultConfig.Filter)
