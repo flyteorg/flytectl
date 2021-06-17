@@ -57,9 +57,9 @@ func TestJSONToTable(t *testing.T) {
 }
 
 func TestOutputFormats(t *testing.T) {
-	expected := []string{"TABLE", "JSON", "YAML"}
+	expected := []string{"TABLE", "JSON", "YAML", "DOT", "DOTURL"}
 	outputs := OutputFormats()
-	assert.Equal(t, 3, len(outputs))
+	assert.Equal(t, 5, len(outputs))
 	assert.Equal(t, expected, outputs)
 }
 
@@ -77,7 +77,7 @@ func TestOutputFormatStringErr(t *testing.T) {
 }
 
 func TestIsAOutputFormat(t *testing.T) {
-	o := OutputFormat(4)
+	o := OutputFormat(5)
 	check := o.IsAOutputFormat()
 	assert.Equal(t, false, check)
 

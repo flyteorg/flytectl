@@ -36,8 +36,7 @@ const (
 
 	// conditional
 	ElseFail string = "orElse - Fail"
-	Else string = "orElse"
-
+	Else     string = "orElse"
 )
 
 func operandToString(op *core.Operand) string {
@@ -349,8 +348,8 @@ func (gb *graphBuilder) CompiledWorkflowClosureToGraph(w *core.CompiledWorkflowC
 
 func newGraphBuilder() *graphBuilder {
 	return &graphBuilder{
-		graphNodes: make(map[string]*graphviz.Node),
-		graphEdges: make(map[string]*graphviz.Edge),
+		graphNodes:   make(map[string]*graphviz.Node),
+		graphEdges:   make(map[string]*graphviz.Edge),
 		nodeClusters: make(map[string]string),
 	}
 }
