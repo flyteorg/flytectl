@@ -93,10 +93,18 @@ func TestTearDownSandbox(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+func TestStartContainerErr(t *testing.T) {
+	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	assert.Nil(t, cleanup(cli))
+	setupSandbox()
+	err := startSandboxCluster(context.Background(), []string{}, cmdCtx)
+	assert.NotNil(t, err)
+}
+
 func TestStartContainer(t *testing.T) {
 	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	assert.Nil(t, cleanup(cli))
 	setupSandbox()
 	err := startSandboxCluster(context.Background(), []string{}, cmdCtx)
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 }
