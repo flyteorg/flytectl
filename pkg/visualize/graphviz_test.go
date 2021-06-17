@@ -3,6 +3,9 @@ package visualize
 import (
 	"bytes"
 	"fmt"
+	graphviz "github.com/awalterschulze/gographviz"
+	"github.com/flyteorg/flytectl/pkg/visualize/mocks"
+	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"testing"
 
@@ -31,4 +34,20 @@ func TestRenderWorkflowBranch(t *testing.T) {
 			assert.NotNil(t, b)
 		})
 	}
+}
+
+func TestAddBranchSubNodeEdge(t *testing.T) {
+	gb := newGraphBuilder()
+	gb.nodeClusters["n"] = "innerGraph"
+	mockGraph := &mocks.Graphvizer{}
+	attrs := map[string]string{}
+	attrs[LHeadAttr] = "innerGraph"
+	attrs[LabelAttr] = fmt.Sprintf("\"%s\"", "label")
+	// Verify the attributes
+	mockGraph.OnAddEdgeMatch(mock.Anything, mock.Anything, mock.Anything, attrs).Return(nil)
+	mockGraph.OnGetEdgeMatch(mock.Anything, mock.Anything).Return(&graphviz.Edge{})
+	parentNode := &graphviz.Node{Name : "parentNode", Attrs: nil}
+	n := &graphviz.Node{Name: "n"}
+	err := gb.addBranchSubNodeEdge(mockGraph, parentNode, n, "label")
+	assert.NoError(t, err)
 }

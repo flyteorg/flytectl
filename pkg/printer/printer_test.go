@@ -2,6 +2,7 @@ package printer
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -210,4 +211,45 @@ func TestPrint(t *testing.T) {
 	workflows = []*admin.Workflow{badWorkflow}
 	err = p.Print(OutputFormat(3), lp, WorkflowToProtoMessages(workflows)...)
 	assert.NotNil(t, err)
+
+	assert.Equal(t, fmt.Errorf("no template found in the workflow task template:<> "), errors.Unwrap(err))
+
+
+	badWorkflow2 := &admin.Workflow{
+		Id: &core.Identifier{
+			Name:    "task1",
+			Version: "v1",
+		},
+		Closure: &admin.WorkflowClosure{
+			CreatedAt: &timestamppb.Timestamp{Seconds: 1, Nanos: 0},
+			CompiledWorkflow: nil,
+		},
+	}
+	workflows = []*admin.Workflow{badWorkflow2}
+	err = p.Print(OutputFormat(3), lp, WorkflowToProtoMessages(workflows)...)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Errorf("empty workflow closure"), errors.Unwrap(err))
+
+	var badSubWorkflow []*core.CompiledWorkflow
+	badSubWorkflow = append(badSubWorkflow, &core.CompiledWorkflow{
+		Template: &core.WorkflowTemplate{},
+	})
+
+	badWorkflow3 := &admin.Workflow{
+		Id: &core.Identifier{
+			Name:    "task1",
+			Version: "v1",
+		},
+		Closure: &admin.WorkflowClosure{
+			CreatedAt: &timestamppb.Timestamp{Seconds: 1, Nanos: 0},
+			CompiledWorkflow: &core.CompiledWorkflowClosure{
+				Tasks: compiledTasks,
+				SubWorkflows: badSubWorkflow,
+			},
+		},
+	}
+	workflows = []*admin.Workflow{badWorkflow3}
+	err = p.Print(OutputFormat(3), lp, WorkflowToProtoMessages(workflows)...)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Errorf("no template found in the sub workflow template:<> "), errors.Unwrap(err))
 }
