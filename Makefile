@@ -35,3 +35,7 @@ install-piptools:
 .PHONY: doc-requirements.txt
 doc-requirements.txt: doc-requirements.in install-piptools
 	$(call PIP_COMPILE,doc-requirements.in)
+
+.PHONY: dco
+dco:
+	@boilerplate/flyte/precommit/update.sh
