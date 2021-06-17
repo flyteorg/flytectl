@@ -1,5 +1,6 @@
 export REPOSITORY=flytectl
 include boilerplate/flyte/golang_test_targets/Makefile
+include boilerplate/flyte/precommit/Makefile
 
 GIT_VERSION := $(shell git describe --always --tags)
 GIT_HASH := $(shell git rev-parse --short HEAD)
@@ -36,6 +37,3 @@ install-piptools:
 doc-requirements.txt: doc-requirements.in install-piptools
 	$(call PIP_COMPILE,doc-requirements.in)
 
-.PHONY: dco
-dco:
-	@boilerplate/flyte/precommit/update.sh
