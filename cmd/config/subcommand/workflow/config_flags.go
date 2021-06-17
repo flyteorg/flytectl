@@ -28,6 +28,15 @@ func (Config) elemValueOrNil(v interface{}) interface{} {
 	return v
 }
 
+func (Config) mustJsonMarshal(v interface{}) string {
+	raw, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(raw)
+}
+
 func (Config) mustMarshalJSON(v json.Marshaler) string {
 	raw, err := v.MarshalJSON()
 	if err != nil {
@@ -41,9 +50,11 @@ func (Config) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg Config) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("Config", pflag.ExitOnError)
-	cmdFlags.StringVar(&(DefaultConfig.Version), fmt.Sprintf("%v%v", prefix, "version"), DefaultConfig.Version, "version of the workflow to be fetched.")
-	cmdFlags.BoolVar(&(DefaultConfig.Latest), fmt.Sprintf("%v%v", prefix, "latest"), DefaultConfig.Latest, " flag to indicate to fetch the latest version,  version flag will be ignored in this case")
-	cmdFlags.StringVar(&(DefaultConfig.Visualize), fmt.Sprintf("%v%v", prefix, "visualize"), DefaultConfig.Visualize, "optional flag to visualize a workflow as one of [png,  dot,  svg,  jpg]")
-	cmdFlags.StringVar(&(DefaultConfig.OutputFile), fmt.Sprintf("%v%v", prefix, "output_file"), DefaultConfig.OutputFile, "path and a filename of where the output image should be dumped. This can only be used in concert with visualize")
+	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "version"), DefaultConfig.Version, "version of the workflow to be fetched.")
+	cmdFlags.Bool(fmt.Sprintf("%v%v", prefix, "latest"), DefaultConfig.Latest, " flag to indicate to fetch the latest version,  version flag will be ignored in this case")
+	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "filter.field-selector"), DefaultConfig.Filter.FieldSelector, "Specifies the Field selector")
+	cmdFlags.String(fmt.Sprintf("%v%v", prefix, "filter.sort-by"), DefaultConfig.Filter.SortBy, "Specifies which field to sort results ")
+	cmdFlags.Int32(fmt.Sprintf("%v%v", prefix, "filter.limit"), DefaultConfig.Filter.Limit, "Specifies the limit")
+	cmdFlags.Bool(fmt.Sprintf("%v%v", prefix, "filter.asc"), DefaultConfig.Filter.Asc, "Specifies the sorting order. By default flytectl sort result in descending order")
 	return cmdFlags
 }
