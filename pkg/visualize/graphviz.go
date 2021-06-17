@@ -10,6 +10,36 @@ import (
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 )
 
+const (
+	// node identifiers
+	StartNode string = "start-node"
+	EndNode   string = "end-node"
+
+	// subgraph attributes
+	SubgraphPrefix string = "cluster_"
+
+	// shape attributes
+	DoubleCircleShape string = "doublecircle"
+	BoxShape          string = "box"
+	DiamondShape      string = "diamond"
+	ShapeType         string = "shape"
+
+	// color attributes
+	ColorAttr string = "color"
+	Red       string = "red"
+	Green     string = "green"
+
+	// structural attributes
+	LabelAttr string = "label"
+	LHeadAttr string = "lhead"
+	LTailAttr string = "ltail"
+
+	// conditional
+	ElseFail string = "orElse - Fail"
+	Else string = "orElse"
+
+)
+
 func operandToString(op *core.Operand) string {
 	if op.GetPrimitive() != nil {
 		l, err := coreutils.ExtractFromLiteral(&core.Literal{Value: &core.Literal_Scalar{
@@ -43,24 +73,24 @@ func booleanExprToString(expr *core.BooleanExpression) string {
 }
 
 func constructStartNode(parentGraph string, n string, graph *graphviz.Graph) (*graphviz.Node, error) {
-	attrs := map[string]string {"shape" : "doublecircle", "color" : "green"}
-	attrs["label"] = "start"
+	attrs := map[string]string{ShapeType: DoubleCircleShape, ColorAttr: Green}
+	attrs[LabelAttr] = "start"
 	err := graph.AddNode(parentGraph, n, attrs)
 	return graph.Nodes.Lookup[n], err
 }
 
-func constructEndNode(parentGraph string,n string, graph *graphviz.Graph) (*graphviz.Node, error) {
-	attrs := map[string]string {"shape" : "doublecircle", "color" : "red"}
-	attrs["label"] = "end"
+func constructEndNode(parentGraph string, n string, graph *graphviz.Graph) (*graphviz.Node, error) {
+	attrs := map[string]string{ShapeType: DoubleCircleShape, ColorAttr: Red}
+	attrs[LabelAttr] = "end"
 	err := graph.AddNode(parentGraph, n, attrs)
 	return graph.Nodes.Lookup[n], err
 }
 
 func constructTaskNode(parentGraph string, name string, graph *graphviz.Graph, n *core.Node, t *core.CompiledTask) (*graphviz.Node, error) {
-	attrs := map[string]string {"shape" : "box"}
+	attrs := map[string]string{ShapeType: BoxShape}
 	if n.Metadata != nil && n.Metadata.Name != "" {
 		v := strings.LastIndexAny(n.Metadata.Name, ".")
-		attrs["label"] = fmt.Sprintf("\"%s [%s]\"", n.Metadata.Name[v+1:], t.Template.Type)
+		attrs[LabelAttr] = fmt.Sprintf("\"%s [%s]\"", n.Metadata.Name[v+1:], t.Template.Type)
 	}
 	tName := strings.ReplaceAll(name, "-", "_")
 	err := graph.AddNode(parentGraph, tName, attrs)
@@ -68,16 +98,16 @@ func constructTaskNode(parentGraph string, name string, graph *graphviz.Graph, n
 }
 
 func constructErrorNode(parentGraph string, name string, graph *graphviz.Graph, m string) (*graphviz.Node, error) {
-	attrs := map[string]string {"shape" : "box", "color" : "red", "label" : m}
+	attrs := map[string]string{ShapeType: BoxShape, ColorAttr: Red, LabelAttr: m}
 	eName := strings.ReplaceAll(name, "-", "_")
 	err := graph.AddNode(parentGraph, eName, attrs)
 	return graph.Nodes.Lookup[eName], err
 }
 
 func constructBranchConditionNode(parentGraph string, name string, graph *graphviz.Graph, n *core.Node) (*graphviz.Node, error) {
-	attrs := map[string]string {"shape" : "diamond"}
+	attrs := map[string]string{ShapeType: DiamondShape}
 	if n.Metadata != nil && n.Metadata.Name != "" {
-		attrs["label"] = n.Metadata.Name
+		attrs[LabelAttr] = fmt.Sprintf("\"[%s]\"", n.Metadata.Name)
 	}
 	cName := strings.ReplaceAll(name, "-", "_")
 	err := graph.AddNode(parentGraph, cName, attrs)
@@ -100,13 +130,19 @@ type graphBuilder struct {
 	subWf map[string]*core.CompiledWorkflow
 	// a lookup table for all tasks in the graph
 	tasks map[string]*core.CompiledTask
+	// a lookup for all node clusters. This is to remap the edges to the cluster itself (instead of the node)
+	// this is useful in the case of branchNodes and subworkflow nodes
+	nodeClusters map[string]string
 }
 
 func (gb *graphBuilder) addBranchSubNodeEdge(graph *graphviz.Graph, parentNode, n *graphviz.Node, label string) error {
 	edgeName := fmt.Sprintf("%s-%s", parentNode.Name, n.Name)
 	if _, ok := gb.graphEdges[edgeName]; !ok {
-		attrs := map[string]string {}
-		attrs["label"] = fmt.Sprintf("\"%s\"", label)
+		attrs := map[string]string{}
+		if c, ok := gb.nodeClusters[n.Name]; ok {
+			attrs[LHeadAttr] = c
+		}
+		attrs[LabelAttr] = fmt.Sprintf("\"%s\"", label)
 		err := graph.AddEdge(parentNode.Name, n.Name, true, attrs)
 		if err != nil {
 			return err
@@ -142,7 +178,7 @@ func (gb *graphBuilder) constructBranchNode(parentGraph string, prefix string, g
 			return nil, err
 		}
 		gb.graphNodes[name] = subNode
-		if err := gb.addBranchSubNodeEdge(graph, parentBranchNode, subNode, "orElse - Fail"); err != nil {
+		if err := gb.addBranchSubNodeEdge(graph, parentBranchNode, subNode, ElseFail); err != nil {
 			return nil, err
 		}
 	} else {
@@ -150,7 +186,7 @@ func (gb *graphBuilder) constructBranchNode(parentGraph string, prefix string, g
 		if err != nil {
 			return nil, err
 		}
-		if err := gb.addBranchSubNodeEdge(graph, parentBranchNode, subNode, "orElse"); err != nil {
+		if err := gb.addBranchSubNodeEdge(graph, parentBranchNode, subNode, Else); err != nil {
 			return nil, err
 		}
 	}
@@ -174,10 +210,12 @@ func (gb *graphBuilder) constructNode(parentGraphName string, prefix string, gra
 	var err error
 	var gn *graphviz.Node
 
-	if n.Id == "start-node" {
+	if n.Id == StartNode {
 		gn, err = constructStartNode(parentGraphName, strings.ReplaceAll(name, "-", "_"), graph)
-	} else if n.Id == "end-node" {
+		gb.nodeClusters[name] = parentGraphName
+	} else if n.Id == EndNode {
 		gn, err = constructEndNode(parentGraphName, strings.ReplaceAll(name, "-", "_"), graph)
+		gb.nodeClusters[name] = parentGraphName
 	} else {
 		switch n.Target.(type) {
 		case *core.Node_TaskNode:
@@ -190,24 +228,28 @@ func (gb *graphBuilder) constructNode(parentGraphName string, prefix string, gra
 			if err != nil {
 				return nil, err
 			}
+			gb.nodeClusters[name] = parentGraphName
 		case *core.Node_BranchNode:
-			err := graph.AddSubGraph(parentGraphName, fmt.Sprintf("cluster_"+n.Metadata.Name), nil)
+			branchSubGraphName := SubgraphPrefix + n.Metadata.Name
+			err := graph.AddSubGraph(parentGraphName, branchSubGraphName, nil)
 			if err != nil {
 				return nil, err
 			}
-			gn, err = gb.constructBranchNode(fmt.Sprintf("cluster_"+n.Metadata.Name), prefix, graph, n)
+			gn, err = gb.constructBranchNode(branchSubGraphName, prefix, graph, n)
 			if err != nil {
 				return nil, err
 			}
+			gb.nodeClusters[name] = branchSubGraphName
 		case *core.Node_WorkflowNode:
 			if n.GetWorkflowNode().GetLaunchplanRef() != nil {
-				attrs := map[string]string {}
+				attrs := map[string]string{}
 				err := graph.AddNode(parentGraphName, name, attrs)
 				if err != nil {
 					return nil, err
 				}
 			} else {
-				err := graph.AddSubGraph(parentGraphName, "cluster_"+name, nil)
+				subGraphName := SubgraphPrefix + name
+				err := graph.AddSubGraph(parentGraphName, subGraphName, nil)
 				if err != nil {
 					return nil, err
 				}
@@ -216,10 +258,11 @@ func (gb *graphBuilder) constructNode(parentGraphName string, prefix string, gra
 				if !ok {
 					return nil, fmt.Errorf("subworkfow [%s] not found", n.GetWorkflowNode().GetSubWorkflowRef().String())
 				}
-				if err := subGB.constructGraph("cluster_"+name, name, graph, swf); err != nil {
+				if err := subGB.constructGraph(subGraphName, name, graph, swf); err != nil {
 					return nil, err
 				}
-				gn = subGB.graphNodes["start-node"]
+				gn = subGB.graphNodes[StartNode]
+				gb.nodeClusters[gn.Name] = subGraphName
 			}
 		}
 	}
@@ -236,20 +279,19 @@ func (gb *graphBuilder) addEdge(fromNodeName, toNodeName string, graph *graphviz
 	if !toOk || !fromOk {
 		return fmt.Errorf("nodes[%s] -> [%s] referenced before creation", fromNodeName, toNodeName)
 	}
-	if _,ok := graph.Edges.SrcToDsts[fromNode.Name][toNode.Name]; !ok {
-		attrs := map[string]string {}
+	if _, ok := graph.Edges.SrcToDsts[fromNode.Name][toNode.Name]; !ok {
+		attrs := map[string]string{}
+		// Now lets check that the toNode or the fromNode is a cluster. If so then following this thread,
+		// https://stackoverflow.com/questions/2012036/graphviz-how-to-connect-subgraphs, we will connect the cluster
+		if c, ok := gb.nodeClusters[fromNode.Name]; ok {
+			attrs[LTailAttr] = c
+		}
+		if c, ok := gb.nodeClusters[toNode.Name]; ok {
+			attrs[LHeadAttr] = c
+		}
 		err := graph.AddEdge(fromNode.Name, toNode.Name, true, attrs)
 		if err != nil {
 			return err
-		}
-		// Now lets check that the toNode or the fromNode is a cluster. If so then following this thread,
-		// https://stackoverflow.com/questions/2012036/graphviz-how-to-connect-subgraphs, we will connect the cluster
-
-		if c, ok := graph.Nodes.Lookup[fromNode.Name]; ok {
-			attrs["ltail"] = c.Name
-		}
-		if c, ok := graph.Nodes.Lookup[toNode.Name]; ok {
-			attrs["lhead"] = c.Name
 		}
 	}
 	return nil
@@ -307,8 +349,9 @@ func (gb *graphBuilder) CompiledWorkflowClosureToGraph(w *core.CompiledWorkflowC
 
 func newGraphBuilder() *graphBuilder {
 	return &graphBuilder{
-		graphNodes:   make(map[string]*graphviz.Node),
-		graphEdges:   make(map[string]*graphviz.Edge),
+		graphNodes: make(map[string]*graphviz.Node),
+		graphEdges: make(map[string]*graphviz.Edge),
+		nodeClusters: make(map[string]string),
 	}
 }
 
@@ -319,14 +362,12 @@ func graphBuilderFromParent(gb *graphBuilder) *graphBuilder {
 	return newGB
 }
 
-// RenderWorkflow Renders the workflow graph to the given file
-func RenderWorkflow(w *core.CompiledWorkflowClosure) ([]byte, error) {
+// RenderWorkflow Renders the workflow graph on the console
+func RenderWorkflow(w *core.CompiledWorkflowClosure) (string, error) {
 	gb := newGraphBuilder()
 	graph, err := gb.CompiledWorkflowClosureToGraph(w)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-
-	fmt.Printf(graph.String())
-	return []byte(graph.String()), nil
+	return graph.String(), nil
 }

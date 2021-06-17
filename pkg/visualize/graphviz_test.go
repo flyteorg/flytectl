@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/goccy/go-graphviz"
-
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +25,7 @@ func TestRenderWorkflowBranch(t *testing.T) {
 			c := &core.CompiledWorkflowClosure{}
 			err = jsonpb.Unmarshal(i, c)
 			assert.NoError(t, err)
-			b, err := RenderWorkflow(c, graphviz.SVG)
+			b, err := RenderWorkflow(c)
 			assert.NoError(t, err)
 			assert.NotNil(t, b)
 		})
