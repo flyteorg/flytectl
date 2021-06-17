@@ -26,6 +26,7 @@ func TestRenderWorkflowBranch(t *testing.T) {
 			err = jsonpb.Unmarshal(i, c)
 			assert.NoError(t, err)
 			b, err := RenderWorkflow(c)
+			fmt.Println(b)
 			assert.NoError(t, err)
 			assert.NotNil(t, b)
 		})

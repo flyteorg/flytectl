@@ -97,7 +97,7 @@ func constructTaskNode(parentGraph string, name string, graph *graphviz.Graph, n
 }
 
 func constructErrorNode(parentGraph string, name string, graph *graphviz.Graph, m string) (*graphviz.Node, error) {
-	attrs := map[string]string{ShapeType: BoxShape, ColorAttr: Red, LabelAttr: m}
+	attrs := map[string]string{ShapeType: BoxShape, ColorAttr: Red, LabelAttr: fmt.Sprintf("\"%s\"", m)}
 	eName := strings.ReplaceAll(name, "-", "_")
 	err := graph.AddNode(parentGraph, eName, attrs)
 	return graph.Nodes.Lookup[eName], err
@@ -334,11 +334,17 @@ func (gb *graphBuilder) CompiledWorkflowClosureToGraph(w *core.CompiledWorkflowC
 
 	tLookup := make(map[string]*core.CompiledTask)
 	for _, t := range w.Tasks {
+		if t.Template == nil || t.Template.Id == nil {
+			return nil, fmt.Errorf("no template found in the workflow task %v", t)
+		}
 		tLookup[t.Template.Id.String()] = t
 	}
 	gb.tasks = tLookup
 	wLookup := make(map[string]*core.CompiledWorkflow)
 	for _, swf := range w.SubWorkflows {
+		if swf.Template == nil || swf.Template.Id == nil {
+			return nil, fmt.Errorf("no template found in the sub workflow %v", swf)
+		}
 		wLookup[swf.Template.Id.String()] = swf
 	}
 	gb.subWf = wLookup
@@ -363,6 +369,9 @@ func graphBuilderFromParent(gb *graphBuilder) *graphBuilder {
 
 // RenderWorkflow Renders the workflow graph on the console
 func RenderWorkflow(w *core.CompiledWorkflowClosure) (string, error) {
+	if w == nil {
+		return "", fmt.Errorf("empty workflow closure")
+	}
 	gb := newGraphBuilder()
 	graph, err := gb.CompiledWorkflowClosureToGraph(w)
 	if err != nil {
