@@ -27,6 +27,14 @@ func LaunchplanToProtoMessages(l []*admin.LaunchPlan) []proto.Message {
 	return messages
 }
 
+func WorkflowToProtoMessages(l []*admin.Workflow) []proto.Message {
+	messages := make([]proto.Message, 0, len(l))
+	for _, m := range l {
+		messages = append(messages, m)
+	}
+	return messages
+}
+
 // TODO Convert this to a Testable Example. For some reason the comparison fails
 func TestJSONToTable(t *testing.T) {
 	d := time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC)
@@ -123,4 +131,83 @@ func TestPrint(t *testing.T) {
 	assert.Nil(t, err)
 	err = p.Print(OutputFormat(2), lp, LaunchplanToProtoMessages(launchPlans)...)
 	assert.Nil(t, err)
+	err = p.Print(OutputFormat(3), lp, LaunchplanToProtoMessages(launchPlans)...)
+	assert.NotNil(t, err)
+	err = p.Print(OutputFormat(4), lp, LaunchplanToProtoMessages(launchPlans)...)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Errorf("visualization is only supported on workflows"), err)
+
+	sortedListLiteralType := core.Variable{
+		Type: &core.LiteralType{
+			Type: &core.LiteralType_CollectionType{
+				CollectionType: &core.LiteralType{
+					Type: &core.LiteralType_Simple{
+						Simple: core.SimpleType_INTEGER,
+					},
+				},
+			},
+		},
+	}
+	variableMap := map[string]*core.Variable{
+		"sorted_list1": &sortedListLiteralType,
+		"sorted_list2": &sortedListLiteralType,
+	}
+
+	var compiledTasks []*core.CompiledTask
+	compiledTasks = append(compiledTasks, &core.CompiledTask{
+		Template: &core.TaskTemplate{
+			Id: &core.Identifier{
+				Project: "dummyProject",
+				Domain:  "dummyDomain",
+				Name:    "dummyName",
+				Version: "dummyVersion",
+			},
+			Interface: &core.TypedInterface{
+				Inputs: &core.VariableMap{
+					Variables: variableMap,
+				},
+			},
+		},
+	})
+
+	workflow1 := &admin.Workflow{
+		Id: &core.Identifier{
+			Name:    "task1",
+			Version: "v1",
+		},
+		Closure: &admin.WorkflowClosure{
+			CreatedAt: &timestamppb.Timestamp{Seconds: 1, Nanos: 0},
+			CompiledWorkflow: &core.CompiledWorkflowClosure{
+				Tasks: compiledTasks,
+			},
+		},
+	}
+
+	workflows := []*admin.Workflow{workflow1}
+
+	err = p.Print(OutputFormat(3), lp, WorkflowToProtoMessages(workflows)...)
+	assert.Nil(t, err)
+	workflows = []*admin.Workflow{}
+	err = p.Print(OutputFormat(3), lp, WorkflowToProtoMessages(workflows)...)
+	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Errorf("atleast one workflow required for visualization"), err)
+	var badCompiledTasks []*core.CompiledTask
+	badCompiledTasks = append(badCompiledTasks, &core.CompiledTask{
+		Template: &core.TaskTemplate{},
+	})
+	badWorkflow := &admin.Workflow{
+		Id: &core.Identifier{
+			Name:    "task1",
+			Version: "v1",
+		},
+		Closure: &admin.WorkflowClosure{
+			CreatedAt: &timestamppb.Timestamp{Seconds: 1, Nanos: 0},
+			CompiledWorkflow: &core.CompiledWorkflowClosure{
+				Tasks: badCompiledTasks,
+			},
+		},
+	}
+	workflows = []*admin.Workflow{badWorkflow}
+	err = p.Print(OutputFormat(3), lp, WorkflowToProtoMessages(workflows)...)
+	assert.NotNil(t, err)
 }
