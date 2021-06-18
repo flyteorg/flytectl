@@ -118,6 +118,104 @@ func TestConstructBranchNode(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Nil(t, resultBranchNode)
 	})
+
+	t.Run("Add ThenNode Error", func(t *testing.T) {
+		gb := newGraphBuilder()
+		mockGraph := &mocks.Graphvizer{}
+		attrs := map[string]string{}
+		attrs[LabelAttr] = fmt.Sprintf("\"[%s]\"", "nodeMetadata")
+		attrs[ShapeType] = DiamondShape
+
+		// Verify the attributes
+		mockGraph.OnAddNodeMatch(mock.Anything, "branchName_id", attrs).Return(nil)
+		mockGraph.OnAddNodeMatch(mock.Anything, "branchName_start_node", mock.Anything).Return(fmt.Errorf("unable to add node"))
+		mockGraph.OnGetNodeMatch(mock.Anything).Return(nil)
+		flyteNode := &core.Node{
+			Id: "id",
+			Metadata: &core.NodeMetadata{
+				Name: "nodeMetadata",
+			},
+			Target: &core.Node_BranchNode{
+				BranchNode: &core.BranchNode{
+					IfElse: &core.IfElseBlock{
+						Case: &core.IfBlock{
+							Condition: &core.BooleanExpression{},
+							ThenNode: &core.Node{
+								Id: "start-node",
+							},
+						},
+					},
+				},
+			},
+		}
+		resultBranchNode, err := gb.constructBranchNode("parentGraph", "branchName", mockGraph, flyteNode)
+		assert.NotNil(t, err)
+		assert.Equal(t, fmt.Errorf("unable to add node"), err)
+		assert.Nil(t, resultBranchNode)
+	})
+
+	t.Run("Add Condition Node Edge Error", func(t *testing.T) {
+		gb := newGraphBuilder()
+		mockGraph := &mocks.Graphvizer{}
+		attrs := map[string]string{}
+		attrs[LabelAttr] = fmt.Sprintf("\"[%s]\"", "nodeMetadata")
+		attrs[ShapeType] = DiamondShape
+
+		parentNode := &graphviz.Node{Name: "parentNode", Attrs: nil}
+		thenBranchStartNode := &graphviz.Node{Name: "branchName_start_node", Attrs: nil}
+
+		mockGraph.OnAddNodeMatch(mock.Anything, "branchName_id", attrs).Return(nil)
+		mockGraph.OnAddNodeMatch(mock.Anything, "branchName_start_node", mock.Anything).Return(nil)
+		mockGraph.OnGetNodeMatch("branchName_id").Return(parentNode)
+		mockGraph.OnGetNodeMatch("branchName_start_node").Return(thenBranchStartNode)
+		mockGraph.OnAddEdgeMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("unable to add edge"))
+		flyteNode := &core.Node{
+			Id: "id",
+			Metadata: &core.NodeMetadata{
+				Name: "nodeMetadata",
+			},
+			Target: &core.Node_BranchNode{
+				BranchNode: &core.BranchNode{
+					IfElse: &core.IfElseBlock{
+						Case: &core.IfBlock{
+							Condition: &core.BooleanExpression{
+								Expr: &core.BooleanExpression_Comparison{
+									Comparison: &core.ComparisonExpression{
+										Operator: core.ComparisonExpression_EQ,
+										LeftValue: &core.Operand{
+											Val: &core.Operand_Primitive{
+												Primitive: &core.Primitive{
+													Value: &core.Primitive_Integer{
+														Integer: 40,
+													},
+												},
+											},
+										},
+										RightValue: &core.Operand{
+											Val: &core.Operand_Primitive{
+												Primitive: &core.Primitive{
+													Value: &core.Primitive_Integer{
+														Integer: 50,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+							ThenNode: &core.Node{
+								Id: "start-node",
+							},
+						},
+					},
+				},
+			},
+		}
+		resultBranchNode, err := gb.constructBranchNode("parentGraph", "branchName", mockGraph, flyteNode)
+		assert.NotNil(t, err)
+		assert.Equal(t, fmt.Errorf("unable to add edge"), err)
+		assert.Nil(t, resultBranchNode)
+	})
 }
 
 func TestConstructNode(t *testing.T) {
