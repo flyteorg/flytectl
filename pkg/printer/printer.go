@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/browser"
 	"net/url"
 	"os"
 
@@ -17,6 +16,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"github.com/kataras/tablewriter"
 	"github.com/landoop/tableprinter"
+	"github.com/pkg/browser"
 	"github.com/yalp/jsonpath"
 )
 
@@ -31,7 +31,7 @@ const (
 	OutputFormatDOTURL
 )
 
-const GraphVisualizationServiceUrl = "http://graph.flyte.org/#"
+const GraphVisualizationServiceURL = "http://graph.flyte.org/#"
 
 func OutputFormats() []string {
 	var v []string
@@ -164,8 +164,8 @@ func (p Printer) Print(format OutputFormat, columns []Column, messages ...proto.
 			return errors.Wrapf("VisualizationError", err, "failed to visualize workflow")
 		}
 		if format == OutputFormatDOTURL {
-			urlToOpen := GraphVisualizationServiceUrl + url.PathEscape(graphStr)
-			fmt.Println("Opening the browser at "+ urlToOpen)
+			urlToOpen := GraphVisualizationServiceURL + url.PathEscape(graphStr)
+			fmt.Println("Opening the browser at " + urlToOpen)
 			return browser.OpenURL(urlToOpen)
 		}
 		fmt.Println(graphStr)

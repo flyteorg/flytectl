@@ -36,8 +36,7 @@ const (
 
 	// conditional
 	ElseFail string = "orElse - Fail"
-	Else string = "orElse"
-
+	Else     string = "orElse"
 )
 
 func operandToString(op *core.Operand) string {
@@ -72,21 +71,21 @@ func booleanExprToString(expr *core.BooleanExpression) string {
 	return comparisonToString(expr.GetComparison())
 }
 
-func constructStartNode(parentGraph string, n string, graph *graphviz.Graph) (*graphviz.Node, error) {
+func constructStartNode(parentGraph string, n string, graph Graphvizer) (*graphviz.Node, error) {
 	attrs := map[string]string{ShapeType: DoubleCircleShape, ColorAttr: Green}
 	attrs[LabelAttr] = "start"
 	err := graph.AddNode(parentGraph, n, attrs)
-	return graph.Nodes.Lookup[n], err
+	return graph.GetNode(n), err
 }
 
-func constructEndNode(parentGraph string, n string, graph *graphviz.Graph) (*graphviz.Node, error) {
+func constructEndNode(parentGraph string, n string, graph Graphvizer) (*graphviz.Node, error) {
 	attrs := map[string]string{ShapeType: DoubleCircleShape, ColorAttr: Red}
 	attrs[LabelAttr] = "end"
 	err := graph.AddNode(parentGraph, n, attrs)
-	return graph.Nodes.Lookup[n], err
+	return graph.GetNode(n), err
 }
 
-func constructTaskNode(parentGraph string, name string, graph *graphviz.Graph, n *core.Node, t *core.CompiledTask) (*graphviz.Node, error) {
+func constructTaskNode(parentGraph string, name string, graph Graphvizer, n *core.Node, t *core.CompiledTask) (*graphviz.Node, error) {
 	attrs := map[string]string{ShapeType: BoxShape}
 	if n.Metadata != nil && n.Metadata.Name != "" {
 		v := strings.LastIndexAny(n.Metadata.Name, ".")
@@ -94,24 +93,24 @@ func constructTaskNode(parentGraph string, name string, graph *graphviz.Graph, n
 	}
 	tName := strings.ReplaceAll(name, "-", "_")
 	err := graph.AddNode(parentGraph, tName, attrs)
-	return graph.Nodes.Lookup[tName], err
+	return graph.GetNode(tName), err
 }
 
-func constructErrorNode(parentGraph string, name string, graph *graphviz.Graph, m string) (*graphviz.Node, error) {
-	attrs := map[string]string{ShapeType: BoxShape, ColorAttr: Red, LabelAttr: m}
+func constructErrorNode(parentGraph string, name string, graph Graphvizer, m string) (*graphviz.Node, error) {
+	attrs := map[string]string{ShapeType: BoxShape, ColorAttr: Red, LabelAttr: fmt.Sprintf("\"%s\"", m)}
 	eName := strings.ReplaceAll(name, "-", "_")
 	err := graph.AddNode(parentGraph, eName, attrs)
-	return graph.Nodes.Lookup[eName], err
+	return graph.GetNode(eName), err
 }
 
-func constructBranchConditionNode(parentGraph string, name string, graph *graphviz.Graph, n *core.Node) (*graphviz.Node, error) {
+func constructBranchConditionNode(parentGraph string, name string, graph Graphvizer, n *core.Node) (*graphviz.Node, error) {
 	attrs := map[string]string{ShapeType: DiamondShape}
 	if n.Metadata != nil && n.Metadata.Name != "" {
 		attrs[LabelAttr] = fmt.Sprintf("\"[%s]\"", n.Metadata.Name)
 	}
 	cName := strings.ReplaceAll(name, "-", "_")
 	err := graph.AddNode(parentGraph, cName, attrs)
-	return graph.Nodes.Lookup[cName], err
+	return graph.GetNode(cName), err
 }
 
 func getName(prefix, id string) string {
@@ -135,24 +134,24 @@ type graphBuilder struct {
 	nodeClusters map[string]string
 }
 
-func (gb *graphBuilder) addBranchSubNodeEdge(graph *graphviz.Graph, parentNode, n *graphviz.Node, label string) error {
+func (gb *graphBuilder) addBranchSubNodeEdge(graph Graphvizer, parentNode, n *graphviz.Node, label string) error {
 	edgeName := fmt.Sprintf("%s-%s", parentNode.Name, n.Name)
 	if _, ok := gb.graphEdges[edgeName]; !ok {
 		attrs := map[string]string{}
 		if c, ok := gb.nodeClusters[n.Name]; ok {
-			attrs[LHeadAttr] = c
+			attrs[LHeadAttr] = fmt.Sprintf("\"%s\"", c)
 		}
 		attrs[LabelAttr] = fmt.Sprintf("\"%s\"", label)
 		err := graph.AddEdge(parentNode.Name, n.Name, true, attrs)
 		if err != nil {
 			return err
 		}
-		gb.graphEdges[edgeName] = graph.Edges.SrcToDsts[parentNode.Name][n.Name][0]
+		gb.graphEdges[edgeName] = graph.GetEdge(parentNode.Name, n.Name)
 	}
 	return nil
 }
 
-func (gb *graphBuilder) constructBranchNode(parentGraph string, prefix string, graph *graphviz.Graph, n *core.Node) (*graphviz.Node, error) {
+func (gb *graphBuilder) constructBranchNode(parentGraph string, prefix string, graph Graphvizer, n *core.Node) (*graphviz.Node, error) {
 	parentBranchNode, err := constructBranchConditionNode(parentGraph, getName(prefix, n.Id), graph, n)
 	if err != nil {
 		return nil, err
@@ -205,7 +204,7 @@ func (gb *graphBuilder) constructBranchNode(parentGraph string, prefix string, g
 	return parentBranchNode, nil
 }
 
-func (gb *graphBuilder) constructNode(parentGraphName string, prefix string, graph *graphviz.Graph, n *core.Node) (*graphviz.Node, error) {
+func (gb *graphBuilder) constructNode(parentGraphName string, prefix string, graph Graphvizer, n *core.Node) (*graphviz.Node, error) {
 	name := getName(prefix, n.Id)
 	var err error
 	var gn *graphviz.Node
@@ -273,21 +272,21 @@ func (gb *graphBuilder) constructNode(parentGraphName string, prefix string, gra
 	return gn, nil
 }
 
-func (gb *graphBuilder) addEdge(fromNodeName, toNodeName string, graph *graphviz.Graph) error {
+func (gb *graphBuilder) addEdge(fromNodeName, toNodeName string, graph Graphvizer) error {
 	toNode, toOk := gb.graphNodes[toNodeName]
 	fromNode, fromOk := gb.graphNodes[fromNodeName]
 	if !toOk || !fromOk {
 		return fmt.Errorf("nodes[%s] -> [%s] referenced before creation", fromNodeName, toNodeName)
 	}
-	if _, ok := graph.Edges.SrcToDsts[fromNode.Name][toNode.Name]; !ok {
+	if !graph.DoesEdgeExist(fromNode.Name, toNode.Name) {
 		attrs := map[string]string{}
 		// Now lets check that the toNode or the fromNode is a cluster. If so then following this thread,
 		// https://stackoverflow.com/questions/2012036/graphviz-how-to-connect-subgraphs, we will connect the cluster
 		if c, ok := gb.nodeClusters[fromNode.Name]; ok {
-			attrs[LTailAttr] = c
+			attrs[LTailAttr] = fmt.Sprintf("\"%s\"", c)
 		}
 		if c, ok := gb.nodeClusters[toNode.Name]; ok {
-			attrs[LHeadAttr] = c
+			attrs[LHeadAttr] = fmt.Sprintf("\"%s\"", c)
 		}
 		err := graph.AddEdge(fromNode.Name, toNode.Name, true, attrs)
 		if err != nil {
@@ -297,7 +296,7 @@ func (gb *graphBuilder) addEdge(fromNodeName, toNodeName string, graph *graphviz
 	return nil
 }
 
-func (gb *graphBuilder) constructGraph(parentGraphName string, prefix string, graph *graphviz.Graph, w *core.CompiledWorkflow) error {
+func (gb *graphBuilder) constructGraph(parentGraphName string, prefix string, graph Graphvizer, w *core.CompiledWorkflow) error {
 	if w == nil || w.Template == nil {
 		return nil
 	}
@@ -328,18 +327,24 @@ func (gb *graphBuilder) constructGraph(parentGraphName string, prefix string, gr
 	return nil
 }
 
-func (gb *graphBuilder) CompiledWorkflowClosureToGraph(w *core.CompiledWorkflowClosure) (*graphviz.Graph, error) {
-	dotGraph := graphviz.NewGraph()
+func (gb *graphBuilder) CompiledWorkflowClosureToGraph(w *core.CompiledWorkflowClosure) (FlyteGraph, error) {
+	dotGraph := FlyteGraph{graphviz.NewGraph()}
 	_ = dotGraph.SetDir(true)
 	_ = dotGraph.SetStrict(true)
 
 	tLookup := make(map[string]*core.CompiledTask)
 	for _, t := range w.Tasks {
+		if t.Template == nil || t.Template.Id == nil {
+			return FlyteGraph{}, fmt.Errorf("no template found in the workflow task %v", t)
+		}
 		tLookup[t.Template.Id.String()] = t
 	}
 	gb.tasks = tLookup
 	wLookup := make(map[string]*core.CompiledWorkflow)
 	for _, swf := range w.SubWorkflows {
+		if swf.Template == nil || swf.Template.Id == nil {
+			return FlyteGraph{}, fmt.Errorf("no template found in the sub workflow %v", swf)
+		}
 		wLookup[swf.Template.Id.String()] = swf
 	}
 	gb.subWf = wLookup
@@ -349,8 +354,8 @@ func (gb *graphBuilder) CompiledWorkflowClosureToGraph(w *core.CompiledWorkflowC
 
 func newGraphBuilder() *graphBuilder {
 	return &graphBuilder{
-		graphNodes: make(map[string]*graphviz.Node),
-		graphEdges: make(map[string]*graphviz.Edge),
+		graphNodes:   make(map[string]*graphviz.Node),
+		graphEdges:   make(map[string]*graphviz.Edge),
 		nodeClusters: make(map[string]string),
 	}
 }
@@ -364,6 +369,9 @@ func graphBuilderFromParent(gb *graphBuilder) *graphBuilder {
 
 // RenderWorkflow Renders the workflow graph on the console
 func RenderWorkflow(w *core.CompiledWorkflowClosure) (string, error) {
+	if w == nil {
+		return "", fmt.Errorf("empty workflow closure")
+	}
 	gb := newGraphBuilder()
 	graph, err := gb.CompiledWorkflowClosureToGraph(w)
 	if err != nil {
