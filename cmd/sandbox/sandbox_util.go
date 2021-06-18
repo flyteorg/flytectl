@@ -63,21 +63,27 @@ func configCleanup() error {
 	return nil
 }
 
-func removeSandboxIfExist(cli *client.Client, reader io.Reader) *types.Container {
-
+func getSandbox(cli *client.Client) *types.Container {
 	containers, _ := cli.ContainerList(context.Background(), types.ContainerListOptions{
 		All: true,
 	})
 	for _, v := range containers {
 		if strings.Contains(v.Names[0], flyteSandboxClusterName) {
-			if cmdUtil.AskForConfirmation("delete existing sandbox cluster", reader) {
-				_ = cli.ContainerRemove(context.Background(), v.ID, types.ContainerRemoveOptions{
-					Force: true,
-				})
-				return &v
-			}
 			return &v
 		}
+	}
+	return nil
+}
+
+func removeSandboxIfExist(cli *client.Client, reader io.Reader) error {
+	if c := getSandbox(cli); c != nil {
+		if cmdUtil.AskForConfirmation("delete existing sandbox cluster", reader) {
+			err := cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{
+				Force: true,
+			})
+			return err
+		}
+		os.Exit(0)
 	}
 	return nil
 }

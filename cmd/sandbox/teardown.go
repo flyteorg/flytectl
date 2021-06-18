@@ -3,8 +3,8 @@ package sandbox
 import (
 	"context"
 	"fmt"
-	"strings"
 
+	"github.com/docker/docker/api/types"
 	"github.com/enescakir/emoji"
 
 	"github.com/docker/docker/client"
@@ -31,8 +31,12 @@ func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.C
 		return err
 	}
 
-	_ = removeSandboxIfExist(cli, strings.NewReader("y"))
-
+	c := getSandbox(cli)
+	if c != nil {
+		_ = cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{
+			Force: true,
+		})
+	}
 	if err := configCleanup(); err != nil {
 		fmt.Printf("Config cleanup failed. Which Failed due to %v \n ", err)
 	}

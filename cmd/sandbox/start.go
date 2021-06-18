@@ -55,8 +55,8 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		return err
 	}
 
-	if container := removeSandboxIfExist(cli, os.Stdin); container != nil {
-		return nil
+	if err := removeSandboxIfExist(cli, os.Stdin); err != nil {
+		return err
 	}
 
 	if len(sandboxConfig.DefaultConfig.SnacksRepo) > 0 {
