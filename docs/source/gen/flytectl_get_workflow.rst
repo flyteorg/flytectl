@@ -64,13 +64,13 @@ Visualize the graph for a workflow within project and domain in dot format.
 
 ::
 
- flytectl get workflow -p flytesnacks -d development -o dot
+ flytectl get workflow -p flytesnacks -d development  core.flyte_basics.basic_workflow.my_wf --latest -o dot
 
 Visualize the graph for a workflow within project and domain in a dot content render.
 
 ::
 
- flytectl get workflow -p flytesnacks -d development -o doturl
+ flytectl get workflow -p flytesnacks -d development  core.flyte_basics.basic_workflow.my_wf --latest -o doturl
 
 Usage
 
