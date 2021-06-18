@@ -140,6 +140,38 @@ func (_m *Graphvizer) AddSubGraph(parentGraph string, name string, attrs map[str
 	return r0
 }
 
+type Graphvizer_DoesEdgeExist struct {
+	*mock.Call
+}
+
+func (_m Graphvizer_DoesEdgeExist) Return(_a0 bool) *Graphvizer_DoesEdgeExist {
+	return &Graphvizer_DoesEdgeExist{Call: _m.Call.Return(_a0)}
+}
+
+func (_m *Graphvizer) OnDoesEdgeExist(src string, dest string) *Graphvizer_DoesEdgeExist {
+	c := _m.On("DoesEdgeExist", src, dest)
+	return &Graphvizer_DoesEdgeExist{Call: c}
+}
+
+func (_m *Graphvizer) OnDoesEdgeExistMatch(matchers ...interface{}) *Graphvizer_DoesEdgeExist {
+	c := _m.On("DoesEdgeExist", matchers...)
+	return &Graphvizer_DoesEdgeExist{Call: c}
+}
+
+// DoesEdgeExist provides a mock function with given fields: src, dest
+func (_m *Graphvizer) DoesEdgeExist(src string, dest string) bool {
+	ret := _m.Called(src, dest)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(string, string) bool); ok {
+		r0 = rf(src, dest)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	return r0
+}
+
 type Graphvizer_GetEdge struct {
 	*mock.Call
 }

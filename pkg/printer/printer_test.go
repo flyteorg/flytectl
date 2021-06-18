@@ -214,14 +214,13 @@ func TestPrint(t *testing.T) {
 
 	assert.Equal(t, fmt.Errorf("no template found in the workflow task template:<> "), errors.Unwrap(err))
 
-
 	badWorkflow2 := &admin.Workflow{
 		Id: &core.Identifier{
 			Name:    "task1",
 			Version: "v1",
 		},
 		Closure: &admin.WorkflowClosure{
-			CreatedAt: &timestamppb.Timestamp{Seconds: 1, Nanos: 0},
+			CreatedAt:        &timestamppb.Timestamp{Seconds: 1, Nanos: 0},
 			CompiledWorkflow: nil,
 		},
 	}
@@ -243,7 +242,7 @@ func TestPrint(t *testing.T) {
 		Closure: &admin.WorkflowClosure{
 			CreatedAt: &timestamppb.Timestamp{Seconds: 1, Nanos: 0},
 			CompiledWorkflow: &core.CompiledWorkflowClosure{
-				Tasks: compiledTasks,
+				Tasks:        compiledTasks,
 				SubWorkflows: badSubWorkflow,
 			},
 		},
