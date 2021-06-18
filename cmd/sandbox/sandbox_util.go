@@ -16,7 +16,6 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/enescakir/emoji"
-	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 )
 
@@ -50,8 +49,7 @@ func setupFlytectlConfig() error {
 
 	err = ioutil.WriteFile(FlytectlConfig, data, 0600)
 	if err != nil {
-		fmt.Printf("Please create ~/.flyte dir %v \n", emoji.ManTechnologist)
-		return err
+		return fmt.Errorf("err: %v", err)
 	}
 	return nil
 }
@@ -83,7 +81,7 @@ func getSandbox(cli *client.Client) *types.Container {
 	return nil
 }
 
-func startContainer(cli *client.Client) (string, error) {
+func startContainer(cli *client.Client, volumes []mount.Mount) (string, error) {
 	ExposedPorts, PortBindings, _ := nat.ParsePortSpecs([]string{
 		"127.0.0.1:30086:30086",
 		"127.0.0.1:30081:30081",
@@ -99,20 +97,6 @@ func startContainer(cli *client.Client) (string, error) {
 		return "", err
 	}
 
-	volumes := []mount.Mount{
-		{
-			Type:   mount.TypeBind,
-			Source: f.FilePathJoin(f.UserHomeDir(), ".flyte"),
-			Target: K3sDir,
-		},
-	}
-	if len(sandboxConfig.DefaultConfig.SnacksRepo) > 0 {
-		volumes = append(volumes, mount.Mount{
-			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.SnacksRepo,
-			Target: flyteSnackDir,
-		})
-	}
 	resp, err := cli.ContainerCreate(context.Background(), &container.Config{
 		Env:          Environment,
 		Image:        ImageName,
@@ -128,7 +112,7 @@ func startContainer(cli *client.Client) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	go watchError(cli, resp.ID)
 	if err := cli.ContainerStart(context.Background(), resp.ID, types.ContainerStartOptions{}); err != nil {
 		return "", err
 	}
@@ -147,7 +131,7 @@ func watchError(cli *client.Client, id string) {
 	}
 }
 
-func readLogs(cli *client.Client, id string) error {
+func readLogs(cli *client.Client, id, message string) error {
 	reader, err := cli.ContainerLogs(context.Background(), id, types.ContainerLogsOptions{
 		ShowStderr: true,
 		ShowStdout: true,
@@ -160,8 +144,8 @@ func readLogs(cli *client.Client, id string) error {
 	scanner := bufio.NewScanner(reader)
 
 	for scanner.Scan() {
-		if strings.Contains(scanner.Text(), SuccessMessage) {
-			fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, SuccessMessage, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
+		if strings.Contains(scanner.Text(), message) {
+			fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, message, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
 			fmt.Printf("Please visit https://github.com/flyteorg/flytesnacks for more example %v \n", emoji.Rocket)
 			fmt.Printf("Register all flytesnacks example by running 'flytectl register examples  -d development  -p flytesnacks' \n")
 			break

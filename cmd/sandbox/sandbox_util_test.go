@@ -8,7 +8,9 @@ import (
 	"testing"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
+	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
 
@@ -93,18 +95,21 @@ func TestTearDownSandbox(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestStartContainerErr(t *testing.T) {
+func TestStartSandboxErr(t *testing.T) {
 	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	assert.Nil(t, cleanup(cli))
 	setupSandbox()
+	volumes = []mount.Mount{}
+	sandboxConfig.DefaultConfig.SnacksRepo = "/tmp"
 	err := startSandboxCluster(context.Background(), []string{}, cmdCtx)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 }
 
 func TestStartContainer(t *testing.T) {
 	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	assert.Nil(t, cleanup(cli))
-	setupSandbox()
-	err := startSandboxCluster(context.Background(), []string{}, cmdCtx)
-	assert.NotNil(t, err)
+	ID, err := startContainer(cli, []mount.Mount{})
+	assert.Nil(t, err)
+	err = readLogs(cli, ID, "Starting Docker daemon...")
+	assert.Nil(t, err)
 }
