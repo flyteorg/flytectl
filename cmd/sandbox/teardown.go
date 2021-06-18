@@ -3,10 +3,10 @@ package sandbox
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/enescakir/emoji"
 
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 )
@@ -31,13 +31,9 @@ func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.C
 		return err
 	}
 
-	container := getSandbox(cli)
-	if container != nil {
-		if err := cli.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{
-			Force: true,
-		}); err != nil {
-			return err
-		}
+	err = removeIfSandboxExist(cli, strings.NewReader("Y"))
+	if err != nil {
+		return err
 	}
 
 	if err := configCleanup(); err != nil {

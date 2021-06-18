@@ -95,7 +95,7 @@ func TestTearDownSandbox(t *testing.T) {
 	assert.Nil(t, err)
 }
 
-func TestStartSandboxErr(t *testing.T) {
+func TestStartSandbox(t *testing.T) {
 	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	assert.Nil(t, cleanup(cli))
 	setupSandbox()
@@ -103,6 +103,15 @@ func TestStartSandboxErr(t *testing.T) {
 	sandboxConfig.DefaultConfig.SnacksRepo = "/tmp"
 	err := startSandboxCluster(context.Background(), []string{}, cmdCtx)
 	assert.Nil(t, err)
+}
+
+func TestStartSandboxErr(t *testing.T) {
+	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	assert.Nil(t, cleanup(cli))
+	setupSandbox()
+	sandboxConfig.DefaultConfig.SnacksRepo = f.UserHomeDir()
+	err := startSandboxCluster(context.Background(), []string{}, cmdCtx)
+	assert.NotNil(t, err)
 }
 
 func TestStartContainer(t *testing.T) {
