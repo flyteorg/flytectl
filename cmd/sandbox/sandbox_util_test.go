@@ -97,7 +97,7 @@ func TestTearDownSandbox(t *testing.T) {
 	defaultInput = strings.NewReader("n")
 	_ = startSandboxCluster(context.Background(), []string{}, cmdCtx)
 	err = teardownSandboxCluster(context.Background(), []string{}, cmdCtx)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 }
 
 func TestStartSandbox(t *testing.T) {
@@ -119,6 +119,11 @@ func TestStartSandbox(t *testing.T) {
 	assert.Nil(t, cleanup(cli))
 	_, err = startContainer(cli, []mount.Mount{})
 	assert.Nil(t, err)
+
+	assert.Nil(t, cleanup(cli))
+	ImageName = ""
+	_, err = startContainer(cli, []mount.Mount{})
+	assert.NotNil(t, err)
 }
 
 func TestReadlogs(t *testing.T) {
