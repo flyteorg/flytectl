@@ -24,7 +24,7 @@ Usage
 `
 )
 
-var defaultInput = strings.NewReader("y")
+var defaultInput = strings.NewReader("n")
 
 func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 

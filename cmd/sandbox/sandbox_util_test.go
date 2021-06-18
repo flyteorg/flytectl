@@ -125,13 +125,3 @@ func TestStartSandbox(t *testing.T) {
 	_, err = startContainer(cli, []mount.Mount{})
 	assert.NotNil(t, err)
 }
-
-func TestReadlogs(t *testing.T) {
-	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	assert.Nil(t, cleanup(cli))
-	ID, err := startContainer(cli, []mount.Mount{})
-	assert.Nil(t, err)
-	err = readLogs(cli, ID, "Starting Docker daemon...")
-	assert.Nil(t, err)
-
-}
