@@ -12,6 +12,7 @@ type Graphvizer interface {
 	SetName(name string) error
 	GetEdge(src, dest string) *graphviz.Edge
 	GetNode(key string) *graphviz.Node
+	DoesEdgeExist(src, dest string) bool
 }
 
 type FlyteGraph struct {
@@ -26,4 +27,9 @@ func (g FlyteGraph) GetNode(key string) *graphviz.Node {
 // GetEdge gets the edge in the graph from src to dest
 func (g FlyteGraph) GetEdge(src, dest string) *graphviz.Edge {
 	return g.Edges.SrcToDsts[src][dest][0]
+}
+
+// DoesEdgeExist checks if an edge exists in the graph from src to dest
+func (g FlyteGraph) DoesEdgeExist(src, dest string) bool {
+	return g.Edges.SrcToDsts[src][dest] != nil
 }

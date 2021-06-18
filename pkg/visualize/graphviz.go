@@ -139,7 +139,7 @@ func (gb *graphBuilder) addBranchSubNodeEdge(graph Graphvizer, parentNode, n *gr
 	if _, ok := gb.graphEdges[edgeName]; !ok {
 		attrs := map[string]string{}
 		if c, ok := gb.nodeClusters[n.Name]; ok {
-			attrs[LHeadAttr] = c
+			attrs[LHeadAttr] = fmt.Sprintf("\"%s\"", c)
 		}
 		attrs[LabelAttr] = fmt.Sprintf("\"%s\"", label)
 		err := graph.AddEdge(parentNode.Name, n.Name, true, attrs)
@@ -278,15 +278,15 @@ func (gb *graphBuilder) addEdge(fromNodeName, toNodeName string, graph Graphvize
 	if !toOk || !fromOk {
 		return fmt.Errorf("nodes[%s] -> [%s] referenced before creation", fromNodeName, toNodeName)
 	}
-	if graph.GetEdge(fromNode.Name, toNode.Name) != nil {
+	if !graph.DoesEdgeExist(fromNode.Name, toNode.Name) {
 		attrs := map[string]string{}
 		// Now lets check that the toNode or the fromNode is a cluster. If so then following this thread,
 		// https://stackoverflow.com/questions/2012036/graphviz-how-to-connect-subgraphs, we will connect the cluster
 		if c, ok := gb.nodeClusters[fromNode.Name]; ok {
-			attrs[LTailAttr] = c
+			attrs[LTailAttr] = fmt.Sprintf("\"%s\"", c)
 		}
 		if c, ok := gb.nodeClusters[toNode.Name]; ok {
-			attrs[LHeadAttr] = c
+			attrs[LHeadAttr] = fmt.Sprintf("\"%s\"", c)
 		}
 		err := graph.AddEdge(fromNode.Name, toNode.Name, true, attrs)
 		if err != nil {
