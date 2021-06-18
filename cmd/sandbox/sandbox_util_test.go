@@ -93,32 +93,40 @@ func TestTearDownSandbox(t *testing.T) {
 	_ = startSandboxCluster(context.Background(), []string{}, cmdCtx)
 	err = teardownSandboxCluster(context.Background(), []string{}, cmdCtx)
 	assert.Nil(t, err)
+
+	defaultInput = strings.NewReader("n")
+	_ = startSandboxCluster(context.Background(), []string{}, cmdCtx)
+	err = teardownSandboxCluster(context.Background(), []string{}, cmdCtx)
+	assert.NotNil(t, err)
 }
 
 func TestStartSandbox(t *testing.T) {
 	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+
 	assert.Nil(t, cleanup(cli))
 	setupSandbox()
 	volumes = []mount.Mount{}
 	sandboxConfig.DefaultConfig.SnacksRepo = "/tmp"
 	err := startSandboxCluster(context.Background(), []string{}, cmdCtx)
 	assert.Nil(t, err)
-}
 
-func TestStartSandboxErr(t *testing.T) {
-	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	assert.Nil(t, cleanup(cli))
 	setupSandbox()
 	sandboxConfig.DefaultConfig.SnacksRepo = f.UserHomeDir()
-	err := startSandboxCluster(context.Background(), []string{}, cmdCtx)
+	err = startSandboxCluster(context.Background(), []string{}, cmdCtx)
 	assert.NotNil(t, err)
+
+	assert.Nil(t, cleanup(cli))
+	_, err = startContainer(cli, []mount.Mount{})
+	assert.Nil(t, err)
 }
 
-func TestStartContainer(t *testing.T) {
+func TestReadlogs(t *testing.T) {
 	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	assert.Nil(t, cleanup(cli))
 	ID, err := startContainer(cli, []mount.Mount{})
 	assert.Nil(t, err)
 	err = readLogs(cli, ID, "Starting Docker daemon...")
 	assert.Nil(t, err)
+
 }

@@ -24,6 +24,8 @@ Usage
 `
 )
 
+var defaultInput = strings.NewReader("y")
+
 func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -31,7 +33,7 @@ func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.C
 		return err
 	}
 
-	err = removeIfSandboxExist(cli, strings.NewReader("Y"))
+	err = removeIfSandboxExist(cli, defaultInput)
 	if err != nil {
 		return err
 	}
