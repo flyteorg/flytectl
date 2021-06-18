@@ -78,7 +78,7 @@ Visualize the graph for a workflow within project and domain in a dot content re
 
 ::
 
- flytectl get workflow -p flytesnacks -d development -o dot-url
+ flytectl get workflow -p flytesnacks -d development -o doturl
 
 Usage
 `
