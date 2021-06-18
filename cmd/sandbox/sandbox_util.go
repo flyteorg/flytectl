@@ -16,7 +16,6 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
 	"github.com/enescakir/emoji"
-	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 )
 
@@ -67,7 +66,7 @@ func configCleanup() error {
 	return nil
 }
 
-func removeIfSandboxExist(cli *client.Client, reader io.Reader) error {
+func getSandbox(cli *client.Client) *types.Container {
 
 	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{
 		All: true,
@@ -77,14 +76,7 @@ func removeIfSandboxExist(cli *client.Client, reader io.Reader) error {
 	}
 	for _, v := range containers {
 		if strings.Contains(v.Names[0], flyteSandboxClusterName) {
-			if cmdUtil.AskForConfirmation("delete existing sandbox cluster", reader) {
-				if err := cli.ContainerRemove(context.Background(), v.ID, types.ContainerRemoveOptions{
-					Force: true,
-				}); err != nil {
-					return err
-				}
-			}
-			return nil
+			return &v
 		}
 	}
 	return nil

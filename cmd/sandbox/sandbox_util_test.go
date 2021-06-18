@@ -94,10 +94,6 @@ func TestTearDownSandbox(t *testing.T) {
 	err = teardownSandboxCluster(context.Background(), []string{}, cmdCtx)
 	assert.Nil(t, err)
 
-	defaultInput = strings.NewReader("n")
-	_ = startSandboxCluster(context.Background(), []string{}, cmdCtx)
-	err = teardownSandboxCluster(context.Background(), []string{}, cmdCtx)
-	assert.Nil(t, err)
 }
 
 func TestStartSandbox(t *testing.T) {

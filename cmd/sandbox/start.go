@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/client"
 	"github.com/enescakir/emoji"
 	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 )
 
@@ -55,8 +57,14 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		return err
 	}
 
-	if err := removeIfSandboxExist(cli, os.Stdin); err != nil {
-		return err
+	if container := getSandbox(cli); container != nil {
+		if cmdUtil.AskForConfirmation("delete existing sandbox cluster", os.Stdin) {
+			if err := cli.ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{
+				Force: true,
+			}); err != nil {
+				return err
+			}
+		}
 	}
 
 	if len(sandboxConfig.DefaultConfig.SnacksRepo) > 0 {

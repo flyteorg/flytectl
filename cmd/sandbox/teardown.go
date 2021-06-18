@@ -3,8 +3,8 @@ package sandbox
 import (
 	"context"
 	"fmt"
-	"strings"
 
+	"github.com/docker/docker/api/types"
 	"github.com/enescakir/emoji"
 
 	"github.com/docker/docker/client"
@@ -24,8 +24,6 @@ Usage
 `
 )
 
-var defaultInput = strings.NewReader("n")
-
 func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -33,7 +31,13 @@ func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.C
 		return err
 	}
 
-	err = removeIfSandboxExist(cli, defaultInput)
+	if container := getSandbox(cli); container != nil {
+		if err := cli.ContainerRemove(context.Background(), container.ID, types.ContainerRemoveOptions{
+			Force: true,
+		}); err != nil {
+			return err
+		}
+	}
 	if err != nil {
 		return err
 	}
