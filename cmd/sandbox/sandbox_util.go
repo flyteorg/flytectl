@@ -68,12 +68,9 @@ func configCleanup() error {
 
 func getSandbox(cli *client.Client) *types.Container {
 
-	containers, err := cli.ContainerList(context.Background(), types.ContainerListOptions{
+	containers, _ := cli.ContainerList(context.Background(), types.ContainerListOptions{
 		All: true,
 	})
-	if err != nil {
-		return nil
-	}
 	for _, v := range containers {
 		if strings.Contains(v.Names[0], flyteSandboxClusterName) {
 			return &v
@@ -93,11 +90,7 @@ func startContainer(cli *client.Client, volumes []mount.Mount) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	if _, err := io.Copy(os.Stdout, r); err != nil {
-		return "", err
-	}
-
+	_, _ = io.Copy(os.Stdout, r)
 	resp, err := cli.ContainerCreate(context.Background(), &container.Config{
 		Env:          Environment,
 		Image:        ImageName,
