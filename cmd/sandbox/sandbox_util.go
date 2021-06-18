@@ -10,6 +10,8 @@ import (
 	"os"
 	"strings"
 
+	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -31,10 +33,8 @@ var (
 )
 
 func setupFlytectlConfig() error {
-	_, err := os.Stat(f.FilePathJoin(f.UserHomeDir(), ".flyte"))
-	if os.IsNotExist(err) {
-		_ = os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755)
-	}
+
+	_ = os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755)
 
 	response, err := http.Get("https://raw.githubusercontent.com/flyteorg/flytectl/master/config.yaml")
 	if err != nil {
@@ -47,10 +47,7 @@ func setupFlytectlConfig() error {
 		return err
 	}
 
-	err = ioutil.WriteFile(FlytectlConfig, data, 0600)
-	if err != nil {
-		return fmt.Errorf("err: %v", err)
-	}
+	_ = ioutil.WriteFile(FlytectlConfig, data, 0600)
 	return nil
 }
 
@@ -66,13 +63,19 @@ func configCleanup() error {
 	return nil
 }
 
-func getSandbox(cli *client.Client) *types.Container {
+func removeSandboxIfExist(cli *client.Client, reader io.Reader) *types.Container {
 
 	containers, _ := cli.ContainerList(context.Background(), types.ContainerListOptions{
 		All: true,
 	})
 	for _, v := range containers {
 		if strings.Contains(v.Names[0], flyteSandboxClusterName) {
+			if cmdUtil.AskForConfirmation("delete existing sandbox cluster", reader) {
+				_ = cli.ContainerRemove(context.Background(), v.ID, types.ContainerRemoveOptions{
+					Force: true,
+				})
+				return &v
+			}
 			return &v
 		}
 	}

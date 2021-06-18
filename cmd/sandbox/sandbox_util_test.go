@@ -81,6 +81,7 @@ func TestSetupFlytectlConfig(t *testing.T) {
 	check := os.IsNotExist(err)
 	assert.Equal(t, check, false)
 	_ = configCleanup()
+
 }
 
 func TestTearDownSandbox(t *testing.T) {
@@ -90,6 +91,7 @@ func TestTearDownSandbox(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Nil(t, cleanup(cli))
 
+	volumes = []mount.Mount{}
 	_ = startSandboxCluster(context.Background(), []string{}, cmdCtx)
 	err = teardownSandboxCluster(context.Background(), []string{}, cmdCtx)
 	assert.Nil(t, err)
@@ -120,4 +122,15 @@ func TestStartSandbox(t *testing.T) {
 	ImageName = ""
 	_, err = startContainer(cli, []mount.Mount{})
 	assert.NotNil(t, err)
+}
+
+func TestGetSandbox(t *testing.T) {
+	cli, _ := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	assert.Nil(t, cleanup(cli))
+	setupSandbox()
+	sandboxConfig.DefaultConfig.SnacksRepo = f.UserHomeDir()
+	_ = startSandboxCluster(context.Background(), []string{}, cmdCtx)
+
+	container := removeSandboxIfExist(cli, strings.NewReader("y"))
+	assert.Nil(t, container)
 }
