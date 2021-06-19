@@ -93,7 +93,7 @@ func GetSandbox(ctx context.Context, cli Docker) *types.Container {
 	return nil
 }
 
-// RemoveSandbox container
+// RemoveSandbox will remove sandbox container if exist
 func RemoveSandbox(ctx context.Context, cli Docker, reader io.Reader) error {
 	if c := GetSandbox(ctx, cli); c != nil {
 		if cmdUtil.AskForConfirmation("delete existing sandbox cluster", reader) {
@@ -117,7 +117,7 @@ func GetSandboxPorts() (map[nat.Port]struct{}, map[nat.Port][]nat.PortBinding, e
 	})
 }
 
-// PullDockerImage will Pull image
+// PullDockerImage will Pull docker image
 func PullDockerImage(ctx context.Context, cli Docker, image string) error {
 	r, err := cli.ImagePull(ctx, image, types.ImagePullOptions{})
 	if err != nil {
@@ -127,7 +127,7 @@ func PullDockerImage(ctx context.Context, cli Docker, image string) error {
 	return err
 }
 
-//StartContainer will start the container
+//StartContainer will create and start docker container
 func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, name, image string) (string, error) {
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Env:          Environment,
@@ -151,12 +151,12 @@ func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, expo
 	return resp.ID, nil
 }
 
-// WatchError watch errors for a container
+// WatchError will return channel for watching errors of a container
 func WatchError(ctx context.Context, cli Docker, id string) (<-chan container.ContainerWaitOKBody, <-chan error) {
 	return cli.ContainerWait(context.Background(), id, container.WaitConditionNotRunning)
 }
 
-// ReadLogs will return container logs
+// ReadLogs will return io scanner for reading the logs of a container
 func ReadLogs(ctx context.Context, cli Docker, id string) (*bufio.Scanner, error) {
 	reader, err := cli.ContainerLogs(context.Background(), id, types.ContainerLogsOptions{
 		ShowStderr: true,
@@ -170,6 +170,7 @@ func ReadLogs(ctx context.Context, cli Docker, id string) (*bufio.Scanner, error
 	return bufio.NewScanner(reader), nil
 }
 
+// WaitForSandbox will wait until it doesn't get success message
 func WaitForSandbox(reader *bufio.Scanner, message string) bool {
 	for reader.Scan() {
 		if strings.Contains(reader.Text(), message) {
@@ -186,6 +187,7 @@ func WaitForSandbox(reader *bufio.Scanner, message string) bool {
 	return false
 }
 
+// GetDockerClient will returns the docker client
 func GetDockerClient() (Docker, error) {
 	if Client == nil {
 		cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
