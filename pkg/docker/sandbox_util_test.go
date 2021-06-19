@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/mount"
 
 	//"github.com/docker/go-connections/nat"
 	"io/ioutil"
@@ -83,41 +82,64 @@ func TestSetupFlytectlConfig(t *testing.T) {
 
 func TestGetSandbox(t *testing.T) {
 	setupSandbox()
-	mockDocker := &mocks.Docker{}
-	context := context.Background()
+	t.Run("Successfully get sandbox container", func(t *testing.T) {
+		mockDocker := &mocks.Docker{}
+		context := context.Background()
 
-	// Verify the attributes
-	mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return(containers, nil)
-	c := GetSandbox(context, mockDocker)
-	assert.Equal(t, c.Names[0], FlyteSandboxClusterName)
+		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return(containers, nil)
+		c := GetSandbox(context, mockDocker)
+		assert.Equal(t, c.Names[0], FlyteSandboxClusterName)
+	})
+
+	t.Run("Successfully get sandbox container with zero result", func(t *testing.T) {
+		mockDocker := &mocks.Docker{}
+		context := context.Background()
+
+		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
+		c := GetSandbox(context, mockDocker)
+		assert.Nil(t, c)
+	})
+
+	t.Run("Error in get sandbox container", func(t *testing.T) {
+		mockDocker := &mocks.Docker{}
+		context := context.Background()
+
+		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return(containers, nil)
+		mockDocker.OnContainerRemove(context, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(nil)
+		err := RemoveSandbox(context, mockDocker, strings.NewReader("y"))
+		assert.Nil(t, err)
+	})
+
 }
 
-func TestRemoveSandbox(t *testing.T) {
+func TestRemoveSandboxWithNoReply(t *testing.T) {
 	setupSandbox()
-	mockDocker := &mocks.Docker{}
-	context := context.Background()
+	t.Run("Successfully remove sandbox container", func(t *testing.T) {
+		mockDocker := &mocks.Docker{}
+		context := context.Background()
 
-	// Verify the attributes
-	mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return(containers, nil)
-	mockDocker.OnContainerRemove(context, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(nil)
-	err := RemoveSandbox(context, mockDocker, strings.NewReader("y"))
-	assert.Nil(t, err)
-}
+		// Verify the attributes
+		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return(containers, nil)
+		mockDocker.OnContainerRemove(context, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(nil)
+		err := RemoveSandbox(context, mockDocker, strings.NewReader("n"))
+		assert.Nil(t, err)
+	})
 
-func TestRemoveSandboxWithNo(t *testing.T) {
-	setupSandbox()
-	mockDocker := &mocks.Docker{}
-	context := context.Background()
+	t.Run("Successfully remove sandbox container with zero sandbox containers are running", func(t *testing.T) {
+		mockDocker := &mocks.Docker{}
+		context := context.Background()
 
-	// Verify the attributes
-	mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return(containers, nil)
-	mockDocker.OnContainerRemove(context, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(nil)
-	err := RemoveSandbox(context, mockDocker, strings.NewReader("n"))
-	assert.Nil(t, err)
+		// Verify the attributes
+		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
+		mockDocker.OnContainerRemove(context, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(nil)
+		err := RemoveSandbox(context, mockDocker, strings.NewReader("n"))
+		assert.Nil(t, err)
+	})
+
 }
 
 func TestPullDockerImage(t *testing.T) {
-	t.Run("Successful pull", func(t *testing.T) {
+	t.Run("Successfully pull image", func(t *testing.T) {
 		setupSandbox()
 		mockDocker := &mocks.Docker{}
 		context := context.Background()
@@ -127,7 +149,7 @@ func TestPullDockerImage(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
-	t.Run("Error in pull", func(t *testing.T) {
+	t.Run("Error in pull image", func(t *testing.T) {
 		setupSandbox()
 		mockDocker := &mocks.Docker{}
 		context := context.Background()
@@ -142,15 +164,7 @@ func TestPullDockerImage(t *testing.T) {
 func TestStartContainer(t *testing.T) {
 	p1, p2, _ := GetSandboxPorts()
 
-	volumes := []mount.Mount{
-		{
-			Type:   mount.TypeBind,
-			Source: f.FilePathJoin(f.UserHomeDir(), ".flyte"),
-			Target: K3sDir,
-		},
-	}
-
-	t.Run("Success", func(t *testing.T) {
+	t.Run("Successfully create a container", func(t *testing.T) {
 		setupSandbox()
 		mockDocker := &mocks.Docker{}
 		context := context.Background()
@@ -162,20 +176,20 @@ func TestStartContainer(t *testing.T) {
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
-			Mounts:       volumes,
+			Mounts:       Volumes,
 			PortBindings: p2,
 			Privileged:   true,
 		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
 			ID: "Hello",
 		}, nil)
 		mockDocker.OnContainerStart(context, "Hello", types.ContainerStartOptions{}).Return(nil)
-		id, err := StartContainer(context, mockDocker, volumes, p1, p2, "nginx", ImageName)
+		id, err := StartContainer(context, mockDocker, Volumes, p1, p2, "nginx", ImageName)
 		assert.Nil(t, err)
 		assert.Greater(t, len(id), 0)
 		assert.Equal(t, id, "Hello")
 	})
 
-	t.Run("Error in create", func(t *testing.T) {
+	t.Run("Error in creating container", func(t *testing.T) {
 		setupSandbox()
 		mockDocker := &mocks.Docker{}
 		context := context.Background()
@@ -187,20 +201,20 @@ func TestStartContainer(t *testing.T) {
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
-			Mounts:       volumes,
+			Mounts:       Volumes,
 			PortBindings: p2,
 			Privileged:   true,
 		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
 			ID: "",
 		}, fmt.Errorf("error"))
 		mockDocker.OnContainerStart(context, "Hello", types.ContainerStartOptions{}).Return(nil)
-		id, err := StartContainer(context, mockDocker, volumes, p1, p2, "nginx", ImageName)
+		id, err := StartContainer(context, mockDocker, Volumes, p1, p2, "nginx", ImageName)
 		assert.NotNil(t, err)
 		assert.Equal(t, len(id), 0)
 		assert.Equal(t, id, "")
 	})
 
-	t.Run("Error in start", func(t *testing.T) {
+	t.Run("Error in start of a container", func(t *testing.T) {
 		setupSandbox()
 		mockDocker := &mocks.Docker{}
 		context := context.Background()
@@ -212,14 +226,14 @@ func TestStartContainer(t *testing.T) {
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
-			Mounts:       volumes,
+			Mounts:       Volumes,
 			PortBindings: p2,
 			Privileged:   true,
 		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
 			ID: "Hello",
 		}, nil)
 		mockDocker.OnContainerStart(context, "Hello", types.ContainerStartOptions{}).Return(fmt.Errorf("error"))
-		id, err := StartContainer(context, mockDocker, volumes, p1, p2, "nginx", ImageName)
+		id, err := StartContainer(context, mockDocker, Volumes, p1, p2, "nginx", ImageName)
 		assert.NotNil(t, err)
 		assert.Equal(t, len(id), 0)
 		assert.Equal(t, id, "")
@@ -240,7 +254,7 @@ func TestWatchError(t *testing.T) {
 func TestReadLogs(t *testing.T) {
 	setupSandbox()
 
-	t.Run("Success", func(t *testing.T) {
+	t.Run("Successfully read logs", func(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		context := context.Background()
 		mockDocker.OnContainerLogsMatch(context, mock.Anything, types.ContainerLogsOptions{
@@ -253,7 +267,7 @@ func TestReadLogs(t *testing.T) {
 		assert.Nil(t, err)
 	})
 
-	t.Run("Error", func(t *testing.T) {
+	t.Run("Error in reading logs", func(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		context := context.Background()
 		mockDocker.OnContainerLogsMatch(context, mock.Anything, types.ContainerLogsOptions{
@@ -269,8 +283,33 @@ func TestReadLogs(t *testing.T) {
 
 func TestWaitForSandbox(t *testing.T) {
 	setupSandbox()
-	reader := bufio.NewScanner(strings.NewReader("hello"))
-	check := WaitForSandbox(reader, "hello")
-	assert.Equal(t, check, true)
+	t.Run("Successfully read logs ", func(t *testing.T) {
+		reader := bufio.NewScanner(strings.NewReader("hello \n Flyte"))
+
+		check := WaitForSandbox(reader, "Flyte")
+		assert.Equal(t, true, check)
+	})
+
+	t.Run("Error in reading logs ", func(t *testing.T) {
+		reader := bufio.NewScanner(strings.NewReader(""))
+		check := WaitForSandbox(reader, "Flyte")
+		assert.Equal(t, false, check)
+	})
+}
+
+func TestDockerClient(t *testing.T) {
+	t.Run("Successfully get docker mock client", func(t *testing.T) {
+		mockDocker := &mocks.Docker{}
+		Client = mockDocker
+		cli, err := GetDockerClient()
+		assert.Nil(t, err)
+		assert.NotNil(t, cli)
+	})
+	t.Run("Successfully get docker client", func(t *testing.T) {
+		Client = nil
+		cli, err := GetDockerClient()
+		assert.Nil(t, err)
+		assert.NotNil(t, cli)
+	})
 
 }

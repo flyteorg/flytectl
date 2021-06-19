@@ -26,7 +26,7 @@ import (
 func TestStartSandboxFunc(t *testing.T) {
 	p1, p2, _ := docker.GetSandboxPorts()
 
-	t.Run("Success", func(t *testing.T) {
+	t.Run("Successfully run sandbox cluster", func(t *testing.T) {
 		ctx := context.Background()
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
@@ -56,7 +56,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		_, err := startSandbox(ctx, mockDocker, os.Stdin)
 		assert.Nil(t, err)
 	})
-	t.Run("Success with flytesnack", func(t *testing.T) {
+	t.Run("Successfully run sandbox cluster with flytesnacks", func(t *testing.T) {
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -92,7 +92,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		_, err := startSandbox(ctx, mockDocker, os.Stdin)
 		assert.Nil(t, err)
 	})
-	t.Run("Error in pull image", func(t *testing.T) {
+	t.Run("Error in pulling image", func(t *testing.T) {
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -128,7 +128,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		_, err := startSandbox(ctx, mockDocker, os.Stdin)
 		assert.NotNil(t, err)
 	})
-	t.Run("Error in pull image", func(t *testing.T) {
+	t.Run("Error in  removing existing cluster", func(t *testing.T) {
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -160,7 +160,7 @@ func TestStartSandboxFunc(t *testing.T) {
 				},
 			},
 		}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, fmt.Errorf("error"))
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -244,7 +244,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		_, err := startSandbox(ctx, mockDocker, os.Stdin)
 		assert.NotNil(t, err)
 	})
-	t.Run("Error in removing", func(t *testing.T) {
+	t.Run("Error in list container", func(t *testing.T) {
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -280,7 +280,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		_, err := startSandbox(ctx, mockDocker, os.Stdin)
 		assert.Nil(t, err)
 	})
-	t.Run("Success of sandbox start", func(t *testing.T) {
+	t.Run("Successfully run sandbox cluster command", func(t *testing.T) {
 		mockOutStream := new(io.Writer)
 		ctx := context.Background()
 		cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
@@ -316,7 +316,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		err := startSandboxCluster(ctx, []string{}, cmdCtx)
 		assert.Nil(t, err)
 	})
-	t.Run("Error of sandbox start", func(t *testing.T) {
+	t.Run("Error in running sandbox cluster command", func(t *testing.T) {
 		mockOutStream := new(io.Writer)
 		ctx := context.Background()
 		cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
