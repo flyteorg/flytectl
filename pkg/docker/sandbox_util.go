@@ -10,6 +10,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/docker/docker/client"
+
 	"github.com/enescakir/emoji"
 
 	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
@@ -30,6 +32,14 @@ var (
 	Environment             = []string{"SANDBOX=1", "KUBERNETES_API_PORT=30086", "FLYTE_HOST=localhost:30081", "FLYTE_AWS_ENDPOINT=http://localhost:30084"}
 	FlyteSnackDir           = "/usr/src"
 	K3sDir                  = "/etc/rancher/"
+	Client                  Docker
+	Volumes                 = []mount.Mount{
+		{
+			Type:   mount.TypeBind,
+			Source: f.FilePathJoin(f.UserHomeDir(), ".flyte"),
+			Target: K3sDir,
+		},
+	}
 )
 
 // SetupFlyteDir will create .flyte dir if not exist
@@ -174,4 +184,16 @@ func WaitForSandbox(reader *bufio.Scanner, message string) bool {
 		fmt.Println(reader.Text())
 	}
 	return false
+}
+
+func GetDockerClient() (Docker, error) {
+	if Client == nil {
+		cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+		if err != nil {
+			fmt.Printf("%v Please Check your docker client %v \n", emoji.GrimacingFace, emoji.Whale)
+			return nil, err
+		}
+		return cli, nil
+	}
+	return Client, nil
 }

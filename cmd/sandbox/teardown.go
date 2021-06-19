@@ -9,7 +9,6 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/enescakir/emoji"
 
-	"github.com/docker/docker/client"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 )
 
@@ -27,10 +26,11 @@ Usage
 )
 
 func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := docker.GetDockerClient()
 	if err != nil {
 		return err
 	}
+
 	return tearDownSandbox(ctx, cli)
 }
 

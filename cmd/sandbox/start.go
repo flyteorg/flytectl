@@ -4,16 +4,15 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/flyteorg/flytectl/pkg/docker"
 
 	"github.com/docker/docker/api/types/mount"
-	"github.com/docker/docker/client"
 	"github.com/enescakir/emoji"
 	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 )
 
 const (
@@ -32,14 +31,6 @@ Usage
 	`
 )
 
-var volumes = []mount.Mount{
-	{
-		Type:   mount.TypeBind,
-		Source: f.FilePathJoin(f.UserHomeDir(), ".flyte"),
-		Target: docker.K3sDir,
-	},
-}
-
 type ExecResult struct {
 	StdOut   string
 	StdErr   string
@@ -47,12 +38,12 @@ type ExecResult struct {
 }
 
 func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := docker.GetDockerClient()
 	if err != nil {
-		fmt.Printf("%v Please Check your docker client %v \n", emoji.GrimacingFace, emoji.Whale)
 		return err
 	}
-	reader, err := startSandbox(ctx, cli)
+
+	reader, err := startSandbox(ctx, cli, os.Stdin)
 	if err != nil {
 		return err
 	}
@@ -60,7 +51,7 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	return nil
 }
 
-func startSandbox(ctx context.Context, cli docker.Docker) (*bufio.Scanner, error) {
+func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
 	if err := docker.SetupFlyteDir(); err != nil {
 		return nil, err
@@ -70,12 +61,12 @@ func startSandbox(ctx context.Context, cli docker.Docker) (*bufio.Scanner, error
 		return nil, err
 	}
 
-	if err := docker.RemoveSandbox(ctx, cli, os.Stdin); err != nil {
+	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
 		return nil, err
 	}
 
 	if len(sandboxConfig.DefaultConfig.SnacksRepo) > 0 {
-		volumes = append(volumes, mount.Mount{
+		docker.Volumes = append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.SnacksRepo,
 			Target: docker.FlyteSnackDir,
@@ -89,14 +80,14 @@ func startSandbox(ctx context.Context, cli docker.Docker) (*bufio.Scanner, error
 	}
 
 	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
-	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, docker.ImageName)
+	ID, err := docker.StartContainer(ctx, cli, docker.Volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, docker.ImageName)
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)
 		return nil, fmt.Errorf("error: %v", err)
 	}
 
 	_, errCh := docker.WatchError(ctx, cli, ID)
-	reader, err := docker.ReadLogs(ctx, cli, ID)
+	logReader, err := docker.ReadLogs(ctx, cli, ID)
 	if err != nil {
 		return nil, fmt.Errorf("error: %v", err)
 	}
@@ -108,5 +99,5 @@ func startSandbox(ctx context.Context, cli docker.Docker) (*bufio.Scanner, error
 		}
 	}()
 
-	return reader, nil
+	return logReader, nil
 }
