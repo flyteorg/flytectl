@@ -1,4 +1,4 @@
-package sandbox
+package docker
 
 import (
 	"bufio"
@@ -10,14 +10,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/enescakir/emoji"
+
 	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
-	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
-	"github.com/enescakir/emoji"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 )
 
@@ -26,16 +26,22 @@ var (
 	FlytectlConfig          = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config-sandbox.yaml")
 	SuccessMessage          = "Flyte is ready! Flyte UI is available at http://localhost:30081/console"
 	ImageName               = "ghcr.io/flyteorg/flyte-sandbox:dind"
-	flyteSandboxClusterName = "flyte-sandbox"
+	FlyteSandboxClusterName = "flyte-sandbox"
 	Environment             = []string{"SANDBOX=1", "KUBERNETES_API_PORT=30086", "FLYTE_HOST=localhost:30081", "FLYTE_AWS_ENDPOINT=http://localhost:30084"}
-	flyteSnackDir           = "/usr/src"
+	FlyteSnackDir           = "/usr/src"
 	K3sDir                  = "/etc/rancher/"
 )
 
-func setupFlytectlConfig() error {
+// SetupFlyteDir will create .flyte dir if not exist
+func SetupFlyteDir() error {
+	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755); err != nil {
+		return err
+	}
+	return nil
+}
 
-	_ = os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755)
-
+// GetFlyteSandboxConfig download the flyte sandbox config
+func GetFlyteSandboxConfig() error {
 	response, err := http.Get("https://raw.githubusercontent.com/flyteorg/flytectl/master/config.yaml")
 	if err != nil {
 		return err
@@ -51,7 +57,8 @@ func setupFlytectlConfig() error {
 	return nil
 }
 
-func configCleanup() error {
+// ConfigCleanup will remove the sandbox config from flyte dir
+func ConfigCleanup() error {
 	err := os.Remove(FlytectlConfig)
 	if err != nil {
 		return err
@@ -63,78 +70,84 @@ func configCleanup() error {
 	return nil
 }
 
-func getSandbox(cli *client.Client) *types.Container {
-	containers, _ := cli.ContainerList(context.Background(), types.ContainerListOptions{
+// GetSandbox will return sandbox container if it exist
+func GetSandbox(ctx context.Context, cli Docker) *types.Container {
+	containers, _ := cli.ContainerList(ctx, types.ContainerListOptions{
 		All: true,
 	})
 	for _, v := range containers {
-		if strings.Contains(v.Names[0], flyteSandboxClusterName) {
+		if strings.Contains(v.Names[0], FlyteSandboxClusterName) {
 			return &v
 		}
 	}
 	return nil
 }
 
-func removeSandboxIfExist(cli *client.Client, reader io.Reader) error {
-	if c := getSandbox(cli); c != nil {
+// RemoveSandbox container
+func RemoveSandbox(ctx context.Context, cli Docker, reader io.Reader) error {
+	if c := GetSandbox(ctx, cli); c != nil {
 		if cmdUtil.AskForConfirmation("delete existing sandbox cluster", reader) {
 			err := cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{
 				Force: true,
 			})
 			return err
 		}
-		os.Exit(0)
+		return nil
 	}
 	return nil
 }
 
-func startContainer(cli *client.Client, volumes []mount.Mount) (string, error) {
-	ExposedPorts, PortBindings, _ := nat.ParsePortSpecs([]string{
+// GetSandboxPorts will return sandbox ports
+func GetSandboxPorts() (map[nat.Port]struct{}, map[nat.Port][]nat.PortBinding, error) {
+	return nat.ParsePortSpecs([]string{
 		"127.0.0.1:30086:30086",
 		"127.0.0.1:30081:30081",
 		"127.0.0.1:30082:30082",
 		"127.0.0.1:30084:30084",
 	})
-	r, err := cli.ImagePull(context.Background(), ImageName, types.ImagePullOptions{})
+}
+
+// PullDockerImage will Pull image
+func PullDockerImage(ctx context.Context, cli Docker, image string) error {
+	r, err := cli.ImagePull(ctx, image, types.ImagePullOptions{})
 	if err != nil {
-		return "", err
+		return err
 	}
-	_, _ = io.Copy(os.Stdout, r)
-	resp, err := cli.ContainerCreate(context.Background(), &container.Config{
+	_, err = io.Copy(os.Stdout, r)
+	return err
+}
+
+//StartContainer will start the container
+func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, name, image string) (string, error) {
+	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Env:          Environment,
-		Image:        ImageName,
+		Image:        image,
 		Tty:          false,
-		ExposedPorts: ExposedPorts,
+		ExposedPorts: exposedPorts,
 	}, &container.HostConfig{
 		Mounts:       volumes,
-		PortBindings: PortBindings,
+		PortBindings: portBindings,
 		Privileged:   true,
 	}, nil,
-		nil, flyteSandboxClusterName)
+		nil, name)
 
 	if err != nil {
 		return "", err
 	}
-	go watchError(cli, resp.ID)
+
 	if err := cli.ContainerStart(context.Background(), resp.ID, types.ContainerStartOptions{}); err != nil {
 		return "", err
 	}
 	return resp.ID, nil
 }
 
-func watchError(cli *client.Client, id string) {
-	statusCh, errCh := cli.ContainerWait(context.Background(), id, container.WaitConditionNotRunning)
-
-	select {
-	case err := <-errCh:
-		if err != nil {
-			panic(err)
-		}
-	case <-statusCh:
-	}
+// WatchError watch errors for a container
+func WatchError(ctx context.Context, cli Docker, id string) (<-chan container.ContainerWaitOKBody, <-chan error) {
+	return cli.ContainerWait(context.Background(), id, container.WaitConditionNotRunning)
 }
 
-func readLogs(cli *client.Client, id, message string) error {
+// ReadLogs will return container logs
+func ReadLogs(ctx context.Context, cli Docker, id string) (*bufio.Scanner, error) {
 	reader, err := cli.ContainerLogs(context.Background(), id, types.ContainerLogsOptions{
 		ShowStderr: true,
 		ShowStdout: true,
@@ -142,18 +155,23 @@ func readLogs(cli *client.Client, id, message string) error {
 		Follow:     true,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	scanner := bufio.NewScanner(reader)
+	return bufio.NewScanner(reader), nil
+}
 
-	for scanner.Scan() {
-		if strings.Contains(scanner.Text(), message) {
+func WaitForSandbox(reader *bufio.Scanner, message string) bool {
+	for reader.Scan() {
+		if strings.Contains(reader.Text(), message) {
 			fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, message, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
 			fmt.Printf("Please visit https://github.com/flyteorg/flytesnacks for more example %v \n", emoji.Rocket)
 			fmt.Printf("Register all flytesnacks example by running 'flytectl register examples  -d development  -p flytesnacks' \n")
-			break
+			fmt.Printf("Add KUBECONFIG and FLYTECTL_CONFIG to your environment variable \n")
+			fmt.Printf("export KUBECONFIG=%v \n", Kubeconfig)
+			fmt.Printf("export FLYTECTL_CONFIG=%v \n", FlytectlConfig)
+			return true
 		}
-		fmt.Println(scanner.Text())
+		fmt.Println(reader.Text())
 	}
-	return nil
+	return false
 }
