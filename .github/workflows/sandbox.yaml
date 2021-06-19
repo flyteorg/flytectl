@@ -1,4 +1,4 @@
-name: build
+name: Test Getting started
 
 on:
   pull_request:
@@ -23,6 +23,6 @@ jobs:
       - name: Create a sandbox cluster
         run: bin/flytectl sandbox start
       - name: Register cookbook
-        run: bin/flytectl register examples -d development  -p flytesnacks
+        run: bin/flytectl register examples -d development  -p flytesnacks || true
       - name: Teardown Sandbox cluster
         run: bin/flytectl sandbox teardown

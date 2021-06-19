@@ -27,7 +27,7 @@ var (
 	Kubeconfig              = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
 	FlytectlConfig          = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config-sandbox.yaml")
 	SuccessMessage          = "Flyte is ready! Flyte UI is available at http://localhost:30081/console"
-	ImageName               = "ghcr.io/flyteorg/flyte-sandbox:dind"
+	ImageName               = "cr.flyte.org/flyteorg/flyte-sandbox:dind"
 	FlyteSandboxClusterName = "flyte-sandbox"
 	Environment             = []string{"SANDBOX=1", "KUBERNETES_API_PORT=30086", "FLYTE_HOST=localhost:30081", "FLYTE_AWS_ENDPOINT=http://localhost:30084"}
 	FlyteSnackDir           = "/usr/src"
