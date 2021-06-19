@@ -31,6 +31,8 @@ Usage
 	`
 )
 
+var osExit = os.Exit
+
 type ExecResult struct {
 	StdOut   string
 	StdErr   string
@@ -95,7 +97,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		err := <-errCh
 		if err != nil {
 			fmt.Printf("err: %v", err)
-			os.Exit(0)
+			osExit(1)
 		}
 	}()
 
