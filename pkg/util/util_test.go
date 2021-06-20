@@ -45,7 +45,7 @@ func TestWriteIntoFile(t *testing.T) {
 	t.Run("Error in writing file", func(t *testing.T) {
 		data, err := GetRequest(baseURL, flytectlReleaseURL)
 		assert.Nil(t, err)
-		err = WriteIntoFile(data, "/github/version.yaml")
+		err = WriteIntoFile(data, "/githubtest/version.yaml")
 		assert.NotNil(t, err)
 	})
 }
