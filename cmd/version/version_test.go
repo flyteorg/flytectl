@@ -2,6 +2,7 @@ package version
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"sort"
@@ -74,10 +75,10 @@ func TestVersionCommandFuncErr(t *testing.T) {
 	stdlibversion.Build = ""
 	stdlibversion.BuildTime = ""
 	stdlibversion.Version = testVersion
-	githubBaseURL = "ht://github.io"
-	mockClient.OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, nil)
+	mockClient.OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, errors.New("error"))
 	err := getVersion(ctx, args, cmdCtx)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
+	mockClient.AssertCalled(t, "GetVersion", ctx, versionRequest)
 }
 
 func TestVersionUtilFunc(t *testing.T) {
@@ -89,9 +90,13 @@ func TestVersionUtilFunc(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, len(tag), 0)
 	})
+	t.Run("Compare flytectl version when upgrade available", func(t *testing.T) {
+		message := compareVersion("v1.1.21", testVersion)
+		assert.Equal(t, fmt.Sprintf(upgradeVersionMessage, "v1.1.21"), message)
+	})
 	t.Run("Compare flytectl version", func(t *testing.T) {
 		message := compareVersion(testVersion, testVersion)
-		assert.Equal(t, "Installed flytectl version is the latest", message)
+		assert.Equal(t, latestVersionMessage, message)
 	})
 	t.Run("Error in getting control plan version", func(t *testing.T) {
 		ctx := context.Background()
@@ -99,7 +104,7 @@ func TestVersionUtilFunc(t *testing.T) {
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		mockClient.OnGetVersionMatch(ctx, &admin.GetVersionRequest{}).Return(nil, fmt.Errorf("error"))
-		getControlePlaneVersion(ctx, cmdCtx)
+		err := getControlPlaneVersion(ctx, cmdCtx)
+		assert.NotNil(t, err)
 	})
-
 }
