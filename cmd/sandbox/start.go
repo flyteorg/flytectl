@@ -31,8 +31,6 @@ Usage
 	`
 )
 
-var osExit = os.Exit
-
 type ExecResult struct {
 	StdOut   string
 	StdErr   string
@@ -85,19 +83,19 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	ID, err := docker.StartContainer(ctx, cli, docker.Volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, docker.ImageName)
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)
-		return nil, fmt.Errorf("error: %v", err)
+		return nil, err
 	}
 
 	_, errCh := docker.WatchError(ctx, cli, ID)
 	logReader, err := docker.ReadLogs(ctx, cli, ID)
 	if err != nil {
-		return nil, fmt.Errorf("error: %v", err)
+		return nil, err
 	}
 	go func() {
 		err := <-errCh
 		if err != nil {
 			fmt.Printf("err: %v", err)
-			osExit(1)
+			os.Exit(1)
 		}
 	}()
 

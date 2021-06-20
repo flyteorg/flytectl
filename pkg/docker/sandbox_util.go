@@ -5,10 +5,10 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"strings"
+
+	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/docker/docker/client"
 
@@ -52,19 +52,12 @@ func SetupFlyteDir() error {
 
 // GetFlyteSandboxConfig download the flyte sandbox config
 func GetFlyteSandboxConfig() error {
-	response, err := http.Get("https://raw.githubusercontent.com/flyteorg/flytectl/master/config.yaml")
-	if err != nil {
-		return err
-	}
-	defer response.Body.Close()
-
-	data, err := ioutil.ReadAll(response.Body)
+	response, err := util.GetRequest("https://raw.githubusercontent.com", "/flyteorg/flytectl/master/config.yaml")
 	if err != nil {
 		return err
 	}
 
-	_ = ioutil.WriteFile(FlytectlConfig, data, 0600)
-	return nil
+	return util.WriteIntoFile(response, FlytectlConfig)
 }
 
 // ConfigCleanup will remove the sandbox config from flyte dir
