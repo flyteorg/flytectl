@@ -7,23 +7,23 @@ import (
 )
 
 const flytectlReleaseURL = "/repos/flyteorg/flytectl/releases/latest"
+const baseURL = "https://api.github.com"
+const wrongBaseURL = "htts://api.github.com"
 
 func TestGetRequest(t *testing.T) {
 	t.Run("Get request with 200", func(t *testing.T) {
-		_, err := GetRequest(flytectlReleaseURL)
+		_, err := GetRequest(baseURL, flytectlReleaseURL)
 		assert.Nil(t, err)
 	})
 	t.Run("Get request with 200", func(t *testing.T) {
-		BaseURL = "htts://api.github.com"
-		_, err := GetRequest(flytectlReleaseURL)
+		_, err := GetRequest(wrongBaseURL, flytectlReleaseURL)
 		assert.NotNil(t, err)
-		BaseURL = "https://api.github.com"
 	})
 }
 
 func TestParseGithubTag(t *testing.T) {
 	t.Run("Parse Github tag with success", func(t *testing.T) {
-		data, err := GetRequest(flytectlReleaseURL)
+		data, err := GetRequest(baseURL, flytectlReleaseURL)
 		assert.Nil(t, err)
 		tag, err := ParseGithubTag(data)
 		assert.Nil(t, err)
@@ -37,15 +37,15 @@ func TestParseGithubTag(t *testing.T) {
 
 func TestWriteIntoFile(t *testing.T) {
 	t.Run("Successfully write into a file", func(t *testing.T) {
-		data, err := GetRequest(flytectlReleaseURL)
+		data, err := GetRequest(baseURL, flytectlReleaseURL)
 		assert.Nil(t, err)
 		err = WriteIntoFile(data, "version.yaml")
 		assert.Nil(t, err)
 	})
 	t.Run("Error in writing file", func(t *testing.T) {
-		data, err := GetRequest(flytectlReleaseURL)
+		data, err := GetRequest(baseURL, flytectlReleaseURL)
 		assert.Nil(t, err)
-		err = WriteIntoFile(data, "/github/version.yaml")
+		err = WriteIntoFile(data, "/githubtest/version.yaml")
 		assert.NotNil(t, err)
 	})
 }

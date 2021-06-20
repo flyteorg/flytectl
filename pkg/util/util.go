@@ -11,10 +11,8 @@ type githubversion struct {
 	TagName string `json:"tag_name"`
 }
 
-var BaseURL = "https://api.github.com"
-
-func GetRequest(url string) ([]byte, error) {
-	response, err := http.Get(fmt.Sprintf("%v%v", BaseURL, url))
+func GetRequest(baseURL, url string) ([]byte, error) {
+	response, err := http.Get(fmt.Sprintf("%v%v", baseURL, url))
 	if err != nil {
 		return []byte(""), err
 	}

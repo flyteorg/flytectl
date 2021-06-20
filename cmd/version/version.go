@@ -113,7 +113,7 @@ func getControlPlaneVersion(ctx context.Context, cmdCtx cmdCore.CommandContext) 
 }
 
 func getLatestVersion(path string) (string, error) {
-	response, err := util.GetRequest(path)
+	response, err := util.GetRequest("https://api.github.com", path)
 	if err != nil {
 		return "", err
 	}
