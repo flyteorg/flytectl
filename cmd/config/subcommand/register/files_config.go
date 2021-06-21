@@ -6,6 +6,7 @@ var (
 	DefaultFilesConfig = &FilesConfig{
 		Version:         "v1",
 		ContinueOnError: false,
+		FastRegister: false,
 	}
 )
 
@@ -17,4 +18,6 @@ type FilesConfig struct {
 	AssumableIamRole     string `json:"assumableIamRole" pflag:", custom assumable iam auth role to register launch plans with."`
 	K8ServiceAccount     string `json:"k8ServiceAccount" pflag:", custom kubernetes service account auth role to register launch plans with."`
 	OutputLocationPrefix string `json:"outputLocationPrefix" pflag:", custom output location prefix for offloaded types (files/schemas)."`
+	AdditionalDistributionDir string `json:"additionalDistributionDir" pflag:", Location for additional distributions."`
+	FastRegister bool `json:"fast" pflag:", register without building the image."`
 }

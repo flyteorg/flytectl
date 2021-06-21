@@ -3,12 +3,14 @@ package register
 import (
 	"context"
 	"encoding/json"
-	"os"
-
+	"fmt"
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flytestdlib/logger"
+	"github.com/flyteorg/flytestdlib/storage"
+	"os"
+	"strings"
 )
 
 const (
@@ -91,6 +93,27 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	logger.Infof(ctx, "Parsing files... Total(%v)", len(dataRefs))
 	fastFail := !rconfig.DefaultFilesConfig.ContinueOnError
 	var registerResults []Result
+	var s *storage.DataStore
+	if rconfig.DefaultFilesConfig.FastRegister {
+		s, _err = storage.NewDataStore(storage.GetConfig(),nil)
+		if _err != nil {
+			logger.Errorf(ctx, "error while creating storage client %v", _err)
+			return _err
+		}
+		fastRegisterCheck := false
+		fullRemotePath := getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir,rconfig.DefaultFilesConfig.Version)
+		for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
+			if strings.Contains(dataRefs[i],".tar.gz") {
+				fastRegisterCheck = true
+				if err := s.CopyRaw(ctx, storage.DataReference(dataRefs[i]), fullRemotePath, storage.Options{}); err != nil {
+					return err
+				}
+			}
+		}
+		if !fastRegisterCheck  {
+			return fmt.Errorf( "Could not discover compressed source, did you remember to run `pyflyte serialize fast ...`?")
+		}
+	}
 	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
 		registerResults, _err = registerFile(ctx, dataRefs[i], registerResults, cmdCtx)
 	}

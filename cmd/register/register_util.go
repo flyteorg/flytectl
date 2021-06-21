@@ -34,6 +34,8 @@ import (
 const registrationProjectPattern = "{{ registration.project }}"
 const registrationDomainPattern = "{{ registration.domain }}"
 const registrationVersionPattern = "{{ registration.version }}"
+const registrationRemotePackagePattern = "{{ remote_package_path }}"
+const registrationDestDirPattern = "{{ dest_dir }}"
 
 type Result struct {
 	Name   string
@@ -200,6 +202,17 @@ func hydrateIdentifier(identifier *core.Identifier) {
 	}
 }
 
+func hydrateTaskSpec(task *admin.TaskSpec) {
+	for _, v := range task.Template.GetContainer().Args {
+		if v == "" || v == registrationRemotePackagePattern {
+			v = string(getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir,rconfig.DefaultFilesConfig.Version))
+		}
+		if v == "" || v == registrationDestDirPattern {
+			//TODO: destination dir path
+		}
+	}
+}
+
 func hydrateLaunchPlanSpec(lpSpec *admin.LaunchPlanSpec) {
 	assumableIamRole := len(rconfig.DefaultFilesConfig.AssumableIamRole) > 0
 	k8ServiceAcct := len(rconfig.DefaultFilesConfig.K8ServiceAccount) > 0
@@ -241,6 +254,9 @@ func hydrateSpec(message proto.Message) error {
 		}
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
+		if rconfig.DefaultFilesConfig.FastRegister {
+			hydrateTaskSpec(taskSpec)
+		}
 		hydrateIdentifier(taskSpec.Template.Id)
 	default:
 		return fmt.Errorf("Unknown type %T", v)
@@ -342,6 +358,7 @@ func registerFile(ctx context.Context, fileName string, registerResults []Result
 	var registerResult Result
 	var fileContents []byte
 	var err error
+
 	if fileContents, err = ioutil.ReadFile(fileName); err != nil {
 		registerResults = append(registerResults, Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error reading file due to %v", err)})
 		return registerResults, err
@@ -352,12 +369,15 @@ func registerFile(ctx context.Context, fileName string, registerResults []Result
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
 	}
+
 	if err := hydrateSpec(spec); err != nil {
 		registerResult = Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error hydrating spec due to %v", err)}
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
 	}
+
 	logger.Debugf(ctx, "Hydrated spec : %v", getJSONSpec(spec))
+
 	if err := register(ctx, spec, cmdCtx); err != nil {
 		// If error is AlreadyExists then dont consider this to be an error but just a warning state
 		if grpcError := status.Code(err); grpcError == codes.AlreadyExists {
@@ -369,6 +389,7 @@ func registerFile(ctx context.Context, fileName string, registerResults []Result
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
 	}
+
 	registerResult = Result{Name: fileName, Status: "Success", Info: "Successfully registered file"}
 	logger.Debugf(ctx, "Successfully registered %v", fileName)
 	registerResults = append(registerResults, registerResult)
@@ -437,4 +458,8 @@ func getFlyteTestManifest() ([]FlyteSnack, string, error) {
 		return nil, "", err
 	}
 	return FlyteSnacksRelease, *releases[0].TagName, nil
+}
+
+func getAdditionalDistributionLoc(remote_location, identifier string) storage.DataReference {
+	return storage.DataReference(fmt.Sprintf("%v/%v",remote_location,identifier))
 }
