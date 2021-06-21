@@ -57,7 +57,11 @@ func getVersion(ctx context.Context, args []string, cmdCtx cmdCore.CommandContex
 		return err
 	}
 
-	fmt.Println(compareVersion(latest, stdlibversion.Version))
+	message, err := compareVersion(latest, stdlibversion.Version)
+	if err != nil {
+		return err
+	}
+	fmt.Println(message)
 	// Print Flytectl
 	if err := printVersion(versionOutput{
 		Build:     stdlibversion.Build,
@@ -83,15 +87,20 @@ func printVersion(response versionOutput) error {
 	return nil
 }
 
-func compareVersion(latest, current string) string {
-	semanticVersion, _ := hversion.NewVersion(latest)
-	currentVersion, _ := hversion.NewVersion(current)
-
+func compareVersion(latest, current string) (string, error) {
+	semanticVersion, err := hversion.NewVersion(latest)
+	if err != nil {
+		return "", err
+	}
+	currentVersion, err := hversion.NewVersion(current)
+	if err != nil {
+		return "", err
+	}
 	if currentVersion.LessThan(semanticVersion) {
-		return fmt.Sprintf(upgradeVersionMessage, latest)
+		return fmt.Sprintf(upgradeVersionMessage, latest), nil
 	}
 
-	return latestVersionMessage
+	return latestVersionMessage, nil
 }
 
 func getControlPlaneVersion(ctx context.Context, cmdCtx cmdCore.CommandContext) error {
