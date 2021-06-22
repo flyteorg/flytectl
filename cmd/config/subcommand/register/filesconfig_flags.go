@@ -60,5 +60,3 @@ func (cfg FilesConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags.BoolVar(&DefaultFilesConfig.FastRegister, fmt.Sprintf("%v%v", prefix, "fast"), DefaultFilesConfig.FastRegister, " register without building the image.")
 	return cmdFlags
 }
-
-

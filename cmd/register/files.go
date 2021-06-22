@@ -1,16 +1,22 @@
 package register
 
 import (
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
+	"strings"
+
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
+	"github.com/flyteorg/flytestdlib/contextutils"
 	"github.com/flyteorg/flytestdlib/logger"
+	"github.com/flyteorg/flytestdlib/promutils"
+	"github.com/flyteorg/flytestdlib/promutils/labeled"
 	"github.com/flyteorg/flytestdlib/storage"
-	"os"
-	"strings"
 )
 
 const (
@@ -94,30 +100,49 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	fastFail := !rconfig.DefaultFilesConfig.ContinueOnError
 	var registerResults []Result
 	var s *storage.DataStore
+	var dataRefReaderCloser io.ReadCloser
+	pbFiles := []string{}
+	testScope := promutils.NewTestScope()
+	// Set Keys
+	labeled.SetMetricKeys(contextutils.AppNameKey, contextutils.ProjectKey, contextutils.DomainKey)
 	if rconfig.DefaultFilesConfig.FastRegister {
-		storage.GetConfig().InitContainer = "dummy"
-		s, _err = storage.NewDataStore(storage.GetConfig(),nil)
+
+		s, _err = storage.NewDataStore(storage.GetConfig(), testScope.NewSubScope("flytectl"))
 		if _err != nil {
 			logger.Errorf(ctx, "error while creating storage client %v", _err)
 			return _err
 		}
 
 		fastRegisterCheck := false
-		fullRemotePath := getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir,rconfig.DefaultFilesConfig.Version)
+		fullRemotePath := getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version)
 		for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
-			if strings.Contains(dataRefs[i],".tar.gz") {
-				fastRegisterCheck = true
-				if err := s.CopyRaw(ctx, storage.DataReference(dataRefs[i]), fullRemotePath, storage.Options{}); err != nil {
+			if strings.Contains(dataRefs[i], ".tar.gz") {
+				raw, err := json.Marshal(dataRefs[i])
+				if err != nil {
 					return err
 				}
+				dataRefReaderCloser, err = os.Open(dataRefs[i])
+				if err != nil {
+					return err
+				}
+				dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser)
+				if err != nil {
+					return err
+				}
+				fastRegisterCheck = true
+				if err := s.WriteRaw(ctx, fullRemotePath, int64(len(raw)), storage.Options{}, dataRefReaderCloser); err != nil {
+					return err
+				}
+				continue
 			}
+			pbFiles = append(pbFiles,dataRefs[1])
 		}
-		if !fastRegisterCheck  {
-			return fmt.Errorf( "could not discover compressed source, did you remember to run 'pyflyte serialize fast'")
+		if !fastRegisterCheck {
+			return fmt.Errorf("could not discover compressed source, did you remember to run 'pyflyte serialize fast'")
 		}
 	}
-	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
-		registerResults, _err = registerFile(ctx, dataRefs[i], registerResults, cmdCtx)
+	for i := 0; i < len(pbFiles) && !(fastFail && _err != nil); i++ {
+			registerResults, _err = registerFile(ctx, pbFiles[i], registerResults, cmdCtx)
 	}
 	payload, _ := json.Marshal(registerResults)
 	registerPrinter := printer.Printer{}

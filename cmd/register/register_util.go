@@ -203,12 +203,14 @@ func hydrateIdentifier(identifier *core.Identifier) {
 }
 
 func hydrateTaskSpec(task *admin.TaskSpec) {
-	for _, v := range task.Template.GetContainer().Args {
-		if v == "" || v == registrationRemotePackagePattern {
-			v = string(getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir,rconfig.DefaultFilesConfig.Version))
-		}
-		if v == "" || v == registrationDestDirPattern {
-			//TODO: destination dir path
+	if task.Template.GetContainer() != nil {
+		for _, v := range task.Template.GetContainer().Args {
+			if v == "" || v == registrationRemotePackagePattern {
+				v = string(getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version))
+			}
+			if v == "" || v == registrationDestDirPattern {
+				//TODO: destination dir path
+			}
 		}
 	}
 }
@@ -254,12 +256,12 @@ func hydrateSpec(message proto.Message) error {
 		}
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
+		hydrateIdentifier(taskSpec.Template.Id)
 		if rconfig.DefaultFilesConfig.FastRegister {
 			hydrateTaskSpec(taskSpec)
 		}
-		hydrateIdentifier(taskSpec.Template.Id)
 	default:
-		return fmt.Errorf("Unknown type %T", v)
+		return fmt.Errorf("unknown type %T", v)
 	}
 	return nil
 }
@@ -411,7 +413,7 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 		if err != nil {
 			return nil, err
 		}
-		dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser);
+		dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser)
 		if err != nil {
 			return nil, err
 		}
@@ -475,5 +477,5 @@ func getFlyteTestManifest() ([]FlyteSnack, string, error) {
 }
 
 func getAdditionalDistributionLoc(remote_location, identifier string) storage.DataReference {
-	return storage.DataReference(fmt.Sprintf("%v/%v",remote_location,identifier))
+	return storage.DataReference(fmt.Sprintf("%v/%v", remote_location, identifier))
 }
