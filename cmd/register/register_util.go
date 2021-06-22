@@ -14,6 +14,10 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/flyteorg/flytestdlib/contextutils"
+	"github.com/flyteorg/flytestdlib/promutils"
+	"github.com/flyteorg/flytestdlib/promutils/labeled"
+
 	"github.com/google/go-github/github"
 
 	"github.com/flyteorg/flytectl/cmd/config"
@@ -34,8 +38,8 @@ import (
 const registrationProjectPattern = "{{ registration.project }}"
 const registrationDomainPattern = "{{ registration.domain }}"
 const registrationVersionPattern = "{{ registration.version }}"
-const registrationRemotePackagePattern = "{{ remote_package_path }}"
-const registrationDestDirPattern = "{{ dest_dir }}"
+const registrationRemotePackagePattern = "{{ .remote_package_path }}"
+const registrationDestDirPattern = "{{ .dest_dir }}"
 
 type Result struct {
 	Name   string
@@ -49,6 +53,7 @@ type HTTPClient interface {
 }
 
 var FlyteSnacksRelease []FlyteSnack
+var Client storage.ComposedProtobufStore
 
 // FlyteSnack Defines flyte test manifest structure
 type FlyteSnack struct {
@@ -204,12 +209,12 @@ func hydrateIdentifier(identifier *core.Identifier) {
 
 func hydrateTaskSpec(task *admin.TaskSpec) {
 	if task.Template.GetContainer() != nil {
-		for _, v := range task.Template.GetContainer().Args {
-			if v == "" || v == registrationRemotePackagePattern {
-				v = string(getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version))
+		for k := range task.Template.GetContainer().Args {
+			if task.Template.GetContainer().Args[k] == "" || task.Template.GetContainer().Args[k] == registrationRemotePackagePattern {
+				task.Template.GetContainer().Args[k] = string(getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version))
 			}
-			if v == "" || v == registrationDestDirPattern {
-				//TODO: destination dir path
+			if task.Template.GetContainer().Args[k] == "" || task.Template.GetContainer().Args[k] == registrationDestDirPattern {
+				task.Template.GetContainer().Args[k] = rconfig.DefaultFilesConfig.DestinationDir
 			}
 		}
 	}
@@ -408,18 +413,6 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 	}
 	var dataRefReaderCloser io.ReadCloser
 
-	if rconfig.DefaultFilesConfig.FastRegister && ext == "tar.gz" {
-		dataRefReaderCloser, err = os.Open(dataRef.String())
-		if err != nil {
-			return nil, err
-		}
-		dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser)
-		if err != nil {
-			return nil, err
-		}
-		return dataRefReaderCloser, err
-	}
-
 	if ext != "tar" && ext != "tgz" {
 		return nil, errors.New("only .tar and .tgz extension archives are supported")
 	}
@@ -451,31 +444,70 @@ func getJSONSpec(message proto.Message) string {
 	return jsonSpec
 }
 
-func getFlyteTestManifest() ([]FlyteSnack, string, error) {
+func getFlyteTestManifest(org, repository string) ([]FlyteSnack, string, error) {
 	c := github.NewClient(nil)
 	opt := &github.ListOptions{Page: 1, PerPage: 1}
-	releases, _, err := c.Repositories.ListReleases(context.Background(), githubOrg, githubRepository, opt)
+	releases, _, err := c.Repositories.ListReleases(context.Background(), org, repository, opt)
 	if err != nil {
 		return nil, "", err
 	}
-	response, err := http.Get(fmt.Sprintf(flyteManifest, *releases[0].TagName))
-	if err != nil {
-		return nil, "", err
-	}
-	defer response.Body.Close()
+	if len(releases) > 0 {
+		response, err := http.Get(fmt.Sprintf(flyteManifest, *releases[0].TagName))
+		if err != nil {
+			return nil, "", err
+		}
+		defer response.Body.Close()
 
-	data, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, "", err
-	}
+		data, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return nil, "", err
+		}
 
-	err = json.Unmarshal(data, &FlyteSnacksRelease)
-	if err != nil {
-		return nil, "", err
+		err = json.Unmarshal(data, &FlyteSnacksRelease)
+		if err != nil {
+			return nil, "", err
+		}
+		return FlyteSnacksRelease, *releases[0].TagName, nil
 	}
-	return FlyteSnacksRelease, *releases[0].TagName, nil
+	return nil, "", fmt.Errorf("Repository doesn't have any release")
 }
 
-func getAdditionalDistributionLoc(remote_location, identifier string) storage.DataReference {
-	return storage.DataReference(fmt.Sprintf("%v/%v", remote_location, identifier))
+func getAdditionalDistributionLoc(remoteLocation, identifier string) storage.DataReference {
+	return storage.DataReference(fmt.Sprintf("%v/%v.tar.gz", remoteLocation, identifier))
+}
+
+func uploadFastRegisterArtifact(ctx context.Context, file string, storageClient storage.ComposedProtobufStore) error {
+	var dataRefReaderCloser io.ReadCloser
+	fullRemotePath := getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version)
+	raw, err := json.Marshal(file)
+	if err != nil {
+		return err
+	}
+	dataRefReaderCloser, err = os.Open(file)
+	if err != nil {
+		return err
+	}
+	dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser)
+	if err != nil {
+		return err
+	}
+	if err := storageClient.WriteRaw(ctx, fullRemotePath, int64(len(raw)), storage.Options{}, dataRefReaderCloser); err != nil {
+		return err
+	}
+	return nil
+}
+
+func getStorageClient(ctx context.Context) (storage.ComposedProtobufStore, error) {
+	if Client != nil {
+		return Client, nil
+	}
+	testScope := promutils.NewTestScope()
+	// Set Keys
+	labeled.SetMetricKeys(contextutils.AppNameKey, contextutils.ProjectKey, contextutils.DomainKey)
+	s, err := storage.NewDataStore(storage.GetConfig(), testScope.NewSubScope("flytectl"))
+	if err != nil {
+		logger.Errorf(ctx, "error while creating storage client %v", err)
+		return nil, err
+	}
+	return s.ComposedProtobufStore, nil
 }

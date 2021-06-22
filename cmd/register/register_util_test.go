@@ -9,6 +9,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+
+	storageMocks "github.com/flyteorg/flytestdlib/storage/mocks"
+
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
@@ -312,9 +316,90 @@ func TestHydrateLaunchPlanSpec(t *testing.T) {
 }
 
 func TestFlyteManifest(t *testing.T) {
-	flytesnacks, tag, err := getFlyteTestManifest()
+	_, tag, err := getFlyteTestManifest(githubOrg, githubRepository)
 	assert.Nil(t, err)
 	assert.Contains(t, tag, "v")
 	assert.NotEmpty(t, tag)
-	assert.Greater(t, len(flytesnacks), 1)
+}
+
+func TestGetAdditionalDistributionLoc(t *testing.T) {
+	remoteLocation := getAdditionalDistributionLoc("s3://dummy", "v1")
+	assert.Equal(t, "s3://dummy/v1.tar.gz", string(remoteLocation))
+}
+
+func TestUploadFastRegisterArtifact(t *testing.T) {
+	t.Run("Successful upload", func(t *testing.T) {
+		rawStoreWrite := &storageMocks.ComposedProtobufStore{}
+		rawStoreWrite.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", rawStoreWrite)
+		assert.Nil(t, err)
+	})
+	t.Run("Failed upload", func(t *testing.T) {
+		rawStoreWrite := &storageMocks.ComposedProtobufStore{}
+		rawStoreWrite.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("error"))
+		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", rawStoreWrite)
+		assert.NotNil(t, err)
+	})
+	t.Run("Failed upload", func(t *testing.T) {
+		rawStoreWrite := &storageMocks.ComposedProtobufStore{}
+		rawStoreWrite.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacksre.tgz", rawStoreWrite)
+		assert.NotNil(t, err)
+	})
+}
+
+func TestGetStorageClient(t *testing.T) {
+	t.Run("Failed to create storage client", func(t *testing.T) {
+		Client = nil
+		s, err := getStorageClient(ctx)
+		assert.NotNil(t, err)
+		assert.Nil(t, s)
+	})
+}
+
+func TestGetFlyteTestManifest(t *testing.T) {
+	t.Run("Failed to get manifest with wrong name", func(t *testing.T) {
+		_, tag, err := getFlyteTestManifest("no////ne", "no////ne")
+		assert.NotNil(t, err)
+		assert.Equal(t, len(tag), 0)
+	})
+	t.Run("Failed to get release", func(t *testing.T) {
+		_, tag, err := getFlyteTestManifest("flyteorg", "homebrew-tap")
+		assert.NotNil(t, err)
+		assert.Equal(t, len(tag), 0)
+	})
+	t.Run("Failed to get manifest", func(t *testing.T) {
+		flyteManifest = ""
+		_, tag, err := getFlyteTestManifest("flyteorg", "flytesnacks")
+		assert.NotNil(t, err)
+		assert.Equal(t, len(tag), 0)
+	})
+}
+
+func TestRegister(t *testing.T) {
+	t.Run("Failed to register", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		node := &admin.NodeExecution{}
+		err := register(ctx, node, cmdCtx)
+		assert.NotNil(t, err)
+	})
+}
+
+func TestHydrateNode(t *testing.T) {
+	t.Run("Failed hydrate node", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		node := &core.Node{}
+		err := hydrateNode(node)
+		assert.NotNil(t, err)
+	})
+
+	t.Run("hydrateSpec with wrong type", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		task := &admin.Task{}
+		err := hydrateSpec(task)
+		assert.NotNil(t, err)
+	})
 }

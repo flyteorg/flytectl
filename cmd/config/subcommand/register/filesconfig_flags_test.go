@@ -197,6 +197,20 @@ func TestFilesConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
+	t.Run("Test_destinationDir", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("destinationDir", testValue)
+			if vString, err := cmdFlags.GetString("destinationDir"); err == nil {
+				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vString), &actual.DestinationDir)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
 	t.Run("Test_fast", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {

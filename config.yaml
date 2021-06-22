@@ -4,17 +4,15 @@ admin:
   insecure: true
 logger:
   show-source: true
-  level: 3
+  level: 1
 storage:
   connection:
     access-key: minio
     auth-type: accesskey
     disable-ssl: true
-    endpoint: http://localhost:9000
-    region: my-region-here
+    endpoint: http://localhost:61333
+    region: us-east-1
     secret-key: miniostorage
-  cache:
-    max_size_mbs: 10
-    target_gc_percent: 100
-  container: my-container
   type: minio
+  container: "my-s3-bucket"
+
