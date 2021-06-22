@@ -404,10 +404,24 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 	if err != nil {
 		return nil, err
 	}
+	var dataRefReaderCloser io.ReadCloser
+
+	if rconfig.DefaultFilesConfig.FastRegister && ext == "tar.gz" {
+		dataRefReaderCloser, err = os.Open(dataRef.String())
+		if err != nil {
+			return nil, err
+		}
+		dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser);
+		if err != nil {
+			return nil, err
+		}
+		return dataRefReaderCloser, err
+	}
+
 	if ext != "tar" && ext != "tgz" {
 		return nil, errors.New("only .tar and .tgz extension archives are supported")
 	}
-	var dataRefReaderCloser io.ReadCloser
+
 	if scheme == "http" || scheme == "https" {
 		dataRefReaderCloser, err = DownloadFileFromHTTP(ctx, dataRef)
 	} else {

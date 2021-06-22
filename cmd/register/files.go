@@ -95,11 +95,13 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	var registerResults []Result
 	var s *storage.DataStore
 	if rconfig.DefaultFilesConfig.FastRegister {
+		storage.GetConfig().InitContainer = "dummy"
 		s, _err = storage.NewDataStore(storage.GetConfig(),nil)
 		if _err != nil {
 			logger.Errorf(ctx, "error while creating storage client %v", _err)
 			return _err
 		}
+
 		fastRegisterCheck := false
 		fullRemotePath := getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir,rconfig.DefaultFilesConfig.Version)
 		for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
@@ -111,7 +113,7 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 			}
 		}
 		if !fastRegisterCheck  {
-			return fmt.Errorf( "Could not discover compressed source, did you remember to run `pyflyte serialize fast ...`?")
+			return fmt.Errorf( "could not discover compressed source, did you remember to run 'pyflyte serialize fast'")
 		}
 	}
 	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {

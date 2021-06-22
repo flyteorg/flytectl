@@ -21,3 +21,5 @@ type FilesConfig struct {
 	AdditionalDistributionDir string `json:"additionalDistributionDir" pflag:", Location for additional distributions."`
 	FastRegister bool `json:"fast" pflag:", register without building the image."`
 }
+
+
