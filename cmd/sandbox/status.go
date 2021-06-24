@@ -3,10 +3,10 @@ package sandbox
 import (
 	"context"
 	"fmt"
+
 	"github.com/enescakir/emoji"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/docker"
-	"time"
 )
 
 const (
@@ -37,6 +37,6 @@ func printStatus(ctx context.Context, cli docker.Docker) error {
 	if c == nil {
 		fmt.Printf("%v no Sandbox found \n", emoji.StopSign)
 	}
-	fmt.Printf("Flyte local sandbox cluster container image [%s] started at [%s] is in status [%s]", c.Image, time.Unix(c.Created, 0).String(), c.Status)
+	fmt.Printf("Flyte local sandbox cluster container image [%s] with status [%s] is in state [%s]", c.Image, c.Status, c.State)
 	return nil
 }
