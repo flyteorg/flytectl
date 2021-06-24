@@ -50,7 +50,6 @@ func (FilesConfig) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg FilesConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("FilesConfig", pflag.ExitOnError)
-
 	cmdFlags.StringVarP(&DefaultFilesConfig.Version, fmt.Sprintf("%v%v", prefix, "version"), "v", DefaultFilesConfig.Version, "version of the entity to be registered with flyte.")
 	cmdFlags.BoolVarP(&DefaultFilesConfig.ContinueOnError, fmt.Sprintf("%v%v", prefix, "continueOnError"), "", DefaultFilesConfig.ContinueOnError, "continue on error when registering files.")
 	cmdFlags.BoolVarP(&DefaultFilesConfig.Archive, fmt.Sprintf("%v%v", prefix, "archive"), "a", DefaultFilesConfig.Archive, "pass in archive file either an http link or local path.")
@@ -59,6 +58,5 @@ func (cfg FilesConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags.StringVarP(&DefaultFilesConfig.OutputLocationPrefix, fmt.Sprintf("%v%v", prefix, "outputLocationPrefix"), "l", DefaultFilesConfig.OutputLocationPrefix, " custom output location prefix for offloaded types (files/schemas).")
 	cmdFlags.StringVar(&DefaultFilesConfig.AdditionalDistributionDir, fmt.Sprintf("%v%v", prefix, "additionalDistributionDir"), DefaultFilesConfig.AdditionalDistributionDir, " Location for additional distributions.")
 	cmdFlags.StringVar(&DefaultFilesConfig.DestinationDir, fmt.Sprintf("%v%v", prefix, "destinationDir"), DefaultFilesConfig.DestinationDir, " Destination dir for the fast register.")
-	cmdFlags.BoolVar(&DefaultFilesConfig.FastRegister, fmt.Sprintf("%v%v", prefix, "fast"), DefaultFilesConfig.FastRegister, " register without building the image.")
 	return cmdFlags
 }

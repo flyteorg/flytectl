@@ -26,7 +26,7 @@ Fast Registers will register all the fast serialized protobuf files including ta
 If there are already registered entities with v1 version then the command will fail immediately on the first such encounter.
 ::
 
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks --fast  --continueOnError -v v2 -l "s3://dummy/prefix" --destinationDir="" --additionalDistributionDir="s3://dummy/fast" 
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix" --destinationDir="" --additionalDistributionDir="s3://dummy/fast" 
 	
 Using archive file.Currently supported are .tgz and .tar extension files and can be local or remote file served through http/https.
 Use --archive flag.
@@ -82,13 +82,6 @@ Override Output location prefix during registration.
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks --continueOnError -v v2 -l "s3://dummy/prefix"
 	
-
-Override Output location prefix during registration.
-
-::
-
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks --continueOnError -v v2 -l "s3://dummy/prefix"
-
 Usage
 `
 )
@@ -106,19 +99,20 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	logger.Infof(ctx, "Parsing files... Total(%v)", len(dataRefs))
 	fastFail := !rconfig.DefaultFilesConfig.ContinueOnError
 	var registerResults []Result
+	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
+		fmt.Println(rconfig.DefaultFilesConfig.AdditionalDistributionDir)
+		fmt.Println(rconfig.DefaultFilesConfig.DestinationDir)
+		if len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) == 0 && len(rconfig.DefaultFilesConfig.DestinationDir) == 0 && strings.Contains(dataRefs[i], ".tar.gz") {
+			return fmt.Errorf("you are trying to register fast serialize workflow. Please pass additional flags like --additionalDistributionDir and --destinationDir")
+		} else if len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) > 0 && len(rconfig.DefaultFilesConfig.DestinationDir) > 0 && strings.Contains(dataRefs[i], ".tar.gz") {
+			if err := uploadFastRegisterArtifact(ctx, dataRefs[i], rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version); err != nil {
+				return err
+			}
+		}
+	}
 
 	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
-		if strings.Contains(dataRefs[i], ".tar.gz") && !rconfig.DefaultFilesConfig.FastRegister {
-			return fmt.Errorf("fast serialize proto can't be registered. Please use --fast flag for fast registration")
-		} else if strings.Contains(dataRefs[i], ".tar.gz") {
-			s, err := getStorageClient(ctx)
-			if err != nil {
-				return err
-			}
-			if err := uploadFastRegisterArtifact(ctx, dataRefs[i], s); err != nil {
-				return err
-			}
-		} else if strings.Contains(dataRefs[i], ".pb") {
+		if strings.Contains(dataRefs[i], ".pb") {
 			registerResults, _err = registerFile(ctx, dataRefs[i], registerResults, cmdCtx)
 		}
 	}

@@ -19,7 +19,6 @@ Registers all latest flytesnacks example
 
 Usage
 `
-	archive = true
 )
 
 var (
@@ -34,7 +33,7 @@ func registerExamplesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Com
 	if err != nil {
 		return err
 	}
-	rconfig.DefaultFilesConfig.Archive = archive
+	rconfig.DefaultFilesConfig.Archive = true
 	for _, v := range flytesnacks {
 		args := []string{
 			fmt.Sprintf(snackReleaseURL, tag, v.Name),

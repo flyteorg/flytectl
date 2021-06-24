@@ -262,9 +262,7 @@ func hydrateSpec(message proto.Message) error {
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
 		hydrateIdentifier(taskSpec.Template.Id)
-		if rconfig.DefaultFilesConfig.FastRegister {
-			hydrateTaskSpec(taskSpec)
-		}
+		hydrateTaskSpec(taskSpec)
 	default:
 		return fmt.Errorf("unknown type %T", v)
 	}
@@ -476,9 +474,14 @@ func getAdditionalDistributionLoc(remoteLocation, identifier string) storage.Dat
 	return storage.DataReference(fmt.Sprintf("%v/%v.tar.gz", remoteLocation, identifier))
 }
 
-func uploadFastRegisterArtifact(ctx context.Context, file string, storageClient storage.ComposedProtobufStore) error {
+func uploadFastRegisterArtifact(ctx context.Context, file, additionalDistributionDir, version string) error {
+	s, err := getStorageClient(ctx)
+	if err != nil {
+		return err
+	}
+
 	var dataRefReaderCloser io.ReadCloser
-	fullRemotePath := getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version)
+	fullRemotePath := getAdditionalDistributionLoc(additionalDistributionDir, version)
 	raw, err := json.Marshal(file)
 	if err != nil {
 		return err
@@ -491,7 +494,7 @@ func uploadFastRegisterArtifact(ctx context.Context, file string, storageClient 
 	if err != nil {
 		return err
 	}
-	if err := storageClient.WriteRaw(ctx, fullRemotePath, int64(len(raw)), storage.Options{}, dataRefReaderCloser); err != nil {
+	if err := s.WriteRaw(ctx, fullRemotePath, int64(len(raw)), storage.Options{}, dataRefReaderCloser); err != nil {
 		return err
 	}
 	return nil

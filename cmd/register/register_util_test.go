@@ -330,20 +330,23 @@ func TestGetAdditionalDistributionLoc(t *testing.T) {
 func TestUploadFastRegisterArtifact(t *testing.T) {
 	t.Run("Successful upload", func(t *testing.T) {
 		rawStoreWrite := &storageMocks.ComposedProtobufStore{}
+		Client = rawStoreWrite
 		rawStoreWrite.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", rawStoreWrite)
+		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "", "")
 		assert.Nil(t, err)
 	})
 	t.Run("Failed upload", func(t *testing.T) {
 		rawStoreWrite := &storageMocks.ComposedProtobufStore{}
+		Client = rawStoreWrite
 		rawStoreWrite.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("error"))
-		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", rawStoreWrite)
+		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "", "")
 		assert.NotNil(t, err)
 	})
 	t.Run("Failed upload", func(t *testing.T) {
 		rawStoreWrite := &storageMocks.ComposedProtobufStore{}
+		Client = rawStoreWrite
 		rawStoreWrite.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacksre.tgz", rawStoreWrite)
+		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacksre.tgz", "", "")
 		assert.NotNil(t, err)
 	})
 }
