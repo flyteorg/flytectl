@@ -100,8 +100,6 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	fastFail := !rconfig.DefaultFilesConfig.ContinueOnError
 	var registerResults []Result
 	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
-		fmt.Println(rconfig.DefaultFilesConfig.AdditionalDistributionDir)
-		fmt.Println(rconfig.DefaultFilesConfig.DestinationDir)
 		if len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) == 0 && len(rconfig.DefaultFilesConfig.DestinationDir) == 0 && strings.Contains(dataRefs[i], ".tar.gz") {
 			return fmt.Errorf("you are trying to register fast serialize workflow. Please pass additional flags like --additionalDistributionDir and --destinationDir")
 		} else if len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) > 0 && len(rconfig.DefaultFilesConfig.DestinationDir) > 0 && strings.Contains(dataRefs[i], ".tar.gz") {
