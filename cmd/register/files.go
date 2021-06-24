@@ -109,7 +109,7 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 
 	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
 		if strings.Contains(dataRefs[i], ".tar.gz") && !rconfig.DefaultFilesConfig.FastRegister {
-			return fmt.Errorf("fast serialize proto can't be register. Please use --fast flag for fast registration")
+			return fmt.Errorf("fast serialize proto can't be registered. Please use --fast flag for fast registration")
 		} else if strings.Contains(dataRefs[i], ".tar.gz") {
 			s, err := getStorageClient(ctx)
 			if err != nil {
