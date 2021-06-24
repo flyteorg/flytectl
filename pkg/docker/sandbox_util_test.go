@@ -162,7 +162,7 @@ func TestPullDockerImage(t *testing.T) {
 }
 
 func TestStartContainer(t *testing.T) {
-	p1, p2, _ := GetSandboxPorts()
+	p1, p2, _ := GetSandboxPorts(30081)
 
 	t.Run("Successfully create a container", func(t *testing.T) {
 		setupSandbox()

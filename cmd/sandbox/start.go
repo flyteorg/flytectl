@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/phayes/freeport"
 	"io"
 	"os"
 
 	"github.com/flyteorg/flytectl/pkg/docker"
+	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/docker/docker/api/types/mount"
 	"github.com/enescakir/emoji"
@@ -37,17 +39,30 @@ type ExecResult struct {
 	ExitCode int
 }
 
+var ports = map[string]int{
+	"k8s" : 30082,
+	"console": 30081,
+	"minio": 30084,
+	"admin": 30086,
+}
+
 func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	cli, err := docker.GetDockerClient()
 	if err != nil {
 		return err
 	}
 
+	ports["k8s"], _ = freeport.GetFreePort()
+	ports["minio"], _ = freeport.GetFreePort()
+	ports["console"], _ = freeport.GetFreePort()
+	ports["admin"], _ = freeport.GetFreePort()
+
 	reader, err := startSandbox(ctx, cli, os.Stdin)
 	if err != nil {
 		return err
 	}
-	docker.WaitForSandbox(reader, docker.SuccessMessage)
+	docker.WaitForSandbox(reader, docker.SuccessMessage,ports)
+	fmt.Println()
 	return nil
 }
 
@@ -56,7 +71,10 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	if err := docker.SetupFlyteDir(); err != nil {
 		return nil, err
 	}
-
+	name := fmt.Sprintf("flyte-%v", util.RandString(5))
+	if len(sandboxConfig.DefaultConfig.Name) > 0 {
+		name = fmt.Sprintf("flyte-%v", sandboxConfig.DefaultConfig.Name)
+	}
 	if err := docker.GetFlyteSandboxConfig(); err != nil {
 		return nil, err
 	}
@@ -65,10 +83,10 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		return nil, err
 	}
 
-	if len(sandboxConfig.DefaultConfig.SnacksRepo) > 0 {
+	if len(sandboxConfig.DefaultConfig.Source) > 0 {
 		docker.Volumes = append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.SnacksRepo,
+			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.FlyteSnackDir,
 		})
 	}
@@ -79,8 +97,8 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		return nil, err
 	}
 
-	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
-	ID, err := docker.StartContainer(ctx, cli, docker.Volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, docker.ImageName)
+	exposedPorts, portBindings, _ := docker.GetSandboxPorts(ports)
+	ID, err := docker.StartContainer(ctx, cli, docker.Volumes, exposedPorts, portBindings, name, docker.ImageName)
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)
 		return nil, err

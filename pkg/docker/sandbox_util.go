@@ -79,7 +79,7 @@ func GetSandbox(ctx context.Context, cli Docker) *types.Container {
 		All: true,
 	})
 	for _, v := range containers {
-		if strings.Contains(v.Names[0], FlyteSandboxClusterName) {
+		if strings.HasPrefix(v.Names[0], "flyte-") {
 			return &v
 		}
 	}
@@ -101,12 +101,12 @@ func RemoveSandbox(ctx context.Context, cli Docker, reader io.Reader) error {
 }
 
 // GetSandboxPorts will return sandbox ports
-func GetSandboxPorts() (map[nat.Port]struct{}, map[nat.Port][]nat.PortBinding, error) {
+func GetSandboxPorts(ports map[string]int) (map[nat.Port]struct{}, map[nat.Port][]nat.PortBinding, error) {
 	return nat.ParsePortSpecs([]string{
-		"127.0.0.1:30086:30086",
-		"127.0.0.1:30081:30081",
-		"127.0.0.1:30082:30082",
-		"127.0.0.1:30084:30084",
+		fmt.Sprintf("127.0.0.1:%v:30081",ports["console"]),
+		fmt.Sprintf("127.0.0.1:%v:30082",ports["k8s"]),
+		fmt.Sprintf("127.0.0.1:%v:30084",ports["minio"]),
+		fmt.Sprintf("127.0.0.1:%v:30086",ports["admin"]),
 	})
 }
 
@@ -164,10 +164,13 @@ func ReadLogs(ctx context.Context, cli Docker, id string) (*bufio.Scanner, error
 }
 
 // WaitForSandbox will wait until it doesn't get success message
-func WaitForSandbox(reader *bufio.Scanner, message string) bool {
+func WaitForSandbox(reader *bufio.Scanner, message string,ports map[string]int) bool {
 	for reader.Scan() {
 		if strings.Contains(reader.Text(), message) {
-			fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, message, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
+			fmt.Printf("%v Flyte is ready! Flyte UI is available at http://localhost:%v/console %v %v %v \n", emoji.ManTechnologist, ports["console"], emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
+			fmt.Printf("%v Kubernetes cluster is ready! Kubernetes Dashboard is available at http://localhost:%v/console %v %v %v \n", emoji.ManTechnologist, ports["k8s"], emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
+			fmt.Printf("%v Minio Dashboard is available at http://localhost:%v/console %v %v %v \n", emoji.ManTechnologist, ports["minio"], emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
+			fmt.Printf("%v Flyteadmin endpoint is available at http://localhost:%v/console %v %v %v \n", emoji.ManTechnologist, ports["admin"], emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
 			fmt.Printf("Please visit https://github.com/flyteorg/flytesnacks for more example %v \n", emoji.Rocket)
 			fmt.Printf("Register all flytesnacks example by running 'flytectl register examples  -d development  -p flytesnacks' \n")
 			fmt.Printf("Add KUBECONFIG and FLYTECTL_CONFIG to your environment variable \n")
