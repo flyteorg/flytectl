@@ -39,7 +39,7 @@ func CreateSandboxCommand() *cobra.Command {
 			Short: teardownShort,
 			Long:  teardownLong},
 		"status": {CmdFunc: sandboxClusterStatus, Aliases: []string{}, ProjectDomainNotRequired: true,
-			Short: startShort,
+			Short: statusShort,
 			Long:  statusLong},
 	}
 

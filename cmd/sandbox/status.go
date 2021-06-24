@@ -36,6 +36,7 @@ func printStatus(ctx context.Context, cli docker.Docker) error {
 	c := docker.GetSandbox(ctx, cli)
 	if c == nil {
 		fmt.Printf("%v no Sandbox found \n", emoji.StopSign)
+		return nil
 	}
 	fmt.Printf("Flyte local sandbox cluster container image [%s] with status [%s] is in state [%s]", c.Image, c.Status, c.State)
 	return nil
