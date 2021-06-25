@@ -21,11 +21,15 @@ If there are already registered entities with v1 version then the command will f
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks
 	
-Fast Register will register all the fast serialized protobuf files including tasks, workflows and launchplans with default v1 version. Learn more about registration  https://docs.flyte.org/projects/cookbook/en/stable/auto/deployment/workflow/fast_registration.html
-Fast Register required --additionalDistributionDir and --destinationDir flags 	
+Fast Register will register all the fast serialized protobuf files including tasks, workflows and launchplans with default v1 version. Learn more about fast registration  https://docs.flyte.org/projects/cookbook/en/stable/auto/deployment/workflow/fast_registration.html
 ::
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix" --destinationDir="" --additionalDistributionDir="s3://dummy/fast" 
+	
+Fast Register will fail if you didn't pass additional flags like --additionalDistributionDir and --destinationDir flags
+::
+
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix" 
 
 	
 Using archive file.Currently supported are .tgz and .tar extension files and can be local or remote file served through http/https.
