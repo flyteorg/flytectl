@@ -50,7 +50,7 @@ func (SandboxConfig) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg SandboxConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("SandboxConfig", pflag.ExitOnError)
-	cmdFlags.StringVar(&DefaultConfig.Source, fmt.Sprintf("%v%v", prefix, "source"), DefaultConfig.Source, " Path of your source code")
+	cmdFlags.StringVar(&DefaultConfig.SourcesPath, fmt.Sprintf("%v%v", prefix, "sourcesPath"), DefaultConfig.SourcesPath, "Path to your source code path where flyte workflows and tasks are.")
 	cmdFlags.StringVar(&DefaultConfig.Name, fmt.Sprintf("%v%v", prefix, "name"), DefaultConfig.Name, " Name of your cluster")
 	cmdFlags.StringVar(&DefaultConfig.Version, fmt.Sprintf("%v%v", prefix, "version"), DefaultConfig.Version, " Flyte version")
 	return cmdFlags

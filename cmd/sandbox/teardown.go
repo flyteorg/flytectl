@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
+
 	"github.com/flyteorg/flytectl/pkg/docker"
 
 	"github.com/docker/docker/api/types"
@@ -35,7 +37,11 @@ func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.C
 }
 
 func tearDownSandbox(ctx context.Context, cli docker.Docker) error {
-	c := docker.GetSandbox(ctx, cli)
+	name := "flyte-sandbox"
+	if len(sandboxConfig.DefaultConfig.Name) > 0 {
+		name = fmt.Sprintf("flyte-%v", sandboxConfig.DefaultConfig.Name)
+	}
+	c := docker.GetSandbox(ctx, cli, name)
 	if c != nil {
 		if err := cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{
 			Force: true,

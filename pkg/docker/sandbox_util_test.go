@@ -28,6 +28,7 @@ import (
 var (
 	cmdCtx     cmdCore.CommandContext
 	containers []types.Container
+	name       = "flyte-sandbox"
 )
 
 func setupSandbox() {
@@ -87,7 +88,7 @@ func TestGetSandbox(t *testing.T) {
 		context := context.Background()
 
 		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return(containers, nil)
-		c := GetSandbox(context, mockDocker)
+		c := GetSandbox(context, mockDocker, name)
 		assert.Equal(t, c.Names[0], FlyteSandboxClusterName)
 	})
 
@@ -96,7 +97,7 @@ func TestGetSandbox(t *testing.T) {
 		context := context.Background()
 
 		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		c := GetSandbox(context, mockDocker)
+		c := GetSandbox(context, mockDocker, name)
 		assert.Nil(t, c)
 	})
 
@@ -106,7 +107,7 @@ func TestGetSandbox(t *testing.T) {
 
 		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return(containers, nil)
 		mockDocker.OnContainerRemove(context, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(nil)
-		err := RemoveSandbox(context, mockDocker, strings.NewReader("y"))
+		err := RemoveSandbox(context, mockDocker, strings.NewReader("y"), name)
 		assert.Nil(t, err)
 	})
 
@@ -121,7 +122,7 @@ func TestRemoveSandboxWithNoReply(t *testing.T) {
 		// Verify the attributes
 		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return(containers, nil)
 		mockDocker.OnContainerRemove(context, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(nil)
-		err := RemoveSandbox(context, mockDocker, strings.NewReader("n"))
+		err := RemoveSandbox(context, mockDocker, strings.NewReader("n"), name)
 		assert.Nil(t, err)
 	})
 
@@ -132,7 +133,7 @@ func TestRemoveSandboxWithNoReply(t *testing.T) {
 		// Verify the attributes
 		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		mockDocker.OnContainerRemove(context, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(nil)
-		err := RemoveSandbox(context, mockDocker, strings.NewReader("n"))
+		err := RemoveSandbox(context, mockDocker, strings.NewReader("n"), name)
 		assert.Nil(t, err)
 	})
 
@@ -162,7 +163,7 @@ func TestPullDockerImage(t *testing.T) {
 }
 
 func TestStartContainer(t *testing.T) {
-	p1, p2, _ := GetSandboxPorts(30081)
+	p1, p2, _ := GetSandboxPorts(Ports)
 
 	t.Run("Successfully create a container", func(t *testing.T) {
 		setupSandbox()
@@ -286,13 +287,13 @@ func TestWaitForSandbox(t *testing.T) {
 	t.Run("Successfully read logs ", func(t *testing.T) {
 		reader := bufio.NewScanner(strings.NewReader("hello \n Flyte"))
 
-		check := WaitForSandbox(reader, "Flyte")
+		check := WaitForSandbox(reader, "Flyte", Ports)
 		assert.Equal(t, true, check)
 	})
 
 	t.Run("Error in reading logs ", func(t *testing.T) {
 		reader := bufio.NewScanner(strings.NewReader(""))
-		check := WaitForSandbox(reader, "Flyte")
+		check := WaitForSandbox(reader, "Flyte", Ports)
 		assert.Equal(t, false, check)
 	})
 }

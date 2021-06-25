@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/docker/docker/api/types/filters"
+
 	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/docker/docker/client"
@@ -39,6 +41,12 @@ var (
 			Source: f.FilePathJoin(f.UserHomeDir(), ".flyte"),
 			Target: K3sDir,
 		},
+	}
+	Ports = map[string]int{
+		"k8s":     30082,
+		"console": 30081,
+		"minio":   30084,
+		"admin":   30086,
 	}
 )
 
@@ -74,21 +82,32 @@ func ConfigCleanup() error {
 }
 
 // GetSandbox will return sandbox container if it exist
-func GetSandbox(ctx context.Context, cli Docker) *types.Container {
+func GetSandbox(ctx context.Context, cli Docker, name string) *types.Container {
 	containers, _ := cli.ContainerList(ctx, types.ContainerListOptions{
 		All: true,
 	})
 	for _, v := range containers {
-		if strings.HasPrefix(v.Names[0], "flyte-") {
+		if strings.Contains(v.Names[0], name) {
 			return &v
 		}
 	}
 	return nil
 }
 
+// GetAllSandbox will return all sandbox containers
+func GetAllSandbox(ctx context.Context, cli Docker, name string) []types.Container {
+	filters := filters.Args{}
+	filters.Add("image", ImageName)
+	containers, _ := cli.ContainerList(ctx, types.ContainerListOptions{
+		All:     true,
+		Filters: filters,
+	})
+	return containers
+}
+
 // RemoveSandbox will remove sandbox container if exist
-func RemoveSandbox(ctx context.Context, cli Docker, reader io.Reader) error {
-	if c := GetSandbox(ctx, cli); c != nil {
+func RemoveSandbox(ctx context.Context, cli Docker, reader io.Reader, name string) error {
+	if c := GetSandbox(ctx, cli, name); c != nil {
 		if cmdUtil.AskForConfirmation("delete existing sandbox cluster", reader) {
 			err := cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{
 				Force: true,
@@ -103,10 +122,10 @@ func RemoveSandbox(ctx context.Context, cli Docker, reader io.Reader) error {
 // GetSandboxPorts will return sandbox ports
 func GetSandboxPorts(ports map[string]int) (map[nat.Port]struct{}, map[nat.Port][]nat.PortBinding, error) {
 	return nat.ParsePortSpecs([]string{
-		fmt.Sprintf("127.0.0.1:%v:30081",ports["console"]),
-		fmt.Sprintf("127.0.0.1:%v:30082",ports["k8s"]),
-		fmt.Sprintf("127.0.0.1:%v:30084",ports["minio"]),
-		fmt.Sprintf("127.0.0.1:%v:30086",ports["admin"]),
+		fmt.Sprintf("127.0.0.1:%v:30081", ports["console"]),
+		fmt.Sprintf("127.0.0.1:%v:30082", ports["k8s"]),
+		fmt.Sprintf("127.0.0.1:%v:30084", ports["minio"]),
+		fmt.Sprintf("127.0.0.1:%v:30086", ports["admin"]),
 	})
 }
 
@@ -164,7 +183,7 @@ func ReadLogs(ctx context.Context, cli Docker, id string) (*bufio.Scanner, error
 }
 
 // WaitForSandbox will wait until it doesn't get success message
-func WaitForSandbox(reader *bufio.Scanner, message string,ports map[string]int) bool {
+func WaitForSandbox(reader *bufio.Scanner, message string, ports map[string]int) bool {
 	for reader.Scan() {
 		if strings.Contains(reader.Text(), message) {
 			fmt.Printf("%v Flyte is ready! Flyte UI is available at http://localhost:%v/console %v %v %v \n", emoji.ManTechnologist, ports["console"], emoji.Rocket, emoji.Rocket, emoji.PartyPopper)

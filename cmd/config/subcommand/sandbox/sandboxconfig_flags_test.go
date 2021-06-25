@@ -99,14 +99,14 @@ func TestSandboxConfig_SetFlags(t *testing.T) {
 	cmdFlags := actual.GetPFlagSet("")
 	assert.True(t, cmdFlags.HasFlags())
 
-	t.Run("Test_source", func(t *testing.T) {
+	t.Run("Test_sourcesPath", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("source", testValue)
-			if vString, err := cmdFlags.GetString("source"); err == nil {
-				testDecodeJson_SandboxConfig(t, fmt.Sprintf("%v", vString), &actual.Source)
+			cmdFlags.Set("sourcesPath", testValue)
+			if vString, err := cmdFlags.GetString("sourcesPath"); err == nil {
+				testDecodeJson_SandboxConfig(t, fmt.Sprintf("%v", vString), &actual.SourcesPath)
 
 			} else {
 				assert.FailNow(t, err.Error())

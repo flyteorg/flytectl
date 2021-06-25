@@ -37,7 +37,10 @@ func CreateSandboxCommand() *cobra.Command {
 			Long:  startLong, PFlagProvider: sandboxConfig.DefaultConfig},
 		"teardown": {CmdFunc: teardownSandboxCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
 			Short: teardownShort,
-			Long:  teardownLong},
+			Long:  teardownLong, PFlagProvider: sandboxConfig.DefaultConfig},
+		"status": {CmdFunc: sandboxClusterStatus, Aliases: []string{}, ProjectDomainNotRequired: true,
+			Short: statusShort,
+			Long:  statusLong},
 	}
 
 	cmdcore.AddCommands(sandbox, sandboxResourcesFuncs)
