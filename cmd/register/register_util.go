@@ -284,7 +284,7 @@ func DownloadFileFromHTTP(ctx context.Context, ref storage.DataReference) (io.Re
 
 /*
 Get serialize output file list from the args list.
-If the archive flag is on then download the archives to temp directory and extract it. In case of fast register it will also return the compress source code
+If the archive flag is on then download the archives to temp directory and extract it. In case of fast register it will also return the compressed source code
 The o/p of this function would be sorted list of the file locations.
 */
 func getSerializeOutputFiles(ctx context.Context, args []string) ([]string, string, error) {
@@ -295,7 +295,7 @@ func getSerializeOutputFiles(ctx context.Context, args []string) ([]string, stri
 		 * generated otherwise the registration can fail if the dependent files are not registered earlier.
 		 */
 		for _, v := range args {
-			if (len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) == 0 || len(rconfig.DefaultFilesConfig.DestinationDir) == 0) && strings.HasSuffix(v, ".tar.gz") {
+			if (len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) == 0 || len(rconfig.DefaultFilesConfig.DestinationDir) == 0) && strings.HasSuffix(v, sourceCodeExtension) {
 				return args, "", fmt.Errorf("you are trying to register fast serialize workflow. Please pass additional flags like --additionalDistributionDir and --destinationDir")
 			}
 		}

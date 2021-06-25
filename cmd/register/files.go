@@ -26,7 +26,7 @@ Fast Register will register all the fast serialized protobuf files including tas
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix" --destinationDir="" --additionalDistributionDir="s3://dummy/fast" 
 	
-Fast Register will fail if you didn't pass additional flags like --additionalDistributionDir and --destinationDir flags
+Fast Register will fail if you didn't pass additional flags like --additionalDistributionDir and --destinationDir flags. Fast register o/p only support work with additional flags
 ::
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix" 
@@ -88,6 +88,7 @@ Override Output location prefix during registration.
 	
 Usage
 `
+	sourceCodeExtension = ".tar.gz"
 )
 
 func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
@@ -110,8 +111,7 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 
 	fastFail := rconfig.DefaultFilesConfig.ContinueOnError
 	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
-		if len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) > 0 && len(rconfig.DefaultFilesConfig.DestinationDir) > 0 && strings.HasSuffix(dataRefs[i], ".tar.gz") {
-			logger.Infof(ctx, "Fast register started for file %v", dataRefs[i])
+		if len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) > 0 && len(rconfig.DefaultFilesConfig.DestinationDir) > 0 && strings.HasSuffix(dataRefs[i], sourceCodeExtension) {
 			if _err = uploadFastRegisterArtifact(ctx, dataRefs[i], rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version); _err != nil {
 				registerResults = append(registerResults, Result{Name: dataRefs[i], Status: "Failed", Info: "Failed while uploading the source code"})
 			}
