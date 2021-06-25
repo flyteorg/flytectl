@@ -3,7 +3,6 @@ package register
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"os"
 	"strings"
 
@@ -91,26 +90,27 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 }
 
 func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	dataRefs, tmpDir, _err := getSortedFileList(ctx, args)
-	if _err != nil {
-		logger.Errorf(ctx, "error while un-archiving files in tmp dir due to %v", _err)
+	var _err error
+	var dataRefs []string
+	var tmpDir string
+	var registerResults []Result
+
+	// getSerializeOutputFiles will return you all proto and  source code compress file in sorted order
+	dataRefs, tmpDir, err := getSerializeOutputFiles(ctx, args)
+	if err != nil {
+		logger.Errorf(ctx, "error while un-archiving files in tmp dir due to %v", err)
 		return _err
 	}
-	logger.Infof(ctx, "Parsing files... Total(%v)", len(dataRefs))
-	fastFail := !rconfig.DefaultFilesConfig.ContinueOnError
-	var registerResults []Result
-	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
-		if len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) == 0 && len(rconfig.DefaultFilesConfig.DestinationDir) == 0 && strings.Contains(dataRefs[i], ".tar.gz") {
-			return fmt.Errorf("you are trying to register fast serialize workflow. Please pass additional flags like --additionalDistributionDir and --destinationDir")
-		} else if len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) > 0 && len(rconfig.DefaultFilesConfig.DestinationDir) > 0 && strings.Contains(dataRefs[i], ".tar.gz") {
-			if err := uploadFastRegisterArtifact(ctx, dataRefs[i], rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version); err != nil {
-				return err
-			}
-		}
-	}
+	logger.Infof(ctx, "Parsing file... Total(%v)", len(dataRefs))
 
+	fastFail := rconfig.DefaultFilesConfig.ContinueOnError
 	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
-		if strings.Contains(dataRefs[i], ".pb") {
+		if len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) > 0 && len(rconfig.DefaultFilesConfig.DestinationDir) > 0 && strings.HasSuffix(dataRefs[i], ".tar.gz") {
+			logger.Infof(ctx, "Fast register started for file %v", dataRefs[i])
+			if _err = uploadFastRegisterArtifact(ctx, dataRefs[i], rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version); _err != nil {
+				registerResults = append(registerResults, Result{Name: dataRefs[i], Status: "Failed", Info: "Failed while uploading the source code"})
+			}
+		} else {
 			registerResults, _err = registerFile(ctx, dataRefs[i], registerResults, cmdCtx)
 		}
 	}

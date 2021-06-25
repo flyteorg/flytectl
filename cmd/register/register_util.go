@@ -263,6 +263,7 @@ func hydrateSpec(message proto.Message) error {
 		taskSpec := message.(*admin.TaskSpec)
 		hydrateIdentifier(taskSpec.Template.Id)
 		hydrateTaskSpec(taskSpec)
+
 	default:
 		return fmt.Errorf("unknown type %T", v)
 	}
@@ -282,29 +283,35 @@ func DownloadFileFromHTTP(ctx context.Context, ref storage.DataReference) (io.Re
 }
 
 /*
-Get file list from the args list.
-If the archive flag is on then download the archives to temp directory and extract it.
+Get serialize output file list from the args list.
+If the archive flag is on then download the archives to temp directory and extract it. In case of fast register it will also return the compress source code
 The o/p of this function would be sorted list of the file locations.
 */
-func getSortedFileList(ctx context.Context, args []string) ([]string, string, error) {
+func getSerializeOutputFiles(ctx context.Context, args []string) ([]string, string, error) {
 	if !rconfig.DefaultFilesConfig.Archive {
 		/*
 		 * Sorting is required for non-archived case since its possible for the user to pass in a list of unordered
 		 * serialized protobuf files , but flyte expects them to be registered in topologically sorted order that it had
 		 * generated otherwise the registration can fail if the dependent files are not registered earlier.
 		 */
+		for _, v := range args {
+			if (len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) == 0 || len(rconfig.DefaultFilesConfig.DestinationDir) == 0) && strings.HasSuffix(v, ".tar.gz") {
+				return args, "", fmt.Errorf("you are trying to register fast serialize workflow. Please pass additional flags like --additionalDistributionDir and --destinationDir")
+			}
+		}
+
 		sort.Strings(args)
 		return args, "", nil
 	}
+
 	tempDir, err := ioutil.TempDir("/tmp", "register")
 
 	if err != nil {
 		return nil, tempDir, err
 	}
-	dataRefs := args
 	var unarchivedFiles []string
-	for i := 0; i < len(dataRefs); i++ {
-		dataRefReaderCloser, err := getArchiveReaderCloser(ctx, dataRefs[i])
+	for _, v := range args {
+		dataRefReaderCloser, err := getArchiveReaderCloser(ctx, v)
 		if err != nil {
 			return unarchivedFiles, tempDir, err
 		}
@@ -316,6 +323,7 @@ func getSortedFileList(ctx context.Context, args []string) ([]string, string, er
 			return unarchivedFiles, tempDir, err
 		}
 	}
+
 	/*
 	 * Similarly in case of archived files, it possible to have an archive created in totally different order than the
 	 * listing order of the serialized files which is required by flyte. Hence we explicitly sort here after unarchiving it.

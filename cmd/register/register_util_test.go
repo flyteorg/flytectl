@@ -54,24 +54,12 @@ func registerFilesSetup() {
 	rconfig.DefaultFilesConfig.OutputLocationPrefix = ""
 }
 
-func TestGetSortedFileList(t *testing.T) {
-	setup()
-	registerFilesSetup()
-	rconfig.DefaultFilesConfig.Archive = false
-	args = []string{"file2", "file1"}
-	fileList, tmpDir, err := getSortedFileList(ctx, args)
-	assert.Equal(t, "file1", fileList[0])
-	assert.Equal(t, "file2", fileList[1])
-	assert.Equal(t, tmpDir, "")
-	assert.Nil(t, err)
-}
-
 func TestGetSortedArchivedFileWithParentFolderList(t *testing.T) {
 	setup()
 	registerFilesSetup()
 	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-parent-folder-register.tar"}
-	fileList, tmpDir, err := getSortedFileList(ctx, args)
+	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 4)
 	assert.Equal(t, filepath.Join(tmpDir, "parentfolder", "014_recipes.core.basic.basic_workflow.t1_1.pb"), fileList[0])
 	assert.Equal(t, filepath.Join(tmpDir, "parentfolder", "015_recipes.core.basic.basic_workflow.t2_1.pb"), fileList[1])
@@ -88,7 +76,7 @@ func TestGetSortedArchivedFileList(t *testing.T) {
 	registerFilesSetup()
 	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-register.tar"}
-	fileList, tmpDir, err := getSortedFileList(ctx, args)
+	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 4)
 	assert.Equal(t, filepath.Join(tmpDir, "014_recipes.core.basic.basic_workflow.t1_1.pb"), fileList[0])
 	assert.Equal(t, filepath.Join(tmpDir, "015_recipes.core.basic.basic_workflow.t2_1.pb"), fileList[1])
@@ -105,7 +93,7 @@ func TestGetSortedArchivedFileUnorderedList(t *testing.T) {
 	registerFilesSetup()
 	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-unordered-register.tar"}
-	fileList, tmpDir, err := getSortedFileList(ctx, args)
+	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 4)
 	assert.Equal(t, filepath.Join(tmpDir, "014_recipes.core.basic.basic_workflow.t1_1.pb"), fileList[0])
 	assert.Equal(t, filepath.Join(tmpDir, "015_recipes.core.basic.basic_workflow.t2_1.pb"), fileList[1])
@@ -122,7 +110,7 @@ func TestGetSortedArchivedCorruptedFileList(t *testing.T) {
 	registerFilesSetup()
 	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/invalid.tar"}
-	fileList, tmpDir, err := getSortedFileList(ctx, args)
+	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 0)
 	assert.True(t, strings.HasPrefix(tmpDir, "/tmp/register"))
 	assert.NotNil(t, err)
@@ -135,7 +123,7 @@ func TestGetSortedArchivedTgzList(t *testing.T) {
 	registerFilesSetup()
 	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-register.tgz"}
-	fileList, tmpDir, err := getSortedFileList(ctx, args)
+	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 4)
 	assert.Equal(t, filepath.Join(tmpDir, "014_recipes.core.basic.basic_workflow.t1_1.pb"), fileList[0])
 	assert.Equal(t, filepath.Join(tmpDir, "015_recipes.core.basic.basic_workflow.t2_1.pb"), fileList[1])
@@ -151,7 +139,7 @@ func TestGetSortedArchivedCorruptedTgzFileList(t *testing.T) {
 	setup()
 	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/invalid.tgz"}
-	fileList, tmpDir, err := getSortedFileList(ctx, args)
+	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, 0, len(fileList))
 	assert.True(t, strings.HasPrefix(tmpDir, "/tmp/register"))
 	assert.NotNil(t, err)
@@ -164,7 +152,7 @@ func TestGetSortedArchivedInvalidArchiveFileList(t *testing.T) {
 	registerFilesSetup()
 	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"testdata/invalid-extension-register.zip"}
-	fileList, tmpDir, err := getSortedFileList(ctx, args)
+	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, 0, len(fileList))
 	assert.True(t, strings.HasPrefix(tmpDir, "/tmp/register"))
 	assert.NotNil(t, err)
@@ -177,7 +165,7 @@ func TestGetSortedArchivedFileThroughInvalidHttpList(t *testing.T) {
 	setup()
 	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"http://invalidhost:invalidport/testdata/valid-register.tar"}
-	fileList, tmpDir, err := getSortedFileList(ctx, args)
+	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, 0, len(fileList))
 	assert.True(t, strings.HasPrefix(tmpDir, "/tmp/register"))
 	assert.NotNil(t, err)
@@ -190,7 +178,7 @@ func TestGetSortedArchivedFileThroughValidHttpList(t *testing.T) {
 	registerFilesSetup()
 	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"http://dummyhost:80/testdata/valid-register.tar"}
-	fileList, tmpDir, err := getSortedFileList(ctx, args)
+	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 4)
 	assert.Equal(t, filepath.Join(tmpDir, "014_recipes.core.basic.basic_workflow.t1_1.pb"), fileList[0])
 	assert.Equal(t, filepath.Join(tmpDir, "015_recipes.core.basic.basic_workflow.t2_1.pb"), fileList[1])
@@ -208,7 +196,7 @@ func TestGetSortedArchivedFileThroughValidHttpWithNullContextList(t *testing.T) 
 	rconfig.DefaultFilesConfig.Archive = true
 	args = []string{"http://dummyhost:80/testdata/valid-register.tar"}
 	ctx = nil
-	fileList, tmpDir, err := getSortedFileList(ctx, args)
+	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 0)
 	assert.True(t, strings.HasPrefix(tmpDir, "/tmp/register"))
 	assert.NotNil(t, err)
