@@ -21,11 +21,12 @@ If there are already registered entities with v1 version then the command will f
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks
 	
-Fast Registers will register all the fast serialized protobuf files including tasks, workflows and launchplans with default v1 version. 
-If there are already registered entities with v1 version then the command will fail immediately on the first such encounter.
+Fast Register will register all the fast serialized protobuf files including tasks, workflows and launchplans with default v1 version. Learn more about registration  https://docs.flyte.org/projects/cookbook/en/stable/auto/deployment/workflow/fast_registration.html
+Fast Register required --additionalDistributionDir and --destinationDir flags 	
 ::
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix" --destinationDir="" --additionalDistributionDir="s3://dummy/fast" 
+
 	
 Using archive file.Currently supported are .tgz and .tar extension files and can be local or remote file served through http/https.
 Use --archive flag.
@@ -99,7 +100,7 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	dataRefs, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	if err != nil {
 		logger.Errorf(ctx, "error while un-archiving files in tmp dir due to %v", err)
-		return _err
+		return err
 	}
 	logger.Infof(ctx, "Parsing file... Total(%v)", len(dataRefs))
 
@@ -110,8 +111,10 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 			if _err = uploadFastRegisterArtifact(ctx, dataRefs[i], rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version); _err != nil {
 				registerResults = append(registerResults, Result{Name: dataRefs[i], Status: "Failed", Info: "Failed while uploading the source code"})
 			}
-		} else {
+		} else if strings.HasSuffix(dataRefs[i], ".pb") {
 			registerResults, _err = registerFile(ctx, dataRefs[i], registerResults, cmdCtx)
+		} else {
+			registerResults = append(registerResults, Result{Name: dataRefs[i], Status: "Failed", Info: "Invalid files"})
 		}
 	}
 

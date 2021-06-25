@@ -62,7 +62,7 @@ func TestRegisterFromFiles(t *testing.T) {
 		mockAdminClient.OnCreateLaunchPlanMatch(mock.Anything, mock.Anything).Return(nil, nil)
 		Client = mockStorage
 		err := Register(ctx, args, cmdCtx)
-		assert.Nil(t, err)
+		assert.NotNil(t, err)
 	})
 	t.Run("Failed fast registration while flags are missing", func(t *testing.T) {
 		setup()
@@ -77,7 +77,7 @@ func TestRegisterFromFiles(t *testing.T) {
 		mockAdminClient.OnCreateLaunchPlanMatch(mock.Anything, mock.Anything).Return(nil, nil)
 		Client = mockStorage
 		err := registerFromFilesFunc(ctx, args, cmdCtx)
-		assert.Nil(t, err)
+		assert.NotNil(t, err)
 	})
 	t.Run("Valid registration of fast serialize", func(t *testing.T) {
 		setup()
@@ -96,23 +96,7 @@ func TestRegisterFromFiles(t *testing.T) {
 		err := registerFromFilesFunc(ctx, args, cmdCtx)
 		assert.Nil(t, err)
 	})
-	t.Run("Registration with compress file without Archive flag ", func(t *testing.T) {
-		setup()
-		registerFilesSetup()
-		rconfig.DefaultFilesConfig.Archive = false
-		rconfig.DefaultFilesConfig.DestinationDir = "/"
-		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.AdditionalDistributionDir = s3Output
-		mockStorage := &storageMocks.ComposedProtobufStore{}
-		args = []string{"testdata/flytesnacks-core.tgz"}
-		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil, nil)
-		mockAdminClient.OnCreateWorkflowMatch(mock.Anything, mock.Anything).Return(nil, nil)
-		mockAdminClient.OnCreateLaunchPlanMatch(mock.Anything, mock.Anything).Return(nil, nil)
-		Client = mockStorage
-		err := registerFromFilesFunc(ctx, args, cmdCtx)
-		assert.NotNil(t, err)
-	})
+
 	t.Run("Registration with proto files ", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
@@ -129,23 +113,6 @@ func TestRegisterFromFiles(t *testing.T) {
 		Client = mockStorage
 		err := registerFromFilesFunc(ctx, args, cmdCtx)
 		assert.Nil(t, err)
-	})
-	t.Run("Registration In valid tar without Archive flag", func(t *testing.T) {
-		setup()
-		registerFilesSetup()
-		rconfig.DefaultFilesConfig.Archive = false
-		rconfig.DefaultFilesConfig.DestinationDir = "/"
-		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.AdditionalDistributionDir = s3Output
-		mockStorage := &storageMocks.ComposedProtobufStore{}
-		args = []string{"testdata/invalid.tar"}
-		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil, nil)
-		mockAdminClient.OnCreateWorkflowMatch(mock.Anything, mock.Anything).Return(nil, nil)
-		mockAdminClient.OnCreateLaunchPlanMatch(mock.Anything, mock.Anything).Return(nil, nil)
-		Client = mockStorage
-		err := registerFromFilesFunc(ctx, args, cmdCtx)
-		assert.NotNil(t, err)
 	})
 
 }

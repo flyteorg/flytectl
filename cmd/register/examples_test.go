@@ -19,7 +19,7 @@ func TestRegisterExamplesFunc(t *testing.T) {
 	mockAdminClient.OnCreateLaunchPlanMatch(mock.Anything, mock.Anything).Return(nil, nil)
 	Client = mockStorage
 	err := registerExamplesFunc(ctx, args, cmdCtx)
-	assert.Nil(t, err)
+	assert.NotNil(t, err)
 }
 func TestRegisterExamplesFuncErr(t *testing.T) {
 	setup()
