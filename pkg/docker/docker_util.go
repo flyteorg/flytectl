@@ -2,11 +2,15 @@ package docker
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/docker/docker/pkg/stdcopy"
 
 	"github.com/docker/docker/api/types/filters"
 
@@ -48,7 +52,22 @@ var (
 		"minio":   30084,
 		"admin":   30086,
 	}
+	ExecConfig = types.ExecConfig{
+		AttachStderr: true,
+		Tty:          true,
+		WorkingDir:   FlyteSnackDir,
+		AttachStdout: true,
+		Cmd:          []string{},
+	}
+	StdWriterPrefixLen = 8
+	StartingBufLen     = 32*1024 + StdWriterPrefixLen + 1
 )
+
+type ExecResult struct {
+	StdOut   string
+	StdErr   string
+	ExitCode int
+}
 
 // SetupFlyteDir will create .flyte dir if not exist
 func SetupFlyteDir() error {
@@ -83,11 +102,11 @@ func ConfigCleanup() error {
 
 // GetSandbox will return sandbox container if it exist
 func GetSandbox(ctx context.Context, cli Docker, name string) *types.Container {
-	containers, _ := cli.ContainerList(ctx, types.ContainerListOptions{
+	container, _ := cli.ContainerList(ctx, types.ContainerListOptions{
 		All: true,
 	})
-	for _, v := range containers {
-		if strings.Contains(v.Names[0], name) {
+	for _, v := range container {
+		if strings.TrimPrefix(v.Names[0], "/") == name {
 			return &v
 		}
 	}
@@ -95,12 +114,12 @@ func GetSandbox(ctx context.Context, cli Docker, name string) *types.Container {
 }
 
 // GetAllSandbox will return all sandbox containers
-func GetAllSandbox(ctx context.Context, cli Docker, name string) []types.Container {
-	filters := filters.Args{}
-	filters.Add("image", ImageName)
+func GetAllSandbox(ctx context.Context, cli Docker) []types.Container {
+	f := filters.NewArgs()
+	f.Add("ancestor", ImageName)
 	containers, _ := cli.ContainerList(ctx, types.ContainerListOptions{
 		All:     true,
-		Filters: filters,
+		Filters: f,
 	})
 	return containers
 }
@@ -127,6 +146,62 @@ func GetSandboxPorts(ports map[string]int) (map[nat.Port]struct{}, map[nat.Port]
 		fmt.Sprintf("127.0.0.1:%v:30084", ports["minio"]),
 		fmt.Sprintf("127.0.0.1:%v:30086", ports["admin"]),
 	})
+}
+
+// ExecCommend will execute a command in container and returns an execution id
+func ExecCommend(ctx context.Context, cli Docker, containerID string, command []string) (types.IDResponse, error) {
+	ExecConfig.Cmd = command
+	r, err := cli.ContainerExecCreate(ctx, containerID, ExecConfig)
+	if err != nil {
+		return types.IDResponse{}, err
+	}
+	return r, err
+}
+
+func InspectExecResp(ctx context.Context, cli Docker, containerID string) (ExecResult, error) {
+	var execResult ExecResult
+	resp, err := cli.ContainerExecAttach(ctx, containerID, types.ExecStartCheck{})
+	if err != nil {
+		return execResult, err
+	}
+	defer resp.Close()
+	// read the output
+	var outBuf, errBuf bytes.Buffer
+	outputDone := make(chan error)
+
+	go func() {
+		_, err = stdcopy.StdCopy(&outBuf, &errBuf, resp.Reader)
+		outputDone <- err
+	}()
+
+	select {
+	case err := <-outputDone:
+		if err != nil {
+			return execResult, err
+		}
+		break
+
+	case <-ctx.Done():
+		return execResult, ctx.Err()
+	}
+
+	stdout, err := ioutil.ReadAll(&outBuf)
+	if err != nil {
+		return execResult, err
+	}
+	stderr, err := ioutil.ReadAll(&errBuf)
+	if err != nil {
+		return execResult, err
+	}
+
+	res, err := cli.ContainerExecInspect(ctx, containerID)
+	if err != nil {
+		return execResult, err
+	}
+	execResult.ExitCode = res.ExitCode
+	execResult.StdOut = string(stdout)
+	execResult.StdErr = string(stderr)
+	return execResult, err
 }
 
 // PullDockerImage will Pull docker image
@@ -212,5 +287,6 @@ func GetDockerClient() (Docker, error) {
 		}
 		return cli, nil
 	}
+
 	return Client, nil
 }

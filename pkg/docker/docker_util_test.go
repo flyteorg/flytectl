@@ -2,16 +2,19 @@ package docker
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 
-	//"github.com/docker/go-connections/nat"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/docker/docker/pkg/stdcopy"
 
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
 	"github.com/stretchr/testify/mock"
@@ -30,6 +33,18 @@ var (
 	containers []types.Container
 	name       = "flyte-sandbox"
 )
+
+func getSrcBuffer(stdOutBytes, stdErrBytes []byte) (buffer *bytes.Buffer, err error) {
+	buffer = new(bytes.Buffer)
+	dstOut := stdcopy.NewStdWriter(buffer, stdcopy.Stdout)
+	_, err = dstOut.Write(stdOutBytes)
+	if err != nil {
+		return
+	}
+	dstErr := stdcopy.NewStdWriter(buffer, stdcopy.Stderr)
+	_, err = dstErr.Write(stdErrBytes)
+	return
+}
 
 func setupSandbox() {
 	mockAdminClient := u.MockClient
@@ -86,16 +101,23 @@ func TestGetSandbox(t *testing.T) {
 	t.Run("Successfully get sandbox container", func(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		context := context.Background()
-
 		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return(containers, nil)
 		c := GetSandbox(context, mockDocker, name)
 		assert.Equal(t, c.Names[0], FlyteSandboxClusterName)
+	})
+	t.Run("Successfully get all sandbox container", func(t *testing.T) {
+		mockDocker := &mocks.Docker{}
+		f := filters.NewArgs()
+		f.Add("ancestor", ImageName)
+		context := context.Background()
+		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true, Filters: f}).Return(containers, nil)
+		c := GetAllSandbox(context, mockDocker)
+		assert.Greater(t, len(c), 0)
 	})
 
 	t.Run("Successfully get sandbox container with zero result", func(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		context := context.Background()
-
 		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		c := GetSandbox(context, mockDocker, name)
 		assert.Nil(t, c)
@@ -104,7 +126,6 @@ func TestGetSandbox(t *testing.T) {
 	t.Run("Error in get sandbox container", func(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		context := context.Background()
-
 		mockDocker.OnContainerList(context, types.ContainerListOptions{All: true}).Return(containers, nil)
 		mockDocker.OnContainerRemove(context, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(nil)
 		err := RemoveSandbox(context, mockDocker, strings.NewReader("y"), name)
@@ -311,6 +332,61 @@ func TestDockerClient(t *testing.T) {
 		cli, err := GetDockerClient()
 		assert.Nil(t, err)
 		assert.NotNil(t, cli)
+	})
+}
+
+func TestDockerExec(t *testing.T) {
+	t.Run("Successfully exec command in container", func(t *testing.T) {
+		ctx := context.Background()
+		mockDocker := &mocks.Docker{}
+		Client = mockDocker
+		c := ExecConfig
+		c.Cmd = []string{"ls"}
+		mockDocker.OnContainerExecCreateMatch(ctx, mock.Anything, c).Return(types.IDResponse{}, nil)
+		_, err := ExecCommend(ctx, mockDocker, "test", []string{"ls"})
+		assert.Nil(t, err)
+	})
+	t.Run("Failed exec command in container", func(t *testing.T) {
+		ctx := context.Background()
+		mockDocker := &mocks.Docker{}
+		Client = mockDocker
+		c := ExecConfig
+		c.Cmd = []string{"ls"}
+		mockDocker.OnContainerExecCreateMatch(ctx, mock.Anything, c).Return(types.IDResponse{}, fmt.Errorf("error"))
+		_, err := ExecCommend(ctx, mockDocker, "test", []string{"ls"})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestInspectExecResp(t *testing.T) {
+	t.Run("Successfully exec command in container", func(t *testing.T) {
+		ctx := context.Background()
+		mockDocker := &mocks.Docker{}
+		Client = mockDocker
+		c := ExecConfig
+		c.Cmd = []string{"ls"}
+		stdOutBytes := []byte(strings.Repeat("o", StartingBufLen))
+		stdErrBytes := []byte(strings.Repeat("e", StartingBufLen))
+		buffer, err := getSrcBuffer(stdOutBytes, stdErrBytes)
+		reader := bufio.NewReader(buffer)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		mockDocker.OnContainerExecInspectMatch(ctx, mock.Anything).Return(types.ContainerExecInspect{}, nil)
+		mockDocker.OnContainerExecAttachMatch(ctx, mock.Anything, types.ExecStartCheck{}).Return(types.HijackedResponse{
+			Reader: reader,
+		}, nil)
+
+		defer func() {
+			if r := recover(); r != nil {
+				assert.NotNil(t, r)
+			}
+		}()
+		result, err := InspectExecResp(ctx, mockDocker, "test")
+		assert.Nil(t, err)
+		assert.Equal(t, stdcopy.Stdout, result.StdOut)
+		assert.Equal(t, stdcopy.Stderr, result.StdErr)
 	})
 
 }

@@ -39,11 +39,11 @@ func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.C
 func tearDownSandbox(ctx context.Context, cli docker.Docker) error {
 	name := "flyte-sandbox"
 	if len(sandboxConfig.DefaultConfig.Name) > 0 {
-		name = fmt.Sprintf("flyte-%v", sandboxConfig.DefaultConfig.Name)
+		name = sandboxConfig.DefaultConfig.Name
 	}
 	c := docker.GetSandbox(ctx, cli, name)
 	if c != nil {
-		if err := cli.ContainerRemove(context.Background(), c.ID, types.ContainerRemoveOptions{
+		if err := cli.ContainerRemove(ctx, c.ID, types.ContainerRemoveOptions{
 			Force: true,
 		}); err != nil {
 			return err

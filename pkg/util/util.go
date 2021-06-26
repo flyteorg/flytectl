@@ -3,8 +3,10 @@ package util
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
+
+	"crypto/rand"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 )
 
@@ -12,7 +14,7 @@ type githubversion struct {
 	TagName string `json:"tag_name"`
 }
 
-const allowedChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const allowedChar = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
 // GetRequest will get the response of get request
 func GetRequest(baseURL, url string) ([]byte, error) {
@@ -49,10 +51,14 @@ func WriteIntoFile(data []byte, file string) error {
 }
 
 //RandString will return a random string of n length
-func RandString(n int) string {
+func RandString(n int) (string, error) {
 	b := make([]byte, n)
-	for i := range b {
-		b[i] = allowedChar[rand.Intn(len(allowedChar))]
+	for i := 0; i < n; i++ {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(allowedChar))))
+		if err != nil {
+			return "", err
+		}
+		b[i] = allowedChar[num.Int64()]
 	}
-	return string(b)
+	return string(b), nil
 }

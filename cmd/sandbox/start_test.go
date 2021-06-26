@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"os"
 	"strings"
 	"testing"
@@ -316,6 +317,80 @@ func TestStartSandboxFunc(t *testing.T) {
 		err := startSandboxCluster(ctx, []string{}, cmdCtx)
 		assert.Nil(t, err)
 	})
+	t.Run("Successfully run sandbox cluster with a provided name", func(t *testing.T) {
+		mockOutStream := new(io.Writer)
+		ctx := context.Background()
+		sandboxConfig.DefaultConfig.Name = "sandbox"
+		cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
+		mockDocker := &mocks.Docker{}
+		errCh := make(chan error)
+		bodyStatus := make(chan container.ContainerWaitOKBody)
+		mockDocker.OnContainerCreate(ctx, &container.Config{
+			Env:          docker.Environment,
+			Image:        docker.ImageName,
+			Tty:          false,
+			ExposedPorts: p1,
+		}, &container.HostConfig{
+			Mounts:       docker.Volumes,
+			PortBindings: p2,
+			Privileged:   true,
+		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
+			ID: "Hello",
+		}, nil)
+		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
+		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		stringReader := strings.NewReader(docker.SuccessMessage)
+		reader := ioutil.NopCloser(stringReader)
+		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
+			ShowStderr: true,
+			ShowStdout: true,
+			Timestamps: true,
+			Follow:     true,
+		}).Return(reader, nil)
+		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
+		docker.Client = mockDocker
+		sandboxConfig.DefaultConfig.SourcesPath = ""
+		err := startSandboxCluster(ctx, []string{}, cmdCtx)
+		assert.Nil(t, err)
+	})
+	t.Run("Failed sandbox cluster because port is not available", func(t *testing.T) {
+		mockOutStream := new(io.Writer)
+		ctx := context.Background()
+		sandboxConfig.DefaultConfig.Name = "sandbox"
+		cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
+		mockDocker := &mocks.Docker{}
+		errCh := make(chan error)
+		bodyStatus := make(chan container.ContainerWaitOKBody)
+		mockDocker.OnContainerCreate(ctx, &container.Config{
+			Env:          docker.Environment,
+			Image:        docker.ImageName,
+			Tty:          false,
+			ExposedPorts: p1,
+		}, &container.HostConfig{
+			Mounts:       docker.Volumes,
+			PortBindings: p2,
+			Privileged:   true,
+		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
+			ID: "Hello",
+		}, nil)
+		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
+		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		stringReader := strings.NewReader(docker.SuccessMessage)
+		reader := ioutil.NopCloser(stringReader)
+		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
+			ShowStderr: true,
+			ShowStdout: true,
+			Timestamps: true,
+			Follow:     true,
+		}).Return(reader, nil)
+		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
+		docker.Client = mockDocker
+		sandboxConfig.DefaultConfig.SourcesPath = ""
+		err := startSandboxCluster(ctx, []string{}, cmdCtx)
+		assert.Nil(t, err)
+	})
 	t.Run("Error in running sandbox cluster command", func(t *testing.T) {
 		mockOutStream := new(io.Writer)
 		ctx := context.Background()
@@ -351,5 +426,17 @@ func TestStartSandboxFunc(t *testing.T) {
 		sandboxConfig.DefaultConfig.SourcesPath = ""
 		err := startSandboxCluster(ctx, []string{}, cmdCtx)
 		assert.NotNil(t, err)
+	})
+}
+
+func TestGetPort(t *testing.T) {
+	t.Run("Get Port successful", func(t *testing.T) {
+		_, err := getPort(docker.Ports)
+		assert.Nil(t, err)
+		ln, err := net.Listen("tcp", "127.0.0.1:30081")
+		assert.Nil(t, err)
+		_, err = getPort(docker.Ports)
+		assert.Nil(t, err)
+		ln.Close()
 	})
 }

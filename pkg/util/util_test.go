@@ -49,3 +49,11 @@ func TestWriteIntoFile(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 }
+
+func TestRandomString(t *testing.T) {
+	t.Run("Successfully get random string", func(t *testing.T) {
+		data, err := RandString(5)
+		assert.Nil(t, err)
+		assert.Equal(t, 5, len(data))
+	})
+}

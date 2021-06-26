@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"os"
 
 	"github.com/phayes/freeport"
@@ -44,11 +45,6 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		return err
 	}
 
-	docker.Ports["k8s"], _ = freeport.GetFreePort()
-	docker.Ports["minio"], _ = freeport.GetFreePort()
-	docker.Ports["console"], _ = freeport.GetFreePort()
-	docker.Ports["admin"], _ = freeport.GetFreePort()
-
 	reader, err := startSandbox(ctx, cli, os.Stdin)
 	if err != nil {
 		return err
@@ -60,12 +56,19 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 
 func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
+
+	ports, err := getPort(docker.Ports)
+	if err != nil {
+		return nil, err
+	}
+	docker.Ports = ports
+
 	if err := docker.SetupFlyteDir(); err != nil {
 		return nil, err
 	}
 	name := "flyte-sandbox"
 	if len(sandboxConfig.DefaultConfig.Name) > 0 {
-		name = fmt.Sprintf("flyte-%v", sandboxConfig.DefaultConfig.Name)
+		name = sandboxConfig.DefaultConfig.Name
 	}
 	if err := docker.GetFlyteSandboxConfig(); err != nil {
 		return nil, err
@@ -110,4 +113,22 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}()
 
 	return logReader, nil
+}
+
+func getPort(ports map[string]int) (map[string]int, error) {
+	p, err := freeport.GetFreePorts(4)
+	if err != nil {
+		return map[string]int{}, err
+	}
+	i := 0
+	for k := range ports {
+		ln, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%v", ports[k]))
+		if err != nil {
+			ports[k] = p[i]
+			i++
+			continue
+		}
+		ln.Close()
+	}
+	return ports, nil
 }
