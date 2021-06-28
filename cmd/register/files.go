@@ -3,8 +3,11 @@ package register
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -98,6 +101,7 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	var _err error
 	var dataRefs []string
+	var validProto []string
 	var tmpDir string
 	var registerResults []Result
 
@@ -109,17 +113,23 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	}
 	logger.Infof(ctx, "Parsing file... Total(%v)", len(dataRefs))
 
-	fastFail := rconfig.DefaultFilesConfig.ContinueOnError
-	for i := 0; i < len(dataRefs) && !(fastFail && _err != nil); i++ {
+	for i := 0; i < len(dataRefs); i++ {
 		if len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) > 0 && len(rconfig.DefaultFilesConfig.DestinationDir) > 0 && strings.HasSuffix(dataRefs[i], sourceCodeExtension) {
-			if _err = uploadFastRegisterArtifact(ctx, dataRefs[i], rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version); _err != nil {
-				registerResults = append(registerResults, Result{Name: dataRefs[i], Status: "Failed", Info: "Failed while uploading the source code"})
+			if err = uploadFastRegisterArtifact(ctx, dataRefs[i], rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version); err != nil {
+				return fmt.Errorf("please check your Storage Config. It while while uploading the source code. %v", err)
 			}
+		} else if (len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) == 0 || len(rconfig.DefaultFilesConfig.DestinationDir) == 0) && strings.HasSuffix(dataRefs[i], sourceCodeExtension) {
+			return errors.New("Fast serialize detected without additional flags")
 		} else if strings.HasSuffix(dataRefs[i], ".pb") {
-			registerResults, _err = registerFile(ctx, dataRefs[i], registerResults, cmdCtx)
+			validProto = append(validProto, dataRefs[i])
 		} else {
-			registerResults = append(registerResults, Result{Name: dataRefs[i], Status: "Failed", Info: "Invalid files"})
+			return errors.New("Invalid files")
 		}
+	}
+
+	fastFail := rconfig.DefaultFilesConfig.ContinueOnError
+	for i := 0; i < len(validProto) && !(fastFail && _err != nil); i++ {
+		registerResults, _err = registerFile(ctx, validProto[i], registerResults, cmdCtx)
 	}
 
 	payload, _ := json.Marshal(registerResults)
