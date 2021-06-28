@@ -61,17 +61,10 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-<<<<<<< HEAD
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-=======
-		sandboxConfig.DefaultConfig.SourcesPath = f.UserHomeDir()
-		volumes := append(docker.Volumes, mount.Mount{
-			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.SourcesPath,
->>>>>>> f6e4526d2fd0439fcbbb24c702d348a8218dfd08
 			Target: docker.FlyteSnackDir,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -104,17 +97,10 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-<<<<<<< HEAD
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-=======
-		sandboxConfig.DefaultConfig.SourcesPath = f.UserHomeDir()
-		volumes := append(docker.Volumes, mount.Mount{
-			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.SourcesPath,
->>>>>>> f6e4526d2fd0439fcbbb24c702d348a8218dfd08
 			Target: docker.FlyteSnackDir,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -147,17 +133,10 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-<<<<<<< HEAD
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-=======
-		sandboxConfig.DefaultConfig.SourcesPath = f.UserHomeDir()
-		volumes := append(docker.Volumes, mount.Mount{
-			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.SourcesPath,
->>>>>>> f6e4526d2fd0439fcbbb24c702d348a8218dfd08
 			Target: docker.FlyteSnackDir,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -198,17 +177,10 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-<<<<<<< HEAD
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-=======
-		sandboxConfig.DefaultConfig.SourcesPath = f.UserHomeDir()
-		volumes := append(docker.Volumes, mount.Mount{
-			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.SourcesPath,
->>>>>>> f6e4526d2fd0439fcbbb24c702d348a8218dfd08
 			Target: docker.FlyteSnackDir,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -241,17 +213,10 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-<<<<<<< HEAD
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-=======
-		sandboxConfig.DefaultConfig.SourcesPath = f.UserHomeDir()
-		volumes := append(docker.Volumes, mount.Mount{
-			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.SourcesPath,
->>>>>>> f6e4526d2fd0439fcbbb24c702d348a8218dfd08
 			Target: docker.FlyteSnackDir,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -284,17 +249,10 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-<<<<<<< HEAD
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-=======
-		sandboxConfig.DefaultConfig.SourcesPath = f.UserHomeDir()
-		volumes := append(docker.Volumes, mount.Mount{
-			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.SourcesPath,
->>>>>>> f6e4526d2fd0439fcbbb24c702d348a8218dfd08
 			Target: docker.FlyteSnackDir,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -354,11 +312,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}).Return(reader, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
 		docker.Client = mockDocker
-<<<<<<< HEAD
 		sandboxConfig.DefaultConfig.Source = ""
-=======
-		sandboxConfig.DefaultConfig.SourcesPath = ""
->>>>>>> f6e4526d2fd0439fcbbb24c702d348a8218dfd08
 		err := startSandboxCluster(ctx, []string{}, cmdCtx)
 		assert.Nil(t, err)
 	})
@@ -394,11 +348,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}).Return(reader, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
 		docker.Client = mockDocker
-<<<<<<< HEAD
 		sandboxConfig.DefaultConfig.Source = ""
-=======
-		sandboxConfig.DefaultConfig.SourcesPath = ""
->>>>>>> f6e4526d2fd0439fcbbb24c702d348a8218dfd08
 		err := startSandboxCluster(ctx, []string{}, cmdCtx)
 		assert.NotNil(t, err)
 	})
