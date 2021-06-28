@@ -5,7 +5,7 @@ var (
 	DefaultConfig = &SandboxConfig{}
 )
 
-// SandboxConfig
+//SandboxConfig
 type SandboxConfig struct {
 	Source string `json:"source" pflag:", Path of your source code"`
 }

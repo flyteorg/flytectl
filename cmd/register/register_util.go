@@ -513,3 +513,21 @@ func getStorageClient(ctx context.Context) (storage.ComposedProtobufStore, error
 	}
 	return s.ComposedProtobufStore, nil
 }
+
+func validateRegisterFiles(dataRefs []string) (string, []string, []string, error) {
+	var validProto, InvalidFiles []string
+	var sourceCode string
+
+	for _, v := range dataRefs {
+		if len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) > 0 && strings.HasSuffix(v, sourceCodeExtension) {
+			sourceCode = v
+		} else if len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) == 0 && strings.HasSuffix(v, sourceCodeExtension) {
+			return sourceCode, validProto, InvalidFiles, fmt.Errorf("please pass additional flags like --additionalDistributionPath")
+		} else if strings.HasSuffix(v, ".pb") {
+			validProto = append(validProto, v)
+		} else {
+			InvalidFiles = append(InvalidFiles, v)
+		}
+	}
+	return sourceCode, validProto, InvalidFiles, nil
+}

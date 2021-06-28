@@ -4,7 +4,7 @@ admin:
   insecure: true
 logger:
   show-source: true
-  level: 2
+  level: 1
 storage:
   connection:
     access-key: minio
@@ -15,4 +15,3 @@ storage:
     secret-key: miniostorage
   type: minio
   container: "my-s3-bucket"
-

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
 
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -25,9 +24,9 @@ If there are already registered entities with v1 version then the command will f
 Fast Register will register all the fast serialized protobuf files including tasks, workflows and launchplans with default v1 version. Learn more about fast registration  https://docs.flyte.org/projects/cookbook/en/stable/auto/deployment/workflow/fast_registration.html
 ::
 
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix" --destinationDir="" --additionalDistributionDir="s3://dummy/fast" 
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix"  --additionalDistributionPath="s3://dummy/fast" 
 	
-Fast Register will fail if you didn't pass additional flags like --additionalDistributionDir and --destinationDir flags. Fast register o/p only support work with additional flags
+Fast Register will fail if you didn't pass additional flags like --additionalDistributionPath flags. Fast register o/p only support work with additional flags
 ::
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix" 
@@ -94,24 +93,6 @@ Usage
 
 func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	return Register(ctx, args, cmdCtx)
-}
-
-func validateRegisterFiles(dataRefs []string) (string, []string, []string, error) {
-	var validProto, InvalidFiles []string
-	var sourceCode string
-
-	for _, v := range dataRefs {
-		if len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) > 0 && strings.HasSuffix(v, sourceCodeExtension) {
-			sourceCode = v
-		} else if len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) == 0 && strings.HasSuffix(v, sourceCodeExtension) {
-			return sourceCode, validProto, InvalidFiles, fmt.Errorf("please pass additional flags like --additionalDistributionPath")
-		} else if strings.HasSuffix(v, ".pb") {
-			validProto = append(validProto, v)
-		} else {
-			InvalidFiles = append(InvalidFiles, v)
-		}
-	}
-	return sourceCode, validProto, InvalidFiles, nil
 }
 
 func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
