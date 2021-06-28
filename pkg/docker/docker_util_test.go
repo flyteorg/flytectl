@@ -313,3 +313,50 @@ func TestDockerClient(t *testing.T) {
 	})
 
 }
+
+func TestDockerExec(t *testing.T) {
+	t.Run("Successfully exec command in container", func(t *testing.T) {
+		ctx := context.Background()
+		mockDocker := &mocks.Docker{}
+		Client = mockDocker
+		c := ExecConfig
+		c.Cmd = []string{"ls"}
+		mockDocker.OnContainerExecCreateMatch(ctx, mock.Anything, c).Return(types.IDResponse{}, nil)
+		_, err := ExecCommend(ctx, mockDocker, "test", []string{"ls"})
+		assert.Nil(t, err)
+	})
+	t.Run("Failed exec command in container", func(t *testing.T) {
+		ctx := context.Background()
+		mockDocker := &mocks.Docker{}
+		Client = mockDocker
+		c := ExecConfig
+		c.Cmd = []string{"ls"}
+		mockDocker.OnContainerExecCreateMatch(ctx, mock.Anything, c).Return(types.IDResponse{}, fmt.Errorf("error"))
+		_, err := ExecCommend(ctx, mockDocker, "test", []string{"ls"})
+		assert.NotNil(t, err)
+	})
+}
+
+func TestInspectExecResp(t *testing.T) {
+	t.Run("Successfully exec command in container", func(t *testing.T) {
+		ctx := context.Background()
+		mockDocker := &mocks.Docker{}
+		Client = mockDocker
+		c := ExecConfig
+		c.Cmd = []string{"ls"}
+		reader := bufio.NewReader(strings.NewReader("test"))
+
+		mockDocker.OnContainerExecInspectMatch(ctx, mock.Anything).Return(types.ContainerExecInspect{}, nil)
+		mockDocker.OnContainerExecAttachMatch(ctx, mock.Anything, types.ExecStartCheck{}).Return(types.HijackedResponse{
+			Reader: reader,
+		}, nil)
+
+		defer func() {
+			if r := recover(); r != nil {
+				assert.NotNil(t, r)
+			}
+		}()
+		err := InspectExecResp(ctx, mockDocker, "test")
+		assert.Nil(t, err)
+	})
+}

@@ -11,6 +11,7 @@ require (
 	github.com/enescakir/emoji v1.0.0
 	github.com/flyteorg/flyteidl v0.19.3
 	github.com/flyteorg/flytestdlib v0.3.24
+	github.com/fsouza/go-dockerclient v1.7.3 // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.4.3
 	github.com/google/go-github v17.0.0+incompatible
@@ -22,6 +23,7 @@ require (
 	github.com/landoop/tableprinter v0.0.0-20180806200924-8bd8c2576d27
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/mitchellh/mapstructure v1.4.1
+	github.com/moby/moby v20.10.7+incompatible // indirect
 	github.com/moby/term v0.0.0-20201216013528-df9cb8a40635 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
