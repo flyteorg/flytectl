@@ -5,9 +5,9 @@ package register
 
 import (
 	"fmt"
+
 	"github.com/spf13/pflag"
 )
-
 
 // GetPFlagSet will return strongly types pflags for all fields in FilesConfig and its nested types. The format of the
 // flags is json-name.json-sub-name... etc.

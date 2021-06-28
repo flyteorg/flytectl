@@ -14,22 +14,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var dereferencableKindsSandboxConfig = map[reflect.Kind]struct{}{
+var dereferencableKindsConfig = map[reflect.Kind]struct{}{
 	reflect.Array: {}, reflect.Chan: {}, reflect.Map: {}, reflect.Ptr: {}, reflect.Slice: {},
 }
 
 // Checks if t is a kind that can be dereferenced to get its underlying type.
-func canGetElementSandboxConfig(t reflect.Kind) bool {
-	_, exists := dereferencableKindsSandboxConfig[t]
+func canGetElementConfig(t reflect.Kind) bool {
+	_, exists := dereferencableKindsConfig[t]
 	return exists
 }
 
 // This decoder hook tests types for json unmarshaling capability. If implemented, it uses json unmarshal to build the
 // object. Otherwise, it'll just pass on the original data.
-func jsonUnmarshalerHookSandboxConfig(_, to reflect.Type, data interface{}) (interface{}, error) {
+func jsonUnmarshalerHookConfig(_, to reflect.Type, data interface{}) (interface{}, error) {
 	unmarshalerType := reflect.TypeOf((*json.Unmarshaler)(nil)).Elem()
 	if to.Implements(unmarshalerType) || reflect.PtrTo(to).Implements(unmarshalerType) ||
-		(canGetElementSandboxConfig(to.Kind()) && to.Elem().Implements(unmarshalerType)) {
+		(canGetElementConfig(to.Kind()) && to.Elem().Implements(unmarshalerType)) {
 
 		raw, err := json.Marshal(data)
 		if err != nil {
@@ -50,7 +50,7 @@ func jsonUnmarshalerHookSandboxConfig(_, to reflect.Type, data interface{}) (int
 	return data, nil
 }
 
-func decode_SandboxConfig(input, result interface{}) error {
+func decode_Config(input, result interface{}) error {
 	config := &mapstructure.DecoderConfig{
 		TagName:          "json",
 		WeaklyTypedInput: true,
@@ -58,7 +58,7 @@ func decode_SandboxConfig(input, result interface{}) error {
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToSliceHookFunc(","),
-			jsonUnmarshalerHookSandboxConfig,
+			jsonUnmarshalerHookConfig,
 		),
 	}
 
@@ -70,7 +70,7 @@ func decode_SandboxConfig(input, result interface{}) error {
 	return decoder.Decode(input)
 }
 
-func join_SandboxConfig(arr interface{}, sep string) string {
+func join_Config(arr interface{}, sep string) string {
 	listValue := reflect.ValueOf(arr)
 	strs := make([]string, 0, listValue.Len())
 	for i := 0; i < listValue.Len(); i++ {
@@ -80,22 +80,22 @@ func join_SandboxConfig(arr interface{}, sep string) string {
 	return strings.Join(strs, sep)
 }
 
-func testDecodeJson_SandboxConfig(t *testing.T, val, result interface{}) {
-	assert.NoError(t, decode_SandboxConfig(val, result))
+func testDecodeJson_Config(t *testing.T, val, result interface{}) {
+	assert.NoError(t, decode_Config(val, result))
 }
 
-func testDecodeRaw_SandboxConfig(t *testing.T, vStringSlice, result interface{}) {
-	assert.NoError(t, decode_SandboxConfig(vStringSlice, result))
+func testDecodeRaw_Config(t *testing.T, vStringSlice, result interface{}) {
+	assert.NoError(t, decode_Config(vStringSlice, result))
 }
 
-func TestSandboxConfig_GetPFlagSet(t *testing.T) {
-	val := SandboxConfig{}
+func TestConfig_GetPFlagSet(t *testing.T) {
+	val := Config{}
 	cmdFlags := val.GetPFlagSet("")
 	assert.True(t, cmdFlags.HasFlags())
 }
 
-func TestSandboxConfig_SetFlags(t *testing.T) {
-	actual := SandboxConfig{}
+func TestConfig_SetFlags(t *testing.T) {
+	actual := Config{}
 	cmdFlags := actual.GetPFlagSet("")
 	assert.True(t, cmdFlags.HasFlags())
 
@@ -106,7 +106,7 @@ func TestSandboxConfig_SetFlags(t *testing.T) {
 
 			cmdFlags.Set("source", testValue)
 			if vString, err := cmdFlags.GetString("source"); err == nil {
-				testDecodeJson_SandboxConfig(t, fmt.Sprintf("%v", vString), &actual.Source)
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.Source)
 
 			} else {
 				assert.FailNow(t, err.Error())

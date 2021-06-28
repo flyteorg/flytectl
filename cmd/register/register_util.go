@@ -517,9 +517,10 @@ func getStorageClient(ctx context.Context) (storage.ComposedProtobufStore, error
 func validateRegisterFiles(dataRefs []string) (string, []string, []string, error) {
 	var validProto, InvalidFiles []string
 	var sourceCode string
-
+	var isFast = false
 	for _, v := range dataRefs {
 		if len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) > 0 && strings.HasSuffix(v, sourceCodeExtension) {
+			isFast = true
 			sourceCode = v
 		} else if len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) == 0 && strings.HasSuffix(v, sourceCodeExtension) {
 			return sourceCode, validProto, InvalidFiles, fmt.Errorf("please pass additional flags like --additionalDistributionPath")
@@ -528,6 +529,9 @@ func validateRegisterFiles(dataRefs []string) (string, []string, []string, error
 		} else {
 			InvalidFiles = append(InvalidFiles, v)
 		}
+	}
+	if !isFast && len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) > 0 {
+		return sourceCode, validProto, InvalidFiles, fmt.Errorf("please check your fast serialize package, There is no source code available but you passed additional flag --additionalDistributionPath")
 	}
 	return sourceCode, validProto, InvalidFiles, nil
 }

@@ -77,6 +77,21 @@ func TestRegisterFromFiles(t *testing.T) {
 		err := registerFromFilesFunc(ctx, args, cmdCtx)
 		assert.NotNil(t, err)
 	})
+	t.Run("Failed fast registration while flag is passed but source code is not available", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		rconfig.DefaultFilesConfig.Archive = false
+		rconfig.DefaultFilesConfig.AdditionalDistributionPath = s3Output
+		mockStorage := &storageMocks.ComposedProtobufStore{}
+		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
+		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
+		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil, nil)
+		mockAdminClient.OnCreateWorkflowMatch(mock.Anything, mock.Anything).Return(nil, nil)
+		mockAdminClient.OnCreateLaunchPlanMatch(mock.Anything, mock.Anything).Return(nil, nil)
+		Client = mockStorage
+		err := registerFromFilesFunc(ctx, args, cmdCtx)
+		assert.NotNil(t, err)
+	})
 	t.Run("Valid registration of fast serialize", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
@@ -99,9 +114,8 @@ func TestRegisterFromFiles(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		rconfig.DefaultFilesConfig.Archive = false
-
 		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.AdditionalDistributionPath = s3Output
+		rconfig.DefaultFilesConfig.AdditionalDistributionPath = ""
 		mockStorage := &storageMocks.ComposedProtobufStore{}
 		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
 		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
@@ -112,5 +126,4 @@ func TestRegisterFromFiles(t *testing.T) {
 		err := registerFromFilesFunc(ctx, args, cmdCtx)
 		assert.Nil(t, err)
 	})
-
 }
