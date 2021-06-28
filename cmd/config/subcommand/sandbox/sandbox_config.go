@@ -1,11 +1,11 @@
 package sandbox
 
-//go:generate pflags Config --default-var DefaultConfig
+//go:generate pflags SandboxConfig --default-var DefaultConfig
 var (
-	DefaultConfig = &Config{}
+	DefaultConfig = &SandboxConfig{}
 )
 
-// Config
-type Config struct {
-	SnacksRepo string `json:"flytesnacks" pflag:", Path of your flytesnacks repository"`
+// SandboxConfig
+type SandboxConfig struct {
+	Source string `json:"source" pflag:", Path of your source code"`
 }

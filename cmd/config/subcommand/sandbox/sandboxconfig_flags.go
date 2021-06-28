@@ -14,7 +14,7 @@ import (
 
 // If v is a pointer, it will get its element value or the zero value of the element type.
 // If v is not a pointer, it will return it as is.
-func (Config) elemValueOrNil(v interface{}) interface{} {
+func (SandboxConfig) elemValueOrNil(v interface{}) interface{} {
 	if t := reflect.TypeOf(v); t.Kind() == reflect.Ptr {
 		if reflect.ValueOf(v).IsNil() {
 			return reflect.Zero(t.Elem()).Interface()
@@ -28,7 +28,7 @@ func (Config) elemValueOrNil(v interface{}) interface{} {
 	return v
 }
 
-func (Config) mustJsonMarshal(v interface{}) string {
+func (SandboxConfig) mustJsonMarshal(v interface{}) string {
 	raw, err := json.Marshal(v)
 	if err != nil {
 		panic(err)
@@ -37,7 +37,7 @@ func (Config) mustJsonMarshal(v interface{}) string {
 	return string(raw)
 }
 
-func (Config) mustMarshalJSON(v json.Marshaler) string {
+func (SandboxConfig) mustMarshalJSON(v json.Marshaler) string {
 	raw, err := v.MarshalJSON()
 	if err != nil {
 		panic(err)
@@ -46,10 +46,10 @@ func (Config) mustMarshalJSON(v json.Marshaler) string {
 	return string(raw)
 }
 
-// GetPFlagSet will return strongly types pflags for all fields in Config and its nested types. The format of the
+// GetPFlagSet will return strongly types pflags for all fields in SandboxConfig and its nested types. The format of the
 // flags is json-name.json-sub-name... etc.
-func (cfg Config) GetPFlagSet(prefix string) *pflag.FlagSet {
-	cmdFlags := pflag.NewFlagSet("Config", pflag.ExitOnError)
-	cmdFlags.StringVar(&DefaultConfig.SnacksRepo, fmt.Sprintf("%v%v", prefix, "flytesnacks"), DefaultConfig.SnacksRepo, " Path of your flytesnacks repository")
+func (cfg SandboxConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
+	cmdFlags := pflag.NewFlagSet("SandboxConfig", pflag.ExitOnError)
+	cmdFlags.StringVar(&DefaultConfig.Source, fmt.Sprintf("%v%v", prefix, "source"), DefaultConfig.Source, " Path of your source code")
 	return cmdFlags
 }

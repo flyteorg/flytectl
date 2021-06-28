@@ -39,7 +39,6 @@ const registrationProjectPattern = "{{ registration.project }}"
 const registrationDomainPattern = "{{ registration.domain }}"
 const registrationVersionPattern = "{{ registration.version }}"
 const registrationRemotePackagePattern = "{{ .remote_package_path }}"
-const registrationDestDirPattern = "{{ .dest_dir }}"
 
 type Result struct {
 	Name   string
@@ -211,10 +210,7 @@ func hydrateTaskSpec(task *admin.TaskSpec) {
 	if task.Template.GetContainer() != nil {
 		for k := range task.Template.GetContainer().Args {
 			if task.Template.GetContainer().Args[k] == "" || task.Template.GetContainer().Args[k] == registrationRemotePackagePattern {
-				task.Template.GetContainer().Args[k] = string(getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version))
-			}
-			if task.Template.GetContainer().Args[k] == "" || task.Template.GetContainer().Args[k] == registrationDestDirPattern {
-				task.Template.GetContainer().Args[k] = rconfig.DefaultFilesConfig.DestinationDir
+				task.Template.GetContainer().Args[k] = string(getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionPath, rconfig.DefaultFilesConfig.Version))
 			}
 		}
 	}
@@ -294,11 +290,6 @@ func getSerializeOutputFiles(ctx context.Context, args []string) ([]string, stri
 		 * serialized protobuf files , but flyte expects them to be registered in topologically sorted order that it had
 		 * generated otherwise the registration can fail if the dependent files are not registered earlier.
 		 */
-		for _, v := range args {
-			if (len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) == 0 || len(rconfig.DefaultFilesConfig.DestinationDir) == 0) && strings.HasSuffix(v, sourceCodeExtension) {
-				return args, "", fmt.Errorf("you are trying to register fast serialize workflow. Please pass additional flags like --additionalDistributionDir and --destinationDir")
-			}
-		}
 
 		sort.Strings(args)
 		return args, "", nil

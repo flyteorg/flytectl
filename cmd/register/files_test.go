@@ -33,9 +33,8 @@ func TestRegisterFromFiles(t *testing.T) {
 		registerFilesSetup()
 		rconfig.DefaultFilesConfig.Archive = true
 
-		rconfig.DefaultFilesConfig.DestinationDir = "/"
 		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.AdditionalDistributionDir = s3Output
+		rconfig.DefaultFilesConfig.AdditionalDistributionPath = s3Output
 		mockStorage := &storageMocks.ComposedProtobufStore{}
 		args = []string{"testdata/flytesnacks-core.tgz"}
 		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
@@ -50,10 +49,9 @@ func TestRegisterFromFiles(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		rconfig.DefaultFilesConfig.Archive = true
-		rconfig.DefaultFilesConfig.DestinationDir = "/"
+
 		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
 		rconfig.DefaultFilesConfig.ContinueOnError = false
-		rconfig.DefaultFilesConfig.AdditionalDistributionDir = s3Output
 		mockStorage := &storageMocks.ComposedProtobufStore{}
 		args = []string{"testdata/valid-fast-register.tgz"}
 		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("error"))
@@ -68,9 +66,9 @@ func TestRegisterFromFiles(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		rconfig.DefaultFilesConfig.Archive = true
-		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
+		rconfig.DefaultFilesConfig.AdditionalDistributionPath = ""
 		mockStorage := &storageMocks.ComposedProtobufStore{}
-		args = []string{"testdata/valid-fast-register.tgz"}
+		args = []string{"testdata/flyte-package.tgz"}
 		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil, nil)
 		mockAdminClient.OnCreateWorkflowMatch(mock.Anything, mock.Anything).Return(nil, nil)
@@ -83,9 +81,9 @@ func TestRegisterFromFiles(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		rconfig.DefaultFilesConfig.Archive = true
-		rconfig.DefaultFilesConfig.DestinationDir = "/"
+
 		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.AdditionalDistributionDir = s3Output
+		rconfig.DefaultFilesConfig.AdditionalDistributionPath = s3Output
 		mockStorage := &storageMocks.ComposedProtobufStore{}
 		args = []string{"testdata/flytesnacks-core.tgz"}
 		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
@@ -101,9 +99,9 @@ func TestRegisterFromFiles(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		rconfig.DefaultFilesConfig.Archive = false
-		rconfig.DefaultFilesConfig.DestinationDir = "/"
+
 		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.AdditionalDistributionDir = s3Output
+		rconfig.DefaultFilesConfig.AdditionalDistributionPath = s3Output
 		mockStorage := &storageMocks.ComposedProtobufStore{}
 		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
 		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)

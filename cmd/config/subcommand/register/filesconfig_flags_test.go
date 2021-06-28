@@ -183,28 +183,14 @@ func TestFilesConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
-	t.Run("Test_additionalDistributionDir", func(t *testing.T) {
+	t.Run("Test_additionalDistributionPath", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("additionalDistributionDir", testValue)
-			if vString, err := cmdFlags.GetString("additionalDistributionDir"); err == nil {
-				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vString), &actual.AdditionalDistributionDir)
-
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
-	})
-	t.Run("Test_destinationDir", func(t *testing.T) {
-
-		t.Run("Override", func(t *testing.T) {
-			testValue := "1"
-
-			cmdFlags.Set("destinationDir", testValue)
-			if vString, err := cmdFlags.GetString("destinationDir"); err == nil {
-				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vString), &actual.DestinationDir)
+			cmdFlags.Set("additionalDistributionPath", testValue)
+			if vString, err := cmdFlags.GetString("additionalDistributionPath"); err == nil {
+				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vString), &actual.AdditionalDistributionPath)
 
 			} else {
 				assert.FailNow(t, err.Error())

@@ -7,8 +7,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
@@ -98,10 +96,27 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 	return Register(ctx, args, cmdCtx)
 }
 
+func validateRegisterFiles(dataRefs []string) (string, []string, []string, error) {
+	var validProto, InvalidFiles []string
+	var sourceCode string
+
+	for _, v := range dataRefs {
+		if len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) > 0 && strings.HasSuffix(v, sourceCodeExtension) {
+			sourceCode = v
+		} else if len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) == 0 && strings.HasSuffix(v, sourceCodeExtension) {
+			return sourceCode, validProto, InvalidFiles, fmt.Errorf("please pass additional flags like --additionalDistributionPath")
+		} else if strings.HasSuffix(v, ".pb") {
+			validProto = append(validProto, v)
+		} else {
+			InvalidFiles = append(InvalidFiles, v)
+		}
+	}
+	return sourceCode, validProto, InvalidFiles, nil
+}
+
 func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	var _err error
 	var dataRefs []string
-	var validProto []string
 	var tmpDir string
 	var registerResults []Result
 
@@ -113,17 +128,19 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	}
 	logger.Infof(ctx, "Parsing file... Total(%v)", len(dataRefs))
 
-	for i := 0; i < len(dataRefs); i++ {
-		if len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) > 0 && len(rconfig.DefaultFilesConfig.DestinationDir) > 0 && strings.HasSuffix(dataRefs[i], sourceCodeExtension) {
-			if err = uploadFastRegisterArtifact(ctx, dataRefs[i], rconfig.DefaultFilesConfig.AdditionalDistributionDir, rconfig.DefaultFilesConfig.Version); err != nil {
-				return fmt.Errorf("please check your Storage Config. It while while uploading the source code. %v", err)
-			}
-		} else if (len(rconfig.DefaultFilesConfig.AdditionalDistributionDir) == 0 || len(rconfig.DefaultFilesConfig.DestinationDir) == 0) && strings.HasSuffix(dataRefs[i], sourceCodeExtension) {
-			return errors.New("Fast serialize detected without additional flags")
-		} else if strings.HasSuffix(dataRefs[i], ".pb") {
-			validProto = append(validProto, dataRefs[i])
-		} else {
-			return errors.New("Invalid files")
+	// Validate Input files
+	sourceCode, validProto, InvalidFiles, err := validateRegisterFiles(dataRefs)
+	if err != nil {
+		return err
+	}
+
+	if len(InvalidFiles) > 0 {
+		return fmt.Errorf("input package have some invalid files. try to run pyflyte package again")
+	}
+
+	if len(sourceCode) > 0 {
+		if err = uploadFastRegisterArtifact(ctx, sourceCode, rconfig.DefaultFilesConfig.AdditionalDistributionPath, rconfig.DefaultFilesConfig.Version); err != nil {
+			return fmt.Errorf("please check your Storage Config. It failed while uploading the source code. %v", err)
 		}
 	}
 

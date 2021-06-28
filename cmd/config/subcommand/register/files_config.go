@@ -17,6 +17,5 @@ type FilesConfig struct {
 	AssumableIamRole          string `json:"assumableIamRole" pflag:", custom assumable iam auth role to register launch plans with."`
 	K8ServiceAccount          string `json:"k8ServiceAccount" pflag:", custom kubernetes service account auth role to register launch plans with."`
 	OutputLocationPrefix      string `json:"outputLocationPrefix" pflag:", custom output location prefix for offloaded types (files/schemas)."`
-	AdditionalDistributionDir string `json:"additionalDistributionDir" pflag:", Location for additional distributions."`
-	DestinationDir            string `json:"destinationDir" pflag:", Destination dir for the fast register."`
+	AdditionalDistributionPath string `json:"additionalDistributionPath" pflag:", Location for additional distributions."`
 }
