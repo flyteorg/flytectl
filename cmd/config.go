@@ -14,8 +14,8 @@ import (
 // configCmd represents the config init command
 var configCmd = &cobra.Command{
 	Use:   "init-config",
-	Short: "Init flytectl config",
-	Long:  `config will create a flytectl config in defined path`,
+	Short: "init-config flytectl config",
+	Long:  `init-config will create a flytectl config in defined path`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return initFlytectlConfig(os.Stdin)
 	},
