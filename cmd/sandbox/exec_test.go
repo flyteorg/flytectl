@@ -3,6 +3,7 @@ package sandbox
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"io"
 	"strings"
 	"testing"
@@ -36,20 +37,18 @@ func TestSandboxClusterExec(t *testing.T) {
 	mockDocker.OnContainerExecInspectMatch(ctx, mock.Anything).Return(types.ContainerExecInspect{}, nil)
 	mockDocker.OnContainerExecAttachMatch(ctx, mock.Anything, types.ExecStartCheck{}).Return(types.HijackedResponse{
 		Reader: reader,
-	}, nil)
+	}, fmt.Errorf("Test"))
 	docker.Client = mockDocker
 	err := sandboxClusterExec(ctx, []string{"ls -al"}, cmdCtx)
-	assert.Nil(t, err)
+
+	assert.NotNil(t, err)
 }
 
-func TestSandboxClusterExecWithNoCommand(t *testing.T) {
+func TestSandboxClusterExecWithoutCmd(t *testing.T) {
 	mockDocker := &mocks.Docker{}
 	mockOutStream := new(io.Writer)
 	ctx := context.Background()
 	cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
-	c := docker.ExecConfig
-	c.Cmd = []string{"ls"}
-
 	reader := bufio.NewReader(strings.NewReader("test"))
 
 	mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{
@@ -65,7 +64,9 @@ func TestSandboxClusterExecWithNoCommand(t *testing.T) {
 	mockDocker.OnContainerExecInspectMatch(ctx, mock.Anything).Return(types.ContainerExecInspect{}, nil)
 	mockDocker.OnContainerExecAttachMatch(ctx, mock.Anything, types.ExecStartCheck{}).Return(types.HijackedResponse{
 		Reader: reader,
-	}, nil)
+	}, fmt.Errorf("Test"))
+	docker.Client = mockDocker
 	err := sandboxClusterExec(ctx, []string{}, cmdCtx)
+
 	assert.NotNil(t, err)
 }
