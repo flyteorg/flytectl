@@ -11,7 +11,7 @@ import (
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
-//go:generate pflags ProjectConfig
+//go:generate pflags ProjectConfig --default-var DefaultProjectConfig --bind-default-var
 
 // Config hold configuration for project update flags.
 type ProjectConfig struct {
@@ -67,7 +67,7 @@ Usage
 `
 )
 
-var projectConfig = &ProjectConfig{}
+var DefaultProjectConfig = &ProjectConfig{}
 
 func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	id := config.GetConfig().Project
@@ -75,8 +75,8 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 		fmt.Printf(clierrors.ErrProjectNotPassed)
 		return nil
 	}
-	archiveProject := projectConfig.ArchiveProject
-	activateProject := projectConfig.ActivateProject
+	archiveProject := DefaultProjectConfig.ArchiveProject
+	activateProject := DefaultProjectConfig.ActivateProject
 	if activateProject == archiveProject {
 		return fmt.Errorf(clierrors.ErrInvalidStateUpdate)
 	}

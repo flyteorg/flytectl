@@ -2,7 +2,7 @@ package adminutils
 
 import "github.com/flyteorg/flytestdlib/config"
 
-//go:generate pflags Config
+//go:generate pflags Config --bind-default-var
 
 var (
 	defaultConfig = &Config{
