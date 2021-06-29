@@ -7,11 +7,11 @@ import (
 )
 
 func TestGetConfig(t *testing.T) {
-	defaultConfig = &Config{
+	DefaultConfig = &Config{
 		MaxRecords: 500,
 		BatchSize:  100,
 	}
 	c := GetConfig()
-	assert.Equal(t, defaultConfig.BatchSize, c.BatchSize)
-	assert.Equal(t, defaultConfig.MaxRecords, c.MaxRecords)
+	assert.Equal(t, DefaultConfig.BatchSize, c.BatchSize)
+	assert.Equal(t, DefaultConfig.MaxRecords, c.MaxRecords)
 }
