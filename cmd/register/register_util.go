@@ -206,11 +206,11 @@ func hydrateIdentifier(identifier *core.Identifier) {
 	}
 }
 
-func hydrateTaskSpec(task *admin.TaskSpec) {
+func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) {
 	if task.Template.GetContainer() != nil {
 		for k := range task.Template.GetContainer().Args {
 			if task.Template.GetContainer().Args[k] == "" || task.Template.GetContainer().Args[k] == registrationRemotePackagePattern {
-				task.Template.GetContainer().Args[k] = string(getAdditionalDistributionLoc(rconfig.DefaultFilesConfig.AdditionalDistributionPath, rconfig.DefaultFilesConfig.Version))
+				task.Template.GetContainer().Args[k] = string(getRemoteStoragePath(rconfig.DefaultFilesConfig.AdditionalDistributionPath, sourceCode, rconfig.DefaultFilesConfig.Version))
 			}
 		}
 	}
@@ -233,7 +233,7 @@ func hydrateLaunchPlanSpec(lpSpec *admin.LaunchPlanSpec) {
 	}
 }
 
-func hydrateSpec(message proto.Message) error {
+func hydrateSpec(message proto.Message, sourceCode string) error {
 	switch v := message.(type) {
 	case *admin.LaunchPlan:
 		launchPlan := message.(*admin.LaunchPlan)
@@ -258,7 +258,7 @@ func hydrateSpec(message proto.Message) error {
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
 		hydrateIdentifier(taskSpec.Template.Id)
-		hydrateTaskSpec(taskSpec)
+		hydrateTaskSpec(taskSpec, sourceCode)
 
 	default:
 		return fmt.Errorf("unknown type %T", v)
@@ -358,7 +358,7 @@ func readAndCopyArchive(src io.Reader, tempDir string, unarchivedFiles []string)
 	}
 }
 
-func registerFile(ctx context.Context, fileName string, registerResults []Result, cmdCtx cmdCore.CommandContext) ([]Result, error) {
+func registerFile(ctx context.Context, fileName, sourceCode string, registerResults []Result, cmdCtx cmdCore.CommandContext) ([]Result, error) {
 	var registerResult Result
 	var fileContents []byte
 	var err error
@@ -374,7 +374,7 @@ func registerFile(ctx context.Context, fileName string, registerResults []Result
 		return registerResults, err
 	}
 
-	if err := hydrateSpec(spec); err != nil {
+	if err := hydrateSpec(spec, sourceCode); err != nil {
 		registerResult = Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error hydrating spec due to %v", err)}
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
@@ -469,18 +469,29 @@ func getFlyteTestManifest(org, repository string) ([]FlyteSnack, string, error) 
 	return nil, "", fmt.Errorf("Repository doesn't have any release")
 }
 
-func getAdditionalDistributionLoc(remoteLocation, identifier string) storage.DataReference {
-	return storage.DataReference(fmt.Sprintf("%v/%v.tar.gz", remoteLocation, identifier))
+func getRemoteStoragePath(remoteLocation, file, identifier string) storage.DataReference {
+	return storage.DataReference(fmt.Sprintf("%v/%v-%v", remoteLocation, identifier, file))
 }
 
-func uploadFastRegisterArtifact(ctx context.Context, file, additionalDistributionDir, version string) error {
+func GetAdditionalDistributionPath(remotePath string) string {
+	if len(remotePath) == 0 {
+		prefix := "s3://"
+		if storage.GetConfig().Type == "GCS" {
+			prefix = "gs://"
+		}
+		remotePath = fmt.Sprintf("%v%v/fast", prefix, storage.GetConfig().InitContainer)
+		return remotePath
+	}
+	return remotePath
+}
+
+func uploadFastRegisterArtifact(ctx context.Context, file, sourceCodeName, additionalDistributionPath, version string) error {
 	s, err := getStorageClient(ctx)
 	if err != nil {
 		return err
 	}
-
 	var dataRefReaderCloser io.ReadCloser
-	fullRemotePath := getAdditionalDistributionLoc(additionalDistributionDir, version)
+	fullRemotePath := getRemoteStoragePath(additionalDistributionPath, sourceCodeName, version)
 	raw, err := json.Marshal(file)
 	if err != nil {
 		return err
@@ -514,24 +525,25 @@ func getStorageClient(ctx context.Context) (storage.ComposedProtobufStore, error
 	return s.ComposedProtobufStore, nil
 }
 
-func validateRegisterFiles(dataRefs []string) (string, []string, []string, error) {
+func isFastRegister(file string) bool {
+	f := strings.Split(file, "/")
+	if strings.HasPrefix(f[len(f)-1], "fast") && strings.HasSuffix(f[len(f)-1], sourceCodeExtension) {
+		return true
+	}
+	return false
+}
+
+func validateRegisterFiles(dataRefs []string) (string, []string, []string) {
 	var validProto, InvalidFiles []string
 	var sourceCode string
-	var isFast = false
 	for _, v := range dataRefs {
-		if len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) > 0 && strings.HasSuffix(v, sourceCodeExtension) {
-			isFast = true
+		if isFastRegister(v) {
 			sourceCode = v
-		} else if len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) == 0 && strings.HasSuffix(v, sourceCodeExtension) {
-			return sourceCode, validProto, InvalidFiles, fmt.Errorf("please pass additional flags like --additionalDistributionPath")
 		} else if strings.HasSuffix(v, ".pb") {
 			validProto = append(validProto, v)
 		} else {
 			InvalidFiles = append(InvalidFiles, v)
 		}
 	}
-	if !isFast && len(rconfig.DefaultFilesConfig.AdditionalDistributionPath) > 0 {
-		return sourceCode, validProto, InvalidFiles, fmt.Errorf("please check your fast serialize package, There is no source code available but you passed additional flag --additionalDistributionPath")
-	}
-	return sourceCode, validProto, InvalidFiles, nil
+	return sourceCode, validProto, InvalidFiles
 }

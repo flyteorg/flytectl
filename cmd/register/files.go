@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -21,16 +22,15 @@ If there are already registered entities with v1 version then the command will f
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks
 	
-Fast Register will register all the fast serialized protobuf files including tasks, workflows and launchplans with default v1 version. Learn more about fast registration  https://docs.flyte.org/projects/cookbook/en/stable/auto/deployment/workflow/fast_registration.html
+Fast Register will register all the fast serialized protobuf files including tasks, workflows and launchplans with default v1 version. Learn more about fast registration, If you didn't pass the additionalDistributionPath then flytectl will create additionalDistributionPath from your storage config'
 ::
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix"  --additionalDistributionPath="s3://dummy/fast" 
 	
-Fast Register will fail if you didn't pass additional flags like --additionalDistributionPath flags. Fast register o/p only support work with additional flags
+If user didn't pass the additionalDistributionPath then flytectl will create additionalDistributionPath from your storage config'
 ::
 
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix" 
-
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix"  --additionalDistributionPath="s3://dummy/fast" 
 	
 Using archive file.Currently supported are .tgz and .tar extension files and can be local or remote file served through http/https.
 Use --archive flag.
@@ -98,8 +98,6 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	var _err error
 	var dataRefs []string
-	var tmpDir string
-	var registerResults []Result
 
 	// getSerializeOutputFiles will return you all proto and  source code compress file in sorted order
 	dataRefs, tmpDir, err := getSerializeOutputFiles(ctx, args)
@@ -110,24 +108,28 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	logger.Infof(ctx, "Parsing file... Total(%v)", len(dataRefs))
 
 	// Validate Input files
-	sourceCode, validProto, InvalidFiles, err := validateRegisterFiles(dataRefs)
-	if err != nil {
-		return err
-	}
+	sourceCode, validProto, InvalidFiles := validateRegisterFiles(dataRefs)
 
 	if len(InvalidFiles) > 0 {
-		return fmt.Errorf("input package have some invalid files. try to run pyflyte package again")
+		return fmt.Errorf("input package have some invalid files. try to run pyflyte package again %v", InvalidFiles)
 	}
 
+	var sourceCodeName string
 	if len(sourceCode) > 0 {
-		if err = uploadFastRegisterArtifact(ctx, sourceCode, rconfig.DefaultFilesConfig.AdditionalDistributionPath, rconfig.DefaultFilesConfig.Version); err != nil {
+		logger.Infof(ctx, "Fast Registration detected")
+		f := strings.Split(sourceCode, "/")
+		sourceCodeName = f[len(f)-1]
+		rconfig.DefaultFilesConfig.AdditionalDistributionPath = GetAdditionalDistributionPath(rconfig.DefaultFilesConfig.AdditionalDistributionPath)
+		if err = uploadFastRegisterArtifact(ctx, sourceCode, sourceCodeName, rconfig.DefaultFilesConfig.AdditionalDistributionPath, rconfig.DefaultFilesConfig.Version); err != nil {
 			return fmt.Errorf("please check your Storage Config. It failed while uploading the source code. %v", err)
 		}
+		logger.Infof(ctx, "Source code successfully uploaded %v/%v ", rconfig.DefaultFilesConfig.AdditionalDistributionPath, sourceCodeName)
 	}
 
+	var registerResults []Result
 	fastFail := rconfig.DefaultFilesConfig.ContinueOnError
 	for i := 0; i < len(validProto) && !(fastFail && _err != nil); i++ {
-		registerResults, _err = registerFile(ctx, validProto[i], registerResults, cmdCtx)
+		registerResults, _err = registerFile(ctx, validProto[i], sourceCodeName, registerResults, cmdCtx)
 	}
 
 	payload, _ := json.Marshal(registerResults)

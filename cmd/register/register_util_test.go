@@ -212,7 +212,7 @@ func TestRegisterFile(t *testing.T) {
 		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil, nil)
 		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
 		var registerResults []Result
-		results, err := registerFile(ctx, args[0], registerResults, cmdCtx)
+		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx)
 		assert.Equal(t, 1, len(results))
 		assert.Nil(t, err)
 	})
@@ -221,7 +221,7 @@ func TestRegisterFile(t *testing.T) {
 		registerFilesSetup()
 		args = []string{"testdata/non-existent.pb"}
 		var registerResults []Result
-		results, err := registerFile(ctx, args[0], registerResults, cmdCtx)
+		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx)
 		assert.Equal(t, 1, len(results))
 		assert.Equal(t, "Failed", results[0].Status)
 		assert.Equal(t, "Error reading file due to open testdata/non-existent.pb: no such file or directory", results[0].Info)
@@ -232,7 +232,7 @@ func TestRegisterFile(t *testing.T) {
 		registerFilesSetup()
 		args = []string{"testdata/valid-register.tar"}
 		var registerResults []Result
-		results, err := registerFile(ctx, args[0], registerResults, cmdCtx)
+		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx)
 		assert.Equal(t, 1, len(results))
 		assert.Equal(t, "Failed", results[0].Status)
 		assert.Equal(t, "Error unmarshalling file due to failed unmarshalling file testdata/valid-register.tar", results[0].Info)
@@ -245,7 +245,7 @@ func TestRegisterFile(t *testing.T) {
 			status.Error(codes.AlreadyExists, "AlreadyExists"))
 		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
 		var registerResults []Result
-		results, err := registerFile(ctx, args[0], registerResults, cmdCtx)
+		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx)
 		assert.Equal(t, 1, len(results))
 		assert.Equal(t, "Success", results[0].Status)
 		assert.Equal(t, "AlreadyExists", results[0].Info)
@@ -258,7 +258,7 @@ func TestRegisterFile(t *testing.T) {
 			status.Error(codes.InvalidArgument, "Invalid"))
 		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
 		var registerResults []Result
-		results, err := registerFile(ctx, args[0], registerResults, cmdCtx)
+		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx)
 		assert.Equal(t, 1, len(results))
 		assert.Equal(t, "Failed", results[0].Status)
 		assert.Equal(t, "Error registering file due to rpc error: code = InvalidArgument desc = Invalid", results[0].Info)
@@ -311,8 +311,8 @@ func TestFlyteManifest(t *testing.T) {
 }
 
 func TestGetAdditionalDistributionLoc(t *testing.T) {
-	remoteLocation := getAdditionalDistributionLoc("s3://dummy", "v1")
-	assert.Equal(t, "s3://dummy/v1.tar.gz", string(remoteLocation))
+	remoteLocation := getRemoteStoragePath("s3://dummy", "test.tar.gz", "v1")
+	assert.Equal(t, "s3://dummy/v1-test.tar.gz", string(remoteLocation))
 }
 
 func TestUploadFastRegisterArtifact(t *testing.T) {
@@ -320,21 +320,21 @@ func TestUploadFastRegisterArtifact(t *testing.T) {
 		rawStoreWrite := &storageMocks.ComposedProtobufStore{}
 		Client = rawStoreWrite
 		rawStoreWrite.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "", "")
+		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "", "", "")
 		assert.Nil(t, err)
 	})
 	t.Run("Failed upload", func(t *testing.T) {
 		rawStoreWrite := &storageMocks.ComposedProtobufStore{}
 		Client = rawStoreWrite
 		rawStoreWrite.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("error"))
-		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "", "")
+		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "", "", "")
 		assert.NotNil(t, err)
 	})
 	t.Run("Failed upload", func(t *testing.T) {
 		rawStoreWrite := &storageMocks.ComposedProtobufStore{}
 		Client = rawStoreWrite
 		rawStoreWrite.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacksre.tgz", "", "")
+		err := uploadFastRegisterArtifact(ctx, "testdata/flytesnacksre.tgz", "", "", "")
 		assert.NotNil(t, err)
 	})
 }
@@ -390,7 +390,7 @@ func TestHydrateNode(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		task := &admin.Task{}
-		err := hydrateSpec(task)
+		err := hydrateSpec(task, "")
 		assert.NotNil(t, err)
 	})
 }

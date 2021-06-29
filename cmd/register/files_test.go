@@ -49,26 +49,24 @@ func TestRegisterFromFiles(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		rconfig.DefaultFilesConfig.Archive = true
-
 		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.ContinueOnError = false
 		mockStorage := &storageMocks.ComposedProtobufStore{}
-		args = []string{"testdata/valid-fast-register.tgz"}
+		args = []string{"testdata/flytesnacks-core.tgz"}
 		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("error"))
 		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil, nil)
 		mockAdminClient.OnCreateWorkflowMatch(mock.Anything, mock.Anything).Return(nil, nil)
 		mockAdminClient.OnCreateLaunchPlanMatch(mock.Anything, mock.Anything).Return(nil, nil)
-		Client = mockStorage
+		Client = nil
 		err := Register(ctx, args, cmdCtx)
 		assert.NotNil(t, err)
 	})
-	t.Run("Failed fast registration while flags are missing", func(t *testing.T) {
+	t.Run("Failed registeration because of invalid files", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		rconfig.DefaultFilesConfig.Archive = true
 		rconfig.DefaultFilesConfig.AdditionalDistributionPath = ""
 		mockStorage := &storageMocks.ComposedProtobufStore{}
-		args = []string{"testdata/flyte-package.tgz"}
+		args = []string{"testdata/invalid-fast.tgz"}
 		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil, nil)
 		mockAdminClient.OnCreateWorkflowMatch(mock.Anything, mock.Anything).Return(nil, nil)
@@ -77,21 +75,7 @@ func TestRegisterFromFiles(t *testing.T) {
 		err := registerFromFilesFunc(ctx, args, cmdCtx)
 		assert.NotNil(t, err)
 	})
-	t.Run("Failed fast registration while flag is passed but source code is not available", func(t *testing.T) {
-		setup()
-		registerFilesSetup()
-		rconfig.DefaultFilesConfig.Archive = false
-		rconfig.DefaultFilesConfig.AdditionalDistributionPath = s3Output
-		mockStorage := &storageMocks.ComposedProtobufStore{}
-		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
-		mockStorage.OnWriteRawMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil, nil)
-		mockAdminClient.OnCreateWorkflowMatch(mock.Anything, mock.Anything).Return(nil, nil)
-		mockAdminClient.OnCreateLaunchPlanMatch(mock.Anything, mock.Anything).Return(nil, nil)
-		Client = mockStorage
-		err := registerFromFilesFunc(ctx, args, cmdCtx)
-		assert.NotNil(t, err)
-	})
+
 	t.Run("Valid registration of fast serialize", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
