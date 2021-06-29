@@ -9,13 +9,13 @@ import (
 )
 
 const (
-	execShort = "Get the status of the sandbox environment."
+	execShort = "Execute any command in sandbox"
 	execLong  = `
-Status will retrieve the status of the Sandbox environment. Currently FlyteSandbox runs as a local docker container.
-This will return the docker status for this container
+Execute command will run any command in sandbox.
+
 Usage
 ::
- bin/flytectl sandbox status 
+ bin/flytectl sandbox exec -- ls -al 
 `
 )
 
@@ -27,7 +27,7 @@ func sandboxClusterExec(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	if len(args) > 0 {
 		return Execute(ctx, cli, args)
 	}
-	return fmt.Errorf("Please use the right syntax. flytectl sandbox exec -- kubectl get pods")
+	return fmt.Errorf("missing argument. Please check usage examples by running flytectl sandbox exec --help")
 }
 
 func Execute(ctx context.Context, cli docker.Docker, args []string) error {
