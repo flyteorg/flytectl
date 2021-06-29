@@ -361,13 +361,12 @@ func TestInspectExecResp(t *testing.T) {
 		c.Cmd = []string{"ls"}
 		reader := bufio.NewReader(strings.NewReader("test"))
 
-		mockDocker.OnContainerExecInspectMatch(ctx, mock.Anything).Return(types.ContainerExecInspect{}, nil)
 		mockDocker.OnContainerExecAttachMatch(ctx, mock.Anything, types.ExecStartCheck{}).Return(types.HijackedResponse{
 			Reader: reader,
-		},nil)
+		}, nil)
 
 		err := InspectExecResp(ctx, mockDocker, "test")
-		assert.NotNil(t, err)
+		assert.Nil(t, err)
 	})
 
 }

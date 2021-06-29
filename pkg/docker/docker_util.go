@@ -217,14 +217,10 @@ func InspectExecResp(ctx context.Context, cli Docker, containerID string) error 
 	if err != nil {
 		return err
 	}
-	defer resp.Close()
-	outputDone := make(chan error)
+
 	s := bufio.NewScanner(resp.Reader)
 	for s.Scan() {
-		if s.Err() != nil {
-			outputDone <- err
-		}
 		fmt.Println(s.Text())
 	}
-	return err
+	return nil
 }
