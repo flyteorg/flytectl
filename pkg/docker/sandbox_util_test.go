@@ -269,5 +269,4 @@ func TestDockerClient(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, cli)
 	})
-
 }

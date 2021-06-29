@@ -11,9 +11,7 @@ import (
 
 func TestSetupConfig(t *testing.T) {
 	assert.Nil(t, initFlytectlConfig(strings.NewReader("Yes")))
-}
-
-func TestSetupConfigWithOutput(t *testing.T) {
+	assert.Nil(t, initFlytectlConfig(strings.NewReader("Yes")))
 	assert.Nil(t, initFlytectlConfig(strings.NewReader("No")))
 }
 

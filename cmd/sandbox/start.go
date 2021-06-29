@@ -4,9 +4,10 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/flyteorg/flytectl/pkg/util"
 	"io"
 	"os"
+
+	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/flyteorg/flytectl/pkg/docker"
 
