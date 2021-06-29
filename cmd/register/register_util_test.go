@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/flyteorg/flytestdlib/storage"
+
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 
 	storageMocks "github.com/flyteorg/flytestdlib/storage/mocks"
@@ -393,4 +395,20 @@ func TestHydrateNode(t *testing.T) {
 		err := hydrateSpec(task, "")
 		assert.NotNil(t, err)
 	})
+}
+
+func TestGetAdditionalDistributionPath(t *testing.T) {
+	t.Run("s3 config validate", func(t *testing.T) {
+		assert.Equal(t, "s3://s3-bucket/fast", getAdditionalDistributionPath("", &storage.Config{
+			InitContainer: "s3-bucket",
+			Type:          "s3",
+		}))
+	})
+	t.Run("s3 config validate", func(t *testing.T) {
+		assert.Equal(t, "s3://s3-bucket/fast", getAdditionalDistributionPath("", &storage.Config{
+			InitContainer: "s3-bucket",
+			Type:          "GCS",
+		}))
+	})
+
 }

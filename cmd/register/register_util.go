@@ -473,13 +473,13 @@ func getRemoteStoragePath(remoteLocation, file, identifier string) storage.DataR
 	return storage.DataReference(fmt.Sprintf("%v/%v-%v", remoteLocation, identifier, file))
 }
 
-func GetAdditionalDistributionPath(remotePath string) string {
+func getAdditionalDistributionPath(remotePath string, conf *storage.Config) string {
 	if len(remotePath) == 0 {
 		prefix := "s3://"
-		if storage.GetConfig().Type == "GCS" {
+		if conf.Type == "GCS" {
 			prefix = "gs://"
 		}
-		remotePath = fmt.Sprintf("%v%v/fast", prefix, storage.GetConfig().InitContainer)
+		remotePath = fmt.Sprintf("%v%v/fast", prefix, conf.InitContainer)
 		return remotePath
 	}
 	return remotePath
@@ -533,7 +533,7 @@ func isFastRegister(file string) bool {
 	return false
 }
 
-func validateRegisterFiles(dataRefs []string) (string, []string, []string) {
+func segregateSourceAndProtos(dataRefs []string) (string, []string, []string) {
 	var validProto, InvalidFiles []string
 	var sourceCode string
 	for _, v := range dataRefs {

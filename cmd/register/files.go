@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/flyteorg/flytestdlib/storage"
+
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
@@ -22,15 +24,16 @@ If there are already registered entities with v1 version then the command will f
 
  bin/flytectl register file  _pb_output/* -d development  -p flytesnacks
 	
-Fast Register will register all the fast serialized protobuf files including tasks, workflows and launchplans with default v1 version. Learn more about fast registration, If you didn't pass the additionalDistributionPath then flytectl will create additionalDistributionPath from your storage config'
-::
-
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix"  --additionalDistributionPath="s3://dummy/fast" 
+Fast Register will register all the fast serialized protobuf files including tasks, workflows and launchplans with default v1 version. flytectl will create additionalDistributionPath from your storage config
 	
-If user didn't pass the additionalDistributionPath then flytectl will create additionalDistributionPath from your storage config'
 ::
 
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 -l "s3://dummy/prefix"  --additionalDistributionPath="s3://dummy/fast" 
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 
+	
+override additionalDistributionPath on registration
+::
+
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 --additionalDistributionPath="s3://dummy/fast" 
 	
 Using archive file.Currently supported are .tgz and .tar extension files and can be local or remote file served through http/https.
 Use --archive flag.
@@ -45,8 +48,7 @@ Using  local tgz file.
 
  bin/flytectl register files  _pb_output.tgz -d development  -p flytesnacks --archive
 
-If you want to continue executing registration on other files ignoring the errors including version conflicts then pass in
-the continueOnError flag.
+If you want to continue executing registration on other files ignoring the errors including version conflicts then pass in the continueOnError flag.
 
 ::
 
@@ -108,7 +110,7 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	logger.Infof(ctx, "Parsing file... Total(%v)", len(dataRefs))
 
 	// Validate Input files
-	sourceCode, validProto, InvalidFiles := validateRegisterFiles(dataRefs)
+	sourceCode, validProto, InvalidFiles := segregateSourceAndProtos(dataRefs)
 
 	if len(InvalidFiles) > 0 {
 		return fmt.Errorf("input package have some invalid files. try to run pyflyte package again %v", InvalidFiles)
@@ -119,7 +121,7 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 		logger.Infof(ctx, "Fast Registration detected")
 		f := strings.Split(sourceCode, "/")
 		sourceCodeName = f[len(f)-1]
-		rconfig.DefaultFilesConfig.AdditionalDistributionPath = GetAdditionalDistributionPath(rconfig.DefaultFilesConfig.AdditionalDistributionPath)
+		rconfig.DefaultFilesConfig.AdditionalDistributionPath = getAdditionalDistributionPath(rconfig.DefaultFilesConfig.AdditionalDistributionPath, storage.GetConfig())
 		if err = uploadFastRegisterArtifact(ctx, sourceCode, sourceCodeName, rconfig.DefaultFilesConfig.AdditionalDistributionPath, rconfig.DefaultFilesConfig.Version); err != nil {
 			return fmt.Errorf("please check your Storage Config. It failed while uploading the source code. %v", err)
 		}
