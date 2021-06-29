@@ -1,7 +1,11 @@
 package util
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
+
+	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -48,4 +52,41 @@ func TestWriteIntoFile(t *testing.T) {
 		err = WriteIntoFile(data, "/githubtest/version.yaml")
 		assert.NotNil(t, err)
 	})
+}
+
+func TestConfigCleanup(t *testing.T) {
+	_, err := os.Stat(f.FilePathJoin(f.UserHomeDir(), ".flyte"))
+	if os.IsNotExist(err) {
+		_ = os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755)
+	}
+	_ = ioutil.WriteFile(FlytectlConfig, []byte("string"), 0600)
+	_ = ioutil.WriteFile(Kubeconfig, []byte("string"), 0600)
+
+	err = ConfigCleanup()
+	assert.Nil(t, err)
+
+	_, err = os.Stat(FlytectlConfig)
+	check := os.IsNotExist(err)
+	assert.Equal(t, check, true)
+
+	_, err = os.Stat(Kubeconfig)
+	check = os.IsNotExist(err)
+	assert.Equal(t, check, true)
+	_ = ConfigCleanup()
+}
+
+func TestSetupFlytectlConfig(t *testing.T) {
+	_, err := os.Stat(f.FilePathJoin(f.UserHomeDir(), ".flyte"))
+	if os.IsNotExist(err) {
+		_ = os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755)
+	}
+	err = SetupFlyteDir()
+	assert.Nil(t, err)
+	err = SetupConfig()
+	assert.Nil(t, err)
+	_, err = os.Stat(FlytectlConfig)
+	assert.Nil(t, err)
+	check := os.IsNotExist(err)
+	assert.Equal(t, check, false)
+	_ = ConfigCleanup()
 }

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/flyteorg/flytectl/pkg/util"
 	"io"
 	"os"
 
@@ -53,11 +54,11 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 
 func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
-	if err := docker.SetupFlyteDir(); err != nil {
+	if err := util.SetupFlyteDir(); err != nil {
 		return nil, err
 	}
 
-	if err := docker.SetupConfig(); err != nil {
+	if err := util.SetupConfig(); err != nil {
 		return nil, err
 	}
 
@@ -74,7 +75,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}
 
 	os.Setenv("KUBECONFIG", docker.Kubeconfig)
-	os.Setenv("FLYTECTL_CONFIG", docker.FlytectlConfig)
+	os.Setenv("FLYTECTL_CONFIG", util.FlytectlConfig)
 	if err := docker.PullDockerImage(ctx, cli, docker.ImageName); err != nil {
 		return nil, err
 	}

@@ -3,6 +3,7 @@ package sandbox
 import (
 	"context"
 	"fmt"
+	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/flyteorg/flytectl/pkg/docker"
 
@@ -43,7 +44,7 @@ func tearDownSandbox(ctx context.Context, cli docker.Docker) error {
 			return err
 		}
 	}
-	if err := docker.ConfigCleanup(); err != nil {
+	if err := util.ConfigCleanup(); err != nil {
 		fmt.Printf("Config cleanup failed. Which Failed due to %v \n ", err)
 	}
 	fmt.Printf("%v %v Sandbox cluster is removed successfully. \n", emoji.Broom, emoji.Broom)

@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+
+	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 )
 
 type githubversion struct {
@@ -32,6 +35,11 @@ storage:
   enable-multicontainer: true
 `
 
+var (
+	FlytectlConfig = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config-sandbox.yaml")
+	Kubeconfig     = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
+)
+
 func GetRequest(baseURL, url string) ([]byte, error) {
 	response, err := http.Get(fmt.Sprintf("%v%v", baseURL, url))
 	if err != nil {
@@ -57,6 +65,32 @@ func ParseGithubTag(data []byte) (string, error) {
 
 func WriteIntoFile(data []byte, file string) error {
 	err := ioutil.WriteFile(file, data, 0600)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetupFlyteDir will create .flyte dir if not exist
+func SetupFlyteDir() error {
+	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755); err != nil {
+		return err
+	}
+	return nil
+}
+
+// SetupConfig download the flyte sandbox config
+func SetupConfig() error {
+	return WriteIntoFile([]byte(ConfigTemplate), FlytectlConfig)
+}
+
+// ConfigCleanup will remove the sandbox config from flyte dir
+func ConfigCleanup() error {
+	err := os.Remove(FlytectlConfig)
+	if err != nil {
+		return err
+	}
+	err = os.RemoveAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s"))
 	if err != nil {
 		return err
 	}

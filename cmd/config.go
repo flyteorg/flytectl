@@ -5,7 +5,6 @@ import (
 	"os"
 
 	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
-	"github.com/flyteorg/flytectl/pkg/docker"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 	"github.com/flyteorg/flytectl/pkg/util"
 	"github.com/spf13/cobra"
@@ -27,7 +26,7 @@ Usage`,
 }
 
 func initFlytectlConfig(reader io.Reader) error {
-	if err := docker.SetupFlyteDir(); err != nil {
+	if err := util.SetupFlyteDir(); err != nil {
 		return err
 	}
 	if cmdUtil.AskForConfirmation("Are you sure ? It will overwrite the default config from ~/.flyte/config.yaml", reader) {
