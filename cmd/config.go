@@ -15,7 +15,7 @@ import (
 var configCmd = &cobra.Command{
 	Use:   "init-config",
 	Short: "init-config flytectl config",
-	Long:  `
+	Long: `
 init-config will create flytectl config in flyte directory i.e ~/.flyte/config.yaml 
 ::
 
