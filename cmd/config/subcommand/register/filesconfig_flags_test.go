@@ -183,14 +183,14 @@ func TestFilesConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
-	t.Run("Test_additionalDistributionPath", func(t *testing.T) {
+	t.Run("Test_sourceUploadPath", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("additionalDistributionPath", testValue)
-			if vString, err := cmdFlags.GetString("additionalDistributionPath"); err == nil {
-				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vString), &actual.AdditionalDistributionPath)
+			cmdFlags.Set("sourceUploadPath", testValue)
+			if vString, err := cmdFlags.GetString("sourceUploadPath"); err == nil {
+				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vString), &actual.SourceUploadPath)
 
 			} else {
 				assert.FailNow(t, err.Error())

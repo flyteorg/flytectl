@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
-
-	"github.com/flyteorg/flytestdlib/storage"
+	"path/filepath"
 
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -119,13 +117,11 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	var sourceCodeName string
 	if len(sourceCode) > 0 {
 		logger.Infof(ctx, "Fast Registration detected")
-		f := strings.Split(sourceCode, "/")
-		sourceCodeName = f[len(f)-1]
-		rconfig.DefaultFilesConfig.AdditionalDistributionPath = getAdditionalDistributionPath(rconfig.DefaultFilesConfig.AdditionalDistributionPath, storage.GetConfig())
-		if err = uploadFastRegisterArtifact(ctx, sourceCode, sourceCodeName, rconfig.DefaultFilesConfig.AdditionalDistributionPath, rconfig.DefaultFilesConfig.Version); err != nil {
+		_, sourceCodeName = filepath.Split(sourceCode)
+		if err = uploadFastRegisterArtifact(ctx, sourceCode, sourceCodeName, rconfig.DefaultFilesConfig.Version); err != nil {
 			return fmt.Errorf("please check your Storage Config. It failed while uploading the source code. %v", err)
 		}
-		logger.Infof(ctx, "Source code successfully uploaded %v/%v ", rconfig.DefaultFilesConfig.AdditionalDistributionPath, sourceCodeName)
+		logger.Infof(ctx, "Source code successfully uploaded %v/%v ", rconfig.DefaultFilesConfig.SourceUploadPath, sourceCodeName)
 	}
 
 	var registerResults []Result

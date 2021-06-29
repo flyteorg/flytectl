@@ -52,7 +52,7 @@ type HTTPClient interface {
 }
 
 var FlyteSnacksRelease []FlyteSnack
-var Client storage.ComposedProtobufStore
+var Client *storage.DataStore
 
 // FlyteSnack Defines flyte test manifest structure
 type FlyteSnack struct {
@@ -206,14 +206,19 @@ func hydrateIdentifier(identifier *core.Identifier) {
 	}
 }
 
-func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) {
+func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 	if task.Template.GetContainer() != nil {
 		for k := range task.Template.GetContainer().Args {
 			if task.Template.GetContainer().Args[k] == "" || task.Template.GetContainer().Args[k] == registrationRemotePackagePattern {
-				task.Template.GetContainer().Args[k] = string(getRemoteStoragePath(rconfig.DefaultFilesConfig.AdditionalDistributionPath, sourceCode, rconfig.DefaultFilesConfig.Version))
+				remotePath, err := getRemoteStoragePath(context.Background(), Client, rconfig.DefaultFilesConfig.SourceUploadPath, sourceCode, rconfig.DefaultFilesConfig.Version)
+				if err != nil {
+					return err
+				}
+				task.Template.GetContainer().Args[k] = string(remotePath)
 			}
 		}
 	}
+	return nil
 }
 
 func hydrateLaunchPlanSpec(lpSpec *admin.LaunchPlanSpec) {
@@ -258,7 +263,9 @@ func hydrateSpec(message proto.Message, sourceCode string) error {
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
 		hydrateIdentifier(taskSpec.Template.Id)
-		hydrateTaskSpec(taskSpec, sourceCode)
+		if err := hydrateTaskSpec(taskSpec, sourceCode); err != nil {
+			return err
+		}
 
 	default:
 		return fmt.Errorf("unknown type %T", v)
@@ -448,50 +455,54 @@ func getFlyteTestManifest(org, repository string) ([]FlyteSnack, string, error) 
 	if err != nil {
 		return nil, "", err
 	}
-	if len(releases) > 0 {
-		response, err := http.Get(fmt.Sprintf(flyteManifest, *releases[0].TagName))
-		if err != nil {
-			return nil, "", err
-		}
-		defer response.Body.Close()
-
-		data, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			return nil, "", err
-		}
-
-		err = json.Unmarshal(data, &FlyteSnacksRelease)
-		if err != nil {
-			return nil, "", err
-		}
-		return FlyteSnacksRelease, *releases[0].TagName, nil
+	if len(releases) == 0 {
+		return nil, "", fmt.Errorf("Repository doesn't have any release")
 	}
-	return nil, "", fmt.Errorf("Repository doesn't have any release")
-}
-
-func getRemoteStoragePath(remoteLocation, file, identifier string) storage.DataReference {
-	return storage.DataReference(fmt.Sprintf("%v/%v-%v", remoteLocation, identifier, file))
-}
-
-func getAdditionalDistributionPath(remotePath string, conf *storage.Config) string {
-	if len(remotePath) == 0 {
-		prefix := "s3://"
-		if conf.Type == "GCS" {
-			prefix = "gs://"
-		}
-		remotePath = fmt.Sprintf("%v%v/fast", prefix, conf.InitContainer)
-		return remotePath
+	response, err := http.Get(fmt.Sprintf(flyteManifest, *releases[0].TagName))
+	if err != nil {
+		return nil, "", err
 	}
-	return remotePath
+	defer response.Body.Close()
+
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, "", err
+	}
+
+	err = json.Unmarshal(data, &FlyteSnacksRelease)
+	if err != nil {
+		return nil, "", err
+	}
+	return FlyteSnacksRelease, *releases[0].TagName, nil
+
 }
 
-func uploadFastRegisterArtifact(ctx context.Context, file, sourceCodeName, additionalDistributionPath, version string) error {
-	s, err := getStorageClient(ctx)
+func getRemoteStoragePath(ctx context.Context, s *storage.DataStore, remoteLocation, file, identifier string) (storage.DataReference, error) {
+	remotePath, err := s.ConstructReference(ctx, storage.DataReference(remoteLocation), fmt.Sprintf("%v-%v", identifier,file))
+	if err != nil {
+		return storage.DataReference(""), err
+	}
+	return remotePath, nil
+}
+
+func uploadFastRegisterArtifact(ctx context.Context, file, sourceCodeName, version string) error {
+	dataStore, err := getStorageClient(ctx)
 	if err != nil {
 		return err
 	}
 	var dataRefReaderCloser io.ReadCloser
-	fullRemotePath := getRemoteStoragePath(additionalDistributionPath, sourceCodeName, version)
+	remotePath := storage.DataReference(rconfig.DefaultFilesConfig.SourceUploadPath)
+	if len(rconfig.DefaultFilesConfig.SourceUploadPath) == 0 {
+		remotePath, err = dataStore.ConstructReference(ctx, dataStore.GetBaseContainerFQN(ctx), "fast")
+		if err != nil {
+			return err
+		}
+	}
+	rconfig.DefaultFilesConfig.SourceUploadPath = string(remotePath)
+	fullRemotePath, err := getRemoteStoragePath(ctx, dataStore, rconfig.DefaultFilesConfig.SourceUploadPath, sourceCodeName, version)
+	if err != nil {
+		return err
+	}
 	raw, err := json.Marshal(file)
 	if err != nil {
 		return err
@@ -504,13 +515,13 @@ func uploadFastRegisterArtifact(ctx context.Context, file, sourceCodeName, addit
 	if err != nil {
 		return err
 	}
-	if err := s.WriteRaw(ctx, fullRemotePath, int64(len(raw)), storage.Options{}, dataRefReaderCloser); err != nil {
+	if err := dataStore.ComposedProtobufStore.WriteRaw(ctx, fullRemotePath, int64(len(raw)), storage.Options{}, dataRefReaderCloser); err != nil {
 		return err
 	}
 	return nil
 }
 
-func getStorageClient(ctx context.Context) (storage.ComposedProtobufStore, error) {
+func getStorageClient(ctx context.Context) (*storage.DataStore, error) {
 	if Client != nil {
 		return Client, nil
 	}
@@ -520,9 +531,10 @@ func getStorageClient(ctx context.Context) (storage.ComposedProtobufStore, error
 	s, err := storage.NewDataStore(storage.GetConfig(), testScope.NewSubScope("flytectl"))
 	if err != nil {
 		logger.Errorf(ctx, "error while creating storage client %v", err)
-		return nil, err
+		return Client, err
 	}
-	return s.ComposedProtobufStore, nil
+	Client = s
+	return Client, nil
 }
 
 func isFastRegister(file string) bool {
