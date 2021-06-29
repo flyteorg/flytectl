@@ -2,11 +2,9 @@ package docker
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -220,33 +218,13 @@ func InspectExecResp(ctx context.Context, cli Docker, containerID string) error 
 		return err
 	}
 	defer resp.Close()
-	var errBuf bytes.Buffer
 	outputDone := make(chan error)
-
-	go func() {
-		s := bufio.NewScanner(resp.Reader)
-		for s.Scan() {
-			if s.Err() != nil {
-				outputDone <- err
-			}
-			fmt.Println(s.Text())
+	s := bufio.NewScanner(resp.Reader)
+	for s.Scan() {
+		if s.Err() != nil {
+			outputDone <- err
 		}
-	}()
-
-	select {
-	case err := <-outputDone:
-		if err != nil {
-			return err
-		}
-		break
-
-	case <-ctx.Done():
-		return ctx.Err()
-	}
-
-	_, err = ioutil.ReadAll(&errBuf)
-	if err != nil {
-		return err
+		fmt.Println(s.Text())
 	}
 	return err
 }
