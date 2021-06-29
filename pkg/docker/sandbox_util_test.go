@@ -71,7 +71,7 @@ func TestSetupFlytectlConfig(t *testing.T) {
 	}
 	err = SetupFlyteDir()
 	assert.Nil(t, err)
-	err = GetFlyteSandboxConfig()
+	err = SetupConfig()
 	assert.Nil(t, err)
 	_, err = os.Stat(FlytectlConfig)
 	assert.Nil(t, err)

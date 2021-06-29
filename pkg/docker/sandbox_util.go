@@ -50,14 +50,9 @@ func SetupFlyteDir() error {
 	return nil
 }
 
-// GetFlyteSandboxConfig download the flyte sandbox config
-func GetFlyteSandboxConfig() error {
-	response, err := util.GetRequest("https://raw.githubusercontent.com", "/flyteorg/flytectl/master/config.yaml")
-	if err != nil {
-		return err
-	}
-
-	return util.WriteIntoFile(response, FlytectlConfig)
+// SetupConfig download the flyte sandbox config
+func SetupConfig() error {
+	return util.WriteIntoFile([]byte(util.ConfigTemplate), FlytectlConfig)
 }
 
 // ConfigCleanup will remove the sandbox config from flyte dir

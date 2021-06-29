@@ -60,6 +60,7 @@ func newRootCmd() *cobra.Command {
 	rootCmd.AddCommand(delete.RemoteDeleteCommand())
 	rootCmd.AddCommand(sandbox.CreateSandboxCommand())
 	rootCmd.AddCommand(completionCmd)
+	rootCmd.AddCommand(configCmd)
 	// Added version command
 	versioncmd := version.GetVersionCommand(rootCmd)
 	cmdCore.AddCommands(rootCmd, versioncmd)

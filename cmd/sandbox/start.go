@@ -57,7 +57,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		return nil, err
 	}
 
-	if err := docker.GetFlyteSandboxConfig(); err != nil {
+	if err := docker.SetupConfig(); err != nil {
 		return nil, err
 	}
 
