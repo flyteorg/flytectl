@@ -478,7 +478,7 @@ func getFlyteTestManifest(org, repository string) ([]FlyteSnack, string, error) 
 }
 
 func getRemoteStoragePath(ctx context.Context, s *storage.DataStore, remoteLocation, file, identifier string) (storage.DataReference, error) {
-	remotePath, err := s.ConstructReference(ctx, storage.DataReference(remoteLocation), fmt.Sprintf("%v-%v", identifier,file))
+	remotePath, err := s.ConstructReference(ctx, storage.DataReference(remoteLocation), fmt.Sprintf("%v-%v", identifier, file))
 	if err != nil {
 		return storage.DataReference(""), err
 	}
