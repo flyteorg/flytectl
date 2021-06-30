@@ -217,7 +217,6 @@ func InspectExecResp(ctx context.Context, cli Docker, containerID string) error 
 	if err != nil {
 		return err
 	}
-
 	s := bufio.NewScanner(resp.Reader)
 	for s.Scan() {
 		fmt.Println(s.Text())

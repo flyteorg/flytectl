@@ -11,12 +11,12 @@ import (
 const (
 	execShort = "Execute any command in sandbox"
 	execLong  = `
-Execute command will run any command in sandbox.
+Execute command will Will run non-interactive commands and return immediately with the output.
 
-Usage
 ::
  bin/flytectl sandbox exec -- ls -al 
-`
+
+Usage`
 )
 
 func sandboxClusterExec(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
