@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -35,9 +36,12 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+// Variable define in serialized proto that needs to be replace in registration time
 const registrationProjectPattern = "{{ registration.project }}"
 const registrationDomainPattern = "{{ registration.domain }}"
 const registrationVersionPattern = "{{ registration.version }}"
+
+// Additional variable define in fast serialized proto that needs to be replace in registration time
 const registrationRemotePackagePattern = "{{ .remote_package_path }}"
 
 type Result struct {
@@ -263,6 +267,7 @@ func hydrateSpec(message proto.Message, sourceCode string) error {
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
 		hydrateIdentifier(taskSpec.Template.Id)
+		// In case of fast serialize input proto also have on additional variable to substitute i.e destination bucket for source code
 		if err := hydrateTaskSpec(taskSpec, sourceCode); err != nil {
 			return err
 		}
@@ -538,8 +543,9 @@ func getStorageClient(ctx context.Context) (*storage.DataStore, error) {
 }
 
 func isFastRegister(file string) bool {
-	f := strings.Split(file, "/")
-	if strings.HasPrefix(f[len(f)-1], "fast") && strings.HasSuffix(f[len(f)-1], sourceCodeExtension) {
+	_, f := filepath.Split(file)
+	// Pyflyte always archive source code with a name that start with fast and have an extension .tar.gz
+	if strings.HasPrefix(f, "fast") && strings.HasSuffix(f, sourceCodeExtension) {
 		return true
 	}
 	return false
