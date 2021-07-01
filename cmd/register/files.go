@@ -31,7 +31,7 @@ SourceUploadPath is an optional flag. By default, flytectl will create SourceUpl
 In case of fast registration, If the SourceUploadPath flag is defined then In this case flytectl will not use the default directory for uploading the source code, it will override the destination path on the registration  
 ::
 
- bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 --additionalDistributionPath="s3://dummy/fast" 
+ bin/flytectl register file  _pb_output/* -d development  -p flytesnacks  -v v2 --SourceUploadPath="s3://dummy/fast" 
 	
 Using archive file.Currently supported are .tgz and .tar extension files and can be local or remote file served through http/https.
 Use --archive flag.

@@ -313,11 +313,6 @@ func TestFlyteManifest(t *testing.T) {
 	assert.NotEmpty(t, tag)
 }
 
-//func TestGetAdditionalDistributionLoc(t *testing.T) {
-//	remoteLocation := getRemoteStoragePath("s3://dummy", "test.tar.gz", "v1")
-//	assert.Equal(t, "s3://dummy/v1-test.tar.gz", string(remoteLocation))
-//}
-
 func TestUploadFastRegisterArtifact(t *testing.T) {
 	t.Run("Successful upload", func(t *testing.T) {
 		testScope := promutils.NewTestScope()
@@ -409,15 +404,3 @@ func TestHydrateNode(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 }
-
-//
-//func TestGetAdditionalDistributionPath(t *testing.T) {
-//	t.Run("s3 config validate", func(t *testing.T) {
-//		ClientDataStore = nil
-//		s, err := getRemoteStoragePath(context.Background(),ClientDataStore, &storage.Config{
-//				InitContainer: "s3-bucket",
-//				Type:          "s3",
-//			})
-//		assert.Equal(t, "s3://s3-bucket/fast",Client, )
-//	})
-//}
