@@ -6,6 +6,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionqueueattribute"
 	pluginoverride "github.com/flyteorg/flytectl/cmd/config/subcommand/plugin_override"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/taskresourceattribute"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflowexecutionconfig"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 
 	"github.com/spf13/cobra"
@@ -39,8 +40,8 @@ func CreateUpdateCommand() *cobra.Command {
 			Short: projectShort, Long: projectLong},
 		"task": {CmdFunc: updateTaskFunc, Aliases: []string{}, ProjectDomainNotRequired: false, PFlagProvider: namedEntityConfig,
 			Short: updateTaskShort, Long: updateTaskLong},
-		"workflow": {CmdFunc: updateWorkflowFunc, Aliases: []string{}, ProjectDomainNotRequired: false, PFlagProvider: namedEntityConfig,
-			Short: updateWorkflowShort, Long: updateWorkflowLong},
+		//"workflow": {CmdFunc: updateWorkflowFunc, Aliases: []string{}, ProjectDomainNotRequired: false, PFlagProvider: namedEntityConfig,
+		//	Short: updateWorkflowShort, Long: updateWorkflowLong},
 		"task-resource-attribute": {CmdFunc: updateTaskResourceAttributesFunc, Aliases: []string{}, PFlagProvider: taskresourceattribute.DefaultUpdateConfig,
 			Short: taskResourceAttributesShort, Long: taskResourceAttributesLong, ProjectDomainNotRequired: true},
 		"cluster-resource-attribute": {CmdFunc: updateClusterResourceAttributesFunc, Aliases: []string{}, PFlagProvider: clusterresourceattribute.DefaultUpdateConfig,
@@ -51,6 +52,8 @@ func CreateUpdateCommand() *cobra.Command {
 			Short: executionClusterLabelShort, Long: executionClusterLabelLong, ProjectDomainNotRequired: true},
 		"plugin-override": {CmdFunc: updatePluginOverridesFunc, Aliases: []string{}, PFlagProvider: pluginoverride.DefaultUpdateConfig,
 			Short: pluginOverrideShort, Long: pluginOverrideLong, ProjectDomainNotRequired: true},
+		"workflow-execution-config": {CmdFunc: updateWorkflowExecutionConfigFunc, Aliases: []string{}, PFlagProvider: workflowexecutionconfig.DefaultUpdateConfig,
+			Short: taskResourceAttributesShort, Long: taskResourceAttributesLong, ProjectDomainNotRequired: true},
 	}
 	cmdCore.AddCommands(updateCmd, updateResourcesFuncs)
 	return updateCmd
