@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/flyteorg/flytectl/pkg/docker"
 
@@ -16,17 +17,19 @@ import (
 )
 
 const (
-	startShort = "Start the flyte sandbox"
+	startShort = "Start the flyte sandbox cluster"
 	startLong  = `
-Start will run the flyte sandbox cluster inside a docker container and setup the config that is required 
+The Flyte Sandbox is a fully standalone minimal environment for running Flyte. provides a simplified way of running flyte-sandbox as a single Docker container running locally.  
+
+Start sandbox cluster without any source code
 ::
 
  bin/flytectl sandbox start
 	
-Mount your flytesnacks repository code inside sandbox 
+Mount your source code repository inside sandbox 
 ::
 
- bin/flytectl sandbox start --sourcesPath=$HOME/flyteorg/flytesnacks 
+ bin/flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
 
 Usage
 	`
@@ -67,9 +70,13 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}
 
 	if len(sandboxConfig.DefaultConfig.Source) > 0 {
+		absPath, err := filepath.Abs(sandboxConfig.DefaultConfig.Source)
+		if err != nil {
+			return nil, err
+		}
 		docker.Volumes = append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.Source,
+			Source: absPath,
 			Target: docker.FlyteSnackDir,
 		})
 	}
