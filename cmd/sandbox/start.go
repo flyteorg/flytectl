@@ -70,23 +70,25 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}
 
 	if len(sandboxConfig.DefaultConfig.Source) > 0 {
-		absPath, err := filepath.Abs(sandboxConfig.DefaultConfig.Source)
+		source, err := filepath.Abs(sandboxConfig.DefaultConfig.Source)
 		if err != nil {
 			return nil, err
 		}
 		docker.Volumes = append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: absPath,
+			Source: source,
 			Target: docker.FlyteSnackDir,
 		})
 	}
 
+	fmt.Printf("%v pulling docker image %s\n", emoji.Whale, docker.ImageName)
 	os.Setenv("KUBECONFIG", docker.Kubeconfig)
 	os.Setenv("FLYTECTL_CONFIG", docker.FlytectlConfig)
 	if err := docker.PullDockerImage(ctx, cli, docker.ImageName); err != nil {
 		return nil, err
 	}
 
+	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
 	ID, err := docker.StartContainer(ctx, cli, docker.Volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, docker.ImageName)
 	if err != nil {
