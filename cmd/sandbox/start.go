@@ -77,7 +77,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		docker.Volumes = append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: source,
-			Target: docker.FlyteSnackDir,
+			Target: docker.Source,
 		})
 	}
 

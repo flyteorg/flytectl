@@ -66,7 +66,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-			Target: docker.FlyteSnackDir,
+			Target: docker.Source,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -104,7 +104,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: absPath,
-			Target: docker.FlyteSnackDir,
+			Target: docker.Source,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -140,7 +140,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-			Target: docker.FlyteSnackDir,
+			Target: docker.Source,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -176,7 +176,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-			Target: docker.FlyteSnackDir,
+			Target: docker.Source,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -220,7 +220,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-			Target: docker.FlyteSnackDir,
+			Target: docker.Source,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -256,7 +256,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-			Target: docker.FlyteSnackDir,
+			Target: docker.Source,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -292,7 +292,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: sandboxConfig.DefaultConfig.Source,
-			Target: docker.FlyteSnackDir,
+			Target: docker.Source,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
