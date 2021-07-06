@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/flyteorg/flyteidl/clients/go/admin"
+
 	"github.com/flyteorg/flytectl/cmd/sandbox"
 
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
@@ -43,9 +45,19 @@ func newRootCmd() *cobra.Command {
 		Short:             "flyetcl CLI tool",
 		Use:               "flytectl",
 		DisableAutoGenTag: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			adminCfg := admin.GetConfig(context.Background())
+			if adminCfg.Endpoint.String() != "dns:///blah" {
+				return fmt.Errorf("config is not respected :(")
+			}
+
+			return nil
+		},
 	}
 
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.flyte/config.yaml)")
+
+	configAccessor.InitializePflags(rootCmd.PersistentFlags())
 
 	// Due to https://github.com/flyteorg/flyte/issues/341, project flag will have to be specified as
 	// --root.project, this adds a convenience on top to allow --project to be used
@@ -69,18 +81,22 @@ func newRootCmd() *cobra.Command {
 	return rootCmd
 }
 
-func initConfig(_ *cobra.Command, _ []string) error {
+func initConfig(cmd *cobra.Command, _ []string) error {
 	configFile := f.FilePathJoin(f.UserHomeDir(), configFileDir, configFileName)
 	if len(os.Getenv("FLYTECTL_CONFIG")) > 0 {
 		configFile = os.Getenv("FLYTECTL_CONFIG")
 	}
+
 	if len(cfgFile) > 0 {
 		configFile = cfgFile
 	}
+
 	configAccessor = viper.NewAccessor(stdConfig.Options{
-		StrictMode:  true,
+		StrictMode:  false,
 		SearchPaths: []string{configFile},
 	})
+
+	configAccessor.InitializePflags(cmd.PersistentFlags())
 
 	err := configAccessor.UpdateConfig(context.TODO())
 	if err != nil {
