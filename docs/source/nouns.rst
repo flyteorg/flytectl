@@ -18,6 +18,7 @@ Flytectl noun specify the resource on which the action needs to be performed eg:
     gen/flytectl_get_execution-queue-attribute
     gen/flytectl_get_plugin-override
     gen/flytectl_get_launchplan
+    gen/flytectl_init_config
     gen/flytectl_update_launchplan
     gen/flytectl_update_workflow
     gen/flytectl_update_project

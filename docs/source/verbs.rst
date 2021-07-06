@@ -9,6 +9,7 @@ Flytectl verbs specify the actions to be performed on the resources like create/
     gen/flytectl_create
     gen/flytectl_completion
     gen/flytectl_get
+    gen/flytectl_init
     gen/flytectl_update
     gen/flytectl_delete
     gen/flytectl_register
