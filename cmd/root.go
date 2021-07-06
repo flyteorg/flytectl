@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/flyteorg/flyteidl/clients/go/admin"
-
 	"github.com/flyteorg/flytectl/cmd/sandbox"
 
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
@@ -45,14 +43,6 @@ func newRootCmd() *cobra.Command {
 		Short:             "flyetcl CLI tool",
 		Use:               "flytectl",
 		DisableAutoGenTag: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			adminCfg := admin.GetConfig(context.Background())
-			if adminCfg.Endpoint.String() != "dns:///blah" {
-				return fmt.Errorf("config is not respected :(")
-			}
-
-			return nil
-		},
 	}
 
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.flyte/config.yaml)")
@@ -92,7 +82,7 @@ func initConfig(cmd *cobra.Command, _ []string) error {
 	}
 
 	configAccessor = viper.NewAccessor(stdConfig.Options{
-		StrictMode:  false,
+		StrictMode:  true,
 		SearchPaths: []string{configFile},
 	})
 

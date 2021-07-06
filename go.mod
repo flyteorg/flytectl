@@ -44,3 +44,5 @@ require (
 	gotest.tools v2.2.0+incompatible
 	sigs.k8s.io/yaml v1.2.0
 )
+
+replace github.com/flyteorg/flytestdlib => github.com/flyteorg/flytestdlib v0.3.27-0.20210706201803-5fff28e55585
