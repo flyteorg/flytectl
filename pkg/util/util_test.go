@@ -76,15 +76,19 @@ func TestConfigCleanup(t *testing.T) {
 }
 
 func TestSetupFlytectlConfig(t *testing.T) {
+	spec := ConfigTemplateSpec{
+		Host:     "dns:///localhost:30081",
+		Insecure: true,
+	}
 	_, err := os.Stat(f.FilePathJoin(f.UserHomeDir(), ".flyte"))
 	if os.IsNotExist(err) {
 		_ = os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755)
 	}
 	err = SetupFlyteDir()
 	assert.Nil(t, err)
-	err = SetupConfig()
+	err = SetupConfig(ConfigTemplate, "version.yaml", spec)
 	assert.Nil(t, err)
-	_, err = os.Stat(FlytectlConfig)
+	_, err = os.Stat("version.yaml")
 	assert.Nil(t, err)
 	check := os.IsNotExist(err)
 	assert.Equal(t, check, false)

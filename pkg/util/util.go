@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"text/template"
 
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 )
@@ -14,14 +15,16 @@ type githubversion struct {
 	TagName string `json:"tag_name"`
 }
 
-const ConfigTemplate = `
-admin:
+const (
+	ConfigTemplate = `admin:
   # For GRPC endpoints you might want to use dns:///flyte.myexample.com
-  endpoint: dns:///localhost:30081
-  insecure: true
+  endpoint: {{.Host}}
+  authType: Pkce
+  insecure: {{.Insecure}}
 logger:
   show-source: true
-  level: 3
+  level: 1`
+	StorageTemplate = `
 storage:
   connection:
     access-key: minio
@@ -32,11 +35,17 @@ storage:
     secret-key: miniostorage
   type: minio
   container: "my-s3-bucket"
-  enable-multicontainer: true
-`
+  enable-multicontainer: true`
+)
+
+type ConfigTemplateSpec struct {
+	Host     string
+	Insecure bool
+}
 
 var (
 	FlytectlConfig = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config-sandbox.yaml")
+	ConfigFile     = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml")
 	Kubeconfig     = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
 )
 
@@ -80,8 +89,18 @@ func SetupFlyteDir() error {
 }
 
 // SetupConfig download the flyte sandbox config
-func SetupConfig() error {
-	return WriteIntoFile([]byte(ConfigTemplate), FlytectlConfig)
+func SetupConfig(templates, filename string, spec ConfigTemplateSpec) error {
+	tmpl := template.New("config")
+	tmpl, err := tmpl.Parse(templates)
+	if err != nil {
+		return err
+	}
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	return tmpl.Execute(file, spec)
 }
 
 // ConfigCleanup will remove the sandbox config from flyte dir

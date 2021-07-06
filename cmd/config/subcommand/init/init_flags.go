@@ -1,11 +1,11 @@
-package sandbox
+package init
 
 //go:generate pflags Config --default-var DefaultConfig
 var (
 	DefaultConfig = &Config{}
 )
 
-//Config
+//Configs
 type Config struct {
-	Source string `json:"source" pflag:", Path of your source code"`
+	Host string `json:"host" pflag:", Endpoint of flyte admin"`
 }

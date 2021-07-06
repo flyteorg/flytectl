@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/flyteorg/flytectl/pkg/util"
 
@@ -18,17 +19,20 @@ import (
 )
 
 const (
-	startShort = "Start the flyte sandbox"
+	startShort = "Start the flyte sandbox cluster"
 	startLong  = `
-Start will run the flyte sandbox cluster inside a docker container and setup the config that is required 
+The Flyte Sandbox is a fully standalone minimal environment for running Flyte. provides a simplified way of running flyte-sandbox as a single Docker container running locally.  
+
+Start sandbox cluster without any source code
 ::
 
  bin/flytectl sandbox start
 	
-Mount your flytesnacks repository code inside sandbox 
+Mount your source code repository inside sandbox 
 ::
 
- bin/flytectl sandbox start --sourcesPath=$HOME/flyteorg/flytesnacks 
+ bin/flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
+
 Usage
 	`
 )
@@ -59,7 +63,12 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		return nil, err
 	}
 
-	if err := util.SetupConfig(); err != nil {
+	spec := util.ConfigTemplateSpec{
+		Host:     "localhost:30081",
+		Insecure: true,
+	}
+	configTemplate := util.ConfigTemplate + util.StorageTemplate
+	if err := util.SetupConfig(configTemplate, util.FlytectlConfig, spec); err != nil {
 		return nil, err
 	}
 
@@ -67,20 +76,26 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		return nil, err
 	}
 
-	if len(sandboxConfig.DefaultConfig.SourcesPath) > 0 {
+	if len(sandboxConfig.DefaultConfig.Source) > 0 {
+		source, err := filepath.Abs(sandboxConfig.DefaultConfig.Source)
+		if err != nil {
+			return nil, err
+		}
 		docker.Volumes = append(docker.Volumes, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.SourcesPath,
-			Target: docker.FlyteSnackDir,
+			Source: source,
+			Target: docker.Source,
 		})
 	}
 
+	fmt.Printf("%v pulling docker image %s\n", emoji.Whale, docker.ImageName)
 	os.Setenv("KUBECONFIG", docker.Kubeconfig)
 	os.Setenv("FLYTECTL_CONFIG", util.FlytectlConfig)
 	if err := docker.PullDockerImage(ctx, cli, docker.ImageName); err != nil {
 		return nil, err
 	}
 
+	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
 	ID, err := docker.StartContainer(ctx, cli, docker.Volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, docker.ImageName)
 	if err != nil {
