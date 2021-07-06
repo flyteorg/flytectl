@@ -34,6 +34,12 @@ Archives project named flytesnacks.
 
  bin/flytectl update project -p flytesnacks --archiveProject
 
+Incorrect usage when passing both archive and activate.
+
+::
+
+ bin/flytectl update project flytesnacks --archiveProject --activateProject
+
 Incorrect usage when passing unknown-project.
 
 ::
