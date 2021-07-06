@@ -23,6 +23,8 @@ func TestSetupConfigFunc(t *testing.T) {
 	ctx := context.Background()
 	_ = os.Remove(util.FlytectlConfig)
 
+	_ = util.SetupFlyteDir()
+
 	cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
 	err := configInitFunc(ctx, []string{}, cmdCtx)
 	initConfig.DefaultConfig.Host = ""
