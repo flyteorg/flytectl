@@ -28,13 +28,12 @@ func initFlytectlConfig(reader io.Reader) error {
 
 	templateValues := util.ConfigTemplateValuesSpec{
 		Host:     "dns:///localhost:30081",
-		Insecure: true,
+		Insecure: initConfig.DefaultConfig.Insecure,
 		Template: util.GetSandboxTemplate(),
 	}
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
 		templateValues.Host = fmt.Sprintf("dns:///%v", initConfig.DefaultConfig.Host)
-		templateValues.Insecure = true
 		templateValues.Template = util.GetAWSCloudTemplate()
 		_, result, err := prompt.Run()
 		if err != nil {
@@ -48,7 +47,7 @@ func initFlytectlConfig(reader io.Reader) error {
 	if _, err := os.Stat(util.ConfigFile); os.IsNotExist(err) {
 		_err = util.SetupConfig(util.ConfigFile, templateValues)
 	} else {
-		if cmdUtil.AskForConfirmation(fmt.Sprintf("Are you sure ? It will overwrite the default config %v", util.ConfigFile), reader) {
+		if cmdUtil.AskForConfirmation(fmt.Sprintf("This action will overwrite an existing config file at [%s]. Do you want to continue?", util.ConfigFile), reader) {
 			if err := os.Remove(util.ConfigFile); err != nil {
 				return err
 			}

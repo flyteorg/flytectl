@@ -9,8 +9,8 @@ import (
 
 // Long descriptions are whitespace sensitive when generating docs using sphinx.
 const (
-	initCmdShort = `Used for generating config template.`
-	initCmdLong  = `init config will create a config in flyte directory i.e ~/.flyte
+	initCmdShort = `Generates flytectl config file in the user's home directory.`
+	initCmdLong  = `Creates a flytectl config file in flyte directory i.e ~/.flyte
 	
 Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox https://docs.flyte.org/en/latest/deployment/sandbox.html
 
@@ -22,7 +22,7 @@ Generate remote cluster config. Read more about the remote deployment https://do
 	
 ::
 
- bin/flytectl init config --host="flyte.myexample.com"
+ bin/flytectl init config --host=flyte.myexample.com
 `
 )
 

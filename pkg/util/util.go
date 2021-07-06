@@ -37,20 +37,24 @@ storage:
   container: "my-s3-bucket"
   enable-multicontainer: true`
 	StorageS3ConfigTemplate = `
-#storage:
-#  kind: s3
-#  config:
-#    auth_type: iam
-#    region: <replace> # Example: us-east-2
-#  container: <replace> # Example my-bucket. Flyte k8s cluster / service account for execution should have read access to this bucket`
+storage:
+  type: stow	
+  stow:
+    kind: s3
+    config:
+      auth_type: iam
+      region: <replace> # Example: us-east-2
+  container: <replace> # Example my-bucket. Flyte k8s cluster / service account for execution should have read access to this bucket`
 	StorageGCSConfigTemplate = `
-#storage:
-#  kind: google
-#  config:
-#    json: ""
-#    project_id: <replace-me> # TODO: replace <project-id> with the GCP project ID
-#    scopes: https://www.googleapis.com/auth/devstorage.read_write
-#  container: <replace> # Example my-bucket. Flyte k8s cluster / service account for execution should have read access to this bucket`
+storage:
+  type: stow	
+  stow:
+    kind: s3
+    config:
+      json: ""
+      project_id: <replace-me> # TODO: replace <project-id> with the GCP project ID
+      scopes: https://www.googleapis.com/auth/devstorage.read_write
+  container: <replace> # Example my-bucket. Flyte k8s cluster / service account for execution should have read access to this bucket`
 )
 
 type ConfigTemplateValuesSpec struct {

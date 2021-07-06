@@ -13,6 +13,7 @@ import (
 // flags is json-name.json-sub-name... etc.
 func (cfg Config) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("Config", pflag.ExitOnError)
-	cmdFlags.StringVar(&DefaultConfig.Host, fmt.Sprintf("%v%v", prefix, "host"), DefaultConfig.Host, " Endpoint of flyte admin")
+	cmdFlags.StringVar(&DefaultConfig.Host, fmt.Sprintf("%v%v", prefix, "host"), DefaultConfig.Host, "Endpoint of flyte admin")
+	cmdFlags.BoolVar(&DefaultConfig.Insecure, fmt.Sprintf("%v%v", prefix, "insecure"), DefaultConfig.Insecure, "Enable insecure mode")
 	return cmdFlags
 }
