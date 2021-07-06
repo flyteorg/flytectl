@@ -76,7 +76,7 @@ func TestConfigCleanup(t *testing.T) {
 }
 
 func TestSetupFlytectlConfig(t *testing.T) {
-	spec := ConfigTemplateSpec{
+	templateValue := ConfigTemplateValuesSpec{
 		Host:     "dns:///localhost:30081",
 		Insecure: true,
 	}
@@ -86,7 +86,7 @@ func TestSetupFlytectlConfig(t *testing.T) {
 	}
 	err = SetupFlyteDir()
 	assert.Nil(t, err)
-	err = SetupConfig(ConfigTemplate, "version.yaml", spec)
+	err = SetupConfig(AdminConfigTemplate, "version.yaml", templateValue)
 	assert.Nil(t, err)
 	_, err = os.Stat("version.yaml")
 	assert.Nil(t, err)

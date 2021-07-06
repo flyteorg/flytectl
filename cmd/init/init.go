@@ -11,13 +11,14 @@ import (
 const (
 	initCmdShort = `Used for generating config template.`
 	initCmdLong  = `init config will create a config in flyte directory i.e ~/.flyte
-Generate sandbox config.
 	
+Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox https://docs.flyte.org/en/latest/deployment/sandbox.html
+
 ::
 
  bin/flytectl init config 
 
-Generate remote cluster config. 
+Generate remote cluster config. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
 	
 ::
 
@@ -35,8 +36,8 @@ func CreateInitCommand() *cobra.Command {
 
 	getResourcesFuncs := map[string]cmdcore.CommandEntry{
 		"config": {CmdFunc: configInitFunc, Aliases: []string{""}, ProjectDomainNotRequired: true,
-			Short: initConfigCmdShort,
-			Long:  initConfigCmdLong, PFlagProvider: initConfig.DefaultConfig},
+			Short: initCmdShort,
+			Long:  initCmdLong, PFlagProvider: initConfig.DefaultConfig},
 	}
 
 	cmdcore.AddCommands(initCmd, getResourcesFuncs)

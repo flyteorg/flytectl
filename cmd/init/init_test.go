@@ -21,7 +21,6 @@ func TestCreateInitCommand(t *testing.T) {
 	})
 
 	assert.Equal(t, cmdNouns[0].Use, "config")
-	assert.Equal(t, cmdNouns[0].Short, initConfigCmdShort)
-	assert.Equal(t, cmdNouns[0].Long, initConfigCmdLong)
-
+	assert.Equal(t, cmdNouns[0].Short, initCmdShort)
+	assert.Equal(t, cmdNouns[0].Long, initCmdLong)
 }

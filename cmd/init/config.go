@@ -13,23 +13,6 @@ import (
 	"github.com/flyteorg/flytectl/pkg/util"
 )
 
-const (
-	initConfigCmdShort = "Used for generating config template."
-	initConfigCmdLong  = `init config will create a config in flyte directory i.e ~/.flyte
-Generate sandbox config.
-	
-::
-
- bin/flytectl init config 
-
-Generate remote cluster config. 
-	
-::
-
- bin/flytectl init config --host="flyte.myexample.com"
-`
-)
-
 func configInitFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	return initFlytectlConfig(os.Stdin)
 }
@@ -38,22 +21,22 @@ func initFlytectlConfig(reader io.Reader) error {
 	if err := util.SetupFlyteDir(); err != nil {
 		return err
 	}
-	spec := util.ConfigTemplateSpec{
+	spec := util.ConfigTemplateValuesSpec{
 		Host:     "dns:///localhost:30081",
 		Insecure: true,
 	}
-	configTemplate := util.ConfigTemplate + util.StorageTemplate
+	configTemplate := util.GetSandboxTemplate()
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
 		spec.Host = fmt.Sprintf("dns:///%v", initConfig.DefaultConfig.Host)
-		spec.Insecure = false
-		configTemplate = util.ConfigTemplate
+		spec.Insecure = true
+		configTemplate = util.AdminConfigTemplate
 	}
 	var _err error
 	if _, err := os.Stat(util.ConfigFile); os.IsNotExist(err) {
 		_err = util.SetupConfig(configTemplate, util.ConfigFile, spec)
 	} else {
-		if cmdUtil.AskForConfirmation("Are you sure ? It will overwrite the default config ~/.flyte/config.yaml", reader) {
+		if cmdUtil.AskForConfirmation(fmt.Sprintf("Are you sure ? It will overwrite the default config %v", util.ConfigFile), reader) {
 			if err := os.Remove(util.ConfigFile); err != nil {
 				return err
 			}

@@ -16,15 +16,15 @@ type githubversion struct {
 }
 
 const (
-	ConfigTemplate = `admin:
+	AdminConfigTemplate = `admin:
   # For GRPC endpoints you might want to use dns:///flyte.myexample.com
   endpoint: {{.Host}}
   authType: Pkce
   insecure: {{.Insecure}}
 logger:
   show-source: true
-  level: 1`
-	StorageTemplate = `
+  level: 0`
+	StorageConfigTemplate = `
 storage:
   connection:
     access-key: minio
@@ -38,7 +38,7 @@ storage:
   enable-multicontainer: true`
 )
 
-type ConfigTemplateSpec struct {
+type ConfigTemplateValuesSpec struct {
 	Host     string
 	Insecure bool
 }
@@ -48,6 +48,11 @@ var (
 	ConfigFile     = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml")
 	Kubeconfig     = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
 )
+
+// GetSandboxTemplate return sandbox cluster config with storage config
+func GetSandboxTemplate() string {
+	return AdminConfigTemplate + StorageConfigTemplate
+}
 
 func GetRequest(baseURL, url string) ([]byte, error) {
 	response, err := http.Get(fmt.Sprintf("%v%v", baseURL, url))
@@ -89,7 +94,7 @@ func SetupFlyteDir() error {
 }
 
 // SetupConfig download the flyte sandbox config
-func SetupConfig(templates, filename string, spec ConfigTemplateSpec) error {
+func SetupConfig(templates, filename string, spec ConfigTemplateValuesSpec) error {
 	tmpl := template.New("config")
 	tmpl, err := tmpl.Parse(templates)
 	if err != nil {

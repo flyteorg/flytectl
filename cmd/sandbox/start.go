@@ -63,12 +63,12 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		return nil, err
 	}
 
-	spec := util.ConfigTemplateSpec{
+	templateValues := util.ConfigTemplateValuesSpec{
 		Host:     "localhost:30081",
 		Insecure: true,
 	}
-	configTemplate := util.ConfigTemplate + util.StorageTemplate
-	if err := util.SetupConfig(configTemplate, util.FlytectlConfig, spec); err != nil {
+	configTemplate := util.GetSandboxTemplate()
+	if err := util.SetupConfig(configTemplate, util.FlytectlConfig, templateValues); err != nil {
 		return nil, err
 	}
 
