@@ -10,8 +10,18 @@ import (
 // Long descriptions are whitespace sensitive when generating docs using sphinx.
 const (
 	initCmdShort = `Used for generating config template.`
-	initCmdLong  = `
+	initCmdLong  = `init config will create a config in flyte directory i.e ~/.flyte
+Generate sandbox config.
+	
+::
 
+ bin/flytectl init config 
+
+Generate remote cluster config. 
+	
+::
+
+ bin/flytectl init config --host="flyte.myexample.com"
 `
 )
 

@@ -14,10 +14,19 @@ import (
 )
 
 const (
-	initConfigCmdShort = "Teardown will cleanup the sandbox environment"
-	initConfigCmdLong  = `
+	initConfigCmdShort = "Used for generating config template."
+	initConfigCmdLong  = `init config will create a config in flyte directory i.e ~/.flyte
+Generate sandbox config.
+	
+::
 
-Usage
+ bin/flytectl init config 
+
+Generate remote cluster config. 
+	
+::
+
+ bin/flytectl init config --host="flyte.myexample.com"
 `
 )
 
@@ -40,16 +49,20 @@ func initFlytectlConfig(reader io.Reader) error {
 		spec.Insecure = false
 		configTemplate = util.ConfigTemplate
 	}
-
+	var _err error
 	if _, err := os.Stat(util.ConfigFile); os.IsNotExist(err) {
-		return util.SetupConfig(configTemplate, util.ConfigFile, spec)
+		_err = util.SetupConfig(configTemplate, util.ConfigFile, spec)
+	} else {
+		if cmdUtil.AskForConfirmation("Are you sure ? It will overwrite the default config ~/.flyte/config.yaml", reader) {
+			if err := os.Remove(util.ConfigFile); err != nil {
+				return err
+			}
+			_err = util.SetupConfig(configTemplate, util.ConfigFile, spec)
+		}
 	}
 
-	if cmdUtil.AskForConfirmation("Are you sure ? It will overwrite the default config ~/.flyte/config.yaml", reader) {
-		if err := os.Remove(util.ConfigFile); err != nil {
-			return err
-		}
-		return util.SetupConfig(configTemplate, util.ConfigFile, spec)
+	if len(initConfig.DefaultConfig.Host) > 0 {
+		fmt.Println("Init flytectl config for remote cluster, Please update your storage config in ~/.flyte/config.yaml. Learn more about the config here https://docs.flyte.org/projects/flytectl/en/latest/index.html#configure")
 	}
-	return nil
+	return _err
 }
