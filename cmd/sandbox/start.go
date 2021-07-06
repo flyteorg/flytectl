@@ -66,9 +66,9 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	templateValues := util.ConfigTemplateValuesSpec{
 		Host:     "localhost:30081",
 		Insecure: true,
+		Template: util.GetSandboxTemplate(),
 	}
-	configTemplate := util.GetSandboxTemplate()
-	if err := util.SetupConfig(configTemplate, util.FlytectlConfig, templateValues); err != nil {
+	if err := util.SetupConfig(util.FlytectlConfig, templateValues); err != nil {
 		return nil, err
 	}
 

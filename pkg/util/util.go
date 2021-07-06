@@ -36,11 +36,27 @@ storage:
   type: minio
   container: "my-s3-bucket"
   enable-multicontainer: true`
+	StorageS3ConfigTemplate = `
+#storage:
+#  kind: s3
+#  config:
+#    auth_type: iam
+#    region: <replace> # Example: us-east-2
+#  container: <replace> # Example my-bucket. Flyte k8s cluster / service account for execution should have read access to this bucket`
+	StorageGCSConfigTemplate = `
+#storage:
+#  kind: google
+#  config:
+#    json: ""
+#    project_id: <replace-me> # TODO: replace <project-id> with the GCP project ID
+#    scopes: https://www.googleapis.com/auth/devstorage.read_write
+#  container: <replace> # Example my-bucket. Flyte k8s cluster / service account for execution should have read access to this bucket`
 )
 
 type ConfigTemplateValuesSpec struct {
 	Host     string
 	Insecure bool
+	Template string
 }
 
 var (
@@ -49,9 +65,19 @@ var (
 	Kubeconfig     = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
 )
 
-// GetSandboxTemplate return sandbox cluster config with storage config
+// GetSandboxTemplate return sandbox cluster config
 func GetSandboxTemplate() string {
 	return AdminConfigTemplate + StorageConfigTemplate
+}
+
+// GetAWSCloudTemplate return aws flyte config with storage config
+func GetAWSCloudTemplate() string {
+	return AdminConfigTemplate + StorageS3ConfigTemplate
+}
+
+// GetGoogleCloudTemplate return google flyte config with storage config
+func GetGoogleCloudTemplate() string {
+	return AdminConfigTemplate + StorageGCSConfigTemplate
 }
 
 func GetRequest(baseURL, url string) ([]byte, error) {
@@ -94,9 +120,9 @@ func SetupFlyteDir() error {
 }
 
 // SetupConfig download the flyte sandbox config
-func SetupConfig(templates, filename string, spec ConfigTemplateValuesSpec) error {
+func SetupConfig(filename string, templateValue ConfigTemplateValuesSpec) error {
 	tmpl := template.New("config")
-	tmpl, err := tmpl.Parse(templates)
+	tmpl, err := tmpl.Parse(templateValue.Template)
 	if err != nil {
 		return err
 	}
@@ -105,7 +131,7 @@ func SetupConfig(templates, filename string, spec ConfigTemplateValuesSpec) erro
 		return err
 	}
 	defer file.Close()
-	return tmpl.Execute(file, spec)
+	return tmpl.Execute(file, templateValue)
 }
 
 // ConfigCleanup will remove the sandbox config from flyte dir

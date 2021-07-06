@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/manifoldco/promptui"
+
 	initConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/init"
 
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -13,34 +15,44 @@ import (
 	"github.com/flyteorg/flytectl/pkg/util"
 )
 
+var prompt = promptui.Select{
+	Label: "Select Storage Provider",
+	Items: []string{"S3", "GCS"},
+}
+
 func configInitFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	return initFlytectlConfig(os.Stdin)
 }
 
 func initFlytectlConfig(reader io.Reader) error {
-	if err := util.SetupFlyteDir(); err != nil {
-		return err
-	}
-	spec := util.ConfigTemplateValuesSpec{
+
+	templateValues := util.ConfigTemplateValuesSpec{
 		Host:     "dns:///localhost:30081",
 		Insecure: true,
+		Template: util.GetSandboxTemplate(),
 	}
-	configTemplate := util.GetSandboxTemplate()
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
-		spec.Host = fmt.Sprintf("dns:///%v", initConfig.DefaultConfig.Host)
-		spec.Insecure = true
-		configTemplate = util.AdminConfigTemplate
+		templateValues.Host = fmt.Sprintf("dns:///%v", initConfig.DefaultConfig.Host)
+		templateValues.Insecure = true
+		templateValues.Template = util.GetAWSCloudTemplate()
+		_, result, err := prompt.Run()
+		if err != nil {
+			return err
+		}
+		if result == "GCS" {
+			templateValues.Template = util.GetGoogleCloudTemplate()
+		}
 	}
 	var _err error
 	if _, err := os.Stat(util.ConfigFile); os.IsNotExist(err) {
-		_err = util.SetupConfig(configTemplate, util.ConfigFile, spec)
+		_err = util.SetupConfig(util.ConfigFile, templateValues)
 	} else {
 		if cmdUtil.AskForConfirmation(fmt.Sprintf("Are you sure ? It will overwrite the default config %v", util.ConfigFile), reader) {
 			if err := os.Remove(util.ConfigFile); err != nil {
 				return err
 			}
-			_err = util.SetupConfig(configTemplate, util.ConfigFile, spec)
+			_err = util.SetupConfig(util.ConfigFile, templateValues)
 		}
 	}
 
