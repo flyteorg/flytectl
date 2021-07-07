@@ -90,6 +90,7 @@ func PullDockerImage(ctx context.Context, cli Docker, image string) error {
 	if err != nil {
 		return err
 	}
+
 	_, err = io.Copy(os.Stdout, r)
 	return err
 }
@@ -142,7 +143,7 @@ func WaitForSandbox(reader *bufio.Scanner, message string) bool {
 	for reader.Scan() {
 		if strings.Contains(reader.Text(), message) {
 			kubeconfig := strings.Join([]string{
-				"$(KUBECONFIG)",
+				"$KUBECONFIG",
 				f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),
 				Kubeconfig,
 			}, ":")

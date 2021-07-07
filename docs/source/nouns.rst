@@ -18,7 +18,6 @@ Flytectl noun specify the resource on which the action needs to be performed eg:
     gen/flytectl_get_execution-queue-attribute
     gen/flytectl_get_plugin-override
     gen/flytectl_get_launchplan
-    gen/flytectl_init_config
     gen/flytectl_update_launchplan
     gen/flytectl_update_workflow
     gen/flytectl_update_project
@@ -37,6 +36,7 @@ Flytectl noun specify the resource on which the action needs to be performed eg:
     gen/flytectl_delete_execution-queue-attribute
     gen/flytectl_delete_plugin-override
     gen/flytectl_config_validate
+    gen/flytectl_config_init
     gen/flytectl_config_discover
     gen/flytectl_sandbox_start
     gen/flytectl_sandbox_status
