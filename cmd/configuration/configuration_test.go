@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/flyteorg/flytectl/pkg/configutil"
+
 	initConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/util"
@@ -42,7 +44,7 @@ func TestSetupConfigFunc(t *testing.T) {
 	var no = strings.NewReader("No")
 	mockOutStream := new(io.Writer)
 	ctx := context.Background()
-	_ = os.Remove(util.FlytectlConfig)
+	_ = os.Remove(configutil.FlytectlConfig)
 
 	_ = util.SetupFlyteDir()
 

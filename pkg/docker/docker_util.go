@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/flyteorg/flytectl/pkg/util"
+	"github.com/flyteorg/flytectl/pkg/configutil"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -147,8 +147,6 @@ func WaitForSandbox(reader *bufio.Scanner, message string) bool {
 				f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),
 				Kubeconfig,
 			}, ":")
-			os.Setenv("KUBECONFIG", kubeconfig)
-			os.Setenv("FLYTECTL_CONFIG", util.FlytectlConfig)
 
 			fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, message, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
 			fmt.Printf("Please visit https://github.com/flyteorg/flytesnacks for more example %v \n", emoji.Rocket)
@@ -156,7 +154,7 @@ func WaitForSandbox(reader *bufio.Scanner, message string) bool {
 
 			fmt.Printf("Add KUBECONFIG and FLYTECTL_CONFIG to your environment variable \n")
 			fmt.Printf("export KUBECONFIG=%v \n", kubeconfig)
-			fmt.Printf("export FLYTECTL_CONFIG=%v \n", util.FlytectlConfig)
+			fmt.Printf("export FLYTECTL_CONFIG=%v \n", configutil.FlytectlConfig)
 			return true
 		}
 		fmt.Println(reader.Text())

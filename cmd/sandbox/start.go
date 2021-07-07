@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/flyteorg/flytectl/pkg/configutil"
+
 	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/flyteorg/flytectl/pkg/docker"
@@ -63,12 +65,12 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		return nil, err
 	}
 
-	templateValues := util.ConfigTemplateValuesSpec{
+	templateValues := configutil.ConfigTemplateValues{
 		Host:     "localhost:30081",
 		Insecure: true,
-		Template: util.GetSandboxTemplate(),
+		Template: configutil.GetSandboxTemplate(),
 	}
-	if err := util.SetupConfig(util.FlytectlConfig, templateValues); err != nil {
+	if err := configutil.SetupConfig(configutil.FlytectlConfig, templateValues); err != nil {
 		return nil, err
 	}
 
