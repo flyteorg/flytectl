@@ -1,0 +1,192 @@
+- created_at: "2021-07-08T14:26:34.0610236Z"
+  ended_at: "1970-01-01T00:00:00Z"
+  id:
+    execution_id:
+      domain: development
+      name: f0ecbec3960ce41188a2
+      project: flytesnacks
+    node_id: end-node
+  inputs:
+    o0: 5
+    o1: world
+    o2: world
+  phase: SUCCEEDED
+  spec_node_id: end-node
+  started_at: "1970-01-01T00:00:00Z"
+  updated_at: "2021-07-08T14:26:34.1337292Z"
+- child_nodes:
+    - created_at: "2021-07-08T14:26:33.8273717Z"
+      ended_at: "1970-01-01T00:00:00Z"
+      id:
+        execution_id:
+          domain: development
+          name: f0ecbec3960ce41188a2
+          project: flytesnacks
+        node_id: n1-0-end-node
+      inputs:
+        o0: world
+        o1: world
+      phase: SUCCEEDED
+      retry_group: "0"
+      spec_node_id: end-node
+      started_at: "1970-01-01T00:00:00Z"
+      updated_at: "2021-07-08T14:26:33.9066259Z"
+    - created_at: "2021-07-08T14:26:08.9031652Z"
+      ended_at: "2021-07-08T14:26:13.6384771Z"
+      id:
+        execution_id:
+          domain: development
+          name: f0ecbec3960ce41188a2
+          project: flytesnacks
+        node_id: n1-0-n0
+      inputs:
+        a: 5
+      outputs:
+        c: world
+        t1_int_output: 7
+      phase: SUCCEEDED
+      retry_group: "0"
+      spec_node_id: n0
+      started_at: "2021-07-08T14:26:08.9857139Z"
+      task_execs:
+        - created_at: "2021-07-08T14:26:08.9794196Z"
+          ended_at: "1970-01-01T00:00:00Z"
+          id:
+            node_execution_id:
+              execution_id:
+                domain: development
+                name: f0ecbec3960ce41188a2
+                project: flytesnacks
+              node_id: n1-0-n0
+            task_id:
+              domain: development
+              name: core.control_flow.subworkflows.t1
+              project: flytesnacks
+              resource_type: 1
+              version: v3
+          logs:
+            - message_format: 2
+              name: Kubernetes Logs (User)
+              uri: http://localhost:30082/#/log/flytesnacks-development/f0ecbec3960ce41188a2-n1-0-n0-0/pod?namespace=flytesnacks-development
+          phase: SUCCEEDED
+          started_at: "1970-01-01T00:00:00Z"
+          updated_at: "2021-07-08T14:26:13.6288723Z"
+      updated_at: "2021-07-08T14:26:13.6384772Z"
+    - created_at: "2021-07-08T14:26:13.8423656Z"
+      ended_at: "2021-07-08T14:26:33.6863212Z"
+      id:
+        execution_id:
+          domain: development
+          name: f0ecbec3960ce41188a2
+          project: flytesnacks
+        node_id: n1-0-n1
+      inputs:
+        a: 7
+      outputs:
+        c: world
+        t1_int_output: 9
+      phase: SUCCEEDED
+      retry_group: "0"
+      spec_node_id: n1
+      started_at: "2021-07-08T14:26:13.9380745Z"
+      task_execs:
+        - created_at: "2021-07-08T14:26:13.9292589Z"
+          ended_at: "1970-01-01T00:00:00Z"
+          id:
+            node_execution_id:
+              execution_id:
+                domain: development
+                name: f0ecbec3960ce41188a2
+                project: flytesnacks
+              node_id: n1-0-n1
+            task_id:
+              domain: development
+              name: core.control_flow.subworkflows.t1
+              project: flytesnacks
+              resource_type: 1
+              version: v3
+          logs:
+            - message_format: 2
+              name: Kubernetes Logs (User)
+              uri: http://localhost:30082/#/log/flytesnacks-development/f0ecbec3960ce41188a2-n1-0-n1-0/pod?namespace=flytesnacks-development
+          phase: SUCCEEDED
+          started_at: "1970-01-01T00:00:00Z"
+          updated_at: "2021-07-08T14:26:33.6760859Z"
+      updated_at: "2021-07-08T14:26:33.6863207Z"
+    - created_at: "2021-07-08T14:26:08.781564Z"
+      ended_at: "1970-01-01T00:00:00Z"
+      id:
+        execution_id:
+          domain: development
+          name: f0ecbec3960ce41188a2
+          project: flytesnacks
+        node_id: n1-0-start-node
+      phase: SUCCEEDED
+      retry_group: "0"
+      spec_node_id: start-node
+      started_at: "1970-01-01T00:00:00Z"
+      updated_at: "2021-07-08T14:26:08.781564Z"
+  created_at: "2021-07-08T14:26:08.6676117Z"
+  ended_at: "2021-07-08T14:26:33.9801895Z"
+  id:
+    execution_id:
+      domain: development
+      name: f0ecbec3960ce41188a2
+      project: flytesnacks
+    node_id: n1
+  phase: SUCCEEDED
+  spec_node_id: n1
+  started_at: "2021-07-08T14:26:08.7238829Z"
+  updated_at: "2021-07-08T14:26:33.9801896Z"
+- created_at: "2021-07-08T14:25:58.603491Z"
+  ended_at: "2021-07-08T14:26:08.5723894Z"
+  id:
+    execution_id:
+      domain: development
+      name: f0ecbec3960ce41188a2
+      project: flytesnacks
+    node_id: node-t1-parent
+  inputs:
+    a: 3
+  outputs:
+    c: world
+    t1_int_output: 5
+  phase: SUCCEEDED
+  spec_node_id: node-t1-parent
+  started_at: "2021-07-08T14:25:58.6673336Z"
+  task_execs:
+    - created_at: "2021-07-08T14:25:58.657936Z"
+      ended_at: "1970-01-01T00:00:00Z"
+      id:
+        node_execution_id:
+          execution_id:
+            domain: development
+            name: f0ecbec3960ce41188a2
+            project: flytesnacks
+          node_id: node-t1-parent
+        task_id:
+          domain: development
+          name: core.control_flow.subworkflows.t1
+          project: flytesnacks
+          resource_type: 1
+          version: v3
+      logs:
+        - message_format: 2
+          name: Kubernetes Logs (User)
+          uri: http://localhost:30082/#/log/flytesnacks-development/f0ecbec3960ce41188a2-node-t1-parent-0/pod?namespace=flytesnacks-development
+      phase: SUCCEEDED
+      started_at: "1970-01-01T00:00:00Z"
+      updated_at: "2021-07-08T14:26:08.561845Z"
+  updated_at: "2021-07-08T14:26:08.5723898Z"
+- created_at: "2021-07-08T14:25:58.5595269Z"
+  ended_at: "1970-01-01T00:00:00Z"
+  id:
+    execution_id:
+      domain: development
+      name: f0ecbec3960ce41188a2
+      project: flytesnacks
+    node_id: start-node
+  phase: SUCCEEDED
+  spec_node_id: start-node
+  started_at: "1970-01-01T00:00:00Z"
+  updated_at: "2021-07-08T14:25:58.5595269Z"
