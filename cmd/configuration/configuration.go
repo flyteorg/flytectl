@@ -61,32 +61,32 @@ func configInitFunc(ctx context.Context, args []string, cmdCtx cmdcore.CommandCo
 
 func initFlytectlConfig(reader io.Reader) error {
 
-	templateValues := configutil.ConfigTemplateValues{
+	templateValues := configutil.ConfigTemplateSpec{
 		Host:     "dns:///localhost:30081",
 		Insecure: initConfig.DefaultConfig.Insecure,
-		Template: configutil.GetSandboxTemplate(),
 	}
+	templateStr := configutil.GetSandboxTemplate()
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
 		templateValues.Host = fmt.Sprintf("dns:///%v", initConfig.DefaultConfig.Host)
-		templateValues.Template = configutil.GetAWSCloudTemplate()
+		templateStr = configutil.GetAWSCloudTemplate()
 		_, result, err := prompt.Run()
 		if err != nil {
 			return err
 		}
 		if result == "GCS" {
-			templateValues.Template = configutil.GetGoogleCloudTemplate()
+			templateStr = configutil.GetGoogleCloudTemplate()
 		}
 	}
 	var _err error
 	if _, err := os.Stat(configutil.ConfigFile); os.IsNotExist(err) {
-		_err = configutil.SetupConfig(configutil.ConfigFile, templateValues)
+		_err = configutil.SetupConfig(configutil.ConfigFile, templateStr, templateValues)
 	} else {
 		if cmdUtil.AskForConfirmation(fmt.Sprintf("This action will overwrite an existing config file at [%s]. Do you want to continue?", configutil.ConfigFile), reader) {
 			if err := os.Remove(configutil.ConfigFile); err != nil {
 				return err
 			}
-			_err = configutil.SetupConfig(configutil.ConfigFile, templateValues)
+			_err = configutil.SetupConfig(configutil.ConfigFile, templateStr, templateValues)
 		}
 	}
 

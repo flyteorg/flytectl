@@ -49,10 +49,9 @@ storage:
   container: <replace> # Example my-bucket. Flyte k8s cluster / service account for execution should have read access to this bucket`
 )
 
-type ConfigTemplateValues struct {
+type ConfigTemplateSpec struct {
 	Host     string
 	Insecure bool
-	Template string
 }
 
 var (
@@ -77,9 +76,9 @@ func GetGoogleCloudTemplate() string {
 }
 
 // SetupConfig download the flyte sandbox config
-func SetupConfig(filename string, templateValue ConfigTemplateValues) error {
+func SetupConfig(filename, templateStr string, templateSpec ConfigTemplateSpec) error {
 	tmpl := template.New("config")
-	tmpl, err := tmpl.Parse(templateValue.Template)
+	tmpl, err := tmpl.Parse(templateStr)
 	if err != nil {
 		return err
 	}
@@ -88,7 +87,7 @@ func SetupConfig(filename string, templateValue ConfigTemplateValues) error {
 		return err
 	}
 	defer file.Close()
-	return tmpl.Execute(file, templateValue)
+	return tmpl.Execute(file, templateSpec)
 }
 
 // ConfigCleanup will remove the sandbox config from flyte dir

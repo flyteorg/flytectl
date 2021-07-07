@@ -33,10 +33,9 @@ func TestConfigCleanup(t *testing.T) {
 }
 
 func TestSetupFlytectlConfig(t *testing.T) {
-	templateValue := ConfigTemplateValues{
+	templateValue := ConfigTemplateSpec{
 		Host:     "dns:///localhost:30081",
 		Insecure: true,
-		Template: AdminConfigTemplate,
 	}
 	_, err := os.Stat(f.FilePathJoin(f.UserHomeDir(), ".flyte"))
 	if os.IsNotExist(err) {
@@ -44,7 +43,7 @@ func TestSetupFlytectlConfig(t *testing.T) {
 	}
 	err = util.SetupFlyteDir()
 	assert.Nil(t, err)
-	err = SetupConfig("version.yaml", templateValue)
+	err = SetupConfig("version.yaml", AdminConfigTemplate, templateValue)
 	assert.Nil(t, err)
 	_, err = os.Stat("version.yaml")
 	assert.Nil(t, err)
