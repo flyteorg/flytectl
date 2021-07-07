@@ -141,11 +141,19 @@ func ReadLogs(ctx context.Context, cli Docker, id string) (*bufio.Scanner, error
 func WaitForSandbox(reader *bufio.Scanner, message string) bool {
 	for reader.Scan() {
 		if strings.Contains(reader.Text(), message) {
+			kubeconfig := strings.Join([]string{
+				"$(KUBECONFIG)",
+				f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),
+				Kubeconfig,
+			}, ":")
+			os.Setenv("KUBECONFIG", kubeconfig)
+			os.Setenv("FLYTECTL_CONFIG", util.FlytectlConfig)
+
 			fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, message, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
 			fmt.Printf("Please visit https://github.com/flyteorg/flytesnacks for more example %v \n", emoji.Rocket)
 			fmt.Printf("Register all flytesnacks example by running 'flytectl register examples  -d development  -p flytesnacks' \n")
 			fmt.Printf("Add KUBECONFIG and FLYTECTL_CONFIG to your environment variable \n")
-			fmt.Printf("export KUBECONFIG=%v \n", Kubeconfig)
+			fmt.Printf("export KUBECONFIG=%v \n", kubeconfig)
 			fmt.Printf("export FLYTECTL_CONFIG=%v \n", util.FlytectlConfig)
 			return true
 		}
