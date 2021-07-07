@@ -11,7 +11,7 @@ import (
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 
 	"github.com/flyteorg/flytectl/cmd/config"
-	initCmd "github.com/flyteorg/flytectl/cmd/configuration"
+	configuration "github.com/flyteorg/flytectl/cmd/configuration"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/cmd/create"
 	"github.com/flyteorg/flytectl/cmd/delete"
@@ -61,7 +61,7 @@ func newRootCmd() *cobra.Command {
 	rootCmd.AddCommand(register.RemoteRegisterCommand())
 	rootCmd.AddCommand(delete.RemoteDeleteCommand())
 	rootCmd.AddCommand(sandbox.CreateSandboxCommand())
-	rootCmd.AddCommand(initCmd.CreateInitCommand())
+	rootCmd.AddCommand(configuration.CreateConfigCommand())
 	rootCmd.AddCommand(completionCmd)
 	// Added version command
 	versioncmd := version.GetVersionCommand(rootCmd)
@@ -74,6 +74,7 @@ func newRootCmd() *cobra.Command {
 
 func initConfig(_ *cobra.Command, _ []string) error {
 	configFile := f.FilePathJoin(f.UserHomeDir(), configFileDir, configFileName)
+	// TODO: Move flyteconfig env variable logic in flytestdlib
 	if len(os.Getenv("FLYTECTL_CONFIG")) > 0 {
 		configFile = os.Getenv("FLYTECTL_CONFIG")
 	}

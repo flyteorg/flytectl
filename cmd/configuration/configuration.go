@@ -40,8 +40,8 @@ var prompt = promptui.Select{
 	Items: []string{"S3", "GCS"},
 }
 
-// CreateInitCommand will return configuration command
-func CreateInitCommand() *cobra.Command {
+// CreateConfigCommand will return configuration command
+func CreateConfigCommand() *cobra.Command {
 	configCmd := viper.GetConfigCommand()
 
 	getResourcesFuncs := map[string]cmdcore.CommandEntry{

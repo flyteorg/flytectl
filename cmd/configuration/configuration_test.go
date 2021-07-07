@@ -17,12 +17,12 @@ import (
 )
 
 func TestCreateInitCommand(t *testing.T) {
-	initCmd := CreateInitCommand()
-	assert.Equal(t, initCmd.Use, "config")
-	assert.Equal(t, initCmd.Short, "Runs various config commands, look at the help of this command to get a list of available commands..")
-	fmt.Println(initCmd.Commands())
-	assert.Equal(t, len(initCmd.Commands()), 3)
-	cmdNouns := initCmd.Commands()
+	configCmd := CreateConfigCommand()
+	assert.Equal(t, configCmd.Use, "config")
+	assert.Equal(t, configCmd.Short, "Runs various config commands, look at the help of this command to get a list of available commands..")
+	fmt.Println(configCmd.Commands())
+	assert.Equal(t, len(configCmd.Commands()), 3)
+	cmdNouns := configCmd.Commands()
 	// Sort by Use value.
 	sort.Slice(cmdNouns, func(i, j int) bool {
 		return cmdNouns[i].Use < cmdNouns[j].Use

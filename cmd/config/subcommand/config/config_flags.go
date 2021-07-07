@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/pflag"
 )
 
-
 // GetPFlagSet will return strongly types pflags for all fields in Config and its nested types. The format of the
 // flags is json-name.json-sub-name... etc.
 func (cfg Config) GetPFlagSet(prefix string) *pflag.FlagSet {
