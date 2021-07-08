@@ -52,8 +52,8 @@ Options
 
 ::
 
-  -t, --activateProject   Activates the project specified as argument.
-  -a, --archiveProject    Archives the project specified as argument.
+      --activateProject   Activates the project specified as argument.
+      --archiveProject    Archives the project specified as argument.
   -h, --help              help for project
 
 Options inherited from parent commands
