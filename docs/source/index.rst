@@ -78,10 +78,12 @@ Basic Configuration
              endpoint: dns:///<replace-me>
              authType: Pkce # if using authentication or just drop this. If insecure set insecure: True
            storage:
-             kind: s3
-             config:
-               auth_type: iam
-               region: <replace> # Example: us-east-2
+             type: stow
+             stow:
+                kind: s3
+                config:
+                    auth_type: iam
+                    region: <replace> # Example: us-east-2
              container: <replace> # Example my-bucket. Flyte k8s cluster / service account for execution should have read access to this bucket
 
    .. tab:: GCS Configuration
@@ -93,11 +95,13 @@ Basic Configuration
              endpoint: dns:///<replace-me>
              authType: Pkce # if using authentication or just drop this. If insecure set insecure: True
            storage:
-             kind: google
-             config:
-               json: ""
-               project_id: <replace-me> # TODO: replace <project-id> with the GCP project ID
-               scopes: https://www.googleapis.com/auth/devstorage.read_write
+             type: stow
+             stow:
+                kind: s3
+                config:
+                    json: ""
+                    project_id: <replace-me> # TODO: replace <project-id> with the GCP project ID
+                    scopes: https://www.googleapis.com/auth/devstorage.read_write
              container: <replace> # Example my-bucket. Flyte k8s cluster / service account for execution should have access to this bucket
 
    .. tab:: Others
