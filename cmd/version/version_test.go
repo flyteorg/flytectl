@@ -90,24 +90,6 @@ func TestVersionUtilFunc(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Equal(t, len(tag), 0)
 	})
-	t.Run("Compare flytectl version when upgrade available", func(t *testing.T) {
-		message, err := compareVersion("v1.1.21", testVersion)
-		assert.Nil(t, err)
-		assert.Equal(t, fmt.Sprintf(upgradeVersionMessage, "v1.1.21"), message)
-	})
-	t.Run("Compare flytectl version", func(t *testing.T) {
-		message, err := compareVersion(testVersion, testVersion)
-		assert.Nil(t, err)
-		assert.Equal(t, latestVersionMessage, message)
-	})
-	t.Run("Error in compare flytectl version", func(t *testing.T) {
-		_, err := compareVersion("vvvvvvvv", testVersion)
-		assert.NotNil(t, err)
-	})
-	t.Run("Error in compare flytectl version", func(t *testing.T) {
-		_, err := compareVersion(testVersion, "vvvvvvvv")
-		assert.NotNil(t, err)
-	})
 	t.Run("Error in getting control plan version", func(t *testing.T) {
 		ctx := context.Background()
 		mockClient := new(mocks.AdminServiceClient)
