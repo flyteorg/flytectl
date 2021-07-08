@@ -41,11 +41,13 @@ Run specific version of flyte, Only available after v0.14.0+
 
 Usage
 	`
+	GeneratedManifest            = "/flyteorg/share/flyte_generated.yaml"
+	FlyteReleaseURL              = "/flyteorg/flyte/releases/download/%v/flyte_sandbox_manifest.yaml"
+	FlyteMinimumVersionSupported = "v0.14.0"
 )
 
 var (
-	GeneratedManifest = "/flyteorg/share/flyte_generated.yaml"
-	FlyteManifest     = f.FilePathJoin(f.UserHomeDir(), ".flyte", "flyte_generated.yaml")
+	FlyteManifest = f.FilePathJoin(f.UserHomeDir(), ".flyte", "flyte_generated.yaml")
 )
 
 type ExecResult struct {
@@ -136,14 +138,14 @@ func mountSourceCode() error {
 
 func mountFlyteManifest(version string) error {
 	if len(version) > 0 {
-		isGreater, err := util.CompareVersion(version, "v0.14.0")
+		isGreater, err := util.IsVersionGreaterThan(version, FlyteMinimumVersionSupported)
 		if err != nil {
 			return err
 		}
 		if !isGreater {
-			return fmt.Errorf("version flag only support v0.14.0+ flyte version")
+			return fmt.Errorf("version flag only support %s+ flyte version", FlyteMinimumVersionSupported)
 		}
-		response, err := util.GetRequest("https://github.com", fmt.Sprintf("/flyteorg/flyte/releases/download/%v/flyte_sandbox_manifest.yaml", version))
+		response, err := util.GetRequest("https://github.com", fmt.Sprintf(FlyteReleaseURL, version))
 		if err != nil {
 			return err
 		}

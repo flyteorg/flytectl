@@ -9,6 +9,10 @@ import (
 	hversion "github.com/hashicorp/go-version"
 )
 
+const (
+	HTTPRequestErrorMessage = "something went wrong. Received status code [%v] while sending a request to [%s]"
+)
+
 type githubversion struct {
 	TagName string `json:"tag_name"`
 }
@@ -26,7 +30,7 @@ func GetRequest(baseURL, url string) ([]byte, error) {
 		}
 		return data, nil
 	}
-	return []byte(""), fmt.Errorf("something goes wrong, Got status code %v while sending request to %s", response.StatusCode, fmt.Sprintf("%s%s", baseURL, url))
+	return []byte(""), fmt.Errorf(HTTPRequestErrorMessage, response.StatusCode, fmt.Sprintf("%s%s", baseURL, url))
 }
 
 func ParseGithubTag(data []byte) (string, error) {
@@ -46,7 +50,7 @@ func WriteIntoFile(data []byte, file string) error {
 	return nil
 }
 
-func CompareVersion(version1, version2 string) (bool, error) {
+func IsVersionGreaterThan(version1, version2 string) (bool, error) {
 	semanticVersion1, err := hversion.NewVersion(version1)
 	if err != nil {
 		return false, err

@@ -54,10 +54,10 @@ func GetVersionCommand(rootCmd *cobra.Command) map[string]cmdCore.CommandEntry {
 func getVersion(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	latest, err := getLatestVersion(flytectlReleasePath)
 	if err != nil {
-		logger.Errorf(ctx, "Error while comparing the flytectl version", err)
+		logger.Errorf(ctx, "Get latest version of flyte got failed", err)
 	}
 
-	isGreater, err := util.CompareVersion(latest, stdlibversion.Version)
+	isGreater, err := util.IsVersionGreaterThan(latest, stdlibversion.Version)
 	if err != nil {
 		logger.Errorf(ctx, "Error while comparing the flytectl version", err)
 	}
