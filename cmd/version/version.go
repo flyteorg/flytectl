@@ -24,10 +24,11 @@ Example version.
 `
 	flytectlAppName       = "flytectl"
 	controlPlanAppName    = "controlPlane"
-	flytectlReleasePath   = "/repos/flyteorg/flytectl/releases/latest"
 	latestVersionMessage  = "Installed flytectl version is the latest"
 	upgradeVersionMessage = "A newer version of flytectl is available [%v] Please upgrade using - https://docs.flyte.org/projects/flytectl/en/latest/index.html"
 )
+
+var flytectlReleasePath = "/repos/flyteorg/flytectl/releases/latest"
 
 type versionOutput struct {
 	// Specifies the Name of app

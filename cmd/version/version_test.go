@@ -99,4 +99,15 @@ func TestVersionUtilFunc(t *testing.T) {
 		err := getControlPlaneVersion(ctx, cmdCtx)
 		assert.NotNil(t, err)
 	})
+	t.Run("Failed in getting version", func(t *testing.T) {
+		ctx := context.Background()
+		mockClient := new(mocks.AdminServiceClient)
+		mockOutStream := new(io.Writer)
+		flytectlReleasePath = "/release"
+		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+		mockClient.OnGetVersionMatch(ctx, &admin.GetVersionRequest{}).Return(nil, fmt.Errorf("error"))
+		err := getVersion(ctx, []string{}, cmdCtx)
+		assert.Nil(t, err)
+	})
+
 }
