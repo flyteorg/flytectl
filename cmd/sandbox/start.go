@@ -44,6 +44,7 @@ Usage
 	GeneratedManifest            = "/flyteorg/share/flyte_generated.yaml"
 	FlyteReleaseURL              = "/flyteorg/flyte/releases/download/%v/flyte_sandbox_manifest.yaml"
 	FlyteMinimumVersionSupported = "v0.14.0"
+	GithubURL                    = "https://github.com"
 )
 
 var (
@@ -145,7 +146,7 @@ func mountFlyteManifest(version string) error {
 		if !isGreater {
 			return fmt.Errorf("version flag only support %s+ flyte version", FlyteMinimumVersionSupported)
 		}
-		response, err := util.GetRequest("https://github.com", fmt.Sprintf(FlyteReleaseURL, version))
+		response, err := util.GetRequest(GithubURL, fmt.Sprintf(FlyteReleaseURL, version))
 		if err != nil {
 			return err
 		}

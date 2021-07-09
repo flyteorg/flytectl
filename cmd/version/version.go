@@ -24,6 +24,7 @@ Example version.
 `
 	flytectlAppName       = "flytectl"
 	controlPlanAppName    = "controlPlane"
+	GithubAPIURL          = "https://api.github.com"
 	latestVersionMessage  = "Installed flytectl version is the latest"
 	upgradeVersionMessage = "A newer version of flytectl is available [%v] Please upgrade using - https://docs.flyte.org/projects/flytectl/en/latest/index.html"
 )
@@ -112,7 +113,7 @@ func getControlPlaneVersion(ctx context.Context, cmdCtx cmdCore.CommandContext) 
 }
 
 func getLatestVersion(path string) (string, error) {
-	response, err := util.GetRequest("https://api.github.com", path)
+	response, err := util.GetRequest(GithubAPIURL, path)
 	if err != nil {
 		return "", err
 	}

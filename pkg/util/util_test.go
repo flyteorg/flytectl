@@ -55,7 +55,7 @@ func TestWriteIntoFile(t *testing.T) {
 	})
 }
 
-func TestCompareVersion(t *testing.T) {
+func TestIsVersionGreaterThan(t *testing.T) {
 	t.Run("Compare flytectl version when upgrade available", func(t *testing.T) {
 		_, err := IsVersionGreaterThan("v1.1.21", testVersion)
 		assert.Nil(t, err)
