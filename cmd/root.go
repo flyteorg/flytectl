@@ -86,7 +86,14 @@ func initConfig(cmd *cobra.Command, _ []string) error {
 		SearchPaths: []string{configFile},
 	})
 
-	configAccessor.InitializePflags(cmd.PersistentFlags())
+	// persistent flags were initially bound to the root command so we must bind to the same command to avoid
+	// overriding those initial ones. We need to traverse up to the root command and initialize pflags for that.
+	rootCmd := cmd
+	for rootCmd.Parent() != nil {
+		rootCmd = rootCmd.Parent()
+	}
+
+	configAccessor.InitializePflags(rootCmd.PersistentFlags())
 
 	err := configAccessor.UpdateConfig(context.TODO())
 	if err != nil {
