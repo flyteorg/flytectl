@@ -127,4 +127,18 @@ func TestConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
+	t.Run("Test_storage", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("storage", testValue)
+			if vString, err := cmdFlags.GetString("storage"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.StorageType)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
 }

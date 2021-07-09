@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/flyteorg/flytestdlib/logger"
 
@@ -35,6 +36,11 @@ Generate remote cluster config. Read more about the remote deployment https://do
 ::
 
  bin/flytectl configuration config --host=flyte.myexample.com
+	
+Generate flytectl config with a specific storage type
+::
+
+ bin/flytectl configuration config --host=flyte.myexample.com --storage=gcs
 `
 )
 
@@ -72,11 +78,14 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 	if len(initConfig.DefaultConfig.Host) > 0 {
 		templateValues.Host = fmt.Sprintf("dns:///%v", initConfig.DefaultConfig.Host)
 		templateStr = configutil.GetAWSCloudTemplate()
-		_, result, err := prompt.Run()
-		if err != nil {
-			return err
+		if len(initConfig.DefaultConfig.StorageType) == 0 {
+			_, result, err := prompt.Run()
+			if err != nil {
+				return err
+			}
+			initConfig.DefaultConfig.StorageType = result
 		}
-		if result == "GCS" {
+		if strings.ToUpper(initConfig.DefaultConfig.StorageType) == "GCS" {
 			templateStr = configutil.GetGoogleCloudTemplate()
 		}
 	}

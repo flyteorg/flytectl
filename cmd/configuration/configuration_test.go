@@ -58,4 +58,6 @@ func TestSetupConfigFunc(t *testing.T) {
 	assert.Nil(t, initFlytectlConfig(ctx, no))
 	initConfig.DefaultConfig.Host = "test"
 	assert.NotNil(t, initFlytectlConfig(ctx, no))
+	initConfig.DefaultConfig.StorageType = "GCS"
+	assert.Nil(t, initFlytectlConfig(ctx, yes))
 }

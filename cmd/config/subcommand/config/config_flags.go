@@ -15,5 +15,6 @@ func (cfg Config) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("Config", pflag.ExitOnError)
 	cmdFlags.StringVar(&DefaultConfig.Host, fmt.Sprintf("%v%v", prefix, "host"), DefaultConfig.Host, "Endpoint of flyte admin")
 	cmdFlags.BoolVar(&DefaultConfig.Insecure, fmt.Sprintf("%v%v", prefix, "insecure"), DefaultConfig.Insecure, "Enable insecure mode")
+	cmdFlags.StringVar(&DefaultConfig.StorageType, fmt.Sprintf("%v%v", prefix, "storage"), DefaultConfig.StorageType, "Storage provider name S3/GCS")
 	return cmdFlags
 }
