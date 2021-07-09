@@ -11,7 +11,7 @@ require (
 	github.com/docker/go-connections v0.4.0
 	github.com/enescakir/emoji v1.0.0
 	github.com/flyteorg/flyteidl v0.19.9
-	github.com/flyteorg/flytestdlib v0.3.24
+	github.com/flyteorg/flytestdlib v0.3.28
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.4.3
 	github.com/google/go-cmp v0.5.6 // indirect
@@ -44,5 +44,3 @@ require (
 	gotest.tools v2.2.0+incompatible
 	sigs.k8s.io/yaml v1.2.0
 )
-
-replace github.com/flyteorg/flytestdlib => github.com/flyteorg/flytestdlib v0.3.27-0.20210706201803-5fff28e55585
