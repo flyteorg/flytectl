@@ -56,8 +56,8 @@ Basic Configuration
            admin:
              # For GRPC endpoints you might want to use dns:///flyte.myexample.com
              endpoint: dns:///localhost:30081
-             insecure: true
-             authType: Pkce # if using authentication or just drop this. If insecure set insecure: True
+             insecure: false # insecure: True # Set to true if the endpoint isn't accessible through TLS/SSL connection (not recommended except on local sandbox deployment)
+             authType: Pkce # authType: Pkce # if using authentication or just drop this.
            storage:
              connection:
                access-key: minio
@@ -76,14 +76,15 @@ Basic Configuration
            admin:
              # For GRPC endpoints you might want to use dns:///flyte.myexample.com
              endpoint: dns:///<replace-me>
-             authType: Pkce # if using authentication or just drop this. If insecure set insecure: True
+             authType: Pkce # authType: Pkce # if using authentication or just drop this.
+             insecure: true # insecure: True # Set to true if the endpoint isn't accessible through TLS/SSL connection (not recommended except on local sandbox deployment)
            storage:
              type: stow
              stow:
                 kind: s3
                 config:
                     auth_type: iam
-                    region: <replace> # Example: us-east-2
+                    region: <REGION> # Example: us-east-2
              container: <replace> # Example my-bucket. Flyte k8s cluster / service account for execution should have read access to this bucket
 
    .. tab:: GCS Configuration
@@ -93,7 +94,8 @@ Basic Configuration
            admin:
              # For GRPC endpoints you might want to use dns:///flyte.myexample.com
              endpoint: dns:///<replace-me>
-             authType: Pkce # if using authentication or just drop this. If insecure set insecure: True
+             authType: Pkce # authType: Pkce # if using authentication or just drop this.
+             insecure: false # insecure: True # Set to true if the endpoint isn't accessible through TLS/SSL connection (not recommended except on local sandbox deployment)
            storage:
              type: stow
              stow:
