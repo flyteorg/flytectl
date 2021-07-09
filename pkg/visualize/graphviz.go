@@ -231,7 +231,7 @@ func (gb *graphBuilder) constructNode(parentGraphName string, prefix string, gra
 		case *core.Node_BranchNode:
 			sanitizedName := strings.ReplaceAll(n.Metadata.Name, "-", "_")
 			branchSubGraphName := SubgraphPrefix + sanitizedName
-			err := graph.AddSubGraph(parentGraphName, branchSubGraphName, nil)
+			err := graph.AddSubGraph(parentGraphName, branchSubGraphName, map[string]string{LabelAttr: sanitizedName})
 			if err != nil {
 				return nil, err
 			}
@@ -250,7 +250,7 @@ func (gb *graphBuilder) constructNode(parentGraphName string, prefix string, gra
 			} else {
 				sanitizedName := strings.ReplaceAll(name, "-", "_")
 				subGraphName := SubgraphPrefix + sanitizedName
-				err := graph.AddSubGraph(parentGraphName, subGraphName, nil)
+				err := graph.AddSubGraph(parentGraphName, subGraphName, map[string]string{LabelAttr: sanitizedName})
 				if err != nil {
 					return nil, err
 				}
