@@ -342,8 +342,6 @@ github.com/fatih/structtag v1.2.0/go.mod h1:mBJUNpUnHmRKrKlQQlmCrh5PuhftFbNv8Ys4
 github.com/flyteorg/flyteidl v0.19.9 h1:1j4/YbV/G1m2hrK017F9K0JYZYxCCwf4qtEkiNnUiEw=
 github.com/flyteorg/flyteidl v0.19.9/go.mod h1:576W2ViEyjTpT+kEVHAGbrTP3HARNUZ/eCwrNPmdx9U=
 github.com/flyteorg/flytestdlib v0.3.13/go.mod h1:Tz8JCECAbX6VWGwFT6cmEQ+RJpZ/6L9pswu3fzWs220=
-github.com/flyteorg/flytestdlib v0.3.27-0.20210706201803-5fff28e55585 h1:v4NlU43995inqUlYVWi5+w8nuhkmdJF6wshMKftw9Tc=
-github.com/flyteorg/flytestdlib v0.3.27-0.20210706201803-5fff28e55585/go.mod h1:1XG0DwYTUm34Yrffm1Qy9Tdr/pWQypEqTq5dUxw3/cM=
 github.com/flyteorg/flytestdlib v0.3.28 h1:bvyldApjlUy9ETxSFpYvLhYLJxxndnMZTf93rVG6a00=
 github.com/flyteorg/flytestdlib v0.3.28/go.mod h1:7cDWkY3v7xsoesFcDdu6DSW5Q2U2W5KlHUbUHSwBG1Q=
 github.com/form3tech-oss/jwt-go v3.2.2+incompatible h1:TcekIExNqud5crz4xD2pavyTgWiPvpYe4Xau31I0PRk=
