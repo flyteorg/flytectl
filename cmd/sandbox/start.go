@@ -33,6 +33,7 @@ Mount your source code repository inside sandbox
 
 Usage
 	`
+	containerFlyteSource = "/flyteorg/share"
 )
 
 type ExecResult struct {
@@ -57,6 +58,11 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 
 func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
+	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
+		return nil, err
+	}
+
+	volumes := docker.Volumes
 	if err := docker.SetupFlyteDir(); err != nil {
 		return nil, err
 	}
@@ -65,20 +71,16 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		return nil, err
 	}
 
-	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
+	if vol, err := mountVolume(sandboxConfig.DefaultConfig.Kustomize, containerFlyteSource); err != nil {
 		return nil, err
+	} else if vol != nil {
+		volumes = append(volumes, *vol)
 	}
 
-	if len(sandboxConfig.DefaultConfig.Source) > 0 {
-		source, err := filepath.Abs(sandboxConfig.DefaultConfig.Source)
-		if err != nil {
-			return nil, err
-		}
-		docker.Volumes = append(docker.Volumes, mount.Mount{
-			Type:   mount.TypeBind,
-			Source: source,
-			Target: docker.Source,
-		})
+	if vol, err := mountVolume(sandboxConfig.DefaultConfig.Source, docker.Source); err != nil {
+		return nil, err
+	} else if vol != nil {
+		volumes = append(volumes, *vol)
 	}
 
 	fmt.Printf("%v pulling docker image %s\n", emoji.Whale, docker.ImageName)
@@ -90,7 +92,8 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 
 	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
-	ID, err := docker.StartContainer(ctx, cli, docker.Volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, docker.ImageName)
+
+	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, docker.ImageName)
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)
 		return nil, err
@@ -110,4 +113,19 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}()
 
 	return logReader, nil
+}
+
+func mountVolume(file, destination string) (*mount.Mount, error) {
+	if len(file) > 0 {
+		source, err := filepath.Abs(file)
+		if err != nil {
+			return nil, err
+		}
+		return &mount.Mount{
+			Type:   mount.TypeBind,
+			Source: source,
+			Target: destination,
+		}, nil
+	}
+	return nil, nil
 }
