@@ -38,7 +38,7 @@ func ParseGithubTag(data []byte) (string, error) {
 }
 
 func WriteIntoFile(data []byte, file string) error {
-	err := ioutil.WriteFile(file, data, 0600)
+	err := ioutil.WriteFile(file, data, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func WriteIntoFile(data []byte, file string) error {
 
 // SetupFlyteDir will create .flyte dir if not exist
 func SetupFlyteDir() error {
-	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755); err != nil {
+	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), os.ModePerm); err != nil {
 		return err
 	}
 	return nil

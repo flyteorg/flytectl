@@ -53,9 +53,9 @@ func TestSetupConfigFunc(t *testing.T) {
 	initConfig.DefaultConfig.Host = ""
 	assert.Nil(t, err)
 
-	assert.Nil(t, initFlytectlConfig(yes))
-	assert.Nil(t, initFlytectlConfig(yes))
-	assert.Nil(t, initFlytectlConfig(no))
+	assert.Nil(t, initFlytectlConfig(ctx, yes))
+	assert.Nil(t, initFlytectlConfig(ctx, yes))
+	assert.Nil(t, initFlytectlConfig(ctx, no))
 	initConfig.DefaultConfig.Host = "test"
-	assert.NotNil(t, initFlytectlConfig(no))
+	assert.NotNil(t, initFlytectlConfig(ctx, no))
 }

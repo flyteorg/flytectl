@@ -6,6 +6,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/flyteorg/flytestdlib/logger"
+
 	"github.com/flyteorg/flytectl/pkg/configutil"
 
 	initConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/config"
@@ -56,10 +58,10 @@ func CreateConfigCommand() *cobra.Command {
 }
 
 func configInitFunc(ctx context.Context, args []string, cmdCtx cmdcore.CommandContext) error {
-	return initFlytectlConfig(os.Stdin)
+	return initFlytectlConfig(ctx, os.Stdin)
 }
 
-func initFlytectlConfig(reader io.Reader) error {
+func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 
 	templateValues := configutil.ConfigTemplateSpec{
 		Host:     "dns:///localhost:30081",
@@ -91,7 +93,7 @@ func initFlytectlConfig(reader io.Reader) error {
 	}
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
-		fmt.Println("Init flytectl config for remote cluster, Please update your storage config in ~/.flyte/config.yaml. Learn more about the config here https://docs.flyte.org/projects/flytectl/en/latest/index.html#configure")
+		logger.Infof(ctx, "Init flytectl config for remote cluster, Please update your storage config in %s. Learn more about the config here https://docs.flyte.org/projects/flytectl/en/latest/index.html#configure", configutil.ConfigFile)
 	}
 	return _err
 }
