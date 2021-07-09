@@ -9,8 +9,6 @@ import (
 	"github.com/flyteorg/flytectl/pkg/printer"
 )
 
-//go:generate pflags Config --default-var=defaultConfig
-
 var (
 	defaultConfig = &Config{
 		Output: printer.OutputFormatTABLE.String(),
