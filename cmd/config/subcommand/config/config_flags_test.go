@@ -133,8 +133,8 @@ func TestConfig_SetFlags(t *testing.T) {
 			testValue := "1"
 
 			cmdFlags.Set("storage", testValue)
-			if vString, err := cmdFlags.GetString("storage"); err == nil {
-				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.StorageType)
+			if vBool, err := cmdFlags.GetBool("storage"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.Storage)
 
 			} else {
 				assert.FailNow(t, err.Error())

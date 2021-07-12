@@ -37,10 +37,10 @@ Generate remote cluster config. Read more about the remote deployment https://do
 
  bin/flytectl configuration config --host=flyte.myexample.com
 	
-Generate flytectl config with a specific storage type
+Generate flytectl config with a storage provider
 ::
 
- bin/flytectl configuration config --host=flyte.myexample.com --storage=gcs
+ bin/flytectl configuration config --host=flyte.myexample.com --storage
 `
 )
 
@@ -77,16 +77,15 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
 		templateValues.Host = fmt.Sprintf("dns:///%v", initConfig.DefaultConfig.Host)
-		templateStr = configutil.GetAWSCloudTemplate()
-		if len(initConfig.DefaultConfig.StorageType) == 0 {
+		if initConfig.DefaultConfig.Storage {
+			templateStr = configutil.GetAWSCloudTemplate()
 			_, result, err := prompt.Run()
 			if err != nil {
 				return err
 			}
-			initConfig.DefaultConfig.StorageType = result
-		}
-		if strings.ToUpper(initConfig.DefaultConfig.StorageType) == "GCS" {
-			templateStr = configutil.GetGoogleCloudTemplate()
+			if strings.ToUpper(result) == "GCS" {
+				templateStr = configutil.GetGoogleCloudTemplate()
+			}
 		}
 	}
 	var _err error

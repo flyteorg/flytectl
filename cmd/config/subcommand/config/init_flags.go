@@ -9,7 +9,7 @@ var (
 
 //Configs
 type Config struct {
-	Host        string `json:"host" pflag:",Endpoint of flyte admin"`
-	Insecure    bool   `json:"insecure" pflag:",Enable insecure mode"`
-	StorageType string `json:"storage" pflag:",Storage provider name S3/GCS"`
+	Host     string `json:"host" pflag:",Endpoint of flyte admin"`
+	Insecure bool   `json:"insecure" pflag:",Enable insecure mode"`
+	Storage  bool   `json:"storage" pflag:",Enable storage provider config"`
 }
