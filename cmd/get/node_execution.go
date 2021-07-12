@@ -1,11 +1,12 @@
 package get
 
 import (
+	"bytes"
 	"context"
+	"github.com/golang/protobuf/jsonpb"
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/disiqueira/gotree"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -13,8 +14,6 @@ import (
 	"github.com/flyteorg/flyteidl/clients/go/coreutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/event"
-	_struct "github.com/golang/protobuf/ptypes/struct"
 )
 
 var nodeExecutionColumns = []printer.Column{
@@ -43,15 +42,15 @@ const (
 	hyphenPrefix               = " - "
 )
 
-func getExecutionDetails(ctx context.Context, project, domain, execName, nodeName string, cmdCtx cmdCore.CommandContext) ([]*NodeExecutionWrapper, error) {
+func getExecutionDetails(ctx context.Context, project, domain, execName, nodeName string, cmdCtx cmdCore.CommandContext) ([]*NodeExecutionClosure, error) {
 	// Fetching Node execution details
-	nodeExecDetailsMap := map[string]*NodeExecutionWrapper{}
+	nodeExecDetailsMap := map[string]*NodeExecutionClosure{}
 	nExecDetails, err := getNodeExecDetailsInt(ctx, project, domain, execName, nodeName, "", nodeExecDetailsMap, cmdCtx)
 	if err != nil {
 		return nil, err
 	}
 
-	var nExecDetailsForView []*NodeExecutionWrapper
+	var nExecDetailsForView []*NodeExecutionClosure
 	// Get the execution details only for the nodeId passed
 	if len(nodeName) > 0 {
 		// Fetch the last one which contains the nodeId details as previous ones are used to reach the nodeId
@@ -64,6 +63,57 @@ func getExecutionDetails(ctx context.Context, project, domain, execName, nodeNam
 	return nExecDetailsForView, nil
 }
 
+type TaskExecution struct {
+	*admin.TaskExecution
+}
+//
+//func (in *TaskExecution) MarshalJSON() ([]byte, error) {
+//	var buf bytes.Buffer
+//	marshaller := jsonpb.Marshaler{}
+//	if err := marshaller.Marshal(&buf, in.TaskExecution); err != nil {
+//		return nil, err
+//	}
+//	return buf.Bytes(), nil
+//}
+//
+//func (in *TaskExecution) UnmarshalJSON(b []byte) error {
+//	in.TaskExecution = &admin.TaskExecution{}
+//	return jsonpb.Unmarshal(bytes.NewReader(b), in.TaskExecution)
+//}
+
+type NodeExecution struct {
+	*admin.NodeExecution
+}
+
+func (in *NodeExecutionClosure) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	marshaller := jsonpb.Marshaler{}
+	if err := marshaller.Marshal(&buf, in); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func (in *NodeExecutionClosure) UnmarshalJSON(b []byte) error {
+	*in = NodeExecutionClosure{}
+	return jsonpb.Unmarshal(bytes.NewReader(b), in)
+}
+
+type NodeExecutionClosure struct {
+	*NodeExecution
+	ChildNodes     []*NodeExecutionClosure `json:"child_nodes,omitempty"`
+	TaskExecutions []*TaskExecutionClosure `json:"task_execs,omitempty"`
+	// Inputs for the node
+	Inputs map[string]interface{} `json:"inputs,omitempty"`
+	// Outputs for the node
+	Outputs map[string]interface{} `json:"outputs,omitempty"`
+}
+
+type TaskExecutionClosure struct {
+	*TaskExecution
+}
+
+/*
 type StatusTrackerWrapper struct {
 	Phase string `json:"phase,omitempty"`
 	// Time at which the node execution began running.
@@ -140,23 +190,26 @@ func transformToWrapperTask(entity *admin.TaskExecution) TaskExecutionWrapper {
 		StatusTrackerWrapper: statusTracker,
 	}
 }
+*/
 
 func getNodeExecDetailsInt(ctx context.Context, project, domain, execName, nodeName, uniqueParentID string,
-	nodeExecDetailsMap map[string]*NodeExecutionWrapper, cmdCtx cmdCore.CommandContext) ([]*NodeExecutionWrapper, error) {
+	nodeExecDetailsMap map[string]*NodeExecutionClosure, cmdCtx cmdCore.CommandContext) ([]*NodeExecutionClosure, error) {
 
 	nExecDetails, err := cmdCtx.AdminFetcherExt().FetchNodeExecutionDetails(ctx, execName, project, domain, uniqueParentID)
 	if err != nil {
 		return nil, err
 	}
 
-	var nodeExecWrappers []*NodeExecutionWrapper
+	var nodeExecClosures []*NodeExecutionClosure
 	for _, nodeExec := range nExecDetails.NodeExecutions {
-		nodeExecWrapper := transformToWrapperNode(nodeExec)
-		nodeExecWrappers = append(nodeExecWrappers, &nodeExecWrapper)
+		nodeExecClosure := &NodeExecutionClosure{
+			NodeExecution: &NodeExecution{nodeExec},
+		}
+		nodeExecClosures = append(nodeExecClosures, nodeExecClosure)
 
 		// Check if this is parent node. If yes do recursive call to get child nodes.
 		if nodeExec.Metadata != nil && nodeExec.Metadata.IsParentNode {
-			nodeExecWrapper.ChildNodes, err = getNodeExecDetailsInt(ctx, project, domain, execName, nodeName, nodeExec.Id.NodeId, nodeExecDetailsMap, cmdCtx)
+			nodeExecClosure.ChildNodes, err = getNodeExecDetailsInt(ctx, project, domain, execName, nodeName, nodeExec.Id.NodeId, nodeExecDetailsMap, cmdCtx)
 			if err != nil {
 				return nil, err
 			}
@@ -171,8 +224,10 @@ func getNodeExecDetailsInt(ctx context.Context, project, domain, execName, nodeN
 				return nil, err
 			}
 			for _, taskExec := range taskExecList.TaskExecutions {
-				t := transformToWrapperTask(taskExec)
-				nodeExecWrapper.TaskExecutions = append(nodeExecWrapper.TaskExecutions, &t)
+				taskExecClosure := &TaskExecutionClosure{
+					TaskExecution: &TaskExecution{taskExec},
+				}
+				nodeExecClosure.TaskExecutions = append(nodeExecClosure.TaskExecutions, taskExecClosure)
 			}
 			// Fetch the node inputs and outputs
 			nExecDataResp, err := cmdCtx.AdminFetcherExt().FetchNodeExecutionData(ctx, nodeExec.Id.NodeId, execName, project, domain)
@@ -180,86 +235,86 @@ func getNodeExecDetailsInt(ctx context.Context, project, domain, execName, nodeN
 				return nil, err
 			}
 			// Extract the inputs from the literal map
-			nodeExecWrapper.Inputs, err = extractLiteralMap(nExecDataResp.FullInputs)
+			nodeExecClosure.Inputs, err = extractLiteralMap(nExecDataResp.FullInputs)
 			if err != nil {
 				return nil, err
 			}
 			// Extract the outputs from the literal map
-			nodeExecWrapper.Outputs, err = extractLiteralMap(nExecDataResp.FullOutputs)
+			nodeExecClosure.Outputs, err = extractLiteralMap(nExecDataResp.FullOutputs)
 			if err != nil {
 				return nil, err
 			}
 		}
-		nodeExecDetailsMap[nodeExec.Id.NodeId] = &nodeExecWrapper
+		nodeExecDetailsMap[nodeExec.Id.NodeId] = nodeExecClosure
 		// Found the node
 		if len(nodeName) > 0 && nodeName == nodeExec.Id.NodeId {
-			return nodeExecWrappers, err
+			return nodeExecClosures, err
 		}
 	}
-	return nodeExecWrappers, nil
+	return nodeExecClosures, nil
 }
 
-func createNodeTaskExecTreeView(rootView gotree.Tree, taskExecWrappers []*TaskExecutionWrapper) {
-	if len(taskExecWrappers) == 0 {
+func createNodeTaskExecTreeView(rootView gotree.Tree, taskExecClosures []*TaskExecutionClosure) {
+	if len(taskExecClosures) == 0 {
 		return
 	}
 	if rootView == nil {
 		rootView = gotree.New("")
 	}
 	// TODO: Replace this by filter to sort in the admin
-	sort.Slice(taskExecWrappers[:], func(i, j int) bool {
-		return taskExecWrappers[i].ID.RetryAttempt < taskExecWrappers[j].ID.RetryAttempt
+	sort.Slice(taskExecClosures[:], func(i, j int) bool {
+		return taskExecClosures[i].Id.RetryAttempt < taskExecClosures[j].Id.RetryAttempt
 	})
-	for _, taskExecWrapper := range taskExecWrappers {
-		attemptView := rootView.Add(taskAttemptPrefix + strconv.Itoa(int(taskExecWrapper.ID.RetryAttempt)))
-		attemptView.Add(taskExecPrefix + taskExecWrapper.Phase +
-			hyphenPrefix + taskExecWrapper.StartedAt.String() +
-			hyphenPrefix + taskExecWrapper.EndedAt.String())
-		attemptView.Add(taskTypePrefix + taskExecWrapper.TaskType)
-		attemptView.Add(taskReasonPrefix + taskExecWrapper.Reason)
-		if taskExecWrapper.Metadata != nil {
+	for _, taskExecClosure := range taskExecClosures {
+		attemptView := rootView.Add(taskAttemptPrefix + strconv.Itoa(int(taskExecClosure.Id.RetryAttempt)))
+		attemptView.Add(taskExecPrefix + taskExecClosure.Closure.Phase.String() +
+			hyphenPrefix + taskExecClosure.Closure.StartedAt.String() +
+			hyphenPrefix + taskExecClosure.Closure.Duration.String())
+		attemptView.Add(taskTypePrefix + taskExecClosure.Closure.TaskType)
+		attemptView.Add(taskReasonPrefix + taskExecClosure.Closure.Reason)
+		if taskExecClosure.Closure.Metadata != nil {
 			metadata := attemptView.Add(taskMetadataPrefix)
-			metadata.Add(taskGeneratedNamePrefix + taskExecWrapper.Metadata.GeneratedName)
-			metadata.Add(taskPluginIDPrefix + taskExecWrapper.Metadata.PluginIdentifier)
+			metadata.Add(taskGeneratedNamePrefix + taskExecClosure.Closure.Metadata.GeneratedName)
+			metadata.Add(taskPluginIDPrefix + taskExecClosure.Closure.Metadata.PluginIdentifier)
 			extResourcesView := metadata.Add(taskExtResourcesPrefix)
-			for _, extResource := range taskExecWrapper.Metadata.ExternalResources {
+			for _, extResource := range taskExecClosure.Closure.Metadata.ExternalResources {
 				extResourcesView.Add(taskExtResourcePrefix + extResource.ExternalId)
 			}
 			resourcePoolInfoView := metadata.Add(taskResourcePrefix)
-			for _, rsPool := range taskExecWrapper.Metadata.ResourcePoolInfo {
+			for _, rsPool := range taskExecClosure.Closure.Metadata.ResourcePoolInfo {
 				resourcePoolInfoView.Add(taskExtResourcePrefix + rsPool.Namespace)
 				resourcePoolInfoView.Add(taskExtResourceTokenPrefix + rsPool.AllocationToken)
 			}
 		}
 
-		sort.Slice(taskExecWrapper.Logs[:], func(i, j int) bool {
-			return taskExecWrapper.Logs[i].Name < taskExecWrapper.Logs[j].Name
+		sort.Slice(taskExecClosure.Closure.Logs[:], func(i, j int) bool {
+			return taskExecClosure.Closure.Logs[i].Name < taskExecClosure.Closure.Logs[j].Name
 		})
 
 		logsView := attemptView.Add(taskLogsPrefix)
-		for _, logData := range taskExecWrapper.Logs {
+		for _, logData := range taskExecClosure.Closure.Logs {
 			logsView.Add(taskLogsNamePrefix + logData.Name)
 			logsView.Add(taskLogURIPrefix + logData.Uri)
 		}
 	}
 }
 
-func createNodeDetailsTreeView(rootView gotree.Tree, nodeExecutionWrappers []*NodeExecutionWrapper) gotree.Tree {
+func createNodeDetailsTreeView(rootView gotree.Tree, nodeExecutionClosures []*NodeExecutionClosure) gotree.Tree {
 	if rootView == nil {
 		rootView = gotree.New("")
 	}
-	if len(nodeExecutionWrappers) == 0 {
+	if len(nodeExecutionClosures) == 0 {
 		return rootView
 	}
 	// TODO : Move to sorting using filters.
-	sort.Slice(nodeExecutionWrappers[:], func(i, j int) bool {
-		return nodeExecutionWrappers[i].StartedAt.Before(nodeExecutionWrappers[j].StartedAt)
+	sort.Slice(nodeExecutionClosures[:], func(i, j int) bool {
+		return nodeExecutionClosures[i].Closure.StartedAt.AsTime().Before(nodeExecutionClosures[j].Closure.StartedAt.AsTime())
 	})
 
-	for _, nodeExecWrapper := range nodeExecutionWrappers {
-		nExecView := rootView.Add(nodeExecWrapper.ID.NodeId + hyphenPrefix + nodeExecWrapper.Phase +
-			hyphenPrefix + nodeExecWrapper.StartedAt.String() +
-			hyphenPrefix + nodeExecWrapper.EndedAt.String())
+	for _, nodeExecWrapper := range nodeExecutionClosures {
+		nExecView := rootView.Add(nodeExecWrapper.Id.NodeId + hyphenPrefix + nodeExecWrapper.Closure.Phase.String() +
+			hyphenPrefix + nodeExecWrapper.Closure.StartedAt.String() +
+			hyphenPrefix + nodeExecWrapper.Closure.Duration.String())
 		if len(nodeExecWrapper.ChildNodes) > 0 {
 			createNodeDetailsTreeView(nExecView, nodeExecWrapper.ChildNodes)
 		}
