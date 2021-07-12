@@ -2,8 +2,9 @@ package delete
 
 import (
 	"fmt"
-	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflowexecutionconfig"
 	"testing"
+
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflowexecutionconfig"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	u "github.com/flyteorg/flytectl/cmd/testutils"

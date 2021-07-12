@@ -2,6 +2,7 @@ package delete
 
 import (
 	"context"
+
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflowexecutionconfig"
 
 	"github.com/flyteorg/flytectl/cmd/config"
@@ -23,13 +24,13 @@ Here the command delete workflow execution config for project flytectldemo and d
 
 
 Deletes workflow execution config using config file which was used for creating it.
-Here the command deletes workflow execution config from the config file ecl.yaml
+Here the command deletes workflow execution config from the config file wec.yaml
 Max_parallelism is optional in the file as its unread during the delete command but can be kept as the same file can be used for get, update or delete 
-eg:  content of ecl.yaml which will use the project domain and workflow name for deleting the resource
+eg:  content of wec.yaml which will use the project domain and workflow name for deleting the resource
 
 ::
 
- flytectl delete workflow-execution-config --attrFile ecl.yaml
+ flytectl delete workflow-execution-config --attrFile wec.yaml
 
 
 .. code-block:: yaml
@@ -58,7 +59,7 @@ func deleteWorkflowExecutionConfig(ctx context.Context, args []string, cmdCtx cm
 	if len(delConfig.AttrFile) > 0 {
 		// Initialize FileConfig which will be used if delConfig.AttrFile is non empty
 		// And Reads from the workflow execution config file
-		pwdGetter = &workflowexecutionconfig.WorkflowExecutionConfigFileConfig{}
+		pwdGetter = &workflowexecutionconfig.FileConfig{}
 		if err := sconfig.ReadConfigFromFile(pwdGetter, delConfig.AttrFile); err != nil {
 			return err
 		}

@@ -2,6 +2,7 @@ package get
 
 import (
 	"context"
+
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflowexecutionconfig"
 
 	"github.com/flyteorg/flytectl/cmd/config"
@@ -51,12 +52,12 @@ eg : output from the command
  }
 
 Writing the workflow execution config to a file. If there are no workflow execution config, command would return an error.
-Here the command gets workflow execution config and writes the config file to po.yaml
-eg:  content of po.yaml
+Here the command gets workflow execution config and writes the config file to wec.yaml
+eg:  content of wec.yaml
 
 ::
 
- flytectl get workflow-execution-config -p flytectldemo -d development --attrFile po.yaml
+ flytectl get workflow-execution-config -p flytectldemo -d development --attrFile wec.yaml
 
 
 .. code-block:: yaml
@@ -81,7 +82,7 @@ func getWorkflowExecutionConfigFunc(ctx context.Context, args []string, cmdCtx c
 		workflowName = args[0]
 	}
 	// Construct a shadow config for WorkflowExecutionConfig. The shadow config is not using ProjectDomainAttribute/Workflowattribute directly inorder to simplify the inputs.
-	workflowExecutionConfigFileConfig := workflowexecutionconfig.WorkflowExecutionConfigFileConfig{Project: project, Domain: domain, Workflow: workflowName}
+	workflowExecutionConfigFileConfig := workflowexecutionconfig.FileConfig{Project: project, Domain: domain, Workflow: workflowName}
 	// Get the workflow execution config from the command line config
 	fileName := workflowexecutionconfig.DefaultFetchConfig.AttrFile
 

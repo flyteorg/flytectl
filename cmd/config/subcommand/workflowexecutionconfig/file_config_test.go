@@ -9,45 +9,38 @@ import (
 )
 
 func TestFileConfig(t *testing.T) {
-	taskAttrFileConfig := TaskResourceAttrFileConfig{
+	workflowExecutionConfigFileConfig := FileConfig{
 		Project: "dummyProject",
 		Domain:  "dummyDomain",
-		TaskResourceAttributes: &admin.TaskResourceAttributes{
-			Defaults: &admin.TaskResourceSpec{
-				Cpu:    "1",
-				Memory: "150Mi",
-			},
-			Limits: &admin.TaskResourceSpec{
-				Cpu:    "2",
-				Memory: "350Mi",
-			},
+		WorkflowExecutionConfig: &admin.WorkflowExecutionConfig{
+			MaxParallelism: 5,
 		},
 	}
 	matchingAttr := &admin.MatchingAttributes{
-		Target: &admin.MatchingAttributes_TaskResourceAttributes{
-			TaskResourceAttributes: taskAttrFileConfig.TaskResourceAttributes,
+		Target: &admin.MatchingAttributes_WorkflowExecutionConfig{
+			WorkflowExecutionConfig: workflowExecutionConfigFileConfig.WorkflowExecutionConfig,
 		},
 	}
 	t.Run("decorate", func(t *testing.T) {
-		assert.Equal(t, matchingAttr, taskAttrFileConfig.Decorate())
+		assert.Equal(t, matchingAttr, workflowExecutionConfigFileConfig.Decorate())
 	})
 
 	t.Run("decorate", func(t *testing.T) {
-		taskAttrFileConfigNew := TaskResourceAttrFileConfig{
+		workflowExecutionConfigFileConfigNew := FileConfig{
 			Project: "dummyProject",
 			Domain:  "dummyDomain",
 		}
-		taskAttrFileConfigNew.UnDecorate(matchingAttr)
-		assert.Equal(t, taskAttrFileConfig, taskAttrFileConfigNew)
+		workflowExecutionConfigFileConfigNew.UnDecorate(matchingAttr)
+		assert.Equal(t, workflowExecutionConfigFileConfig, workflowExecutionConfigFileConfigNew)
 	})
 	t.Run("get project domain workflow", func(t *testing.T) {
-		taskAttrFileConfigNew := TaskResourceAttrFileConfig{
+		workflowExecutionConfigFileConfigNew := FileConfig{
 			Project:  "dummyProject",
 			Domain:   "dummyDomain",
 			Workflow: "workflow",
 		}
-		assert.Equal(t, "dummyProject", taskAttrFileConfigNew.GetProject())
-		assert.Equal(t, "dummyDomain", taskAttrFileConfigNew.GetDomain())
-		assert.Equal(t, "workflow", taskAttrFileConfigNew.GetWorkflow())
+		assert.Equal(t, "dummyProject", workflowExecutionConfigFileConfigNew.GetProject())
+		assert.Equal(t, "dummyDomain", workflowExecutionConfigFileConfigNew.GetDomain())
+		assert.Equal(t, "workflow", workflowExecutionConfigFileConfigNew.GetWorkflow())
 	})
 }

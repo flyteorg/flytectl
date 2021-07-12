@@ -3,6 +3,7 @@ package update
 import (
 	"context"
 	"fmt"
+
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflowexecutionconfig"
 
 	sconfig "github.com/flyteorg/flytectl/cmd/config/subcommand"
@@ -18,8 +19,8 @@ Updating the workflow execution config is only available from a generated file. 
 Also this will completely overwrite any existing custom project and domain and workflow combination execution config.
 Would be preferable to do get and generate an config file if there is an existing execution config already set and then update it to have new values
 Refer to get workflow-execution-config section on how to generate this file
-Here the command updates takes the input for workflow execution config from the config file tra.yaml
-eg:  content of tra.yaml
+Here the command updates takes the input for workflow execution config from the config file wec.yaml
+eg:  content of wec.yaml
 
 .. code-block:: yaml
 
@@ -29,7 +30,7 @@ eg:  content of tra.yaml
 
 ::
 
- flytectl update workflow-execution-config --attrFile tra.yaml
+ flytectl update workflow-execution-config --attrFile wec.yaml
 
 Updating workflow execution config for project and domain and workflow combination. This will take precedence over any other
 execution config defined at project domain level.
@@ -44,7 +45,7 @@ Update the workflow execution config for workflow core.control_flow.run_merge_so
 
 ::
 
- flytectl update workflow-execution-config --attrFile tra.yaml
+ flytectl update workflow-execution-config --attrFile wec.yaml
 
 Usage
 
@@ -57,7 +58,7 @@ func updateWorkflowExecutionConfigFunc(ctx context.Context, args []string, cmdCt
 		return fmt.Errorf("attrFile is mandatory while calling update for workflow execution config")
 	}
 
-	workflowExecutionConfigFileConfig := workflowexecutionconfig.WorkflowExecutionConfigFileConfig{}
+	workflowExecutionConfigFileConfig := workflowexecutionconfig.FileConfig{}
 	if err := sconfig.ReadConfigFromFile(&workflowExecutionConfigFileConfig, updateConfig.AttrFile); err != nil {
 		return err
 	}
