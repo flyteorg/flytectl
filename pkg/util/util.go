@@ -8,6 +8,11 @@ import (
 	"os"
 
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
+	hversion "github.com/hashicorp/go-version"
+)
+
+const (
+	HTTPRequestErrorMessage = "something went wrong. Received status code [%v] while sending a request to [%s]"
 )
 
 type githubversion struct {
@@ -15,17 +20,19 @@ type githubversion struct {
 }
 
 func GetRequest(baseURL, url string) ([]byte, error) {
-	response, err := http.Get(fmt.Sprintf("%v%v", baseURL, url))
+	response, err := http.Get(fmt.Sprintf("%s%s", baseURL, url))
 	if err != nil {
 		return []byte(""), err
 	}
 	defer response.Body.Close()
-
-	data, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return []byte(""), err
+	if response.StatusCode == 200 {
+		data, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return []byte(""), err
+		}
+		return data, nil
 	}
-	return data, nil
+	return []byte(""), fmt.Errorf(HTTPRequestErrorMessage, response.StatusCode, fmt.Sprintf("%s%s", baseURL, url))
 }
 
 func ParseGithubTag(data []byte) (string, error) {
@@ -51,4 +58,16 @@ func SetupFlyteDir() error {
 		return err
 	}
 	return nil
+}
+
+func IsVersionGreaterThan(version1, version2 string) (bool, error) {
+	semanticVersion1, err := hversion.NewVersion(version1)
+	if err != nil {
+		return false, err
+	}
+	semanticVersion2, err := hversion.NewVersion(version2)
+	if err != nil {
+		return false, err
+	}
+	return semanticVersion2.LessThanOrEqual(semanticVersion1), nil
 }

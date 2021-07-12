@@ -77,6 +77,7 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
 		templateValues.Host = fmt.Sprintf("dns:///%v", initConfig.DefaultConfig.Host)
+		templateStr = configutil.AdminConfigTemplate
 		if initConfig.DefaultConfig.Storage {
 			templateStr = configutil.GetAWSCloudTemplate()
 			_, result, err := prompt.Run()

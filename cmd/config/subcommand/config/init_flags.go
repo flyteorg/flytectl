@@ -4,6 +4,7 @@ package config
 var (
 	DefaultConfig = &Config{
 		Insecure: true,
+		Storage:  false,
 	}
 )
 
