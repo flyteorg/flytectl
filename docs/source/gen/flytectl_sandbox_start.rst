@@ -3,22 +3,25 @@
 flytectl sandbox start
 ----------------------
 
-Start the flyte sandbox
+Start the flyte sandbox cluster
 
 Synopsis
 ~~~~~~~~
 
 
 
-Start will run the flyte sandbox cluster inside a docker container and setup the config that is required 
+The Flyte Sandbox is a fully standalone minimal environment for running Flyte. provides a simplified way of running flyte-sandbox as a single Docker container running locally.  
+
+Start sandbox cluster without any source code
 ::
 
  bin/flytectl sandbox start
 	
-Mount your flytesnacks repository code inside sandbox 
+Mount your source code repository inside sandbox 
 ::
 
- bin/flytectl sandbox start --sourcesPath=$HOME/flyteorg/flytesnacks 
+ bin/flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
+
 Usage
 	
 
@@ -31,8 +34,8 @@ Options
 
 ::
 
-      --flytesnacks string    Path of your flytesnacks repository
-  -h, --help                 help for start
+  -h, --help            help for start
+      --source string    Path of your source code
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,5 +50,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_sandbox` 	 - Used for testing flyte sandbox.
+* :doc:`flytectl_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.
 

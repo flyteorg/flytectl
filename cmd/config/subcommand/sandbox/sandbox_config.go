@@ -1,11 +1,11 @@
 package sandbox
 
-//go:generate pflags Config --default-var DefaultConfig
+//go:generate pflags Config --default-var DefaultConfig --bind-default-var
 var (
 	DefaultConfig = &Config{}
 )
 
-// Config represents the config parameters exposed for the `sandbox` command.
+//Config
 type Config struct {
-	SourcesPath string `json:"sourcesPath" pflag:",Path to your source code path where flyte workflows and tasks are."`
+	Source string `json:"source" pflag:", Path of your source code"`
 }

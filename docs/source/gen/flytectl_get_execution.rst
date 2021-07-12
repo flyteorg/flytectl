@@ -24,13 +24,13 @@ Retrieves execution by name within project and domain.
 Retrieves all the executions with filters.
 ::
  
-  bin/flytectl get execution -p flytesnacks -d development --filter.field-selector="execution.phase in (FAILED;SUCCEEDED),execution.duration<200" 
+  bin/flytectl get execution -p flytesnacks -d development --filter.fieldSelector="execution.phase in (FAILED;SUCCEEDED),execution.duration<200" 
 
  
 Retrieves all the execution with limit and sorting.
 ::
   
-   bin/flytectl get execution -p flytesnacks -d development --filter.sort-by=created_at --filter.limit=1 --filter.asc
+   bin/flytectl get execution -p flytesnacks -d development --filter.sortBy=created_at --filter.limit=1 --filter.asc
    
 
 Retrieves all the execution within project and domain in yaml format
@@ -45,6 +45,31 @@ Retrieves all the execution within project and domain in json format.
 
  bin/flytectl get execution -p flytesnacks -d development -o json
 
+
+Get more details for the execution using --details flag which shows node executions along with task executions on them. Default view is tree view and TABLE format is not supported on this view
+
+::
+
+ bin/flytectl get execution -p flytesnacks -d development oeh94k9r2r --details
+
+Using yaml view for the details. In this view only node details are available. For task details pass --nodeId flag
+
+::
+
+ bin/flytectl get execution -p flytesnacks -d development oeh94k9r2r --details -o yaml
+
+Using --nodeId flag to get task executions on a specific node. Use the nodeId attribute from node details view
+
+::
+
+ bin/flytectl get execution -p flytesnacks -d development oeh94k9r2r --nodId n0
+
+Task execution view is also available in yaml/json format. Below example shows yaml
+
+::
+
+ bin/flytectl get execution -p flytesnacks -d development oeh94k9r2r --nodId n0 -o yaml
+
 Usage
 
 
@@ -57,11 +82,13 @@ Options
 
 ::
 
-      --filter.asc                     Specifies the sorting order. By default flytectl sort result in descending order
-      --filter.field-selector string   Specifies the Field selector
-      --filter.limit int32             Specifies the limit (default 100)
-      --filter.sort-by string          Specifies which field to sort result by 
-  -h, --help                           help for execution
+      --details                       gets node execution details. Only applicable for single execution name i.e get execution name --details
+      --filter.asc                    Specifies the sorting order. By default flytectl sort result in descending order
+      --filter.fieldSelector string   Specifies the Field selector
+      --filter.limit int32            Specifies the limit (default 100)
+      --filter.sortBy string          Specifies which field to sort results  (default "created_at")
+  -h, --help                          help for execution
+      --nodeId string                 get task executions for given node name.
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

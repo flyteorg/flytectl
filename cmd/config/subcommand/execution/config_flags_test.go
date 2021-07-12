@@ -99,13 +99,13 @@ func TestConfig_SetFlags(t *testing.T) {
 	cmdFlags := actual.GetPFlagSet("")
 	assert.True(t, cmdFlags.HasFlags())
 
-	t.Run("Test_filter.field-selector", func(t *testing.T) {
+	t.Run("Test_filter.fieldSelector", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("filter.field-selector", testValue)
-			if vString, err := cmdFlags.GetString("filter.field-selector"); err == nil {
+			cmdFlags.Set("filter.fieldSelector", testValue)
+			if vString, err := cmdFlags.GetString("filter.fieldSelector"); err == nil {
 				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.Filter.FieldSelector)
 
 			} else {
@@ -113,13 +113,13 @@ func TestConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
-	t.Run("Test_filter.sort-by", func(t *testing.T) {
+	t.Run("Test_filter.sortBy", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("filter.sort-by", testValue)
-			if vString, err := cmdFlags.GetString("filter.sort-by"); err == nil {
+			cmdFlags.Set("filter.sortBy", testValue)
+			if vString, err := cmdFlags.GetString("filter.sortBy"); err == nil {
 				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.Filter.SortBy)
 
 			} else {
@@ -149,6 +149,34 @@ func TestConfig_SetFlags(t *testing.T) {
 			cmdFlags.Set("filter.asc", testValue)
 			if vBool, err := cmdFlags.GetBool("filter.asc"); err == nil {
 				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.Filter.Asc)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_details", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("details", testValue)
+			if vBool, err := cmdFlags.GetBool("details"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.Details)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_nodeId", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("nodeId", testValue)
+			if vString, err := cmdFlags.GetString("nodeId"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.NodeID)
 
 			} else {
 				assert.FailNow(t, err.Error())
