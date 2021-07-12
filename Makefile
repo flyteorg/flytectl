@@ -39,4 +39,5 @@ doc-requirements.txt: doc-requirements.in install-piptools
 test_unit_without_flag:
 	go test ./... -race -coverprofile=coverage.temp.txt -covermode=atomic
 	cat coverage.temp.txt  | grep -v "_flags.go" > coverage.txt
+	rm coverage.temp.txt
 	curl -s https://codecov.io/bash > codecov_bash.sh && bash codecov_bash.sh
