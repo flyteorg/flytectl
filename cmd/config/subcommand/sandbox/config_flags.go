@@ -52,5 +52,6 @@ func (cfg Config) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("Config", pflag.ExitOnError)
 	cmdFlags.StringVar(&DefaultConfig.Source, fmt.Sprintf("%v%v", prefix, "source"), DefaultConfig.Source, "Path of your source code")
 	cmdFlags.StringVar(&DefaultConfig.Kustomize, fmt.Sprintf("%v%v", prefix, "kustomize"), DefaultConfig.Kustomize, "kustomize file path")
+	cmdFlags.StringVar(&DefaultConfig.Version, fmt.Sprintf("%v%v", prefix, "version"), DefaultConfig.Version, "Version of flyte")
 	return cmdFlags
 }

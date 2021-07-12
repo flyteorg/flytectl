@@ -99,42 +99,42 @@ func TestConfig_SetFlags(t *testing.T) {
 	cmdFlags := actual.GetPFlagSet("")
 	assert.True(t, cmdFlags.HasFlags())
 
-	t.Run("Test_project", func(t *testing.T) {
+	t.Run("Test_host", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("project", testValue)
-			if vString, err := cmdFlags.GetString("project"); err == nil {
-				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.Project)
+			cmdFlags.Set("host", testValue)
+			if vString, err := cmdFlags.GetString("host"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.Host)
 
 			} else {
 				assert.FailNow(t, err.Error())
 			}
 		})
 	})
-	t.Run("Test_domain", func(t *testing.T) {
+	t.Run("Test_insecure", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("domain", testValue)
-			if vString, err := cmdFlags.GetString("domain"); err == nil {
-				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.Domain)
+			cmdFlags.Set("insecure", testValue)
+			if vBool, err := cmdFlags.GetBool("insecure"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.Insecure)
 
 			} else {
 				assert.FailNow(t, err.Error())
 			}
 		})
 	})
-	t.Run("Test_output", func(t *testing.T) {
+	t.Run("Test_storage", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("output", testValue)
-			if vString, err := cmdFlags.GetString("output"); err == nil {
-				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.Output)
+			cmdFlags.Set("storage", testValue)
+			if vBool, err := cmdFlags.GetBool("storage"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.Storage)
 
 			} else {
 				assert.FailNow(t, err.Error())

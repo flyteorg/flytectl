@@ -9,4 +9,5 @@ var (
 type Config struct {
 	Source    string `json:"source" pflag:",Path of your source code"`
 	Kustomize string `json:"kustomize" pflag:",kustomize file path"`
+	Version   string `json:"version" pflag:",Version of flyte"`
 }
