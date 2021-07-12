@@ -55,9 +55,9 @@ type ConfigTemplateSpec struct {
 }
 
 var (
-	FlytectlConfig = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml")
+	FlytectlConfig        = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml")
 	FlytectlSandboxConfig = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config-sandbox.yaml")
-	Kubeconfig     = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
+	Kubeconfig            = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
 )
 
 // GetSandboxTemplate return sandbox cluster config

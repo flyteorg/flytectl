@@ -16,15 +16,16 @@ func TestConfigCleanup(t *testing.T) {
 	if os.IsNotExist(err) {
 		_ = os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), 0755)
 	}
-	_ = ioutil.WriteFile(FlytectlConfig, []byte("string"), 0600)
+	_ = os.Remove(FlytectlSandboxConfig)
+	_ = ioutil.WriteFile(FlytectlSandboxConfig, []byte("string"), 0600)
 	_ = ioutil.WriteFile(Kubeconfig, []byte("string"), 0600)
 
 	err = ConfigCleanup()
 	assert.Nil(t, err)
 
-	_, err = os.Stat(FlytectlConfig)
+	_, err = os.Stat(FlytectlSandboxConfig)
 	check := os.IsNotExist(err)
-	assert.Equal(t, check, false)
+	assert.Equal(t, check, true)
 
 	_, err = os.Stat(Kubeconfig)
 	check = os.IsNotExist(err)
