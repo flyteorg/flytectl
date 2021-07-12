@@ -42,7 +42,7 @@ func TestCreateGetCommand(t *testing.T) {
 	assert.Equal(t, getCommand.Use, "get")
 	assert.Equal(t, getCommand.Short, "Used for fetching various flyte resources including tasks/workflows/launchplans/executions/project.")
 	fmt.Println(getCommand.Commands())
-	assert.Equal(t, len(getCommand.Commands()), 10)
+	assert.Equal(t, len(getCommand.Commands()), 11)
 	cmdNouns := getCommand.Commands()
 	// Sort by Use value.
 	sort.Slice(cmdNouns, func(i, j int) bool {
