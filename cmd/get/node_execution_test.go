@@ -2,7 +2,6 @@ package get
 
 import (
 	"fmt"
-	"io/ioutil"
 	"testing"
 	"time"
 
@@ -16,7 +15,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -33,39 +31,27 @@ func TestCreateNodeDetailsTreeView(t *testing.T) {
 		assert.Equal(t, expectedRoot, treeRoot)
 	})
 
-	t.Run("successful sub workflow execution full view", func(t *testing.T) {
-		nodeExecWrapper, err := ioutil.ReadFile("testdata/node_exec_wrapper_successful.yaml")
-		assert.Nil(t, err)
-		var wrapperNodeExecutions []*NodeExecutionWrapper
-		err = yaml.Unmarshal(nodeExecWrapper, &wrapperNodeExecutions)
-		assert.Nil(t, err)
-		assert.NotNil(t, wrapperNodeExecutions)
-		assert.Equal(t, 4, len(wrapperNodeExecutions))
-		treeRoot := createNodeDetailsTreeView(nil, wrapperNodeExecutions)
-		assert.Equal(t, 4, len(treeRoot.Items()))
-	})
-
 	t.Run("successful simple node execution full view", func(t *testing.T) {
 
 		nodeExec1 := createDummyNodeWithID("start-node", false)
-		wrapperNodeExec1 := transformToWrapperNode(nodeExec1)
+		nodeExec1Closure := NodeExecutionClosure{NodeExec: &NodeExecution{nodeExec1}}
 		taskExec11 := createDummyTaskExecutionForNode("start-node", "task11")
-		wrapperTaskExec11 := transformToWrapperTask(taskExec11)
+		taskExec11Closure := TaskExecutionClosure{&TaskExecution{taskExec11}}
 		taskExec12 := createDummyTaskExecutionForNode("start-node", "task12")
-		wrapperTaskExec12 := transformToWrapperTask(taskExec12)
+		taskExec12Closure := TaskExecutionClosure{&TaskExecution{taskExec12}}
 
-		wrapperNodeExec1.TaskExecutions = []*TaskExecutionWrapper{&wrapperTaskExec11, &wrapperTaskExec12}
+		nodeExec1Closure.TaskExecutions = []*TaskExecutionClosure{&taskExec11Closure, &taskExec12Closure}
 
 		nodeExec2 := createDummyNodeWithID("n0", false)
-		wrapperNodeExec2 := transformToWrapperNode(nodeExec2)
+		nodeExec2Closure := NodeExecutionClosure{NodeExec: &NodeExecution{nodeExec2}}
 		taskExec21 := createDummyTaskExecutionForNode("n0", "task21")
-		wrapperTaskExec21 := transformToWrapperTask(taskExec21)
+		taskExec21Closure := TaskExecutionClosure{&TaskExecution{taskExec21}}
 		taskExec22 := createDummyTaskExecutionForNode("n0", "task22")
-		wrapperTaskExec22 := transformToWrapperTask(taskExec22)
+		taskExec22Closure := TaskExecutionClosure{&TaskExecution{taskExec22}}
 
-		wrapperNodeExec2.TaskExecutions = []*TaskExecutionWrapper{&wrapperTaskExec21, &wrapperTaskExec22}
+		nodeExec2Closure.TaskExecutions = []*TaskExecutionClosure{&taskExec21Closure, &taskExec22Closure}
 
-		wrapperNodeExecutions := []*NodeExecutionWrapper{&wrapperNodeExec1, &wrapperNodeExec2}
+		wrapperNodeExecutions := []*NodeExecutionClosure{&nodeExec1Closure, &nodeExec2Closure}
 
 		treeRoot := createNodeDetailsTreeView(nil, wrapperNodeExecutions)
 

@@ -3,17 +3,18 @@ package get
 import (
 	"bytes"
 	"context"
-	"github.com/golang/protobuf/jsonpb"
 	"sort"
 	"strconv"
 	"strings"
 
-	"github.com/disiqueira/gotree"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/clients/go/coreutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+
+	"github.com/disiqueira/gotree"
+	"github.com/golang/protobuf/jsonpb"
 )
 
 var nodeExecutionColumns = []printer.Column{
@@ -42,27 +43,6 @@ const (
 	hyphenPrefix               = " - "
 )
 
-func getExecutionDetails(ctx context.Context, project, domain, execName, nodeName string, cmdCtx cmdCore.CommandContext) ([]*NodeExecutionClosure, error) {
-	// Fetching Node execution details
-	nodeExecDetailsMap := map[string]*NodeExecutionClosure{}
-	nExecDetails, err := getNodeExecDetailsInt(ctx, project, domain, execName, nodeName, "", nodeExecDetailsMap, cmdCtx)
-	if err != nil {
-		return nil, err
-	}
-
-	var nExecDetailsForView []*NodeExecutionClosure
-	// Get the execution details only for the nodeId passed
-	if len(nodeName) > 0 {
-		// Fetch the last one which contains the nodeId details as previous ones are used to reach the nodeId
-		if nodeExecDetailsMap[nodeName] != nil {
-			nExecDetailsForView = append(nExecDetailsForView, nodeExecDetailsMap[nodeName])
-		}
-	} else {
-		nExecDetailsForView = nExecDetails
-	}
-	return nExecDetailsForView, nil
-}
-
 type TaskExecution struct {
 	*admin.TaskExecution
 }
@@ -85,22 +65,22 @@ type NodeExecution struct {
 	*admin.NodeExecution
 }
 
-func (in *NodeExecutionClosure) MarshalJSON() ([]byte, error) {
+func (in *NodeExecution) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	marshaller := jsonpb.Marshaler{}
-	if err := marshaller.Marshal(&buf, in); err != nil {
+	if err := marshaller.Marshal(&buf, in.NodeExecution); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
 }
 
-func (in *NodeExecutionClosure) UnmarshalJSON(b []byte) error {
-	*in = NodeExecutionClosure{}
+func (in *NodeExecution) UnmarshalJSON(b []byte) error {
+	*in = NodeExecution{}
 	return jsonpb.Unmarshal(bytes.NewReader(b), in)
 }
 
 type NodeExecutionClosure struct {
-	*NodeExecution
+	NodeExec       *NodeExecution          `json:"node_exec,omitempty"`
 	ChildNodes     []*NodeExecutionClosure `json:"child_nodes,omitempty"`
 	TaskExecutions []*TaskExecutionClosure `json:"task_execs,omitempty"`
 	// Inputs for the node
@@ -111,6 +91,32 @@ type NodeExecutionClosure struct {
 
 type TaskExecutionClosure struct {
 	*TaskExecution
+}
+
+func getExecutionDetails(ctx context.Context, project, domain, execName, nodeName string, cmdCtx cmdCore.CommandContext) ([]*NodeExecutionClosure, error) {
+	// Fetching Node execution details
+	nodeExecDetailsMap := map[string]*NodeExecutionClosure{}
+	nExecDetails, err := getNodeExecDetailsInt(ctx, project, domain, execName, nodeName, "", nodeExecDetailsMap, cmdCtx)
+	if err != nil {
+		return nil, err
+	}
+
+	var nExecDetailsForView []*NodeExecutionClosure
+	// Get the execution details only for the nodeId passed
+	if len(nodeName) > 0 {
+		// Fetch the last one which contains the nodeId details as previous ones are used to reach the nodeId
+		if nodeExecDetailsMap[nodeName] != nil {
+			nExecDetailsForView = append(nExecDetailsForView, nodeExecDetailsMap[nodeName])
+		}
+	} else {
+		nExecDetailsForView = nExecDetails
+	}
+
+	sort.Slice(nExecDetailsForView[:], func(i, j int) bool {
+		return nExecDetailsForView[i].NodeExec.Closure.CreatedAt.AsTime().Before(nExecDetailsForView[j].NodeExec.Closure.CreatedAt.AsTime())
+	})
+
+	return nExecDetailsForView, nil
 }
 
 func getNodeExecDetailsInt(ctx context.Context, project, domain, execName, nodeName, uniqueParentID string,
@@ -124,7 +130,7 @@ func getNodeExecDetailsInt(ctx context.Context, project, domain, execName, nodeN
 	var nodeExecClosures []*NodeExecutionClosure
 	for _, nodeExec := range nExecDetails.NodeExecutions {
 		nodeExecClosure := &NodeExecutionClosure{
-			NodeExecution: &NodeExecution{nodeExec},
+			NodeExec: &NodeExecution{nodeExec},
 		}
 		nodeExecClosures = append(nodeExecClosures, nodeExecClosure)
 
@@ -189,8 +195,8 @@ func createNodeTaskExecTreeView(rootView gotree.Tree, taskExecClosures []*TaskEx
 	for _, taskExecClosure := range taskExecClosures {
 		attemptView := rootView.Add(taskAttemptPrefix + strconv.Itoa(int(taskExecClosure.Id.RetryAttempt)))
 		attemptView.Add(taskExecPrefix + taskExecClosure.Closure.Phase.String() +
-			hyphenPrefix + taskExecClosure.Closure.StartedAt.String() +
-			hyphenPrefix + taskExecClosure.Closure.Duration.String())
+			hyphenPrefix + taskExecClosure.Closure.CreatedAt.AsTime().String() +
+			hyphenPrefix + taskExecClosure.Closure.UpdatedAt.AsTime().String())
 		attemptView.Add(taskTypePrefix + taskExecClosure.Closure.TaskType)
 		attemptView.Add(taskReasonPrefix + taskExecClosure.Closure.Reason)
 		if taskExecClosure.Closure.Metadata != nil {
@@ -229,13 +235,13 @@ func createNodeDetailsTreeView(rootView gotree.Tree, nodeExecutionClosures []*No
 	}
 	// TODO : Move to sorting using filters.
 	sort.Slice(nodeExecutionClosures[:], func(i, j int) bool {
-		return nodeExecutionClosures[i].Closure.StartedAt.AsTime().Before(nodeExecutionClosures[j].Closure.StartedAt.AsTime())
+		return nodeExecutionClosures[i].NodeExec.Closure.CreatedAt.AsTime().Before(nodeExecutionClosures[j].NodeExec.Closure.CreatedAt.AsTime())
 	})
 
 	for _, nodeExecWrapper := range nodeExecutionClosures {
-		nExecView := rootView.Add(nodeExecWrapper.Id.NodeId + hyphenPrefix + nodeExecWrapper.Closure.Phase.String() +
-			hyphenPrefix + nodeExecWrapper.Closure.StartedAt.String() +
-			hyphenPrefix + nodeExecWrapper.Closure.Duration.String())
+		nExecView := rootView.Add(nodeExecWrapper.NodeExec.Id.NodeId + hyphenPrefix + nodeExecWrapper.NodeExec.Closure.Phase.String() +
+			hyphenPrefix + nodeExecWrapper.NodeExec.Closure.CreatedAt.AsTime().String() +
+			hyphenPrefix + nodeExecWrapper.NodeExec.Closure.UpdatedAt.AsTime().String())
 		if len(nodeExecWrapper.ChildNodes) > 0 {
 			createNodeDetailsTreeView(nExecView, nodeExecWrapper.ChildNodes)
 		}
