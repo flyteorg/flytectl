@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/flyteorg/flytectl/clierrors"
+
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 
 	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
@@ -91,8 +93,10 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err := startSandbox(ctx, mockDocker, strings.NewReader("n"))
-		assert.Nil(t, err)
+		reader, err := startSandbox(ctx, mockDocker, strings.NewReader("n"))
+		assert.NotNil(t, err)
+		assert.Equal(t, err.Error(), clierrors.ErrSandboxExists)
+		assert.Nil(t, reader)
 	})
 	t.Run("Successfully run sandbox cluster with source code", func(t *testing.T) {
 		ctx := context.Background()
