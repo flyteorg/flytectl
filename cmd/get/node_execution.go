@@ -66,20 +66,20 @@ func getExecutionDetails(ctx context.Context, project, domain, execName, nodeNam
 type TaskExecution struct {
 	*admin.TaskExecution
 }
-//
-//func (in *TaskExecution) MarshalJSON() ([]byte, error) {
-//	var buf bytes.Buffer
-//	marshaller := jsonpb.Marshaler{}
-//	if err := marshaller.Marshal(&buf, in.TaskExecution); err != nil {
-//		return nil, err
-//	}
-//	return buf.Bytes(), nil
-//}
-//
-//func (in *TaskExecution) UnmarshalJSON(b []byte) error {
-//	in.TaskExecution = &admin.TaskExecution{}
-//	return jsonpb.Unmarshal(bytes.NewReader(b), in.TaskExecution)
-//}
+
+func (in *TaskExecution) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	marshaller := jsonpb.Marshaler{}
+	if err := marshaller.Marshal(&buf, in.TaskExecution); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func (in *TaskExecution) UnmarshalJSON(b []byte) error {
+	in.TaskExecution = &admin.TaskExecution{}
+	return jsonpb.Unmarshal(bytes.NewReader(b), in.TaskExecution)
+}
 
 type NodeExecution struct {
 	*admin.NodeExecution
