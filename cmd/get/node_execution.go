@@ -43,10 +43,12 @@ const (
 	hyphenPrefix               = " - "
 )
 
+// TaskExecution wrapper around admin.TaskExecution
 type TaskExecution struct {
 	*admin.TaskExecution
 }
 
+// MarshalJSON overridden method to json marshalling to use jsonpb
 func (in *TaskExecution) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	marshaller := jsonpb.Marshaler{}
@@ -56,6 +58,7 @@ func (in *TaskExecution) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// UnmarshalJSON overridden method to json unmarshalling to use jsonpb
 func (in *TaskExecution) UnmarshalJSON(b []byte) error {
 	in.TaskExecution = &admin.TaskExecution{}
 	return jsonpb.Unmarshal(bytes.NewReader(b), in.TaskExecution)
@@ -65,6 +68,7 @@ type NodeExecution struct {
 	*admin.NodeExecution
 }
 
+// MarshalJSON overridden method to json marshalling to use jsonpb
 func (in *NodeExecution) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	marshaller := jsonpb.Marshaler{}
@@ -74,11 +78,14 @@ func (in *NodeExecution) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// UnmarshalJSON overridden method to json unmarshalling to use jsonpb
 func (in *NodeExecution) UnmarshalJSON(b []byte) error {
 	*in = NodeExecution{}
 	return jsonpb.Unmarshal(bytes.NewReader(b), in)
 }
 
+// NodeExecutionClosure forms a wrapper around admin.NodeExecution and also fetches the childnodes , task execs
+// and input/output on the node executions from the admin api's.
 type NodeExecutionClosure struct {
 	NodeExec       *NodeExecution          `json:"node_exec,omitempty"`
 	ChildNodes     []*NodeExecutionClosure `json:"child_nodes,omitempty"`
@@ -89,6 +96,7 @@ type NodeExecutionClosure struct {
 	Outputs map[string]interface{} `json:"outputs,omitempty"`
 }
 
+// TaskExecutionClosure wrapper around TaskExecution
 type TaskExecutionClosure struct {
 	*TaskExecution
 }
