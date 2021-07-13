@@ -70,7 +70,9 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	if err != nil {
 		return err
 	}
-	docker.WaitForSandbox(reader, docker.SuccessMessage)
+	if reader != nil {
+		docker.WaitForSandbox(reader, docker.SuccessMessage)
+	}
 	return nil
 }
 
@@ -78,6 +80,9 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
 
 	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
+		if err.Error() == "EXIST" {
+			return nil, nil
+		}
 		return nil, err
 	}
 

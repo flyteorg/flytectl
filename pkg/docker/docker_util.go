@@ -69,7 +69,7 @@ func RemoveSandbox(ctx context.Context, cli Docker, reader io.Reader) error {
 			})
 			return err
 		}
-		return nil
+		return fmt.Errorf("EXIST")
 	}
 	return nil
 }
