@@ -55,9 +55,9 @@ type ConfigTemplateSpec struct {
 }
 
 var (
-	FlytectlConfig = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config-sandbox.yaml")
-	ConfigFile     = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml")
-	Kubeconfig     = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
+	FlytectlConfig        = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config.yaml")
+	FlytectlSandboxConfig = f.FilePathJoin(f.UserHomeDir(), ".flyte", "config-sandbox.yaml")
+	Kubeconfig            = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
 )
 
 // GetSandboxTemplate return sandbox cluster config
@@ -92,7 +92,7 @@ func SetupConfig(filename, templateStr string, templateSpec ConfigTemplateSpec) 
 
 // ConfigCleanup will remove the sandbox config from flyte dir
 func ConfigCleanup() error {
-	err := os.Remove(FlytectlConfig)
+	err := os.Remove(FlytectlSandboxConfig)
 	if err != nil {
 		return err
 	}

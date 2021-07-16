@@ -90,19 +90,19 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 		}
 	}
 	var _err error
-	if _, err := os.Stat(configutil.ConfigFile); os.IsNotExist(err) {
-		_err = configutil.SetupConfig(configutil.ConfigFile, templateStr, templateValues)
+	if _, err := os.Stat(configutil.FlytectlConfig); os.IsNotExist(err) {
+		_err = configutil.SetupConfig(configutil.FlytectlConfig, templateStr, templateValues)
 	} else {
-		if cmdUtil.AskForConfirmation(fmt.Sprintf("This action will overwrite an existing config file at [%s]. Do you want to continue?", configutil.ConfigFile), reader) {
-			if err := os.Remove(configutil.ConfigFile); err != nil {
+		if cmdUtil.AskForConfirmation(fmt.Sprintf("This action will overwrite an existing config file at [%s]. Do you want to continue?", configutil.FlytectlConfig), reader) {
+			if err := os.Remove(configutil.FlytectlConfig); err != nil {
 				return err
 			}
-			_err = configutil.SetupConfig(configutil.ConfigFile, templateStr, templateValues)
+			_err = configutil.SetupConfig(configutil.FlytectlConfig, templateStr, templateValues)
 		}
 	}
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
-		logger.Infof(ctx, "Init flytectl config for remote cluster, Please update your storage config in %s. Learn more about the config here https://docs.flyte.org/projects/flytectl/en/latest/index.html#configure", configutil.ConfigFile)
+		logger.Infof(ctx, "Init flytectl config for remote cluster, Please update your storage config in %s. Learn more about the config here https://docs.flyte.org/projects/flytectl/en/latest/index.html#configure", configutil.FlytectlConfig)
 	}
 	return _err
 }

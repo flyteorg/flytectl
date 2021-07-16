@@ -47,6 +47,7 @@ Run specific version of flyte, Only available after v0.14.0+
 
 Usage
 	`
+	containerFlyteSource         = "/flyteorg/share"
 	GeneratedManifest            = "/flyteorg/share/flyte_generated.yaml"
 	FlyteReleaseURL              = "/flyteorg/flyte/releases/download/%v/flyte_sandbox_manifest.yaml"
 	FlyteMinimumVersionSupported = "v0.14.0"
@@ -98,12 +99,20 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		Host:     "localhost:30081",
 		Insecure: true,
 	}
-	if err := configutil.SetupConfig(configutil.FlytectlConfig, configutil.GetSandboxTemplate(), templateValues); err != nil {
+
+	templateStr := configutil.GetSandboxTemplate()
+	if err := configutil.SetupConfig(configutil.FlytectlSandboxConfig, templateStr, templateValues); err != nil {
 		return nil, err
 	}
 
 	volumes := docker.Volumes
 	if vol, err := mountVolume(sandboxConfig.DefaultConfig.Source, docker.Source); err != nil {
+		return nil, err
+	} else if vol != nil {
+		volumes = append(volumes, *vol)
+	}
+
+	if vol, err := mountVolume(sandboxConfig.DefaultConfig.Kustomize, containerFlyteSource); err != nil {
 		return nil, err
 	} else if vol != nil {
 		volumes = append(volumes, *vol)
@@ -127,6 +136,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 
 	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
+
 	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, docker.ImageName)
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)
