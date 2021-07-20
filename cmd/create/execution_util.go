@@ -93,23 +93,7 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 
 func relaunchExecution(ctx context.Context, executionName string, project string, domain string,
 	cmdCtx cmdCore.CommandContext) error {
-	recoveredExec, err := cmdCtx.AdminClient().RelaunchExecution(ctx, &admin.ExecutionRelaunchRequest{
-		Id: &core.WorkflowExecutionIdentifier{
-			Name:    executionName,
-			Project: project,
-			Domain:  domain,
-		},
-	})
-	if err != nil {
-		return err
-	}
-	fmt.Printf("execution identifier %v\n", recoveredExec.Id)
-	return nil
-}
-
-func recoverExecution(ctx context.Context, executionName string, project string, domain string,
-	cmdCtx cmdCore.CommandContext) error {
-	relaunchedExec, err := cmdCtx.AdminClient().RecoverExecution(ctx, &admin.ExecutionRecoverRequest{
+	relaunchedExec, err := cmdCtx.AdminClient().RelaunchExecution(ctx, &admin.ExecutionRelaunchRequest{
 		Id: &core.WorkflowExecutionIdentifier{
 			Name:    executionName,
 			Project: project,
@@ -120,6 +104,22 @@ func recoverExecution(ctx context.Context, executionName string, project string,
 		return err
 	}
 	fmt.Printf("execution identifier %v\n", relaunchedExec.Id)
+	return nil
+}
+
+func recoverExecution(ctx context.Context, executionName string, project string, domain string,
+	cmdCtx cmdCore.CommandContext) error {
+	recoveredExec, err := cmdCtx.AdminClient().RecoverExecution(ctx, &admin.ExecutionRecoverRequest{
+		Id: &core.WorkflowExecutionIdentifier{
+			Name:    executionName,
+			Project: project,
+			Domain:  domain,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("execution identifier %v\n", recoveredExec.Id)
 	return nil
 }
 
