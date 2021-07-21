@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/flyteorg/flytectl/pkg/util"
+
 	"github.com/flyteorg/flytestdlib/logger"
 
 	"github.com/flyteorg/flytectl/pkg/configutil"
@@ -68,6 +70,10 @@ func configInitFunc(ctx context.Context, args []string, cmdCtx cmdcore.CommandCo
 }
 
 func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
+
+	if err := util.SetupFlyteDir(); err != nil {
+		return err
+	}
 
 	templateValues := configutil.ConfigTemplateSpec{
 		Host:     "dns:///localhost:30081",
