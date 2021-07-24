@@ -8,9 +8,10 @@ import (
 	"strings"
 	"testing"
 
+	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
+
 	"github.com/docker/docker/api/types/container"
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
-	"github.com/flyteorg/flytectl/pkg/util"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/docker/docker/api/types"
@@ -25,10 +26,17 @@ var (
 	containers []types.Container
 )
 
+func setupFlyteDir() error {
+	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), os.ModePerm); err != nil {
+		return err
+	}
+	return nil
+}
+
 func setupSandbox() {
 	mockAdminClient := u.MockClient
 	cmdCtx = cmdCore.NewCommandContext(mockAdminClient, u.MockOutStream)
-	_ = util.SetupFlyteDir()
+	_ = setupFlyteDir()
 	container1 := types.Container{
 		ID: "FlyteSandboxClusterName",
 		Names: []string{
@@ -196,17 +204,6 @@ func TestStartContainer(t *testing.T) {
 		assert.Equal(t, len(id), 0)
 		assert.Equal(t, id, "")
 	})
-}
-
-func TestWatchError(t *testing.T) {
-	setupSandbox()
-	mockDocker := &mocks.Docker{}
-	context := context.Background()
-	errCh := make(chan error)
-	bodyStatus := make(chan container.ContainerWaitOKBody)
-	mockDocker.OnContainerWaitMatch(context, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-	_, err := WatchError(context, mockDocker, "test")
-	assert.NotNil(t, err)
 }
 
 func TestReadLogs(t *testing.T) {

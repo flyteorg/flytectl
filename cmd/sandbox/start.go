@@ -5,20 +5,22 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
-
-	"github.com/flyteorg/flytectl/clierrors"
+	"time"
 
 	"github.com/docker/docker/api/types/mount"
+	"github.com/flyteorg/flytectl/clierrors"
+	"github.com/flyteorg/flytectl/pkg/k8s"
+	v1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 
 	"github.com/flyteorg/flytectl/pkg/configutil"
 
+	"github.com/flyteorg/flytectl/pkg/docker"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 	"github.com/flyteorg/flytectl/pkg/util"
-
-	"github.com/flyteorg/flytectl/pkg/docker"
+	corev1k8s "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/enescakir/emoji"
 	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
@@ -51,6 +53,8 @@ Usage
 	FlyteReleaseURL              = "/flyteorg/flyte/releases/download/%v/flyte_sandbox_manifest.yaml"
 	FlyteMinimumVersionSupported = "v0.14.0"
 	GithubURL                    = "https://github.com"
+	progressBarMessage           = "Waiting for flyte deployment"
+	k8sEndpoint                  = "https://127.0.0.1:30086"
 )
 
 var (
@@ -76,6 +80,25 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	if reader != nil {
 		docker.WaitForSandbox(reader, docker.SuccessMessage)
 	}
+
+	time.Sleep(3 * time.Second)
+	k8sClient, err := k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
+	if err != nil {
+		return err
+	}
+
+	total, countChan, errChK8s := monitorFlyteDeployment(ctx, k8sClient.AppsV1(), k8sClient.CoreV1().Nodes())
+
+	go func() {
+		err := <-errChK8s
+		if err != nil {
+			fmt.Printf("err: %v \n", err)
+			os.Exit(1)
+		}
+	}()
+
+	util.ProgressBarForFlyteStatus(total, countChan, progressBarMessage)
+
 	return nil
 }
 
@@ -86,7 +109,8 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		if err.Error() != clierrors.ErrSandboxExists {
 			return nil, err
 		}
-		printExistingSandboxMessage()
+		fmt.Printf("Existing details of your sandbox:")
+		util.PrintSandboxMessage()
 		return nil, nil
 	}
 
@@ -133,20 +157,38 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		return nil, err
 	}
 
-	_, errCh := docker.WatchError(ctx, cli, ID)
 	logReader, err := docker.ReadLogs(ctx, cli, ID)
 	if err != nil {
 		return nil, err
 	}
-	go func() {
-		err := <-errCh
-		if err != nil {
-			fmt.Printf("err: %v", err)
-			os.Exit(1)
-		}
-	}()
 
 	return logReader, nil
+}
+
+func watchFlyteDeploymentStatus(ctx context.Context, appsClient v1.AppsV1Interface, nodeClient corev1k8s.NodeInterface) (chan int64, chan error) {
+	var count = make(chan int64)
+	var lastCount int64 = 0
+	var errorChan = make(chan error)
+
+	go func() {
+		for {
+			ready, err := k8s.GetCountOfReadyDeployment(ctx, appsClient)
+			if err != nil {
+				errorChan <- err
+			}
+			count <- ready - lastCount
+			lastCount = ready
+			isTaint, err := k8s.GetNodeTaintStatus(ctx, nodeClient)
+			if err != nil {
+				errorChan <- err
+			}
+			if isTaint {
+				errorChan <- fmt.Errorf("docker sandbox doesn't have sufficient memory available. Please run docker system prune -a --volumes")
+			}
+			time.Sleep(5 * time.Second)
+		}
+	}()
+	return count, errorChan
 }
 
 func mountVolume(file, destination string) (*mount.Mount, error) {
@@ -164,6 +206,25 @@ func mountVolume(file, destination string) (*mount.Mount, error) {
 	return nil, nil
 }
 
+func monitorFlyteDeployment(ctx context.Context, appsClient v1.AppsV1Interface, nodeClient corev1k8s.NodeInterface) (int64, chan int64, chan error) {
+	countChan := make(chan int64)
+	chanErr := make(chan error)
+	var err error
+	defer func() {
+		if err != nil {
+			chanErr <- err
+		}
+	}()
+	total, err := k8s.GetFlyteDeploymentCount(ctx, appsClient)
+	if err != nil {
+		return total, countChan, chanErr
+	}
+
+	countChan, chanErr = watchFlyteDeploymentStatus(ctx, appsClient, nodeClient)
+
+	return total, countChan, chanErr
+}
+
 func downloadFlyteManifest(version string) error {
 	isGreater, err := util.IsVersionGreaterThan(version, FlyteMinimumVersionSupported)
 	if err != nil {
@@ -176,22 +237,12 @@ func downloadFlyteManifest(version string) error {
 	if err != nil {
 		return err
 	}
-	if err := util.WriteIntoFile(response, FlyteManifest); err != nil {
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+	if err := util.WriteIntoFile(data, FlyteManifest); err != nil {
 		return err
 	}
 	return nil
-}
-
-func printExistingSandboxMessage() {
-	kubeconfig := strings.Join([]string{
-		"$KUBECONFIG",
-		f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),
-		docker.Kubeconfig,
-	}, ":")
-
-	fmt.Printf("Existing details of your sandbox:")
-	fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, docker.SuccessMessage, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
-	fmt.Printf("Add KUBECONFIG and FLYTECTL_CONFIG to your environment variable \n")
-	fmt.Printf("export KUBECONFIG=%v \n", kubeconfig)
-	fmt.Printf("export FLYTECTL_CONFIG=%v \n", configutil.FlytectlConfig)
 }

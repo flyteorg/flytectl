@@ -1,7 +1,12 @@
 package util
 
 import (
+	"context"
+	"io/ioutil"
 	"testing"
+	"time"
+
+	stdlibversion "github.com/flyteorg/flytestdlib/version"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -28,7 +33,9 @@ func TestGetRequest(t *testing.T) {
 
 func TestParseGithubTag(t *testing.T) {
 	t.Run("Parse Github tag with success", func(t *testing.T) {
-		data, err := GetRequest(baseURL, flytectlReleaseURL)
+		response, err := GetRequest(baseURL, flytectlReleaseURL)
+		assert.Nil(t, err)
+		data, err := ioutil.ReadAll(response.Body)
 		assert.Nil(t, err)
 		tag, err := ParseGithubTag(data)
 		assert.Nil(t, err)
@@ -42,13 +49,17 @@ func TestParseGithubTag(t *testing.T) {
 
 func TestWriteIntoFile(t *testing.T) {
 	t.Run("Successfully write into a file", func(t *testing.T) {
-		data, err := GetRequest(baseURL, flytectlReleaseURL)
+		response, err := GetRequest(baseURL, flytectlReleaseURL)
+		assert.Nil(t, err)
+		data, err := ioutil.ReadAll(response.Body)
 		assert.Nil(t, err)
 		err = WriteIntoFile(data, "version.yaml")
 		assert.Nil(t, err)
 	})
 	t.Run("Error in writing file", func(t *testing.T) {
-		data, err := GetRequest(baseURL, flytectlReleaseURL)
+		response, err := GetRequest(baseURL, flytectlReleaseURL)
+		assert.Nil(t, err)
+		data, err := ioutil.ReadAll(response.Body)
 		assert.Nil(t, err)
 		err = WriteIntoFile(data, "/githubtest/version.yaml")
 		assert.NotNil(t, err)
@@ -86,4 +97,39 @@ func TestIsVersionGreaterThan(t *testing.T) {
 		_, err := IsVersionGreaterThan(testVersion, "vvvvvvvv")
 		assert.NotNil(t, err)
 	})
+}
+
+func TestProgressBarForFlyteStatus(t *testing.T) {
+	t.Run("Progress bar success", func(t *testing.T) {
+		count := make(chan int64)
+		go func() {
+			time.Sleep(1 * time.Second)
+			count <- 1
+		}()
+		ProgressBarForFlyteStatus(1, count, "")
+	})
+}
+
+func TestGetLatestVersion(t *testing.T) {
+	t.Run("Get latest release with wrong url", func(t *testing.T) {
+		tag, err := GetLatestVersion("h://api.github.com/repos/flyteorg/flytectreleases/latest")
+		assert.NotNil(t, err)
+		assert.Equal(t, len(tag), 0)
+	})
+	t.Run("Get latest release", func(t *testing.T) {
+		tag, err := GetLatestVersion(FlytectlReleasePath)
+		assert.NotNil(t, err)
+		assert.Equal(t, len(tag), 0)
+	})
+}
+
+func TestDetectNewVersion(t *testing.T) {
+	stdlibversion.Version = "v0.2.10"
+	assert.Nil(t, DetectNewVersion(context.Background()))
+	stdlibversion.Version = "v100.0.0"
+	assert.Nil(t, DetectNewVersion(context.Background()))
+	stdlibversion.Version = "v100.0.0"
+	assert.Nil(t, DetectNewVersion(context.Background()))
+	stdlibversion.Version = "v0"
+	assert.NotNil(t, DetectNewVersion(context.Background()))
 }

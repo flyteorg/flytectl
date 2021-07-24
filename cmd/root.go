@@ -18,6 +18,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/get"
 	"github.com/flyteorg/flytectl/cmd/register"
 	"github.com/flyteorg/flytectl/cmd/update"
+	"github.com/flyteorg/flytectl/cmd/upgrade"
 	"github.com/flyteorg/flytectl/cmd/version"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	stdConfig "github.com/flyteorg/flytestdlib/config"
@@ -68,6 +69,10 @@ func newRootCmd() *cobra.Command {
 	// Added version command
 	versioncmd := version.GetVersionCommand(rootCmd)
 	cmdCore.AddCommands(rootCmd, versioncmd)
+
+	// Added upgrade command
+	upgradecmd := upgrade.SelfUpgrade(rootCmd)
+	cmdCore.AddCommands(rootCmd, upgradecmd)
 
 	config.GetConfig()
 

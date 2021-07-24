@@ -9,23 +9,89 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-
-	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
+	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
+	"github.com/flyteorg/flytectl/pkg/k8s"
+	"github.com/flyteorg/flytectl/pkg/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	testclient "k8s.io/client-go/kubernetes/fake"
 )
+
+var content = `
+apiVersion: v1
+clusters:
+- cluster:
+    server: https://localhost:8080
+    extensions:
+    - name: client.authentication.k8s.io/exec
+      extension:
+        audience: foo
+        other: bar
+  name: foo-cluster
+contexts:
+- context:
+    cluster: foo-cluster
+    user: foo-user
+    namespace: bar
+  name: foo-context
+current-context: foo-context
+kind: Config
+users:
+- name: foo-user
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      args:
+      - arg-1
+      - arg-2
+      command: foo-command
+      provideClusterInfo: true
+`
+
+var fakeNodeTaint = &corev1.Node{
+	Status: corev1.NodeStatus{
+		Conditions: []corev1.NodeCondition{
+			{
+				Type:   "MemoryPressure",
+				Status: corev1.ConditionFalse,
+				Reason: "KubeletHasSufficientMemory",
+			},
+			{
+				Type:   "DiskPressure",
+				Status: corev1.ConditionFalse,
+				Reason: "KubeletHasDiskPressure",
+			},
+		},
+	},
+}
 
 func TestStartSandboxFunc(t *testing.T) {
 	p1, p2, _ := docker.GetSandboxPorts()
+	client := testclient.NewSimpleClientset()
+	k8s.Client = client
+	assert.Nil(t, util.SetupFlyteDir())
+	assert.Nil(t, os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s"), os.ModePerm))
+	assert.Nil(t, ioutil.WriteFile(docker.Kubeconfig, []byte(content), os.ModePerm))
+
+	fakeDeployment := appsv1.Deployment{
+		Status: appsv1.DeploymentStatus{
+			AvailableReplicas: 0,
+		},
+	}
+	fakeDeployment.SetName("flyte")
+	fakeDeployment.SetName("flyte")
 
 	t.Run("Successfully run sandbox cluster", func(t *testing.T) {
 		ctx := context.Background()
@@ -445,6 +511,15 @@ func TestStartSandboxFunc(t *testing.T) {
 		cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
+		_, err := client.AppsV1().Deployments("flyte").Create(ctx, &fakeDeployment, v1.CreateOptions{})
+		if err != nil {
+			t.Error(err)
+		}
+		fakeNodeTaint.SetName("flyte")
+		_, err = client.CoreV1().Nodes().Create(ctx, fakeNodeTaint, v1.CreateOptions{})
+		if err != nil {
+			t.Error(err)
+		}
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -472,8 +547,20 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
 		docker.Client = mockDocker
 		sandboxConfig.DefaultConfig.Source = ""
-		err := startSandboxCluster(ctx, []string{}, cmdCtx)
-		assert.Nil(t, err)
+		go func() {
+			dep, err := client.AppsV1().Deployments("flyte").Get(ctx, "flyte", v1.GetOptions{})
+			if err != nil {
+				t.Error(err)
+			}
+			dep.Status.AvailableReplicas = 1
+			time.Sleep(2 * time.Second)
+			_, err = client.AppsV1().Deployments("flyte").Update(ctx, dep, v1.UpdateOptions{})
+			if err != nil {
+				t.Error(err)
+			}
+		}()
+		err = startSandboxCluster(ctx, []string{}, cmdCtx)
+		assert.NotNil(t, err)
 	})
 	t.Run("Error in running sandbox cluster command", func(t *testing.T) {
 		mockOutStream := new(io.Writer)
@@ -510,5 +597,26 @@ func TestStartSandboxFunc(t *testing.T) {
 		sandboxConfig.DefaultConfig.Source = ""
 		err := startSandboxCluster(ctx, []string{}, cmdCtx)
 		assert.NotNil(t, err)
+	})
+}
+
+func TestMonitorFlyteDeployment(t *testing.T) {
+	t.Run("Monitor k8s deployment", func(t *testing.T) {
+		ctx := context.Background()
+		client := testclient.NewSimpleClientset()
+		fakeDeployment := &appsv1.Deployment{
+			Status: appsv1.DeploymentStatus{
+				AvailableReplicas: 1,
+			},
+		}
+		fakeDeployment.SetName("flyte")
+		fakeDeployment.SetNamespace("flyte")
+		_, err := client.AppsV1().Deployments("flyte").Create(ctx, fakeDeployment, v1.CreateOptions{})
+		if err != nil {
+			t.Error(err)
+		}
+		total, _, _ := monitorFlyteDeployment(ctx, client.AppsV1(), client.CoreV1().Nodes())
+
+		assert.Equal(t, int64(1), total)
 	})
 }
