@@ -118,8 +118,8 @@ func TestGetLatestVersion(t *testing.T) {
 	})
 	t.Run("Get latest release", func(t *testing.T) {
 		tag, err := GetLatestVersion(FlytectlReleasePath)
-		assert.NotNil(t, err)
-		assert.Equal(t, len(tag), 0)
+		assert.Nil(t, err)
+		assert.Equal(t, 7, len(tag))
 	})
 }
 
@@ -127,17 +127,17 @@ func TestDetectNewVersion(t *testing.T) {
 	stdlibversion.Version = "v0.2.10"
 	message, err := DetectNewVersion(context.Background())
 	assert.Nil(t, err)
-	assert.Greater(t, 0, len(message))
+	assert.Equal(t, 177, len(message))
+	stdlibversion.Version = "v0.2.0"
+	message, err = DetectNewVersion(context.Background())
+	assert.Nil(t, err)
+	assert.Equal(t, 176, len(message))
 	stdlibversion.Version = "v100.0.0"
 	message, err = DetectNewVersion(context.Background())
 	assert.Nil(t, err)
-	assert.Greater(t, 0, len(message))
-	stdlibversion.Version = "v100.0.0"
-	message, err = DetectNewVersion(context.Background())
-	assert.Nil(t, err)
-	assert.Greater(t, 0, len(message))
+	assert.Equal(t, 0, len(message))
 	stdlibversion.Version = "v0"
 	message, err = DetectNewVersion(context.Background())
-	assert.NotNil(t, err)
-	assert.Equal(t, 0, len(message))
+	assert.Nil(t, err)
+	assert.Equal(t, 172, len(message))
 }

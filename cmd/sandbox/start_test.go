@@ -560,7 +560,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			}
 		}()
 		err = startSandboxCluster(ctx, []string{}, cmdCtx)
-		assert.NotNil(t, err)
+		assert.Nil(t, err)
 	})
 	t.Run("Error in running sandbox cluster command", func(t *testing.T) {
 		mockOutStream := new(io.Writer)
