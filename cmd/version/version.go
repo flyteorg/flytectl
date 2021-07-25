@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/flyteorg/flytectl/pkg/util"
+
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -47,6 +49,15 @@ func GetVersionCommand(rootCmd *cobra.Command) map[string]cmdCore.CommandEntry {
 }
 
 func getVersion(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
+
+	message, err := util.DetectNewVersion(ctx)
+	if err != nil {
+		logger.Error(ctx, "Not able to detect new version because %v", err)
+	}
+	if len(message) > 0 {
+		fmt.Println(message)
+	}
+
 	// Print Flytectl
 	if err := printVersion(versionOutput{
 		Build:     stdlibversion.Build,
