@@ -27,6 +27,10 @@ const (
 	ProgressSuccessMessage  = "Flyte is ready! Flyte UI is available at http://localhost:30081/console"
 	GithubAPIURL            = "https://api.github.com"
 	FlytectlReleasePath     = "/repos/flyteorg/flytectl/releases/latest"
+	commonMessage           = "\n A new release of flytectl is available: %s → %s \n"
+	darwinMessage           = "To upgrade, run: brew update && brew upgrade flytectl \n"
+	linuxMessage            = "To upgrade, run: flytectl upgrade \n"
+	releaseURL              = "https://github.com/flyteorg/flytectl/releases/tag/%s \n"
 )
 
 type githubversion struct {
@@ -128,26 +132,25 @@ func GetLatestVersion(path string) (string, error) {
 	return ParseGithubTag(data)
 }
 
-func DetectNewVersion(ctx context.Context) error {
+func DetectNewVersion(ctx context.Context) (string, error) {
 	latest, err := GetLatestVersion(FlytectlReleasePath)
 	if err != nil {
-		return err
+		return "", err
 	}
-
 	isGreater, err := IsVersionGreaterThan(latest, stdlibversion.Version)
 	if err != nil {
-		return err
+		return "", err
 	}
-
+	message := ""
 	if isGreater {
-		fmt.Printf("\n A new release of flytectl is available: %s → %s \n", stdlibversion.Version, latest)
 		if runtime.GOOS == "darwin" {
-			fmt.Println("To upgrade, run: brew update && brew upgrade flytectl")
+			message = commonMessage + darwinMessage
 		} else if runtime.GOOS == "linux" {
-			fmt.Println("To upgrade, run: flytectl upgrade")
+			message = commonMessage + linuxMessage
 		}
-		fmt.Printf("https://github.com/flyteorg/flytectl/releases/tag/%s \n", latest)
+		message += releaseURL
+		message = fmt.Sprintf(message, stdlibversion.Version, latest, latest)
 	}
 
-	return nil
+	return message, nil
 }

@@ -125,11 +125,19 @@ func TestGetLatestVersion(t *testing.T) {
 
 func TestDetectNewVersion(t *testing.T) {
 	stdlibversion.Version = "v0.2.10"
-	assert.Nil(t, DetectNewVersion(context.Background()))
+	message, err := DetectNewVersion(context.Background())
+	assert.Nil(t, err)
+	assert.Greater(t, 0, len(message))
 	stdlibversion.Version = "v100.0.0"
-	assert.Nil(t, DetectNewVersion(context.Background()))
+	message, err = DetectNewVersion(context.Background())
+	assert.Nil(t, err)
+	assert.Greater(t, 0, len(message))
 	stdlibversion.Version = "v100.0.0"
-	assert.Nil(t, DetectNewVersion(context.Background()))
+	message, err = DetectNewVersion(context.Background())
+	assert.Nil(t, err)
+	assert.Greater(t, 0, len(message))
 	stdlibversion.Version = "v0"
-	assert.NotNil(t, DetectNewVersion(context.Background()))
+	message, err = DetectNewVersion(context.Background())
+	assert.NotNil(t, err)
+	assert.Equal(t, 0, len(message))
 }

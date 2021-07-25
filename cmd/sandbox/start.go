@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -79,6 +80,11 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	}
 	if reader != nil {
 		docker.WaitForSandbox(reader, docker.SuccessMessage)
+	}
+
+	err = os.Chmod(docker.Kubeconfig, 0777)
+	if err != nil {
+		log.Println(err)
 	}
 
 	time.Sleep(3 * time.Second)
