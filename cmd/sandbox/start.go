@@ -5,8 +5,13 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/flyteorg/flytectl/clierrors"
 
 	"github.com/docker/docker/api/types/mount"
 
@@ -44,11 +49,10 @@ Run specific version of flyte, Only available after v0.14.0+
 
 Usage
 	`
-	containerFlyteSource         = "/flyteorg/share"
-	GeneratedManifest            = "/flyteorg/share/flyte_generated.yaml"
-	FlyteReleaseURL              = "/flyteorg/flyte/releases/download/%v/flyte_sandbox_manifest.yaml"
-	FlyteMinimumVersionSupported = "v0.14.0"
-	GithubURL                    = "https://github.com"
+	containerFlyteSource                  = "/flyteorg/share"
+	generatedManifest                     = "/flyteorg/share/flyte_generated.yaml"
+	flyteMinimumVersionSupported          = "v0.14.0"
+	flyteMinimumVersionSupportedKustomize = "v0.15.1"
 )
 
 var (
@@ -71,7 +75,16 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	if err != nil {
 		return err
 	}
-	docker.WaitForSandbox(reader, docker.SuccessMessage)
+	if reader != nil {
+		isReady := docker.WaitForSandbox(reader, docker.SuccessMessage)
+		if isReady {
+			printExistingSandboxMessage()
+			fmt.Println("")
+			fmt.Printf("Please visit https://github.com/flyteorg/flytesnacks for more example %v \n", emoji.Rocket)
+			fmt.Printf("Register all flytesnacks example by running 'flytectl register examples  -d development  -p flytesnacks' \n")
+		}
+		return fmt.Errorf("sandbox start failed. Please create a issue https://github.com/flyteorg/flyte/issues/new/choose")
+	}
 	return nil
 }
 
@@ -79,7 +92,13 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
 
 	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
-		return nil, err
+		if err.Error() != clierrors.ErrSandboxExists {
+			return nil, err
+		}
+
+		fmt.Printf("Existing details of your sandbox:")
+		printExistingSandboxMessage()
+		return nil, nil
 	}
 
 	if err := util.SetupFlyteDir(); err != nil {
@@ -102,22 +121,39 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	} else if vol != nil {
 		volumes = append(volumes, *vol)
 	}
-
-	if vol, err := mountVolume(sandboxConfig.DefaultConfig.Kustomize, containerFlyteSource); err != nil {
-		return nil, err
-	} else if vol != nil {
-		volumes = append(volumes, *vol)
+	if len(sandboxConfig.DefaultConfig.Kustomize) > 0 {
+		version := sandboxConfig.DefaultConfig.Version
+		if len(sandboxConfig.DefaultConfig.Version) == 0 {
+			release, err := util.GetLatestVersion("flyte")
+			if err != nil {
+				return nil, err
+			}
+			version = release.GetTagName()
+		}
+		isGreater, err := util.IsVersionGreaterThan(version, flyteMinimumVersionSupportedKustomize)
+		if err != nil {
+			return nil, err
+		}
+		if isGreater {
+			if vol, err := mountVolume(sandboxConfig.DefaultConfig.Kustomize, containerFlyteSource); err != nil {
+				return nil, err
+			} else if vol != nil {
+				volumes = append(volumes, *vol)
+			}
+		}
+		fmt.Printf("kustomize flag only supported after with flyte %s release", flyteMinimumVersionSupportedKustomize)
 	}
 
 	if len(sandboxConfig.DefaultConfig.Version) > 0 {
 		if err := downloadFlyteManifest(sandboxConfig.DefaultConfig.Version); err != nil {
 			return nil, err
 		}
-		vol, err := mountVolume(FlyteManifest, GeneratedManifest)
-		if err != nil {
+
+		if vol, err := mountVolume(FlyteManifest, generatedManifest); err != nil {
 			return nil, err
+		} else if vol != nil {
+			volumes = append(volumes, *vol)
 		}
-		volumes = append(volumes, *vol)
 	}
 
 	fmt.Printf("%v pulling docker image %s\n", emoji.Whale, docker.ImageName)
@@ -166,19 +202,52 @@ func mountVolume(file, destination string) (*mount.Mount, error) {
 }
 
 func downloadFlyteManifest(version string) error {
-	isGreater, err := util.IsVersionGreaterThan(version, FlyteMinimumVersionSupported)
+	isGreater, err := util.IsVersionGreaterThan(version, flyteMinimumVersionSupported)
 	if err != nil {
 		return err
 	}
 	if !isGreater {
-		return fmt.Errorf("version flag only support %s+ flyte version", FlyteMinimumVersionSupported)
+		return fmt.Errorf("version flag only support %s+ flyte version", flyteMinimumVersionSupported)
 	}
-	response, err := util.GetRequest(GithubURL, fmt.Sprintf(FlyteReleaseURL, version))
+
+	release, err := util.CheckVersionExist(version, "flyte")
 	if err != nil {
 		return err
 	}
-	if err := util.WriteIntoFile(response, FlyteManifest); err != nil {
-		return err
+	var manifestURL = ""
+	for _, v := range release.Assets {
+		if v.GetName() == "flyte_sandbox_manifest.yaml" {
+			manifestURL = *v.BrowserDownloadURL
+		}
+	}
+	if len(manifestURL) > 0 {
+		response, err := http.Get(manifestURL)
+		if err != nil {
+			return err
+		}
+		defer response.Body.Close()
+		if response.StatusCode != 200 {
+			return fmt.Errorf("someting goes wrong while downloading the flyte release")
+		}
+		data, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return err
+		}
+		if err := util.WriteIntoFile(data, FlyteManifest); err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+func printExistingSandboxMessage() {
+	kubeconfig := strings.Join([]string{
+		"$KUBECONFIG",
+		f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),
+		docker.Kubeconfig,
+	}, ":")
+	fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, docker.SuccessMessage, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
+	fmt.Printf("Add KUBECONFIG and FLYTECTL_CONFIG to your environment variable \n")
+	fmt.Printf("export KUBECONFIG=%v \n", kubeconfig)
+	fmt.Printf("export FLYTECTL_CONFIG=%v \n", configutil.FlytectlConfig)
 }

@@ -3,12 +3,13 @@ package docker
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 
-	"github.com/flyteorg/flytectl/pkg/configutil"
+	"github.com/flyteorg/flytectl/clierrors"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -69,7 +70,7 @@ func RemoveSandbox(ctx context.Context, cli Docker, reader io.Reader) error {
 			})
 			return err
 		}
-		return nil
+		return errors.New(clierrors.ErrSandboxExists)
 	}
 	return nil
 }
@@ -142,19 +143,6 @@ func ReadLogs(ctx context.Context, cli Docker, id string) (*bufio.Scanner, error
 func WaitForSandbox(reader *bufio.Scanner, message string) bool {
 	for reader.Scan() {
 		if strings.Contains(reader.Text(), message) {
-			kubeconfig := strings.Join([]string{
-				"$KUBECONFIG",
-				f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),
-				Kubeconfig,
-			}, ":")
-
-			fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, message, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
-			fmt.Printf("Please visit https://github.com/flyteorg/flytesnacks for more example %v \n", emoji.Rocket)
-			fmt.Printf("Register all flytesnacks example by running 'flytectl register examples  -d development  -p flytesnacks' \n")
-
-			fmt.Printf("Add KUBECONFIG and FLYTECTL_CONFIG to your environment variable \n")
-			fmt.Printf("export KUBECONFIG=%v \n", kubeconfig)
-			fmt.Printf("export FLYTECTL_CONFIG=%v \n", configutil.FlytectlConfig)
 			return true
 		}
 		fmt.Println(reader.Text())

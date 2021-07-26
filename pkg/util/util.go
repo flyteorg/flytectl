@@ -1,48 +1,18 @@
 package util
 
 import (
-	"encoding/json"
-	"fmt"
+	"context"
 	"io/ioutil"
-	"net/http"
 	"os"
 
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
+	"github.com/google/go-github/v37/github"
 	hversion "github.com/hashicorp/go-version"
 )
 
 const (
-	HTTPRequestErrorMessage = "something went wrong. Received status code [%v] while sending a request to [%s]"
+	owner = "flyteorg"
 )
-
-type githubversion struct {
-	TagName string `json:"tag_name"`
-}
-
-func GetRequest(baseURL, url string) ([]byte, error) {
-	response, err := http.Get(fmt.Sprintf("%s%s", baseURL, url))
-	if err != nil {
-		return []byte(""), err
-	}
-	defer response.Body.Close()
-	if response.StatusCode == 200 {
-		data, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			return []byte(""), err
-		}
-		return data, nil
-	}
-	return []byte(""), fmt.Errorf(HTTPRequestErrorMessage, response.StatusCode, fmt.Sprintf("%s%s", baseURL, url))
-}
-
-func ParseGithubTag(data []byte) (string, error) {
-	var result = githubversion{}
-	err := json.Unmarshal(data, &result)
-	if err != nil {
-		return "", err
-	}
-	return result.TagName, nil
-}
 
 func WriteIntoFile(data []byte, file string) error {
 	err := ioutil.WriteFile(file, data, os.ModePerm)
@@ -70,4 +40,22 @@ func IsVersionGreaterThan(version1, version2 string) (bool, error) {
 		return false, err
 	}
 	return semanticVersion2.LessThanOrEqual(semanticVersion1), nil
+}
+
+func GetLatestVersion(repository string) (*github.RepositoryRelease, error) {
+	client := github.NewClient(nil)
+	release, _, err := client.Repositories.GetLatestRelease(context.Background(), owner, repository)
+	if err != nil {
+		return nil, err
+	}
+	return release, err
+}
+
+func CheckVersionExist(version, repository string) (*github.RepositoryRelease, error) {
+	client := github.NewClient(nil)
+	release, _, err := client.Repositories.GetReleaseByTag(context.Background(), owner, repository, version)
+	if err != nil {
+		return nil, err
+	}
+	return release, err
 }

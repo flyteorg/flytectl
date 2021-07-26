@@ -23,7 +23,7 @@ golang
 
     .. prompt:: bash $
 
-       brew upgrade flytectl
+       brew update && brew upgrade flytectl
 
   .. tab:: Other Operating systems
 
@@ -99,7 +99,7 @@ Basic Configuration
            storage:
              type: stow
              stow:
-                kind: s3
+                kind: google
                 config:
                     json: ""
                     project_id: <replace-me> # TODO: replace <project-id> with the GCP project ID

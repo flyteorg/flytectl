@@ -24,12 +24,9 @@ Example version.
 `
 	flytectlAppName       = "flytectl"
 	controlPlanAppName    = "controlPlane"
-	GithubAPIURL          = "https://api.github.com"
 	latestVersionMessage  = "Installed flytectl version is the latest"
 	upgradeVersionMessage = "A newer version of flytectl is available [%v] Please upgrade using - https://docs.flyte.org/projects/flytectl/en/latest/index.html"
 )
-
-var flytectlReleasePath = "/repos/flyteorg/flytectl/releases/latest"
 
 type versionOutput struct {
 	// Specifies the Name of app
@@ -53,19 +50,19 @@ func GetVersionCommand(rootCmd *cobra.Command) map[string]cmdCore.CommandEntry {
 }
 
 func getVersion(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	latest, err := getLatestVersion(flytectlReleasePath)
+	release, err := util.GetLatestVersion("flyte")
 	if err != nil {
 		logger.Errorf(ctx, "Get latest version of flyte got failed", err)
 	}
 
-	isGreater, err := util.IsVersionGreaterThan(latest, stdlibversion.Version)
+	isGreater, err := util.IsVersionGreaterThan(release.GetTagName(), stdlibversion.Version)
 	if err != nil {
 		logger.Errorf(ctx, "Error while comparing the flytectl version", err)
 	}
 
 	message := latestVersionMessage
 	if isGreater {
-		message = fmt.Sprintf(upgradeVersionMessage, latest)
+		message = fmt.Sprintf(upgradeVersionMessage, release.GetTagName())
 	}
 
 	fmt.Println(message)
@@ -110,12 +107,4 @@ func getControlPlaneVersion(ctx context.Context, cmdCtx cmdCore.CommandContext) 
 		return fmt.Errorf("not able to get control plane version..Please try again: %v", err)
 	}
 	return nil
-}
-
-func getLatestVersion(path string) (string, error) {
-	response, err := util.GetRequest(GithubAPIURL, path)
-	if err != nil {
-		return "", err
-	}
-	return util.ParseGithubTag(response)
 }
