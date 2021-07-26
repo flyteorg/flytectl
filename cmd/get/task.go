@@ -2,16 +2,17 @@ package get
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/flyteorg/flytectl/cmd/config"
 	taskConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/task"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/ext"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/flyteorg/flytestdlib/logger"
-
 	"github.com/golang/protobuf/proto"
+	"strings"
 )
 
 const (
@@ -93,11 +94,15 @@ Check the create execution section on how to launch one using the generated file
 Usage
 `
 )
+const FormattedDescriptionsFieldKey = "_formatted_descriptions"
+const DescriptionLineWidth = 25
 
 var taskColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
 	{Header: "Name", JSONPath: "$.id.name"},
 	{Header: "Type", JSONPath: "$.closure.compiledTask.template.type"},
+	{Header: "Inputs", JSONPath: "$.closure.compiledTask.template.interface.inputs.variables." + FormattedDescriptionsFieldKey + ".description"},
+	{Header: "Outputs", JSONPath: "$.closure.compiledTask.template.interface.outputs.variables." + FormattedDescriptionsFieldKey + ".description"},
 	{Header: "Discoverable", JSONPath: "$.closure.compiledTask.template.metadata.discoverable"},
 	{Header: "Discovery Version", JSONPath: "$.closure.compiledTask.template.metadata.discoveryVersion"},
 	{Header: "Created At", JSONPath: "$.closure.createdAt"},
@@ -106,9 +111,31 @@ var taskColumns = []printer.Column{
 func TaskToProtoMessages(l []*admin.Task) []proto.Message {
 	messages := make([]proto.Message, 0, len(l))
 	for _, m := range l {
+		formatVariableDescriptions(m.Closure.CompiledTask.Template.Interface.Inputs.Variables)
+		formatVariableDescriptions(m.Closure.CompiledTask.Template.Interface.Outputs.Variables)
 		messages = append(messages, m)
 	}
 	return messages
+}
+
+func formatVariableDescriptions(variableMap map[string]*core.Variable) {
+	var descriptions []string
+	for k, v := range variableMap {
+		// a: a isn't very helpful
+		if k != v.Description {
+			descriptions = append(descriptions, getTruncatedLine(fmt.Sprintf("%s: %s", k, v.Description), DescriptionLineWidth))
+		} else {
+			descriptions = append(descriptions, getTruncatedLine(k, DescriptionLineWidth))
+		}
+	}
+	variableMap[FormattedDescriptionsFieldKey] = &core.Variable{Description: strings.Join(descriptions, "\n")}
+}
+
+func getTruncatedLine(line string, width int) string {
+	if len(line) > width {
+		return line[:width-3] + "..."
+	}
+	return line
 }
 
 func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
