@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"runtime"
 
 	"github.com/flyteorg/flytectl/pkg/util"
 
@@ -50,7 +51,7 @@ func GetVersionCommand(rootCmd *cobra.Command) map[string]cmdCore.CommandEntry {
 
 func getVersion(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 
-	message, err := util.DetectNewVersion(ctx)
+	message, err := util.GetUpgradeMessage(runtime.GOOS)
 	if err != nil {
 		logger.Error(ctx, "Not able to detect new version because %v", err)
 	}

@@ -248,7 +248,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes = append(volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: FlyteManifest,
-			Target: GeneratedManifest,
+			Target: generatedManifest,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -280,13 +280,13 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-		sandboxConfig.DefaultConfig.Version = "v0.13.0"
+		sandboxConfig.DefaultConfig.Version = "v0.1444.0"
 		sandboxConfig.DefaultConfig.Source = ""
 		volumes := docker.Volumes
 		volumes = append(volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: FlyteManifest,
-			Target: GeneratedManifest,
+			Target: generatedManifest,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,

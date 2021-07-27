@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/Microsoft/go-winio v0.5.0 // indirect
+	github.com/avast/retry-go v3.0.0+incompatible // indirect
 	github.com/awalterschulze/gographviz v2.0.3+incompatible
 	github.com/containerd/containerd v1.5.2 // indirect
 	github.com/disiqueira/gotree v1.0.0
@@ -16,6 +17,7 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/go-github v17.0.0+incompatible
+	github.com/google/go-github/v37 v37.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.2.0
 	github.com/gorilla/mux v1.8.0 // indirect

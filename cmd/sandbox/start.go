@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/flyteorg/flytestdlib/logger"
 
 	"github.com/docker/docker/api/types/mount"
 	"github.com/flyteorg/flytectl/clierrors"
@@ -50,12 +52,10 @@ Run specific version of flyte, Only available after v0.14.0+
 
 Usage
 	`
-	GeneratedManifest            = "/flyteorg/share/flyte_generated.yaml"
-	FlyteReleaseURL              = "/flyteorg/flyte/releases/download/%v/flyte_sandbox_manifest.yaml"
-	FlyteMinimumVersionSupported = "v0.14.0"
-	GithubURL                    = "https://github.com"
 	progressBarMessage           = "Waiting for flyte deployment"
 	k8sEndpoint                  = "https://127.0.0.1:30086"
+	flyteMinimumVersionSupported = "v0.14.0"
+	generatedManifest            = "/flyteorg/share/flyte_generated.yaml"
 )
 
 var (
@@ -82,12 +82,7 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		docker.WaitForSandbox(reader, docker.SuccessMessage)
 	}
 
-	err = os.Chmod(docker.Kubeconfig, 0777)
-	if err != nil {
-		log.Println(err)
-	}
-
-	time.Sleep(3 * time.Second)
+	time.Sleep(5 * time.Second)
 	k8sClient, err := k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
 	if err != nil {
 		return err
@@ -140,14 +135,23 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}
 
 	if len(sandboxConfig.DefaultConfig.Version) > 0 {
-		if err := downloadFlyteManifest(sandboxConfig.DefaultConfig.Version); err != nil {
-			return nil, err
-		}
-		vol, err := mountVolume(FlyteManifest, GeneratedManifest)
+		isGreater, err := util.IsVersionGreaterThan(sandboxConfig.DefaultConfig.Version, flyteMinimumVersionSupported)
 		if err != nil {
 			return nil, err
 		}
-		volumes = append(volumes, *vol)
+		if !isGreater {
+			logger.Infof(ctx, "version flag only supported after with flyte %s+ release", flyteMinimumVersionSupported)
+		} else {
+			if err := downloadFlyteManifest(sandboxConfig.DefaultConfig.Version); err != nil {
+				return nil, err
+			}
+
+			if vol, err := mountVolume(FlyteManifest, generatedManifest); err != nil {
+				return nil, err
+			} else if vol != nil {
+				volumes = append(volumes, *vol)
+			}
+		}
 	}
 
 	fmt.Printf("%v pulling docker image %s\n", emoji.Whale, docker.ImageName)
@@ -232,23 +236,32 @@ func monitorFlyteDeployment(ctx context.Context, appsClient v1.AppsV1Interface, 
 }
 
 func downloadFlyteManifest(version string) error {
-	isGreater, err := util.IsVersionGreaterThan(version, FlyteMinimumVersionSupported)
+	release, err := util.CheckVersionExist(version, "flyte")
 	if err != nil {
 		return err
 	}
-	if !isGreater {
-		return fmt.Errorf("version flag only support %s+ flyte version", FlyteMinimumVersionSupported)
+	var manifestURL = ""
+	for _, v := range release.Assets {
+		if v.GetName() == "flyte_sandbox_manifest.yaml" {
+			manifestURL = *v.BrowserDownloadURL
+		}
 	}
-	response, err := util.GetRequest(GithubURL, fmt.Sprintf(FlyteReleaseURL, version))
-	if err != nil {
-		return err
-	}
-	data, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-	if err := util.WriteIntoFile(data, FlyteManifest); err != nil {
-		return err
+	if len(manifestURL) > 0 {
+		response, err := http.Get(manifestURL)
+		if err != nil {
+			return err
+		}
+		defer response.Body.Close()
+		if response.StatusCode != 200 {
+			return fmt.Errorf("someting goes wrong while downloading the flyte release")
+		}
+		data, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			return err
+		}
+		if err := util.WriteIntoFile(data, FlyteManifest); err != nil {
+			return err
+		}
 	}
 	return nil
 }

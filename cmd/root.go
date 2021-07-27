@@ -67,12 +67,12 @@ func newRootCmd() *cobra.Command {
 	rootCmd.AddCommand(configuration.CreateConfigCommand())
 	rootCmd.AddCommand(completionCmd)
 	// Added version command
-	versioncmd := version.GetVersionCommand(rootCmd)
-	cmdCore.AddCommands(rootCmd, versioncmd)
+	versionCmd := version.GetVersionCommand(rootCmd)
+	cmdCore.AddCommands(rootCmd, versionCmd)
 
 	// Added upgrade command
-	upgradecmd := upgrade.SelfUpgrade(rootCmd)
-	cmdCore.AddCommands(rootCmd, upgradecmd)
+	upgradeCmd := upgrade.SelfUpgrade(rootCmd)
+	cmdCore.AddCommands(rootCmd, upgradeCmd)
 
 	config.GetConfig()
 

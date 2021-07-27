@@ -6,6 +6,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/flyteorg/flytectl/pkg/filesystemutils"
+
+	"github.com/flyteorg/flytectl/pkg/util"
+
 	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
 	stdlibversion "github.com/flyteorg/flytestdlib/version"
 
@@ -39,12 +43,20 @@ func TestUpgradeCommand(t *testing.T) {
 
 func TestUpgrade(t *testing.T) {
 	t.Run("Successful upgrade", func(t *testing.T) {
-		assert.Nil(t, upgrade(strings.NewReader("y"), "v0.2.14", "/tmp/flytectl"))
-		assert.Nil(t, upgrade(strings.NewReader("n"), "v0.2.14", "/tmp/flytectl"))
+		release, err := util.CheckVersionExist("v0.2.14", "flytectl")
+		if err != nil {
+			t.Error(err)
+		}
+		assert.Nil(t, upgrade(strings.NewReader("y"), release, "/tmp/flytectl", "linux"))
+		assert.Nil(t, upgrade(strings.NewReader("n"), release, "/tmp/flytectl", "linux"))
+		assert.Nil(t, upgrade(strings.NewReader("n"), release, "/tmp/flytectl", "windows"))
 	})
 }
 
 func TestSelfUpgrade(t *testing.T) {
+	ext = filesystemutils.FilePathJoin("/tmp/test")
+	_ = util.WriteIntoFile([]byte(""), ext)
+
 	t.Run("Successful upgrade", func(t *testing.T) {
 		ctx := context.Background()
 		var args []string
@@ -53,7 +65,26 @@ func TestSelfUpgrade(t *testing.T) {
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
 		stdlibversion.BuildTime = ""
-		stdlibversion.Version = "v100.0.0"
+		stdlibversion.Version = "v0.2.10"
+
+		assert.Nil(t, selfUpgrade(ctx, args, cmdCtx))
+	})
+}
+
+func TestSelfUpgradeRollback(t *testing.T) {
+	ext = filesystemutils.FilePathJoin("/tmp/test")
+	_ = util.WriteIntoFile([]byte(""), ext)
+
+	t.Run("Successful upgrade", func(t *testing.T) {
+		ctx := context.Background()
+		var args = []string{"rollback"}
+		mockClient := new(mocks.AdminServiceClient)
+		mockOutStream := new(io.Writer)
+		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+		stdlibversion.Build = ""
+		stdlibversion.BuildTime = ""
+		stdlibversion.Version = "v0.2.10"
+
 		assert.Nil(t, selfUpgrade(ctx, args, cmdCtx))
 	})
 }

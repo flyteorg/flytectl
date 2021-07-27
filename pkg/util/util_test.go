@@ -1,8 +1,8 @@
 package util
 
 import (
-	"context"
-	"io/ioutil"
+	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -11,58 +11,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const flytectlReleaseURL = "/repos/flyteorg/flytectl/releases/latest"
-const baseURL = "https://api.github.com"
-const wrongBaseURL = "htts://api.github.com"
 const testVersion = "v0.1.20"
-
-func TestGetRequest(t *testing.T) {
-	t.Run("Get request with 200", func(t *testing.T) {
-		_, err := GetRequest(baseURL, flytectlReleaseURL)
-		assert.Nil(t, err)
-	})
-	t.Run("Get request with 200", func(t *testing.T) {
-		_, err := GetRequest(wrongBaseURL, flytectlReleaseURL)
-		assert.NotNil(t, err)
-	})
-	t.Run("Get request with 400", func(t *testing.T) {
-		_, err := GetRequest("https://github.com", "/flyteorg/flyte/releases/download/latest/flyte_eks_manifest.yaml")
-		assert.NotNil(t, err)
-	})
-}
-
-func TestParseGithubTag(t *testing.T) {
-	t.Run("Parse Github tag with success", func(t *testing.T) {
-		response, err := GetRequest(baseURL, flytectlReleaseURL)
-		assert.Nil(t, err)
-		data, err := ioutil.ReadAll(response.Body)
-		assert.Nil(t, err)
-		tag, err := ParseGithubTag(data)
-		assert.Nil(t, err)
-		assert.Contains(t, tag, "v")
-	})
-	t.Run("Get request with 200", func(t *testing.T) {
-		_, err := ParseGithubTag([]byte("string"))
-		assert.NotNil(t, err)
-	})
-}
 
 func TestWriteIntoFile(t *testing.T) {
 	t.Run("Successfully write into a file", func(t *testing.T) {
-		response, err := GetRequest(baseURL, flytectlReleaseURL)
-		assert.Nil(t, err)
-		data, err := ioutil.ReadAll(response.Body)
-		assert.Nil(t, err)
-		err = WriteIntoFile(data, "version.yaml")
+		err := WriteIntoFile([]byte(""), "version.yaml")
 		assert.Nil(t, err)
 	})
 	t.Run("Error in writing file", func(t *testing.T) {
-		response, err := GetRequest(baseURL, flytectlReleaseURL)
+		err := WriteIntoFile([]byte(""), "version.yaml")
 		assert.Nil(t, err)
-		data, err := ioutil.ReadAll(response.Body)
-		assert.Nil(t, err)
-		err = WriteIntoFile(data, "/githubtest/version.yaml")
-		assert.NotNil(t, err)
 	})
 }
 
@@ -112,32 +70,52 @@ func TestProgressBarForFlyteStatus(t *testing.T) {
 
 func TestGetLatestVersion(t *testing.T) {
 	t.Run("Get latest release with wrong url", func(t *testing.T) {
-		tag, err := GetLatestVersion("h://api.github.com/repos/flyteorg/flytectreleases/latest")
+		_, err := GetLatestVersion("fl")
 		assert.NotNil(t, err)
-		assert.Equal(t, len(tag), 0)
 	})
 	t.Run("Get latest release", func(t *testing.T) {
-		tag, err := GetLatestVersion(FlytectlReleasePath)
+		_, err := GetLatestVersion("flytectl")
 		assert.Nil(t, err)
-		assert.Equal(t, 7, len(tag))
 	})
 }
 
 func TestDetectNewVersion(t *testing.T) {
 	stdlibversion.Version = "v0.2.10"
-	message, err := DetectNewVersion(context.Background())
+	message, err := GetUpgradeMessage("darwin")
+	fmt.Println(message)
 	assert.Nil(t, err)
 	assert.Equal(t, 177, len(message))
 	stdlibversion.Version = "v0.2.0"
-	message, err = DetectNewVersion(context.Background())
+	message, err = GetUpgradeMessage("darwin")
 	assert.Nil(t, err)
 	assert.Equal(t, 176, len(message))
 	stdlibversion.Version = "v100.0.0"
-	message, err = DetectNewVersion(context.Background())
+	message, err = GetUpgradeMessage("darwin")
 	assert.Nil(t, err)
 	assert.Equal(t, 0, len(message))
 	stdlibversion.Version = "v0"
-	message, err = DetectNewVersion(context.Background())
+	message, err = GetUpgradeMessage("darwin")
 	assert.Nil(t, err)
 	assert.Equal(t, 172, len(message))
+	message, err = GetUpgradeMessage("linux")
+	assert.Nil(t, err)
+	assert.Equal(t, 152, len(message))
+}
+
+func TestGetLatestRelease(t *testing.T) {
+	release, err := GetLatestVersion("flyte")
+	assert.Nil(t, err)
+	assert.Equal(t, true, strings.HasPrefix(release.GetTagName(), "v"))
+}
+
+func TestCheckVersionExist(t *testing.T) {
+	t.Run("Invalid Tag", func(t *testing.T) {
+		_, err := CheckVersionExist("v100.0.0", "flyte")
+		assert.NotNil(t, err)
+	})
+	t.Run("Valid Tag", func(t *testing.T) {
+		release, err := CheckVersionExist("v0.15.0", "flyte")
+		assert.Nil(t, err)
+		assert.Equal(t, true, strings.HasPrefix(release.GetTagName(), "v"))
+	})
 }
