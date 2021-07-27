@@ -178,11 +178,17 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
+		sandboxConfig.DefaultConfig.Version = "v0.15.1"
 		sandboxConfig.DefaultConfig.Source = ""
 		sandboxConfig.DefaultConfig.Kustomize = "testdata/kustomization.yaml"
 		absPathKustomize, err := filepath.Abs(sandboxConfig.DefaultConfig.Kustomize)
 		assert.Nil(t, err)
 		volumes := docker.Volumes
+		volumes = append(volumes, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: FlyteManifest,
+			Target: generatedManifest,
+		})
 		volumes = append(volumes, mount.Mount{
 			Type:   mount.TypeBind,
 			Source: absPathKustomize,
@@ -298,7 +304,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-		sandboxConfig.DefaultConfig.Version = "v0.13.0"
+		sandboxConfig.DefaultConfig.Version = "v0.1111.222"
 		sandboxConfig.DefaultConfig.Source = ""
 		volumes := docker.Volumes
 		volumes = append(volumes, mount.Mount{

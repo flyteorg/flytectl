@@ -24,31 +24,31 @@ func TestSetupFlyteDir(t *testing.T) {
 	assert.Nil(t, SetupFlyteDir())
 }
 
-func TestIsVersionGreaterThan(t *testing.T) {
+func TestIsVersionGreaterThanEqual(t *testing.T) {
 	t.Run("Compare flytectl version when upgrade available", func(t *testing.T) {
-		_, err := IsVersionGreaterThan("v1.1.21", testVersion)
+		_, err := IsVersionGreaterThanEqual("v1.1.21", testVersion)
 		assert.Nil(t, err)
 	})
 	t.Run("Compare flytectl version greater then", func(t *testing.T) {
-		ok, err := IsVersionGreaterThan("v1.1.21", testVersion)
+		ok, err := IsVersionGreaterThanEqual("v1.1.21", testVersion)
 		assert.Nil(t, err)
 		assert.Equal(t, true, ok)
 	})
 	t.Run("Compare flytectl version smaller then", func(t *testing.T) {
-		ok, err := IsVersionGreaterThan("v0.1.19", testVersion)
+		ok, err := IsVersionGreaterThanEqual("v0.1.19", testVersion)
 		assert.Nil(t, err)
 		assert.Equal(t, false, ok)
 	})
 	t.Run("Compare flytectl version", func(t *testing.T) {
-		_, err := IsVersionGreaterThan(testVersion, testVersion)
+		_, err := IsVersionGreaterThanEqual(testVersion, testVersion)
 		assert.Nil(t, err)
 	})
 	t.Run("Error in compare flytectl version", func(t *testing.T) {
-		_, err := IsVersionGreaterThan("vvvvvvvv", testVersion)
+		_, err := IsVersionGreaterThanEqual("vvvvvvvv", testVersion)
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in compare flytectl version", func(t *testing.T) {
-		_, err := IsVersionGreaterThan(testVersion, "vvvvvvvv")
+		_, err := IsVersionGreaterThanEqual(testVersion, "vvvvvvvv")
 		assert.NotNil(t, err)
 	})
 }

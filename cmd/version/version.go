@@ -55,7 +55,7 @@ func getVersion(ctx context.Context, args []string, cmdCtx cmdCore.CommandContex
 		logger.Errorf(ctx, "Get latest version of flyte got failed", err)
 	}
 
-	isGreater, err := util.IsVersionGreaterThan(release.GetTagName(), stdlibversion.Version)
+	isGreater, err := util.IsVersionGreaterThanEqual(release.GetTagName(), stdlibversion.Version)
 	if err != nil {
 		logger.Errorf(ctx, "Error while comparing the flytectl version", err)
 	}

@@ -30,7 +30,7 @@ func SetupFlyteDir() error {
 	return nil
 }
 
-func IsVersionGreaterThan(version1, version2 string) (bool, error) {
+func IsVersionGreaterThanEqual(version1, version2 string) (bool, error) {
 	semanticVersion1, err := hversion.NewVersion(version1)
 	if err != nil {
 		return false, err

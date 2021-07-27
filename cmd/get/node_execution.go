@@ -170,15 +170,22 @@ func getNodeExecDetailsInt(ctx context.Context, project, domain, execName, nodeN
 				return nil, err
 			}
 			// Extract the inputs from the literal map
-			nodeExecClosure.Inputs, err = extractLiteralMap(nExecDataResp.FullInputs)
-			if err != nil {
-				return nil, err
+			if nExecDataResp.FullInputs.Literals != nil {
+				nodeExecClosure.Inputs, err = extractLiteralMap(nExecDataResp.FullInputs)
+
+				if err != nil {
+					return nil, err
+				}
 			}
+
 			// Extract the outputs from the literal map
-			nodeExecClosure.Outputs, err = extractLiteralMap(nExecDataResp.FullOutputs)
-			if err != nil {
-				return nil, err
+			if nExecDataResp.FullInputs.Literals != nil {
+				nodeExecClosure.Outputs, err = extractLiteralMap(nExecDataResp.FullOutputs)
+				if err != nil {
+					return nil, err
+				}
 			}
+
 		}
 		nodeExecDetailsMap[nodeExec.Id.NodeId] = nodeExecClosure
 		// Found the node

@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/flyteorg/flytestdlib/logger"
+
 	"github.com/flyteorg/flytectl/clierrors"
 
 	"github.com/docker/docker/api/types/mount"
@@ -49,7 +51,7 @@ Run specific version of flyte, Only available after v0.14.0+
 
 Usage
 	`
-	containerFlyteSource                  = "/flyteorg/share"
+	containerFlyteSource                  = "/flyteorg/share/kustomization.yaml"
 	generatedManifest                     = "/flyteorg/share/flyte_generated.yaml"
 	flyteMinimumVersionSupported          = "v0.14.0"
 	flyteMinimumVersionSupportedKustomize = "v0.15.1"
@@ -82,10 +84,10 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 			fmt.Println("")
 			fmt.Printf("Please visit https://github.com/flyteorg/flytesnacks for more example %v \n", emoji.Rocket)
 			fmt.Printf("Register all flytesnacks example by running 'flytectl register examples  -d development  -p flytesnacks' \n")
+			return nil
 		}
-		return fmt.Errorf("sandbox start failed. Please create a issue https://github.com/flyteorg/flyte/issues/new/choose")
 	}
-	return nil
+	return fmt.Errorf("sandbox start failed. Please check troubleshooting documentation https://docs.flyte.org/en/latest/community/troubleshoot.html#troubleshoot")
 }
 
 func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bufio.Scanner, error) {
@@ -121,30 +123,16 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	} else if vol != nil {
 		volumes = append(volumes, *vol)
 	}
-	if len(sandboxConfig.DefaultConfig.Kustomize) > 0 {
-		version := sandboxConfig.DefaultConfig.Version
-		if len(sandboxConfig.DefaultConfig.Version) == 0 {
-			release, err := util.GetLatestVersion("flyte")
-			if err != nil {
-				return nil, err
-			}
-			version = release.GetTagName()
-		}
-		isGreater, err := util.IsVersionGreaterThan(version, flyteMinimumVersionSupportedKustomize)
+
+	if len(sandboxConfig.DefaultConfig.Version) > 0 {
+		isGreater, err := util.IsVersionGreaterThanEqual(sandboxConfig.DefaultConfig.Version, flyteMinimumVersionSupported)
 		if err != nil {
 			return nil, err
 		}
-		if isGreater {
-			if vol, err := mountVolume(sandboxConfig.DefaultConfig.Kustomize, containerFlyteSource); err != nil {
-				return nil, err
-			} else if vol != nil {
-				volumes = append(volumes, *vol)
-			}
+		if !isGreater {
+			logger.Infof(ctx, "version flag only supported after with flyte %s+ release", flyteMinimumVersionSupported)
 		}
-		fmt.Printf("kustomize flag only supported after with flyte %s release", flyteMinimumVersionSupportedKustomize)
-	}
 
-	if len(sandboxConfig.DefaultConfig.Version) > 0 {
 		if err := downloadFlyteManifest(sandboxConfig.DefaultConfig.Version); err != nil {
 			return nil, err
 		}
@@ -154,6 +142,31 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		} else if vol != nil {
 			volumes = append(volumes, *vol)
 		}
+	}
+
+	if len(sandboxConfig.DefaultConfig.Kustomize) > 0 {
+		version := sandboxConfig.DefaultConfig.Version
+		if len(sandboxConfig.DefaultConfig.Version) == 0 {
+			release, err := util.GetLatestVersion("flyte")
+			if err != nil {
+				return nil, err
+			}
+			version = release.GetTagName()
+		}
+		isGreater, err := util.IsVersionGreaterThanEqual(version, flyteMinimumVersionSupportedKustomize)
+		if err != nil {
+			return nil, err
+		}
+		if isGreater {
+			if vol, err := mountVolume(sandboxConfig.DefaultConfig.Kustomize, containerFlyteSource); err != nil {
+				return nil, err
+			} else if vol != nil {
+				volumes = append(volumes, *vol)
+			}
+		} else {
+			logger.Infof(ctx, "kustomize flag only supported after with flyte %s release", flyteMinimumVersionSupportedKustomize)
+		}
+
 	}
 
 	fmt.Printf("%v pulling docker image %s\n", emoji.Whale, docker.ImageName)
@@ -202,14 +215,6 @@ func mountVolume(file, destination string) (*mount.Mount, error) {
 }
 
 func downloadFlyteManifest(version string) error {
-	isGreater, err := util.IsVersionGreaterThan(version, flyteMinimumVersionSupported)
-	if err != nil {
-		return err
-	}
-	if !isGreater {
-		return fmt.Errorf("version flag only support %s+ flyte version", flyteMinimumVersionSupported)
-	}
-
 	release, err := util.CheckVersionExist(version, "flyte")
 	if err != nil {
 		return err
