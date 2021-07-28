@@ -59,6 +59,7 @@ func SelfUpgrade(rootCmd *cobra.Command) map[string]cmdCore.CommandEntry {
 
 func selfUpgrade(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	var source, message string
+	var goos = runtime.GOOS
 	// Get the binary path
 	if err := getExecutable(); err != nil {
 		return err
@@ -66,6 +67,9 @@ func selfUpgrade(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 	// Check if it's a rollback
 	if len(args) > 0 {
 		if args[0] == "rollback" {
+			if checkGOOSForRollback(goos) {
+				return nil
+			}
 			// Restore the binary
 			source = backup
 		}
@@ -82,7 +86,7 @@ func selfUpgrade(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 		if !isGreater {
 			return nil
 		}
-		if err := upgrade(os.Stdin, latest, ext, runtime.GOARCH); err != nil {
+		if err := upgrade(os.Stdin, latest, ext, goos); err != nil {
 			return err
 		}
 		source = target
@@ -100,12 +104,13 @@ func selfUpgrade(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 	if len(message) > 0 {
 		fmt.Println(message)
 	}
+
 	return nil
 }
 
 func upgrade(reader io.Reader, latest *github.RepositoryRelease, ext, goos string) error {
-	// Check if GOOS is windows
-	if checkWindows(latest.GetTagName(), goos) {
+	// Check if GOOS is windows and darwin
+	if checkGOOSForUpgrade(latest.GetTagName(), goos) {
 		return nil
 	}
 
@@ -170,11 +175,24 @@ func upgrade(reader io.Reader, latest *github.RepositoryRelease, ext, goos strin
 	return nil
 }
 
-func checkWindows(latest, goos string) bool {
+func checkGOOSForUpgrade(latest, goos string) bool {
 	if goos == "windows" {
 		fmt.Printf("A new release of flytectl is available: %s → %s \n", stdlibversion.Version, latest)
 		fmt.Println("Flytectl auto upgrade is not available on windows")
 		fmt.Printf("https://github.com/flyteorg/flytectl/releases/tag/%s \n", latest)
+		return true
+	} else if goos == "darwin" {
+		fmt.Printf("A new release of flytectl is available: %s → %s \n", stdlibversion.Version, latest)
+		fmt.Println("To upgrade, run: brew update && brew upgrade flytectl")
+		fmt.Printf("https://github.com/flyteorg/flytectl/releases/tag/%s \n", latest)
+		return true
+	}
+	return false
+}
+
+func checkGOOSForRollback(goos string) bool {
+	if goos == "windows" || goos == "darwin" {
+		fmt.Printf("Flytectl rollback is not available on %v \n", goos)
 		return true
 	}
 	return false

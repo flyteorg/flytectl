@@ -50,6 +50,15 @@ func TestUpgrade(t *testing.T) {
 		assert.Nil(t, upgrade(strings.NewReader("y"), release, "/tmp/flytectl", "linux"))
 		assert.Nil(t, upgrade(strings.NewReader("n"), release, "/tmp/flytectl", "linux"))
 		assert.Nil(t, upgrade(strings.NewReader("n"), release, "/tmp/flytectl", "windows"))
+		assert.Nil(t, upgrade(strings.NewReader("n"), release, "/tmp/flytectl", "darwin"))
+	})
+}
+
+func TestCheckGoosForRollback(t *testing.T) {
+	t.Run("checkGOOSForRollback on linux", func(t *testing.T) {
+		assert.Equal(t, false, checkGOOSForRollback("linux"))
+		assert.Equal(t, true, checkGOOSForRollback("windows"))
+		assert.Equal(t, true, checkGOOSForRollback("darwin"))
 	})
 }
 
@@ -74,6 +83,8 @@ func TestSelfUpgrade(t *testing.T) {
 func TestSelfUpgradeRollback(t *testing.T) {
 	ext = filesystemutils.FilePathJoin("/tmp/test")
 	_ = util.WriteIntoFile([]byte(""), ext)
+	backup = filesystemutils.FilePathJoin("/tmp/test.bak")
+	_ = util.WriteIntoFile([]byte(""), ext)
 
 	t.Run("Successful upgrade", func(t *testing.T) {
 		ctx := context.Background()
@@ -84,7 +95,6 @@ func TestSelfUpgradeRollback(t *testing.T) {
 		stdlibversion.Build = ""
 		stdlibversion.BuildTime = ""
 		stdlibversion.Version = "v0.2.10"
-
 		assert.Nil(t, selfUpgrade(ctx, args, cmdCtx))
 	})
 }
