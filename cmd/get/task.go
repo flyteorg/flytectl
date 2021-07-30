@@ -94,15 +94,15 @@ Check the create execution section on how to launch one using the generated file
 Usage
 `
 )
-const FormattedDescriptionsFieldKey = "_formatted_descriptions"
+const FormattedDescriptionsKey = "_formatted_descriptions"
 const DescriptionLineWidth = 25
 
 var taskColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
 	{Header: "Name", JSONPath: "$.id.name"},
 	{Header: "Type", JSONPath: "$.closure.compiledTask.template.type"},
-	{Header: "Inputs", JSONPath: "$.closure.compiledTask.template.interface.inputs.variables." + FormattedDescriptionsFieldKey + ".description"},
-	{Header: "Outputs", JSONPath: "$.closure.compiledTask.template.interface.outputs.variables." + FormattedDescriptionsFieldKey + ".description"},
+	{Header: "Inputs", JSONPath: "$.closure.compiledTask.template.interface.inputs.variables." + FormattedDescriptionsKey + ".description"},
+	{Header: "Outputs", JSONPath: "$.closure.compiledTask.template.interface.outputs.variables." + FormattedDescriptionsKey + ".description"},
 	{Header: "Discoverable", JSONPath: "$.closure.compiledTask.template.metadata.discoverable"},
 	{Header: "Discovery Version", JSONPath: "$.closure.compiledTask.template.metadata.discoveryVersion"},
 	{Header: "Created At", JSONPath: "$.closure.createdAt"},
@@ -128,7 +128,7 @@ func formatVariableDescriptions(variableMap map[string]*core.Variable) {
 			descriptions = append(descriptions, getTruncatedLine(k, DescriptionLineWidth))
 		}
 	}
-	variableMap[FormattedDescriptionsFieldKey] = &core.Variable{Description: strings.Join(descriptions, "\n")}
+	variableMap[FormattedDescriptionsKey] = &core.Variable{Description: strings.Join(descriptions, "\n")}
 }
 
 func getTruncatedLine(line string, width int) string {
