@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
+	corev1api "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
@@ -12,13 +13,13 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
+const (
+	flyteNamespace = "flyte"
+)
+
 type K8s interface {
 	AppsV1() appsv1.AppsV1Interface
 	CoreV1() corev1.CoreV1Interface
-}
-
-type FlyteK8s struct {
-	*kubernetes.Clientset
 }
 
 var Client K8s
@@ -40,28 +41,12 @@ func GetK8sClient(cfg, master string) (K8s, error) {
 	return Client, nil
 }
 
-func GetCountOfReadyDeployment(ctx context.Context, client appsv1.AppsV1Interface) (int64, error) {
-	deployments, err := client.Deployments("flyte").List(ctx, v1.ListOptions{})
+func GetFlyteDeployment(ctx context.Context, client corev1.CoreV1Interface) (*corev1api.PodList, error) {
+	pods, err := client.Pods(flyteNamespace).List(ctx, v1.ListOptions{})
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-
-	var count int64
-	for _, dep := range deployments.Items {
-		if dep.Status.AvailableReplicas == 1 {
-			count++
-			continue
-		}
-	}
-	return count, nil
-}
-
-func GetFlyteDeploymentCount(ctx context.Context, client appsv1.AppsV1Interface) (int64, error) {
-	deployments, err := client.Deployments("flyte").List(ctx, v1.ListOptions{})
-	if err != nil {
-		return 0, err
-	}
-	return int64(len(deployments.Items)), nil
+	return pods, nil
 }
 
 func GetNodeTaintStatus(ctx context.Context, client corev1.NodeInterface) (bool, error) {

@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -85,13 +84,13 @@ func TestStartSandboxFunc(t *testing.T) {
 	assert.Nil(t, os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s"), os.ModePerm))
 	assert.Nil(t, ioutil.WriteFile(docker.Kubeconfig, []byte(content), os.ModePerm))
 
-	fakeDeployment := appsv1.Deployment{
-		Status: appsv1.DeploymentStatus{
-			AvailableReplicas: 0,
+	fakePod := corev1.Pod{
+		Status: corev1.PodStatus{
+			Conditions: []corev1.PodCondition{},
 		},
 	}
-	fakeDeployment.SetName("flyte")
-	fakeDeployment.SetName("flyte")
+	fakePod.SetName("flyte")
+	fakePod.SetName("flyte")
 
 	t.Run("Successfully run sandbox cluster", func(t *testing.T) {
 		ctx := context.Background()
@@ -247,7 +246,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := docker.Volumes
 		volumes = append(volumes, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: FlyteManifest,
+			Source: flyteManifest,
 			Target: generatedManifest,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -285,7 +284,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := docker.Volumes
 		volumes = append(volumes, mount.Mount{
 			Type:   mount.TypeBind,
-			Source: FlyteManifest,
+			Source: flyteManifest,
 			Target: generatedManifest,
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -318,6 +317,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
+
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
 		volumes := docker.Volumes
 		volumes = append(volumes, mount.Mount{
@@ -427,10 +427,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		_, err := startSandbox(ctx, mockDocker, os.Stdin)
 		assert.NotNil(t, err)
 	})
-	t.Run("Failed manifest", func(t *testing.T) {
-		err := downloadFlyteManifest("v100.9.9")
-		assert.NotNil(t, err)
-	})
 	t.Run("Error in reading logs", func(t *testing.T) {
 		ctx := context.Background()
 		errCh := make(chan error)
@@ -511,7 +507,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
-		_, err := client.AppsV1().Deployments("flyte").Create(ctx, &fakeDeployment, v1.CreateOptions{})
+		_, err := client.CoreV1().Pods("flyte").Create(ctx, &fakePod, v1.CreateOptions{})
 		if err != nil {
 			t.Error(err)
 		}
@@ -548,13 +544,16 @@ func TestStartSandboxFunc(t *testing.T) {
 		docker.Client = mockDocker
 		sandboxConfig.DefaultConfig.Source = ""
 		go func() {
-			dep, err := client.AppsV1().Deployments("flyte").Get(ctx, "flyte", v1.GetOptions{})
+			pod, err := client.CoreV1().Pods("flyte").Get(ctx, "flyte", v1.GetOptions{})
 			if err != nil {
 				t.Error(err)
 			}
-			dep.Status.AvailableReplicas = 1
-			time.Sleep(2 * time.Second)
-			_, err = client.AppsV1().Deployments("flyte").Update(ctx, dep, v1.UpdateOptions{})
+			pod.Status.Phase = corev1.PodRunning
+			pod.Status.Conditions = append(pod.Status.Conditions, corev1.PodCondition{
+				Type:   corev1.PodReady,
+				Status: corev1.ConditionTrue,
+			})
+			_, err = client.CoreV1().Pods("flyte").Update(ctx, pod, v1.UpdateOptions{})
 			if err != nil {
 				t.Error(err)
 			}
@@ -615,8 +614,11 @@ func TestMonitorFlyteDeployment(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		total, _, _ := monitorFlyteDeployment(ctx, client.AppsV1(), client.CoreV1().Nodes())
+		podList, _ := watchFlyteDeployment(ctx, client.CoreV1())
+		for v := range podList {
+			assert.Equal(t, int(0), len(v.Items))
+			break
+		}
 
-		assert.Equal(t, int64(1), total)
 	})
 }

@@ -1,34 +1,24 @@
 package util
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strings"
-
-	stdlibversion "github.com/flyteorg/flytestdlib/version"
 
 	"github.com/enescakir/emoji"
 	"github.com/flyteorg/flytectl/pkg/configutil"
 	"github.com/flyteorg/flytectl/pkg/docker"
-	"github.com/google/go-github/v37/github"
-	"github.com/vbauerster/mpb/v7"
-	"github.com/vbauerster/mpb/v7/decor"
-
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 	hversion "github.com/hashicorp/go-version"
 )
 
 const (
 	progressSuccessMessage = "Flyte is ready! Flyte UI is available at http://localhost:30081/console"
-	FlytectlReleasePath    = "/repos/flyteorg/flytectl/releases/latest"
-	commonMessage          = "\n A new release of flytectl is available: %s → %s \n"
-	darwinMessage          = "To upgrade, run: brew update && brew upgrade flytectl \n"
-	linuxMessage           = "To upgrade, run: flytectl upgrade \n"
-	releaseURL             = "https://github.com/flyteorg/flytectl/releases/tag/%s \n"
-	owner                  = "flyteorg"
 )
+
+var Ext string
 
 func WriteIntoFile(data []byte, file string) error {
 	err := ioutil.WriteFile(file, data, os.ModePerm)
@@ -71,65 +61,15 @@ func PrintSandboxMessage() {
 	fmt.Printf("export FLYTECTL_CONFIG=%v \n", configutil.FlytectlConfig)
 }
 
-func ProgressBarForFlyteStatus(total int64, count chan int64, message string) {
-	p := mpb.New(mpb.WithWidth(64))
-	bar := p.AddBar(total,
-		mpb.PrependDecorators(
-			decor.Name(message, decor.WC{W: len(message) + 1, C: decor.DidentRight}),
-			decor.Name("", decor.WCSyncSpaceR),
-		),
-		mpb.AppendDecorators(
-			decor.OnComplete(decor.Percentage(decor.WC{W: 5}), ""),
-		),
-		mpb.AppendDecorators(decor.Percentage()),
-	)
-	for {
-		c := <-count
-		bar.IncrBy(int(c))
-		if bar.Current() == total {
-			PrintSandboxMessage()
-			return
-		}
-	}
-}
-
-func GetUpgradeMessage(goos string) (string, error) {
-	latest, err := GetLatestVersion("flytectl")
-	if err != nil {
-		return "", err
-	}
-	isGreater, err := IsVersionGreaterThan(latest.GetTagName(), stdlibversion.Version)
-	if err != nil {
-		return "", err
-	}
-	message := ""
-	if isGreater {
-		if goos == "darwin" {
-			message = commonMessage + darwinMessage
-		} else if goos == "linux" {
-			message = commonMessage + linuxMessage
-		}
-		message += releaseURL
-		message = fmt.Sprintf(message, stdlibversion.Version, latest.GetTagName(), latest.GetTagName())
-	}
-
-	return message, nil
-}
-
-func GetLatestVersion(repository string) (*github.RepositoryRelease, error) {
-	client := github.NewClient(nil)
-	release, _, err := client.Repositories.GetLatestRelease(context.Background(), owner, repository)
+func GetRequest(url string) (*http.Response, error) {
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", url, nil)
+	response, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	return release, err
-}
-
-func CheckVersionExist(version, repository string) (*github.RepositoryRelease, error) {
-	client := github.NewClient(nil)
-	release, _, err := client.Repositories.GetReleaseByTag(context.Background(), owner, repository, version)
-	if err != nil {
-		return nil, err
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("someting goes wrong while sending request to %s. Got status code %v", url, response.StatusCode)
 	}
-	return release, err
+	return response, nil
 }

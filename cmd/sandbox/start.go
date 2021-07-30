@@ -5,18 +5,22 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/avast/retry-go"
+	"github.com/olekukonko/tablewriter"
+	corev1api "k8s.io/api/core/v1"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+
+	"github.com/flyteorg/flytectl/pkg/util/githubutil"
 
 	"github.com/flyteorg/flytestdlib/logger"
 
 	"github.com/docker/docker/api/types/mount"
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/pkg/k8s"
-	v1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 
 	"github.com/flyteorg/flytectl/pkg/configutil"
 
@@ -52,14 +56,13 @@ Run specific version of flyte, Only available after v0.14.0+
 
 Usage
 	`
-	progressBarMessage           = "Waiting for flyte deployment"
 	k8sEndpoint                  = "https://127.0.0.1:30086"
 	flyteMinimumVersionSupported = "v0.14.0"
 	generatedManifest            = "/flyteorg/share/flyte_generated.yaml"
 )
 
 var (
-	FlyteManifest = f.FilePathJoin(f.UserHomeDir(), ".flyte", "flyte_generated.yaml")
+	flyteManifest = f.FilePathJoin(f.UserHomeDir(), ".flyte", "flyte_generated.yaml")
 )
 
 type ExecResult struct {
@@ -82,24 +85,57 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		docker.WaitForSandbox(reader, docker.SuccessMessage)
 	}
 
-	time.Sleep(5 * time.Second)
-	k8sClient, err := k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
+	var k8sClient k8s.K8s
+	err = retry.Do(
+		func() error {
+			k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
+			return err
+		},
+		retry.Attempts(10),
+	)
 	if err != nil {
 		return err
 	}
 
-	total, countChan, errChK8s := monitorFlyteDeployment(ctx, k8sClient.AppsV1(), k8sClient.CoreV1().Nodes())
-
+	podsChan, errChK8s := watchFlyteDeployment(ctx, k8sClient.CoreV1())
 	go func() {
-		err := <-errChK8s
+		err := <-watchDiskPressure(ctx, k8sClient.CoreV1().Nodes(), errChK8s)
 		if err != nil {
 			fmt.Printf("err: %v \n", err)
 			os.Exit(1)
 		}
 	}()
 
-	util.ProgressBarForFlyteStatus(total, countChan, progressBarMessage)
+	var data = os.Stdout
+	table := tablewriter.NewWriter(data)
+	table.SetHeader([]string{"Service", "Status", "Namespace"})
+	table.SetRowLine(true)
 
+	var total, ready int
+	for pods := range podsChan {
+		table.ClearRows()
+		table.SetAutoWrapText(false)
+		table.SetAutoFormatHeaders(true)
+		_, _ = data.WriteString("\x1b[3;J\x1b[H\x1b[2J")
+		total = len(pods.Items)
+		ready = 0
+		if total != 0 {
+			for _, v := range pods.Items {
+				if (v.Status.Phase == corev1api.PodRunning) || (v.Status.Phase == corev1api.PodSucceeded) {
+					ready++
+				}
+				if len(v.Status.Conditions) > 0 {
+					table.Append([]string{v.GetName(), string(v.Status.Phase), v.GetNamespace()})
+				}
+			}
+			table.Render()
+			if total == ready {
+				break
+			}
+		}
+
+	}
+	util.PrintSandboxMessage()
 	return nil
 }
 
@@ -141,17 +177,18 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		}
 		if !isGreater {
 			logger.Infof(ctx, "version flag only supported after with flyte %s+ release", flyteMinimumVersionSupported)
-		} else {
-			if err := downloadFlyteManifest(sandboxConfig.DefaultConfig.Version); err != nil {
-				return nil, err
-			}
-
-			if vol, err := mountVolume(FlyteManifest, generatedManifest); err != nil {
-				return nil, err
-			} else if vol != nil {
-				volumes = append(volumes, *vol)
-			}
+			return nil, fmt.Errorf("version flag only supported after with flyte %s+ release", flyteMinimumVersionSupported)
 		}
+		if err := githubutil.GetFlyteManifest(sandboxConfig.DefaultConfig.Version, flyteManifest); err != nil {
+			return nil, err
+		}
+
+		if vol, err := mountVolume(flyteManifest, generatedManifest); err != nil {
+			return nil, err
+		} else if vol != nil {
+			volumes = append(volumes, *vol)
+		}
+
 	}
 
 	fmt.Printf("%v pulling docker image %s\n", emoji.Whale, docker.ImageName)
@@ -175,19 +212,9 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	return logReader, nil
 }
 
-func watchFlyteDeploymentStatus(ctx context.Context, appsClient v1.AppsV1Interface, nodeClient corev1k8s.NodeInterface) (chan int64, chan error) {
-	var count = make(chan int64)
-	var lastCount int64 = 0
-	var errorChan = make(chan error)
-
+func watchDiskPressure(ctx context.Context, nodeClient corev1k8s.NodeInterface, errorChan chan error) chan error {
 	go func() {
 		for {
-			ready, err := k8s.GetCountOfReadyDeployment(ctx, appsClient)
-			if err != nil {
-				errorChan <- err
-			}
-			count <- ready - lastCount
-			lastCount = ready
 			isTaint, err := k8s.GetNodeTaintStatus(ctx, nodeClient)
 			if err != nil {
 				errorChan <- err
@@ -198,7 +225,7 @@ func watchFlyteDeploymentStatus(ctx context.Context, appsClient v1.AppsV1Interfa
 			time.Sleep(5 * time.Second)
 		}
 	}()
-	return count, errorChan
+	return errorChan
 }
 
 func mountVolume(file, destination string) (*mount.Mount, error) {
@@ -216,52 +243,20 @@ func mountVolume(file, destination string) (*mount.Mount, error) {
 	return nil, nil
 }
 
-func monitorFlyteDeployment(ctx context.Context, appsClient v1.AppsV1Interface, nodeClient corev1k8s.NodeInterface) (int64, chan int64, chan error) {
-	countChan := make(chan int64)
+func watchFlyteDeployment(ctx context.Context, appsClient corev1.CoreV1Interface) (chan corev1api.PodList, chan error) {
+	watchPods := make(chan corev1api.PodList)
 	chanErr := make(chan error)
-	var err error
-	defer func() {
-		if err != nil {
-			chanErr <- err
+
+	go func() {
+		for {
+			pods, err := k8s.GetFlyteDeployment(ctx, appsClient)
+			if err != nil {
+				chanErr <- err
+			}
+			watchPods <- *pods
+			time.Sleep(30 * time.Second)
 		}
 	}()
-	total, err := k8s.GetFlyteDeploymentCount(ctx, appsClient)
-	if err != nil {
-		return total, countChan, chanErr
-	}
 
-	countChan, chanErr = watchFlyteDeploymentStatus(ctx, appsClient, nodeClient)
-
-	return total, countChan, chanErr
-}
-
-func downloadFlyteManifest(version string) error {
-	release, err := util.CheckVersionExist(version, "flyte")
-	if err != nil {
-		return err
-	}
-	var manifestURL = ""
-	for _, v := range release.Assets {
-		if v.GetName() == "flyte_sandbox_manifest.yaml" {
-			manifestURL = *v.BrowserDownloadURL
-		}
-	}
-	if len(manifestURL) > 0 {
-		response, err := http.Get(manifestURL)
-		if err != nil {
-			return err
-		}
-		defer response.Body.Close()
-		if response.StatusCode != 200 {
-			return fmt.Errorf("someting goes wrong while downloading the flyte release")
-		}
-		data, err := ioutil.ReadAll(response.Body)
-		if err != nil {
-			return err
-		}
-		if err := util.WriteIntoFile(data, FlyteManifest); err != nil {
-			return err
-		}
-	}
-	return nil
+	return watchPods, chanErr
 }

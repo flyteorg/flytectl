@@ -66,6 +66,21 @@ func TestVersionCommandFunc(t *testing.T) {
 	mockClient.AssertCalled(t, "GetVersion", ctx, versionRequest)
 }
 
+func TestVersionCommandFuncError(t *testing.T) {
+	ctx := context.Background()
+	var args []string
+	mockClient := new(mocks.AdminServiceClient)
+	mockOutStream := new(io.Writer)
+	cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+	stdlibversion.Build = ""
+	stdlibversion.BuildTime = ""
+	stdlibversion.Version = "v"
+	mockClient.OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, nil)
+	err := getVersion(ctx, args, cmdCtx)
+	assert.Nil(t, err)
+	mockClient.AssertCalled(t, "GetVersion", ctx, versionRequest)
+}
+
 func TestVersionCommandFuncErr(t *testing.T) {
 	ctx := context.Background()
 	var args []string

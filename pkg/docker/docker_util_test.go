@@ -26,17 +26,10 @@ var (
 	containers []types.Container
 )
 
-func setupFlyteDir() error {
-	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), os.ModePerm); err != nil {
-		return err
-	}
-	return nil
-}
-
 func setupSandbox() {
 	mockAdminClient := u.MockClient
 	cmdCtx = cmdCore.NewCommandContext(mockAdminClient, u.MockOutStream)
-	_ = setupFlyteDir()
+	_ = os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), os.ModePerm)
 	container1 := types.Container{
 		ID: "FlyteSandboxClusterName",
 		Names: []string{

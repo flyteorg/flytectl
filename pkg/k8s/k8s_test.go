@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	testclient "k8s.io/client-go/kubernetes/fake"
@@ -19,18 +18,12 @@ var fakeNode = &corev1.Node{
 	},
 }
 
-var fakeDeployment = &appsv1.Deployment{
-	Status: appsv1.DeploymentStatus{
-		AvailableReplicas: 1,
-	},
-}
-
 func TestGetFlyteDeploymentCount(t *testing.T) {
 	ctx := context.Background()
 	client := testclient.NewSimpleClientset()
-	c, err := GetFlyteDeploymentCount(ctx, client.AppsV1())
+	c, err := GetFlyteDeployment(ctx, client.CoreV1())
 	assert.Nil(t, err)
-	assert.Equal(t, int64(0), c)
+	assert.Equal(t, 0, len(c.Items))
 }
 
 func TestGetNodeTaintStatus(t *testing.T) {
@@ -70,18 +63,6 @@ func TestGetNodeTaintStatus(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, true, c)
 	})
-}
-func TestGetCountOfReadyDeployment(t *testing.T) {
-	ctx := context.Background()
-	client := testclient.NewSimpleClientset()
-	fakeDeployment.SetName("flyte")
-	_, err := client.AppsV1().Deployments("flyte").Create(ctx, fakeDeployment, v1.CreateOptions{})
-	if err != nil {
-		t.Error(err)
-	}
-	c, err := GetCountOfReadyDeployment(ctx, client.AppsV1())
-	assert.Nil(t, err)
-	assert.Equal(t, int64(1), c)
 }
 
 func TestGetK8sClient(t *testing.T) {

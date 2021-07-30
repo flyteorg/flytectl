@@ -3,12 +3,12 @@ package upgrade
 import (
 	"io"
 	"sort"
-	"strings"
 	"testing"
 
-	"github.com/flyteorg/flytectl/pkg/filesystemutils"
-
 	"github.com/flyteorg/flytectl/pkg/util"
+	"github.com/flyteorg/flytectl/pkg/util/githubutil"
+
+	"github.com/flyteorg/flytectl/pkg/util/platformutil"
 
 	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
 	stdlibversion "github.com/flyteorg/flytestdlib/version"
@@ -18,6 +18,11 @@ import (
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+)
+
+var (
+	version = "v0.2.20"
+	tempExt = "flyte.ext"
 )
 
 func TestUpgradeCommand(t *testing.T) {
@@ -41,31 +46,79 @@ func TestUpgradeCommand(t *testing.T) {
 	assert.Equal(t, cmdNouns[0].Long, upgradeCmdLong)
 }
 
+//
 func TestUpgrade(t *testing.T) {
+	_ = util.WriteIntoFile([]byte("data"), tempExt)
+	stdlibversion.Version = version
+	githubutil.FlytectlReleaseConfig.OverrideExecutable = tempExt
 	t.Run("Successful upgrade", func(t *testing.T) {
-		release, err := util.CheckVersionExist("v0.2.14", "flytectl")
-		if err != nil {
-			t.Error(err)
-		}
-		assert.Nil(t, upgrade(strings.NewReader("y"), release, "/tmp/flytectl", "linux"))
-		assert.Nil(t, upgrade(strings.NewReader("n"), release, "/tmp/flytectl", "linux"))
-		assert.Nil(t, upgrade(strings.NewReader("n"), release, "/tmp/flytectl", "windows"))
-		assert.Nil(t, upgrade(strings.NewReader("n"), release, "/tmp/flytectl", "darwin"))
+		message, err := upgrade(githubutil.FlytectlReleaseConfig)
+		assert.Nil(t, err)
+		assert.Equal(t, 39, len(message))
 	})
 }
 
 func TestCheckGoosForRollback(t *testing.T) {
+	stdlibversion.Version = version
+	linux := platformutil.Linux
+	windows := platformutil.Windows
+	darwin := platformutil.Darwin
+	githubutil.FlytectlReleaseConfig.OverrideExecutable = tempExt
 	t.Run("checkGOOSForRollback on linux", func(t *testing.T) {
-		assert.Equal(t, false, checkGOOSForRollback("linux"))
-		assert.Equal(t, true, checkGOOSForRollback("windows"))
-		assert.Equal(t, true, checkGOOSForRollback("darwin"))
+		assert.Equal(t, true, isRollBackSupported(linux))
+		assert.Equal(t, false, isRollBackSupported(windows))
+		assert.Equal(t, true, isRollBackSupported(darwin))
+	})
+}
+
+func TestIsUpgradeable(t *testing.T) {
+	stdlibversion.Version = version
+	githubutil.FlytectlReleaseConfig.OverrideExecutable = tempExt
+	latest, err := githubutil.FlytectlReleaseConfig.GetLatestVersion()
+	if err != nil {
+		t.Error(err)
+	}
+	linux := platformutil.Linux
+	windows := platformutil.Windows
+	darwin := platformutil.Darwin
+	t.Run("IsUpgradeable on linux", func(t *testing.T) {
+		check, err := isUpgradeSupported(latest, linux)
+		assert.Nil(t, err)
+		assert.Equal(t, true, check)
+	})
+	t.Run("IsUpgradeable on linux", func(t *testing.T) {
+		check, err := isUpgradeSupported(latest, windows)
+		assert.Nil(t, err)
+		assert.Equal(t, false, check)
+	})
+	t.Run("IsUpgradeable on darwin", func(t *testing.T) {
+		check, err := isUpgradeSupported(latest, darwin)
+		assert.Nil(t, err)
+		assert.Equal(t, true, check)
+	})
+	t.Run("IsUpgradeable on darwin using brew", func(t *testing.T) {
+		check, err := isUpgradeSupported(latest, darwin)
+		assert.Nil(t, err)
+		assert.Equal(t, true, check)
+	})
+	t.Run("isUpgradeSupported failed", func(t *testing.T) {
+		stdlibversion.Version = "v"
+		check, err := isUpgradeSupported("v", linux)
+		assert.NotNil(t, err)
+		assert.Equal(t, false, check)
+		stdlibversion.Version = version
+	})
+	t.Run("isUpgradeSupported windows", func(t *testing.T) {
+		check, err := isUpgradeSupported("v0.2.20", windows)
+		assert.Nil(t, err)
+		assert.Equal(t, false, check)
 	})
 }
 
 func TestSelfUpgrade(t *testing.T) {
-	ext = filesystemutils.FilePathJoin("/tmp/test")
-	_ = util.WriteIntoFile([]byte(""), ext)
-
+	stdlibversion.Version = version
+	githubutil.FlytectlReleaseConfig.OverrideExecutable = tempExt
+	goos = platformutil.Linux
 	t.Run("Successful upgrade", func(t *testing.T) {
 		ctx := context.Background()
 		var args []string
@@ -74,27 +127,83 @@ func TestSelfUpgrade(t *testing.T) {
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
 		stdlibversion.BuildTime = ""
-		stdlibversion.Version = "v0.2.10"
+		stdlibversion.Version = version
 
 		assert.Nil(t, selfUpgrade(ctx, args, cmdCtx))
 	})
 }
 
-func TestSelfUpgradeRollback(t *testing.T) {
-	ext = filesystemutils.FilePathJoin("/tmp/test")
-	_ = util.WriteIntoFile([]byte(""), ext)
-	backup = filesystemutils.FilePathJoin("/tmp/test.bak")
-	_ = util.WriteIntoFile([]byte(""), ext)
-
+func TestSelfUpgradeError(t *testing.T) {
+	stdlibversion.Version = version
+	githubutil.FlytectlReleaseConfig.OverrideExecutable = tempExt
+	goos = platformutil.Linux
 	t.Run("Successful upgrade", func(t *testing.T) {
 		ctx := context.Background()
-		var args = []string{"rollback"}
+		var args []string
 		mockClient := new(mocks.AdminServiceClient)
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
 		stdlibversion.BuildTime = ""
-		stdlibversion.Version = "v0.2.10"
+		stdlibversion.Version = "v"
+
+		assert.NotNil(t, selfUpgrade(ctx, args, cmdCtx))
+	})
+
+}
+
+func TestSelfUpgradeRollback(t *testing.T) {
+	stdlibversion.Version = version
+	githubutil.FlytectlReleaseConfig.OverrideExecutable = tempExt
+	goos = platformutil.Linux
+	t.Run("Successful rollback", func(t *testing.T) {
+		ctx := context.Background()
+		var args = []string{subCommand}
+		mockClient := new(mocks.AdminServiceClient)
+		mockOutStream := new(io.Writer)
+		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+		stdlibversion.Build = ""
+		stdlibversion.BuildTime = ""
+		stdlibversion.Version = version
 		assert.Nil(t, selfUpgrade(ctx, args, cmdCtx))
 	})
+
+	t.Run("Successful rollback failed", func(t *testing.T) {
+		ctx := context.Background()
+		var args = []string{subCommand}
+		mockClient := new(mocks.AdminServiceClient)
+		mockOutStream := new(io.Writer)
+		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+		stdlibversion.Build = ""
+		stdlibversion.BuildTime = ""
+		stdlibversion.Version = "v100.0.0"
+		assert.NotNil(t, selfUpgrade(ctx, args, cmdCtx))
+	})
+
+	t.Run("Successful rollback for windows", func(t *testing.T) {
+		ctx := context.Background()
+		var args = []string{subCommand}
+		mockClient := new(mocks.AdminServiceClient)
+		mockOutStream := new(io.Writer)
+		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+		stdlibversion.Build = ""
+		stdlibversion.BuildTime = ""
+		stdlibversion.Version = version
+		goos = platformutil.Windows
+		assert.Nil(t, selfUpgrade(ctx, args, cmdCtx))
+	})
+
+	t.Run("Successful rollback for windows", func(t *testing.T) {
+		ctx := context.Background()
+		var args = []string{subCommand}
+		mockClient := new(mocks.AdminServiceClient)
+		mockOutStream := new(io.Writer)
+		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+		stdlibversion.Build = ""
+		stdlibversion.BuildTime = ""
+		stdlibversion.Version = version
+		githubutil.FlytectlReleaseConfig.OverrideExecutable = "/"
+		assert.Nil(t, selfUpgrade(ctx, args, cmdCtx))
+	})
+
 }
