@@ -196,7 +196,7 @@ func FormatVariableDescriptions(variableMap map[string]*core.Variable) {
 	variableMap[DefaultFormattedDescriptionsKey] = &core.Variable{Description: strings.Join(descriptions, "\n")}
 }
 
-func FormatParameterDescriptions(variableMap map[string]*core.Parameter) {
+func FormatParameterDescriptions(parameterMap map[string]*core.Parameter) {
 	keys := make([]string, 0, len(variableMap))
 	// sort the keys for testing and consistency with other output formats
 	for k := range variableMap {
