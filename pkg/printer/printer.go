@@ -179,7 +179,6 @@ func FormatVariableDescriptions(variableMap map[string]*core.Variable) {
 	sort.Strings(keys)
 
 	var descriptions []string
-	//for k, v := range variableMap {
 	for _, k := range keys {
 		if k == DefaultFormattedDescriptionsKey {
 			continue
@@ -197,9 +196,9 @@ func FormatVariableDescriptions(variableMap map[string]*core.Variable) {
 }
 
 func FormatParameterDescriptions(parameterMap map[string]*core.Parameter) {
-	keys := make([]string, 0, len(variableMap))
+	keys := make([]string, 0, len(parameterMap))
 	// sort the keys for testing and consistency with other output formats
-	for k := range variableMap {
+	for k := range parameterMap {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
@@ -210,7 +209,7 @@ func FormatParameterDescriptions(parameterMap map[string]*core.Parameter) {
 		if k == DefaultFormattedDescriptionsKey {
 			continue
 		}
-		v := variableMap[k]
+		v := parameterMap[k]
 		if v.Var == nil {
 			continue
 		}
@@ -221,7 +220,7 @@ func FormatParameterDescriptions(parameterMap map[string]*core.Parameter) {
 			descriptions = append(descriptions, getTruncatedLine(k))
 		}
 	}
-	variableMap[DefaultFormattedDescriptionsKey] = &core.Parameter{Var: &core.Variable{Description: strings.Join(descriptions, "\n")}}
+	parameterMap[DefaultFormattedDescriptionsKey] = &core.Parameter{Var: &core.Variable{Description: strings.Join(descriptions, "\n")}}
 }
 
 func getTruncatedLine(line string) string {
