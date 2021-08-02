@@ -2,17 +2,15 @@ package get
 
 import (
 	"context"
-	"fmt"
+
 	"github.com/flyteorg/flytectl/cmd/config"
 	taskConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/task"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/ext"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/flyteorg/flytestdlib/logger"
 	"github.com/golang/protobuf/proto"
-	"strings"
 )
 
 const (
@@ -94,15 +92,13 @@ Check the create execution section on how to launch one using the generated file
 Usage
 `
 )
-const FormattedDescriptionsKey = "_formatted_descriptions"
-const DescriptionLineWidth = 25
 
 var taskColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
 	{Header: "Name", JSONPath: "$.id.name"},
 	{Header: "Type", JSONPath: "$.closure.compiledTask.template.type"},
-	{Header: "Inputs", JSONPath: "$.closure.compiledTask.template.interface.inputs.variables." + FormattedDescriptionsKey + ".description"},
-	{Header: "Outputs", JSONPath: "$.closure.compiledTask.template.interface.outputs.variables." + FormattedDescriptionsKey + ".description"},
+	{Header: "Inputs", JSONPath: "$.closure.compiledTask.template.interface.inputs.variables." + printer.DefaultFormattedDescriptionsKey + ".description"},
+	{Header: "Outputs", JSONPath: "$.closure.compiledTask.template.interface.outputs.variables." + printer.DefaultFormattedDescriptionsKey + ".description"},
 	{Header: "Discoverable", JSONPath: "$.closure.compiledTask.template.metadata.discoverable"},
 	{Header: "Discovery Version", JSONPath: "$.closure.compiledTask.template.metadata.discoveryVersion"},
 	{Header: "Created At", JSONPath: "$.closure.createdAt"},
@@ -111,31 +107,23 @@ var taskColumns = []printer.Column{
 func TaskToProtoMessages(l []*admin.Task) []proto.Message {
 	messages := make([]proto.Message, 0, len(l))
 	for _, m := range l {
-		formatVariableDescriptions(m.Closure.CompiledTask.Template.Interface.Inputs.Variables)
-		formatVariableDescriptions(m.Closure.CompiledTask.Template.Interface.Outputs.Variables)
 		messages = append(messages, m)
 	}
 	return messages
 }
 
-func formatVariableDescriptions(variableMap map[string]*core.Variable) {
-	var descriptions []string
-	for k, v := range variableMap {
-		// a: a isn't very helpful
-		if k != v.Description {
-			descriptions = append(descriptions, getTruncatedLine(fmt.Sprintf("%s: %s", k, v.Description), DescriptionLineWidth))
-		} else {
-			descriptions = append(descriptions, getTruncatedLine(k, DescriptionLineWidth))
+func TaskToTableProtoMessages(l []*admin.Task) []proto.Message {
+	messages := make([]proto.Message, 0, len(l))
+	for _, m := range l {
+		if m.Closure.CompiledTask.Template.Interface.Inputs != nil {
+			printer.FormatVariableDescriptions(m.Closure.CompiledTask.Template.Interface.Inputs.Variables)
 		}
+		if m.Closure.CompiledTask.Template.Interface.Outputs != nil {
+			printer.FormatVariableDescriptions(m.Closure.CompiledTask.Template.Interface.Outputs.Variables)
+		}
+		messages = append(messages, m)
 	}
-	variableMap[FormattedDescriptionsKey] = &core.Variable{Description: strings.Join(descriptions, "\n")}
-}
-
-func getTruncatedLine(line string, width int) string {
-	if len(line) > width {
-		return line[:width-3] + "..."
-	}
-	return line
+	return messages
 }
 
 func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
@@ -150,13 +138,20 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 			return err
 		}
 		logger.Debugf(ctx, "Retrieved Task", tasks)
+		if config.GetConfig().MustOutputFormat() == printer.OutputFormatTABLE {
+			return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToTableProtoMessages(tasks)...)
+		}
 		return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToProtoMessages(tasks)...)
+
 	}
 	tasks, err = cmdCtx.AdminFetcherExt().FetchAllVerOfTask(ctx, "", config.GetConfig().Project, config.GetConfig().Domain, taskConfig.DefaultConfig.Filter)
 	if err != nil {
 		return err
 	}
 	logger.Debugf(ctx, "Retrieved %v Task", len(tasks))
+	if config.GetConfig().MustOutputFormat() == printer.OutputFormatTABLE {
+		return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToTableProtoMessages(tasks)...)
+	}
 	return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToProtoMessages(tasks)...)
 }
 
