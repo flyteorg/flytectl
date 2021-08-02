@@ -225,7 +225,7 @@ func FormatParameterDescriptions(variableMap map[string]*core.Parameter) {
 }
 
 func getTruncatedLine(line string) string {
-	// maybe add width to function signature later
+	// TODO: maybe add width to function signature later
 	width := defaultLineWidth
 	if len(line) > width {
 		return line[:width-3] + "..."
