@@ -101,7 +101,7 @@ Usage
 var launchplanColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
 	{Header: "Name", JSONPath: "$.id.name"},
-	{Header: "Type", JSONPath: "$.id.resourceType"},
+	{Header: "Type", JSONPath: "$.closure.compiledTask.template.type"},
 	{Header: "State", JSONPath: "$.spec.state"},
 	{Header: "Schedule", JSONPath: "$.spec.entityMetadata.schedule"},
 	{Header: "Inputs", JSONPath: "$.closure.expectedInputs.parameters." + printer.DefaultFormattedDescriptionsKey + ".var.description"},
