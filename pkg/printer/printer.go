@@ -180,9 +180,6 @@ func FormatVariableDescriptions(variableMap map[string]*core.Variable) {
 
 	var descriptions []string
 	for _, k := range keys {
-		if k == DefaultFormattedDescriptionsKey {
-			continue
-		}
 		v := variableMap[k]
 		// a: a isn't very helpful
 		if k != v.Description {
@@ -204,11 +201,7 @@ func FormatParameterDescriptions(parameterMap map[string]*core.Parameter) {
 	sort.Strings(keys)
 
 	var descriptions []string
-	//for k, v := range variableMap {
 	for _, k := range keys {
-		if k == DefaultFormattedDescriptionsKey {
-			continue
-		}
 		v := parameterMap[k]
 		if v.Var == nil {
 			continue

@@ -127,6 +127,7 @@ func LaunchplanToProtoMessages(l []*admin.LaunchPlan) []proto.Message {
 func LaunchplanToTableProtoMessages(l []*admin.LaunchPlan) []proto.Message {
 	messages := make([]proto.Message, 0, len(l))
 	for _, m := range l {
+		m := proto.Clone(m).(*admin.LaunchPlan)
 		if m.Closure.ExpectedInputs != nil {
 			printer.FormatParameterDescriptions(m.Closure.ExpectedInputs.Parameters)
 		}
