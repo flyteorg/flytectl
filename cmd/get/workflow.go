@@ -164,11 +164,8 @@ func getWorkflowFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 
 // FetchWorkflowForName fetches the workflow give it name.
 func FetchWorkflowForName(ctx context.Context, fetcher ext.AdminFetcherExtInterface, name, project,
-	domain string) ([]*admin.Workflow, bool, error) {
-	var workflows []*admin.Workflow
+	domain string) (workflows []*admin.Workflow, isList bool, err error) {
 	var workflow *admin.Workflow
-	var isList bool
-	var err error
 	if workflowconfig.DefaultConfig.Latest {
 		if workflow, err = fetcher.FetchWorkflowLatestVersion(ctx, name, project, domain, workflowconfig.DefaultConfig.Filter); err != nil {
 			return nil, false, err
