@@ -33,6 +33,7 @@ const (
 	brewInstallDirectory = "/Cellar/flytectl"
 )
 
+// FlytectlReleaseConfig represent the updater config for flytectl binary
 var FlytectlReleaseConfig = &updater.Updater{
 	Provider: &provider.Github{
 		RepositoryURL: flytectlRepository,
@@ -46,6 +47,7 @@ var (
 	arch = platformutil.Arch(runtime.GOARCH)
 )
 
+// GetLatestVersion returns the latest version of provided repository
 func GetLatestVersion(repository string) (*github.RepositoryRelease, error) {
 	client := github.NewClient(nil)
 	release, _, err := client.Repositories.GetLatestRelease(context.Background(), owner, repository)
@@ -64,6 +66,7 @@ func getFlytectlAssetName() string {
 	return fmt.Sprintf("flytectl_%s_%s.tar.gz", strings.Title(runtime.GOOS), arch.String())
 }
 
+// CheckVersionExist returns the provided version release if version exist in repository
 func CheckVersionExist(version, repository string) (*github.RepositoryRelease, error) {
 	client := github.NewClient(nil)
 	release, _, err := client.Repositories.GetReleaseByTag(context.Background(), owner, repository, version)
@@ -73,6 +76,7 @@ func CheckVersionExist(version, repository string) (*github.RepositoryRelease, e
 	return release, err
 }
 
+// GetAssetsFromRelease returns the asset from github release
 func GetAssetsFromRelease(version, assets, repository string) (*github.ReleaseAsset, error) {
 	release, err := CheckVersionExist(version, repository)
 	if err != nil {
@@ -86,6 +90,7 @@ func GetAssetsFromRelease(version, assets, repository string) (*github.ReleaseAs
 	return nil, fmt.Errorf("assest is not found in %s[%s] release", repository, version)
 }
 
+// GetFlyteManifest will write the flyte manifest in a file
 func GetFlyteManifest(version string, target string) error {
 	asset, err := GetAssetsFromRelease(version, sandboxManifest, flyte)
 	if err != nil {
@@ -107,6 +112,7 @@ func GetFlyteManifest(version string, target string) error {
 
 }
 
+// GetUpgradeMessage return the upgrade message
 func GetUpgradeMessage(latest string, goos platformutil.Platform) (string, error) {
 	isGreater, err := util.IsVersionGreaterThan(latest, stdlibversion.Version)
 	if err != nil {
@@ -131,6 +137,7 @@ func GetUpgradeMessage(latest string, goos platformutil.Platform) (string, error
 	return message, nil
 }
 
+// CheckBrewInstall returns the path of symlink if flytectl is installed from brew
 func CheckBrewInstall(goos platformutil.Platform) (string, error) {
 	if goos.String() == platformutil.Darwin.String() {
 		executable, err := FlytectlReleaseConfig.GetExecutable()

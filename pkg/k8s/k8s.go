@@ -41,6 +41,7 @@ func GetK8sClient(cfg, master string) (K8s, error) {
 	return Client, nil
 }
 
+// GetFlyteDeployment return the pod list from flyte namespace
 func GetFlyteDeployment(ctx context.Context, client corev1.CoreV1Interface) (*corev1api.PodList, error) {
 	pods, err := client.Pods(flyteNamespace).List(ctx, v1.ListOptions{})
 	if err != nil {
@@ -49,6 +50,7 @@ func GetFlyteDeployment(ctx context.Context, client corev1.CoreV1Interface) (*co
 	return pods, nil
 }
 
+// GetNodeTaintStatus check disk pressure taint in node
 func GetNodeTaintStatus(ctx context.Context, client corev1.NodeInterface) (bool, error) {
 	nodes, err := client.List(ctx, v1.ListOptions{})
 	if err != nil {

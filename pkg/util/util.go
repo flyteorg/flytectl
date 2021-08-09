@@ -20,6 +20,7 @@ const (
 
 var Ext string
 
+// WriteIntoFile will write content in a file
 func WriteIntoFile(data []byte, file string) error {
 	err := ioutil.WriteFile(file, data, os.ModePerm)
 	if err != nil {
@@ -36,6 +37,7 @@ func SetupFlyteDir() error {
 	return nil
 }
 
+// IsVersionGreaterThan check version if it's greater then other
 func IsVersionGreaterThan(version1, version2 string) (bool, error) {
 	semanticVersion1, err := hversion.NewVersion(version1)
 	if err != nil {
@@ -48,6 +50,7 @@ func IsVersionGreaterThan(version1, version2 string) (bool, error) {
 	return semanticVersion2.LessThanOrEqual(semanticVersion1), nil
 }
 
+// PrintSandboxMessage will print sandbox success message
 func PrintSandboxMessage() {
 	kubeconfig := strings.Join([]string{
 		"$KUBECONFIG",
@@ -61,6 +64,7 @@ func PrintSandboxMessage() {
 	fmt.Printf("export FLYTECTL_CONFIG=%v \n", configutil.FlytectlConfig)
 }
 
+// GetRequest returns the response of get request
 func GetRequest(url string) (*http.Response, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
