@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -64,10 +65,10 @@ func PrintSandboxMessage() {
 	fmt.Printf("export FLYTECTL_CONFIG=%v \n", configutil.FlytectlConfig)
 }
 
-// GetRequest returns the response of get request
-func GetRequest(url string) (*http.Response, error) {
+// SendRequest will create request and return the response
+func SendRequest(method, url string, option io.Reader) (*http.Response, error) {
 	client := &http.Client{}
-	req, _ := http.NewRequest("GET", url, nil)
+	req, _ := http.NewRequest(method, url, option)
 	response, err := client.Do(req)
 	if err != nil {
 		return nil, err

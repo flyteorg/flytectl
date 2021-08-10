@@ -96,7 +96,7 @@ func GetFlyteManifest(version string, target string) error {
 	if err != nil {
 		return err
 	}
-	response, err := util.GetRequest(asset.GetBrowserDownloadURL())
+	response, err := util.SendRequest("GET", asset.GetBrowserDownloadURL(), nil)
 	if err != nil {
 		return err
 	}

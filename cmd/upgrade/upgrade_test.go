@@ -74,42 +74,33 @@ func TestCheckGoosForRollback(t *testing.T) {
 func TestIsUpgradeable(t *testing.T) {
 	stdlibversion.Version = version
 	githubutil.FlytectlReleaseConfig.OverrideExecutable = tempExt
-	latest, err := githubutil.FlytectlReleaseConfig.GetLatestVersion()
-	if err != nil {
-		t.Error(err)
-	}
 	linux := platformutil.Linux
 	windows := platformutil.Windows
 	darwin := platformutil.Darwin
 	t.Run("IsUpgradeable on linux", func(t *testing.T) {
-		check, err := isUpgradeSupported(latest, linux)
+		check, err := isUpgradeSupported(linux)
 		assert.Nil(t, err)
 		assert.Equal(t, true, check)
 	})
-	t.Run("IsUpgradeable on linux", func(t *testing.T) {
-		check, err := isUpgradeSupported(latest, windows)
-		assert.Nil(t, err)
-		assert.Equal(t, false, check)
-	})
 	t.Run("IsUpgradeable on darwin", func(t *testing.T) {
-		check, err := isUpgradeSupported(latest, darwin)
+		check, err := isUpgradeSupported(darwin)
 		assert.Nil(t, err)
 		assert.Equal(t, true, check)
 	})
 	t.Run("IsUpgradeable on darwin using brew", func(t *testing.T) {
-		check, err := isUpgradeSupported(latest, darwin)
+		check, err := isUpgradeSupported(darwin)
 		assert.Nil(t, err)
 		assert.Equal(t, true, check)
 	})
 	t.Run("isUpgradeSupported failed", func(t *testing.T) {
 		stdlibversion.Version = "v"
-		check, err := isUpgradeSupported("v", linux)
+		check, err := isUpgradeSupported(linux)
 		assert.NotNil(t, err)
 		assert.Equal(t, false, check)
 		stdlibversion.Version = version
 	})
 	t.Run("isUpgradeSupported windows", func(t *testing.T) {
-		check, err := isUpgradeSupported("v0.2.20", windows)
+		check, err := isUpgradeSupported(windows)
 		assert.Nil(t, err)
 		assert.Equal(t, false, check)
 	})
@@ -158,7 +149,7 @@ func TestSelfUpgradeRollback(t *testing.T) {
 	goos = platformutil.Linux
 	t.Run("Successful rollback", func(t *testing.T) {
 		ctx := context.Background()
-		var args = []string{subCommand}
+		var args = []string{rollBackSubCommand}
 		mockClient := new(mocks.AdminServiceClient)
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
@@ -170,7 +161,7 @@ func TestSelfUpgradeRollback(t *testing.T) {
 
 	t.Run("Successful rollback failed", func(t *testing.T) {
 		ctx := context.Background()
-		var args = []string{subCommand}
+		var args = []string{rollBackSubCommand}
 		mockClient := new(mocks.AdminServiceClient)
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
@@ -182,7 +173,7 @@ func TestSelfUpgradeRollback(t *testing.T) {
 
 	t.Run("Successful rollback for windows", func(t *testing.T) {
 		ctx := context.Background()
-		var args = []string{subCommand}
+		var args = []string{rollBackSubCommand}
 		mockClient := new(mocks.AdminServiceClient)
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
@@ -195,7 +186,7 @@ func TestSelfUpgradeRollback(t *testing.T) {
 
 	t.Run("Successful rollback for windows", func(t *testing.T) {
 		ctx := context.Background()
-		var args = []string{subCommand}
+		var args = []string{rollBackSubCommand}
 		mockClient := new(mocks.AdminServiceClient)
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)

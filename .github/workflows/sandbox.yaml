@@ -27,8 +27,6 @@ jobs:
         run: bin/flytectl sandbox start
       - name: Setup flytectl config
         run: bin/flytectl config init
-      - name: Wait
-        run: sleep 5
       - name: Register cookbook
         run: bin/flytectl register examples -d development  -p flytesnacks
       - name: Teardown Sandbox cluster

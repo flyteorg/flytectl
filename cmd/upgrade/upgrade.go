@@ -2,10 +2,14 @@ package upgrade
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"runtime"
 	"strings"
+
+	"github.com/flyteorg/flytectl/pkg/util"
+	stdlibversion "github.com/flyteorg/flytestdlib/version"
 
 	"github.com/flyteorg/flytectl/pkg/util/githubutil"
 
@@ -13,9 +17,7 @@ import (
 	"github.com/mouuff/go-rocket-update/pkg/updater"
 
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytectl/pkg/util"
 	"github.com/flyteorg/flytectl/pkg/util/platformutil"
-	stdlibversion "github.com/flyteorg/flytestdlib/version"
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +39,7 @@ Rollback flytectl binary
 
 Note: Upgrade is not available on windows
 `
-	subCommand = "rollback"
+	rollBackSubCommand = "rollback"
 )
 
 var (
@@ -55,10 +57,9 @@ func SelfUpgrade(rootCmd *cobra.Command) map[string]cmdCore.CommandEntry {
 }
 
 func selfUpgrade(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	var err error
 	// Check if it's a rollback
 	if len(args) == 1 {
-		if args[0] == subCommand && !isRollBackSupported(goos) {
+		if args[0] == rollBackSubCommand && !isRollBackSupported(goos) {
 			return nil
 		}
 		ext, err := githubutil.FlytectlReleaseConfig.GetExecutable()
@@ -67,23 +68,12 @@ func selfUpgrade(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 		}
 		backupBinary := fmt.Sprintf("%s.old", ext)
 		if _, err := os.Stat(backupBinary); err != nil {
-			return fmt.Errorf("flytectl backup doesn't exist at %s. Please first run flytectl upgrade", backupBinary)
+			return errors.New("flytectl backup doesn't exist. Rollback is not possible")
 		}
 		return githubutil.FlytectlReleaseConfig.Rollback()
 	}
 
-	latest, err := githubutil.FlytectlReleaseConfig.GetLatestVersion()
-	if err != nil {
-		return err
-	}
-
-	if isGreater, err := util.IsVersionGreaterThan(latest, stdlibversion.Version); err != nil {
-		return err
-	} else if !isGreater {
-		return nil
-	}
-
-	if isSupported, err := isUpgradeSupported(latest, goos); err != nil {
+	if isSupported, err := isUpgradeSupported(goos); err != nil {
 		return err
 	} else if !isSupported {
 		return nil
@@ -113,7 +103,19 @@ func upgrade(u *updater.Updater) (string, error) {
 	return "", u.Rollback()
 }
 
-func isUpgradeSupported(latest string, goos platformutil.Platform) (bool, error) {
+func isUpgradeSupported(goos platformutil.Platform) (bool, error) {
+	latest, err := githubutil.FlytectlReleaseConfig.GetLatestVersion()
+	if err != nil {
+		return false, err
+	}
+
+	if isGreater, err := util.IsVersionGreaterThan(latest, stdlibversion.Version); err != nil {
+		return false, err
+	} else if !isGreater {
+		fmt.Println("You have already latest version of flytectl")
+		return false, nil
+	}
+
 	message, err := githubutil.GetUpgradeMessage(latest, goos)
 	if err != nil {
 		return false, err

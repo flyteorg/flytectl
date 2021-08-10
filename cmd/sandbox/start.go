@@ -20,18 +20,16 @@ import (
 
 	"github.com/docker/docker/api/types/mount"
 	"github.com/flyteorg/flytectl/clierrors"
-	"github.com/flyteorg/flytectl/pkg/k8s"
-
 	"github.com/flyteorg/flytectl/pkg/configutil"
-
-	"github.com/flyteorg/flytectl/pkg/docker"
-	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
-	"github.com/flyteorg/flytectl/pkg/util"
-	corev1k8s "k8s.io/client-go/kubernetes/typed/core/v1"
+	"github.com/flyteorg/flytectl/pkg/k8s"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/enescakir/emoji"
 	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/pkg/docker"
+	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
+	"github.com/flyteorg/flytectl/pkg/util"
 )
 
 const (
@@ -59,6 +57,9 @@ Usage
 	k8sEndpoint                  = "https://127.0.0.1:30086"
 	flyteMinimumVersionSupported = "v0.14.0"
 	generatedManifest            = "/flyteorg/share/flyte_generated.yaml"
+	flyteNamespace               = "flyte"
+	diskPressureTaint            = "node.kubernetes.io/disk-pressure"
+	taintEffect                  = "NoSchedule"
 )
 
 var (
@@ -97,44 +98,10 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		return err
 	}
 
-	podsChan, errChK8s := watchFlyteDeployment(ctx, k8sClient.CoreV1())
-	go func() {
-		err := <-watchDiskPressure(ctx, k8sClient.CoreV1().Nodes(), errChK8s)
-		if err != nil {
-			fmt.Printf("err: %v \n", err)
-			os.Exit(1)
-		}
-	}()
-
-	var data = os.Stdout
-	table := tablewriter.NewWriter(data)
-	table.SetHeader([]string{"Service", "Status", "Namespace"})
-	table.SetRowLine(true)
-
-	var total, ready int
-	for pods := range podsChan {
-		table.ClearRows()
-		table.SetAutoWrapText(false)
-		table.SetAutoFormatHeaders(true)
-		_, _ = data.WriteString("\x1b[3;J\x1b[H\x1b[2J")
-		total = len(pods.Items)
-		ready = 0
-		if total != 0 {
-			for _, v := range pods.Items {
-				if (v.Status.Phase == corev1api.PodRunning) || (v.Status.Phase == corev1api.PodSucceeded) {
-					ready++
-				}
-				if len(v.Status.Conditions) > 0 {
-					table.Append([]string{v.GetName(), string(v.Status.Phase), v.GetNamespace()})
-				}
-			}
-			table.Render()
-			if total == ready {
-				break
-			}
-		}
-
+	if err := watchFlyteDeployment(ctx, k8sClient.CoreV1()); err != nil {
+		return err
 	}
+
 	util.PrintSandboxMessage()
 	return nil
 }
@@ -212,22 +179,6 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	return logReader, nil
 }
 
-func watchDiskPressure(ctx context.Context, nodeClient corev1k8s.NodeInterface, errorChan chan error) chan error {
-	go func() {
-		for {
-			isTaint, err := k8s.GetNodeTaintStatus(ctx, nodeClient)
-			if err != nil {
-				errorChan <- err
-			}
-			if isTaint {
-				errorChan <- fmt.Errorf("docker sandbox doesn't have sufficient memory available. Please run docker system prune -a --volumes")
-			}
-			time.Sleep(5 * time.Second)
-		}
-	}()
-	return errorChan
-}
-
 func mountVolume(file, destination string) (*mount.Mount, error) {
 	if len(file) > 0 {
 		source, err := filepath.Abs(file)
@@ -243,20 +194,86 @@ func mountVolume(file, destination string) (*mount.Mount, error) {
 	return nil, nil
 }
 
-func watchFlyteDeployment(ctx context.Context, appsClient corev1.CoreV1Interface) (chan corev1api.PodList, chan error) {
-	watchPods := make(chan corev1api.PodList)
-	chanErr := make(chan error)
+func watchFlyteDeployment(ctx context.Context, appsClient corev1.CoreV1Interface) error {
+	var data = os.Stdout
+	table := tablewriter.NewWriter(data)
+	table.SetHeader([]string{"Service", "Status", "Namespace"})
+	table.SetRowLine(true)
 
-	go func() {
-		for {
-			pods, err := k8s.GetFlyteDeployment(ctx, appsClient)
-			if err != nil {
-				chanErr <- err
-			}
-			watchPods <- *pods
-			time.Sleep(30 * time.Second)
+	for {
+		isTaint, err := isNodeTainted(ctx, appsClient)
+		if err != nil {
+			return err
 		}
-	}()
+		if isTaint {
+			return fmt.Errorf("docker sandbox doesn't have sufficient memory available. Please run docker system prune -a --volumes")
+		}
 
-	return watchPods, chanErr
+		pods, err := getFlyteDeployment(ctx, appsClient)
+		if err != nil {
+			return err
+		}
+		table.ClearRows()
+		table.SetAutoWrapText(false)
+		table.SetAutoFormatHeaders(true)
+
+		// Clear os.Stdout
+		_, _ = data.WriteString("\x1b[3;J\x1b[H\x1b[2J")
+
+		var total, ready int
+		total = len(pods.Items)
+		ready = 0
+		if total != 0 {
+			for _, v := range pods.Items {
+				if isPodReady(v) {
+					ready++
+				}
+				if len(v.Status.Conditions) > 0 {
+					table.Append([]string{v.GetName(), string(v.Status.Phase), v.GetNamespace()})
+				}
+			}
+			table.Render()
+			if total == ready {
+				break
+			}
+		}
+
+		time.Sleep(40 * time.Second)
+	}
+
+	return nil
+}
+
+func isPodReady(v corev1api.Pod) bool {
+	if (v.Status.Phase == corev1api.PodRunning) || (v.Status.Phase == corev1api.PodSucceeded) {
+		return true
+	}
+	return false
+}
+
+func getFlyteDeployment(ctx context.Context, client corev1.CoreV1Interface) (*corev1api.PodList, error) {
+	pods, err := client.Pods(flyteNamespace).List(ctx, v1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return pods, nil
+}
+
+func isNodeTainted(ctx context.Context, client corev1.CoreV1Interface) (bool, error) {
+	nodes, err := client.Nodes().List(ctx, v1.ListOptions{})
+	if err != nil {
+		return false, err
+	}
+	match := 0
+	for _, node := range nodes.Items {
+		for _, c := range node.Spec.Taints {
+			if c.Key == diskPressureTaint && c.Effect == taintEffect {
+				match++
+			}
+		}
+	}
+	if match > 0 {
+		return true, nil
+	}
+	return false, nil
 }

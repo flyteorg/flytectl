@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/flyteorg/flytectl/pkg/k8s"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
@@ -18,11 +20,9 @@ import (
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
-	"github.com/flyteorg/flytectl/pkg/k8s"
 	"github.com/flyteorg/flytectl/pkg/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	testclient "k8s.io/client-go/kubernetes/fake"
@@ -59,36 +59,25 @@ users:
       provideClusterInfo: true
 `
 
-var fakeNodeTaint = &corev1.Node{
-	Status: corev1.NodeStatus{
-		Conditions: []corev1.NodeCondition{
-			{
-				Type:   "MemoryPressure",
-				Status: corev1.ConditionFalse,
-				Reason: "KubeletHasSufficientMemory",
-			},
-			{
-				Type:   "DiskPressure",
-				Status: corev1.ConditionFalse,
-				Reason: "KubeletHasDiskPressure",
-			},
-		},
+var fakeNode = &corev1.Node{
+	Spec: corev1.NodeSpec{
+		Taints: []corev1.Taint{},
+	},
+}
+
+var fakePod = corev1.Pod{
+	Status: corev1.PodStatus{
+		Phase:      corev1.PodRunning,
+		Conditions: []corev1.PodCondition{},
 	},
 }
 
 func TestStartSandboxFunc(t *testing.T) {
 	p1, p2, _ := docker.GetSandboxPorts()
-	client := testclient.NewSimpleClientset()
-	k8s.Client = client
 	assert.Nil(t, util.SetupFlyteDir())
 	assert.Nil(t, os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s"), os.ModePerm))
 	assert.Nil(t, ioutil.WriteFile(docker.Kubeconfig, []byte(content), os.ModePerm))
 
-	fakePod := corev1.Pod{
-		Status: corev1.PodStatus{
-			Conditions: []corev1.PodCondition{},
-		},
-	}
 	fakePod.SetName("flyte")
 	fakePod.SetName("flyte")
 
@@ -507,12 +496,14 @@ func TestStartSandboxFunc(t *testing.T) {
 		cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
+		client := testclient.NewSimpleClientset()
+		k8s.Client = client
 		_, err := client.CoreV1().Pods("flyte").Create(ctx, &fakePod, v1.CreateOptions{})
 		if err != nil {
 			t.Error(err)
 		}
-		fakeNodeTaint.SetName("flyte")
-		_, err = client.CoreV1().Nodes().Create(ctx, fakeNodeTaint, v1.CreateOptions{})
+		fakeNode.SetName("master")
+		_, err = client.CoreV1().Nodes().Create(ctx, fakeNode, v1.CreateOptions{})
 		if err != nil {
 			t.Error(err)
 		}
@@ -543,21 +534,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
 		docker.Client = mockDocker
 		sandboxConfig.DefaultConfig.Source = ""
-		go func() {
-			pod, err := client.CoreV1().Pods("flyte").Get(ctx, "flyte", v1.GetOptions{})
-			if err != nil {
-				t.Error(err)
-			}
-			pod.Status.Phase = corev1.PodRunning
-			pod.Status.Conditions = append(pod.Status.Conditions, corev1.PodCondition{
-				Type:   corev1.PodReady,
-				Status: corev1.ConditionTrue,
-			})
-			_, err = client.CoreV1().Pods("flyte").Update(ctx, pod, v1.UpdateOptions{})
-			if err != nil {
-				t.Error(err)
-			}
-		}()
 		err = startSandboxCluster(ctx, []string{}, cmdCtx)
 		assert.Nil(t, err)
 	})
@@ -600,25 +576,101 @@ func TestStartSandboxFunc(t *testing.T) {
 }
 
 func TestMonitorFlyteDeployment(t *testing.T) {
-	t.Run("Monitor k8s deployment", func(t *testing.T) {
+	t.Run("Monitor k8s deployment fail because of storage", func(t *testing.T) {
 		ctx := context.Background()
 		client := testclient.NewSimpleClientset()
-		fakeDeployment := &appsv1.Deployment{
-			Status: appsv1.DeploymentStatus{
-				AvailableReplicas: 1,
-			},
-		}
-		fakeDeployment.SetName("flyte")
-		fakeDeployment.SetNamespace("flyte")
-		_, err := client.AppsV1().Deployments("flyte").Create(ctx, fakeDeployment, v1.CreateOptions{})
+		k8s.Client = client
+		fakePod.SetName("flyte")
+		fakePod.SetName("flyte")
+
+		_, err := client.CoreV1().Pods("flyte").Create(ctx, &fakePod, v1.CreateOptions{})
 		if err != nil {
 			t.Error(err)
 		}
-		podList, _ := watchFlyteDeployment(ctx, client.CoreV1())
-		for v := range podList {
-			assert.Equal(t, int(0), len(v.Items))
-			break
+		fakeNode.SetName("master")
+		fakeNode.Spec.Taints = append(fakeNode.Spec.Taints, corev1.Taint{
+			Effect: "NoSchedule",
+			Key:    "node.kubernetes.io/disk-pressure",
+		})
+		_, err = client.CoreV1().Nodes().Create(ctx, fakeNode, v1.CreateOptions{})
+		if err != nil {
+			t.Error(err)
 		}
 
+		err = watchFlyteDeployment(ctx, client.CoreV1())
+		assert.NotNil(t, err)
+
+	})
+
+	t.Run("Monitor k8s deployment success", func(t *testing.T) {
+		ctx := context.Background()
+		client := testclient.NewSimpleClientset()
+		k8s.Client = client
+		fakePod.SetName("flyte")
+		fakePod.SetName("flyte")
+
+		_, err := client.CoreV1().Pods("flyte").Create(ctx, &fakePod, v1.CreateOptions{})
+		if err != nil {
+			t.Error(err)
+		}
+		fakeNode.SetName("master")
+		fakeNode.Spec.Taints = []corev1.Taint{}
+		_, err = client.CoreV1().Nodes().Create(ctx, fakeNode, v1.CreateOptions{})
+		if err != nil {
+			t.Error(err)
+		}
+
+		err = watchFlyteDeployment(ctx, client.CoreV1())
+		assert.Nil(t, err)
+
+	})
+
+}
+
+func TestGetFlyteDeploymentCount(t *testing.T) {
+
+	ctx := context.Background()
+	client := testclient.NewSimpleClientset()
+	c, err := getFlyteDeployment(ctx, client.CoreV1())
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(c.Items))
+}
+
+func TestGetNodeTaintStatus(t *testing.T) {
+	t.Run("Check node taint with success", func(t *testing.T) {
+		ctx := context.Background()
+		client := testclient.NewSimpleClientset()
+		fakeNode.SetName("master")
+		_, err := client.CoreV1().Nodes().Create(ctx, fakeNode, v1.CreateOptions{})
+		if err != nil {
+			t.Error(err)
+		}
+		c, err := isNodeTainted(ctx, client.CoreV1())
+		assert.Nil(t, err)
+		assert.Equal(t, false, c)
+	})
+	t.Run("Check node taint with fail", func(t *testing.T) {
+		ctx := context.Background()
+		client := testclient.NewSimpleClientset()
+		fakeNode.SetName("master")
+		_, err := client.CoreV1().Nodes().Create(ctx, fakeNode, v1.CreateOptions{})
+		if err != nil {
+			t.Error(err)
+		}
+		node, err := client.CoreV1().Nodes().Get(ctx, "master", v1.GetOptions{})
+		if err != nil {
+			t.Error(err)
+		}
+		node.Spec.Taints = append(node.Spec.Taints, corev1.Taint{
+			Effect: taintEffect,
+			Key:    diskPressureTaint,
+		})
+		_, err = client.CoreV1().Nodes().Update(ctx, node, v1.UpdateOptions{})
+		if err != nil {
+			t.Error(err)
+		}
+		c, err := isNodeTainted(ctx, client.CoreV1())
+		assert.Nil(t, err)
+		assert.Equal(t, true, c)
 	})
 }
