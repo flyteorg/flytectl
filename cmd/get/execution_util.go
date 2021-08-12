@@ -75,7 +75,7 @@ func TaskInputs(task *admin.Task) map[string]*core.Variable {
 	if task.Closure.CompiledTask.Template.Interface.Inputs == nil {
 		return taskInputs
 	}
-	return task.Closure.CompiledTask.Template.Interface.Inputs.Variables
+	return VariableMapEntriesToMap(task.Closure.CompiledTask.Template.Interface.Inputs.Variables)
 }
 
 func ParamMapForTask(task *admin.Task) (map[string]yaml.Node, error) {
@@ -113,7 +113,7 @@ func WorkflowParams(lp *admin.LaunchPlan) map[string]*core.Parameter {
 	if lp.Spec.DefaultInputs == nil {
 		return workflowParams
 	}
-	return lp.Spec.DefaultInputs.Parameters
+	return ParameterMapEntriesToMap(lp.Spec.DefaultInputs.Parameters)
 }
 
 func ParamMapForWorkflow(lp *admin.LaunchPlan) (map[string]yaml.Node, error) {

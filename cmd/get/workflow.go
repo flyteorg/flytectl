@@ -87,8 +87,8 @@ Usage
 var workflowColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
 	{Header: "Name", JSONPath: "$.id.name"},
-	{Header: "Inputs", JSONPath: "$.closure.compiledWorkflow.primary.template.interface.inputs.variables." + printer.DefaultFormattedDescriptionsKey + ".description"},
-	{Header: "Outputs", JSONPath: "$.closure.compiledWorkflow.primary.template.interface.outputs.variables." + printer.DefaultFormattedDescriptionsKey + ".description"},
+	{Header: "Inputs", JSONPath: "$.closure.compiledWorkflow.primary.template.interface.inputs.variables[0].value.description"},
+	{Header: "Outputs", JSONPath: "$.closure.compiledWorkflow.primary.template.interface.outputs.variables[0].value.description"},
 	{Header: "Created At", JSONPath: "$.closure.createdAt"},
 }
 
@@ -115,10 +115,14 @@ func WorkflowToTableProtoMessages(l []*admin.Workflow) []proto.Message {
 				if m.Closure.CompiledWorkflow.Primary.Template != nil {
 					if m.Closure.CompiledWorkflow.Primary.Template.Interface != nil {
 						if m.Closure.CompiledWorkflow.Primary.Template.Interface.Inputs != nil {
-							printer.FormatVariableDescriptions(m.Closure.CompiledWorkflow.Primary.Template.Interface.Inputs.Variables)
+							variableMap := VariableMapEntriesToMap(m.Closure.CompiledWorkflow.Primary.Template.Interface.Inputs.Variables)
+							printer.FormatVariableDescriptions(variableMap)
+							m.Closure.CompiledWorkflow.Primary.Template.Interface.Inputs.Variables[0].Value = variableMap[printer.DefaultFormattedDescriptionsKey]
 						}
 						if m.Closure.CompiledWorkflow.Primary.Template.Interface.Outputs != nil {
-							printer.FormatVariableDescriptions(m.Closure.CompiledWorkflow.Primary.Template.Interface.Outputs.Variables)
+							variableMap := VariableMapEntriesToMap(m.Closure.CompiledWorkflow.Primary.Template.Interface.Outputs.Variables)
+							printer.FormatVariableDescriptions(variableMap)
+							m.Closure.CompiledWorkflow.Primary.Template.Interface.Outputs.Variables[0].Value = variableMap[printer.DefaultFormattedDescriptionsKey]
 						}
 					}
 				}
