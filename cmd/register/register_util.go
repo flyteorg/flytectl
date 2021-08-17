@@ -107,7 +107,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 	switch v := message.(type) {
 	case *admin.LaunchPlan:
 		launchPlan := message.(*admin.LaunchPlan)
-		_, err := cmdCtx.AdminClient().CreateLaunchPlan(ctx, &admin.LaunchPlanCreateRequest{
+		request := &admin.LaunchPlanCreateRequest{
 			Id: &core.Identifier{
 				ResourceType: core.ResourceType_LAUNCH_PLAN,
 				Project:      config.GetConfig().Project,
@@ -116,11 +116,18 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 				Version:      rconfig.DefaultFilesConfig.Version,
 			},
 			Spec: launchPlan.Spec,
-		})
-		return err
+		}
+
+		if rconfig.DefaultFilesConfig.DryRun {
+			logger.Debugf(ctx, "skipping CreateLaunchPlan request (DryRun)")
+			return nil
+		} else {
+			_, err := cmdCtx.AdminClient().CreateLaunchPlan(ctx, request)
+			return err
+		}
 	case *admin.WorkflowSpec:
 		workflowSpec := message.(*admin.WorkflowSpec)
-		_, err := cmdCtx.AdminClient().CreateWorkflow(ctx, &admin.WorkflowCreateRequest{
+		request := &admin.WorkflowCreateRequest{
 			Id: &core.Identifier{
 				ResourceType: core.ResourceType_WORKFLOW,
 				Project:      config.GetConfig().Project,
@@ -129,11 +136,18 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 				Version:      rconfig.DefaultFilesConfig.Version,
 			},
 			Spec: workflowSpec,
-		})
-		return err
+		}
+
+		if rconfig.DefaultFilesConfig.DryRun {
+			logger.Debugf(ctx, "skipping CreateWorkflow request (DryRun)")
+			return nil
+		} else {
+			_, err := cmdCtx.AdminClient().CreateWorkflow(ctx, request)
+			return err
+		}
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
-		_, err := cmdCtx.AdminClient().CreateTask(ctx, &admin.TaskCreateRequest{
+		request := &admin.TaskCreateRequest{
 			Id: &core.Identifier{
 				ResourceType: core.ResourceType_TASK,
 				Project:      config.GetConfig().Project,
@@ -142,8 +156,15 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 				Version:      rconfig.DefaultFilesConfig.Version,
 			},
 			Spec: taskSpec,
-		})
-		return err
+		}
+
+		if rconfig.DefaultFilesConfig.DryRun {
+			logger.Debugf(ctx, "skipping CreateTask request (DryRun)")
+			return nil
+		} else {
+			_, err := cmdCtx.AdminClient().CreateTask(ctx, request)
+			return err
+		}
 	default:
 		return fmt.Errorf("Failed registering unknown entity  %v", v)
 	}
