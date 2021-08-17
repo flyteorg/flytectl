@@ -10,6 +10,7 @@ import (
 	cmdGet "github.com/flyteorg/flytectl/cmd/get"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+	"github.com/flyteorg/flytestdlib/logger"
 	"github.com/google/uuid"
 	"sigs.k8s.io/yaml"
 )
@@ -17,9 +18,16 @@ import (
 func createExecutionRequestForWorkflow(ctx context.Context, workflowName, project, domain string,
 	cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
 	// Fetch the launch plan
-	lp, err := cmdCtx.AdminFetcherExt().FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain)
-	if err != nil {
-		return nil, err
+	var lp *admin.LaunchPlan
+	var err error
+	if executionConfig.DryRun {
+		logger.Debugf(ctx, "mocking FetchLPVersion request (DryRun)")
+		lp = &admin.LaunchPlan {}
+	} else {
+		lp, err = cmdCtx.AdminFetcherExt().FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Create workflow params literal map
@@ -52,9 +60,16 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName, projec
 func createExecutionRequestForTask(ctx context.Context, taskName string, project string, domain string,
 	cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
 	// Fetch the task
-	task, err := cmdCtx.AdminFetcherExt().FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain)
-	if err != nil {
-		return nil, err
+	var task *admin.Task
+	var err error
+	if executionConfig.DryRun {
+		logger.Debugf(ctx, "mocking FetchTaskVersion request (DryRun)")
+		task = &admin.Task{}
+	} else {
+		task, err = cmdCtx.AdminFetcherExt().FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain)
+		if err != nil {
+			return nil, err
+		}
 	}
 	// Create task variables literal map
 	taskInputs := cmdGet.TaskInputs(task)
@@ -93,6 +108,10 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 
 func relaunchExecution(ctx context.Context, executionName string, project string, domain string,
 	cmdCtx cmdCore.CommandContext) error {
+	if executionConfig.DryRun {
+		logger.Debugf(ctx, "skipping RelaunchExecution request (DryRun)")
+		return nil
+	}
 	relaunchedExec, err := cmdCtx.AdminClient().RelaunchExecution(ctx, &admin.ExecutionRelaunchRequest{
 		Id: &core.WorkflowExecutionIdentifier{
 			Name:    executionName,
@@ -109,6 +128,10 @@ func relaunchExecution(ctx context.Context, executionName string, project string
 
 func recoverExecution(ctx context.Context, executionName string, project string, domain string,
 	cmdCtx cmdCore.CommandContext) error {
+	if executionConfig.DryRun {
+		logger.Debugf(ctx, "skipping RecoverExecution request (DryRun)")
+		return nil
+	}
 	recoveredExec, err := cmdCtx.AdminClient().RecoverExecution(ctx, &admin.ExecutionRecoverRequest{
 		Id: &core.WorkflowExecutionIdentifier{
 			Name:    executionName,
@@ -157,6 +180,7 @@ func readExecConfigFromFile(fileName string) (*ExecutionConfig, error) {
 }
 
 func resolveOverrides(toBeOverridden *ExecutionConfig, project string, domain string) {
+	toBeOverridden.DryRun = executionConfig.DryRun
 	if executionConfig.KubeServiceAcct != "" {
 		toBeOverridden.KubeServiceAcct = executionConfig.KubeServiceAcct
 	}
