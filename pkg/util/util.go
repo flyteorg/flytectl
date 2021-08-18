@@ -48,7 +48,7 @@ func IsVersionGreaterThan(version1, version2 string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return semanticVersion2.LessThanOrEqual(semanticVersion1), nil
+	return semanticVersion1.GreaterThan(semanticVersion2), nil
 }
 
 // PrintSandboxMessage will print sandbox success message
