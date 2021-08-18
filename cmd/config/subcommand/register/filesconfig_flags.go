@@ -57,6 +57,6 @@ func (cfg FilesConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags.StringVar(&DefaultFilesConfig.K8ServiceAccount, fmt.Sprintf("%v%v", prefix, "k8ServiceAccount"), DefaultFilesConfig.K8ServiceAccount, " custom kubernetes service account auth role to register launch plans with.")
 	cmdFlags.StringVar(&DefaultFilesConfig.OutputLocationPrefix, fmt.Sprintf("%v%v", prefix, "outputLocationPrefix"), DefaultFilesConfig.OutputLocationPrefix, " custom output location prefix for offloaded types (files/schemas).")
 	cmdFlags.StringVar(&DefaultFilesConfig.SourceUploadPath, fmt.Sprintf("%v%v", prefix, "sourceUploadPath"), DefaultFilesConfig.SourceUploadPath, " Location for source code in storage.")
-	cmdFlags.BoolVar(&DefaultFilesConfig.DryRun, fmt.Sprintf("%v%v", prefix, "dryRun"), DefaultFilesConfig.DryRun, "execute local operations without making any modifications")
+	cmdFlags.BoolVar(&DefaultFilesConfig.DryRun, fmt.Sprintf("%v%v", prefix, "dryRun"), DefaultFilesConfig.DryRun, "execute local operations without making any modifications (skip or mock all server communication)")
 	return cmdFlags
 }
