@@ -29,7 +29,10 @@ var (
 func setupSandbox() {
 	mockAdminClient := u.MockClient
 	cmdCtx = cmdCore.NewCommandContext(mockAdminClient, u.MockOutStream)
-	_ = os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), os.ModePerm)
+	err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), os.ModePerm)
+	if err != nil {
+		fmt.Println(err)
+	}
 	container1 := types.Container{
 		ID: "FlyteSandboxClusterName",
 		Names: []string{
