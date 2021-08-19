@@ -18,16 +18,9 @@ import (
 func createExecutionRequestForWorkflow(ctx context.Context, workflowName, project, domain string,
 	cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
 	// Fetch the launch plan
-	var lp *admin.LaunchPlan
-	var err error
-	if executionConfig.DryRun {
-		logger.Debugf(ctx, "mocking FetchLPVersion request (DryRun)")
-		lp = &admin.LaunchPlan{}
-	} else {
-		lp, err = cmdCtx.AdminFetcherExt().FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain)
-		if err != nil {
-			return nil, err
-		}
+	lp, err := cmdCtx.AdminFetcherExt().FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain)
+	if err != nil {
+		return nil, err
 	}
 
 	// Create workflow params literal map
@@ -60,16 +53,9 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName, projec
 func createExecutionRequestForTask(ctx context.Context, taskName string, project string, domain string,
 	cmdCtx cmdCore.CommandContext) (*admin.ExecutionCreateRequest, error) {
 	// Fetch the task
-	var task *admin.Task
-	var err error
-	if executionConfig.DryRun {
-		logger.Debugf(ctx, "mocking FetchTaskVersion request (DryRun)")
-		task = &admin.Task{}
-	} else {
-		task, err = cmdCtx.AdminFetcherExt().FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain)
-		if err != nil {
-			return nil, err
-		}
+	task, err := cmdCtx.AdminFetcherExt().FetchTaskVersion(ctx, taskName, executionConfig.Version, project, domain)
+	if err != nil {
+		return nil, err
 	}
 	// Create task variables literal map
 	taskInputs := cmdGet.TaskInputs(task)

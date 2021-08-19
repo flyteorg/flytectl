@@ -18,7 +18,7 @@ import (
 type ProjectConfig struct {
 	ActivateProject bool `json:"activateProject" pflag:",Activates the project specified as argument."`
 	ArchiveProject  bool `json:"archiveProject" pflag:",Archives the project specified as argument."`
-	DryRun          bool `json:"dryRun" pflag:",execute local operations without making any modifications (skip or mock all server communication)"`
+	DryRun          bool `json:"dryRun" pflag:",execute command without making any modifications."`
 }
 
 const (

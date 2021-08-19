@@ -21,7 +21,7 @@ type NamedEntityConfig struct {
 	Archive     bool   `json:"archive" pflag:",archive named entity."`
 	Activate    bool   `json:"activate" pflag:",activate the named entity."`
 	Description string `json:"description" pflag:",description of the named entity."`
-	DryRun      bool   `json:"dryRun" pflag:",execute local operations without making any modifications (skip or mock all server communication)"`
+	DryRun      bool   `json:"dryRun" pflag:",execute command without making any modifications."`
 }
 
 func (n NamedEntityConfig) UpdateNamedEntity(ctx context.Context, name string, project string, domain string, rsType core.ResourceType, cmdCtx cmdCore.CommandContext) error {

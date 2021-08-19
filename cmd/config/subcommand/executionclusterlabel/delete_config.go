@@ -5,7 +5,7 @@ package executionclusterlabel
 // AttrDeleteConfig Matchable resource attributes configuration passed from command line
 type AttrDeleteConfig struct {
 	AttrFile string `json:"attrFile" pflag:",attribute file name to be used for delete attribute for the resource type."`
-	DryRun   bool   `json:"dryRun" pflag:",execute local operations without making any modifications (skip or mock all server communication)"`
+	DryRun   bool   `json:"dryRun" pflag:",execute command without making any modifications."`
 }
 
 var DefaultDelConfig = &AttrDeleteConfig{}

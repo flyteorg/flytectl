@@ -50,6 +50,6 @@ func (ExecDeleteConfig) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg ExecDeleteConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("ExecDeleteConfig", pflag.ExitOnError)
-	cmdFlags.BoolVar(&DefaultExecDeleteConfig.DryRun, fmt.Sprintf("%v%v", prefix, "dryRun"), DefaultExecDeleteConfig.DryRun, "execute local operations without making any modifications (skip or mock all server communication)")
+	cmdFlags.BoolVar(&DefaultExecDeleteConfig.DryRun, fmt.Sprintf("%v%v", prefix, "dryRun"), DefaultExecDeleteConfig.DryRun, "execute command without making any modifications.")
 	return cmdFlags
 }
