@@ -14,22 +14,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var dereferencableKindsExecutionDeleteConfig = map[reflect.Kind]struct{}{
+var dereferencableKindsExecDeleteConfig = map[reflect.Kind]struct{}{
 	reflect.Array: {}, reflect.Chan: {}, reflect.Map: {}, reflect.Ptr: {}, reflect.Slice: {},
 }
 
 // Checks if t is a kind that can be dereferenced to get its underlying type.
-func canGetElementExecutionDeleteConfig(t reflect.Kind) bool {
-	_, exists := dereferencableKindsExecutionDeleteConfig[t]
+func canGetElementExecDeleteConfig(t reflect.Kind) bool {
+	_, exists := dereferencableKindsExecDeleteConfig[t]
 	return exists
 }
 
 // This decoder hook tests types for json unmarshaling capability. If implemented, it uses json unmarshal to build the
 // object. Otherwise, it'll just pass on the original data.
-func jsonUnmarshalerHookExecutionDeleteConfig(_, to reflect.Type, data interface{}) (interface{}, error) {
+func jsonUnmarshalerHookExecDeleteConfig(_, to reflect.Type, data interface{}) (interface{}, error) {
 	unmarshalerType := reflect.TypeOf((*json.Unmarshaler)(nil)).Elem()
 	if to.Implements(unmarshalerType) || reflect.PtrTo(to).Implements(unmarshalerType) ||
-		(canGetElementExecutionDeleteConfig(to.Kind()) && to.Elem().Implements(unmarshalerType)) {
+		(canGetElementExecDeleteConfig(to.Kind()) && to.Elem().Implements(unmarshalerType)) {
 
 		raw, err := json.Marshal(data)
 		if err != nil {
@@ -50,7 +50,7 @@ func jsonUnmarshalerHookExecutionDeleteConfig(_, to reflect.Type, data interface
 	return data, nil
 }
 
-func decode_ExecutionDeleteConfig(input, result interface{}) error {
+func decode_ExecDeleteConfig(input, result interface{}) error {
 	config := &mapstructure.DecoderConfig{
 		TagName:          "json",
 		WeaklyTypedInput: true,
@@ -58,7 +58,7 @@ func decode_ExecutionDeleteConfig(input, result interface{}) error {
 		DecodeHook: mapstructure.ComposeDecodeHookFunc(
 			mapstructure.StringToTimeDurationHookFunc(),
 			mapstructure.StringToSliceHookFunc(","),
-			jsonUnmarshalerHookExecutionDeleteConfig,
+			jsonUnmarshalerHookExecDeleteConfig,
 		),
 	}
 
@@ -70,7 +70,7 @@ func decode_ExecutionDeleteConfig(input, result interface{}) error {
 	return decoder.Decode(input)
 }
 
-func join_ExecutionDeleteConfig(arr interface{}, sep string) string {
+func join_ExecDeleteConfig(arr interface{}, sep string) string {
 	listValue := reflect.ValueOf(arr)
 	strs := make([]string, 0, listValue.Len())
 	for i := 0; i < listValue.Len(); i++ {
@@ -80,22 +80,22 @@ func join_ExecutionDeleteConfig(arr interface{}, sep string) string {
 	return strings.Join(strs, sep)
 }
 
-func testDecodeJson_ExecutionDeleteConfig(t *testing.T, val, result interface{}) {
-	assert.NoError(t, decode_ExecutionDeleteConfig(val, result))
+func testDecodeJson_ExecDeleteConfig(t *testing.T, val, result interface{}) {
+	assert.NoError(t, decode_ExecDeleteConfig(val, result))
 }
 
-func testDecodeRaw_ExecutionDeleteConfig(t *testing.T, vStringSlice, result interface{}) {
-	assert.NoError(t, decode_ExecutionDeleteConfig(vStringSlice, result))
+func testDecodeRaw_ExecDeleteConfig(t *testing.T, vStringSlice, result interface{}) {
+	assert.NoError(t, decode_ExecDeleteConfig(vStringSlice, result))
 }
 
-func TestExecutionDeleteConfig_GetPFlagSet(t *testing.T) {
-	val := ExecutionDeleteConfig{}
+func TestExecDeleteConfig_GetPFlagSet(t *testing.T) {
+	val := ExecDeleteConfig{}
 	cmdFlags := val.GetPFlagSet("")
 	assert.True(t, cmdFlags.HasFlags())
 }
 
-func TestExecutionDeleteConfig_SetFlags(t *testing.T) {
-	actual := ExecutionDeleteConfig{}
+func TestExecDeleteConfig_SetFlags(t *testing.T) {
+	actual := ExecDeleteConfig{}
 	cmdFlags := actual.GetPFlagSet("")
 	assert.True(t, cmdFlags.HasFlags())
 
@@ -106,7 +106,7 @@ func TestExecutionDeleteConfig_SetFlags(t *testing.T) {
 
 			cmdFlags.Set("dryRun", testValue)
 			if vBool, err := cmdFlags.GetBool("dryRun"); err == nil {
-				testDecodeJson_ExecutionDeleteConfig(t, fmt.Sprintf("%v", vBool), &actual.DryRun)
+				testDecodeJson_ExecDeleteConfig(t, fmt.Sprintf("%v", vBool), &actual.DryRun)
 
 			} else {
 				assert.FailNow(t, err.Error())

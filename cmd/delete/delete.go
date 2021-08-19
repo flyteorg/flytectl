@@ -33,7 +33,7 @@ func RemoteDeleteCommand() *cobra.Command {
 	}
 	terminateResourcesFuncs := map[string]cmdcore.CommandEntry{
 		"execution": {CmdFunc: terminateExecutionFunc, Aliases: []string{"executions"}, Short: execCmdShort,
-			Long: execCmdLong, PFlagProvider: execution.DefaultExecutionDeleteConfig},
+			Long: execCmdLong, PFlagProvider: execution.DefaultExecDeleteConfig},
 		"task-resource-attribute": {CmdFunc: deleteTaskResourceAttributes, Aliases: []string{"task-resource-attributes"},
 			Short: taskResourceAttributesShort,
 			Long:  taskResourceAttributesLong, PFlagProvider: taskresourceattribute.DefaultDelConfig, ProjectDomainNotRequired: true},

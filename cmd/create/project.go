@@ -46,7 +46,7 @@ type ProjectConfig struct {
 	File        string            `json:"file" pflag:",file for the project definition."`
 	Description string            `json:"description" pflag:",description for the project specified as argument."`
 	Labels      map[string]string `json:"labels" pflag:",labels for the project specified as argument."`
-	DryRun      bool `json:"dryRun" pflag:",execute local operations without making any modifications (skip or mock all server communication)"`
+	DryRun      bool              `json:"dryRun" pflag:",execute local operations without making any modifications (skip or mock all server communication)"`
 }
 
 var (

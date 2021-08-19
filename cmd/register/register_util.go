@@ -110,58 +110,55 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 		if rconfig.DefaultFilesConfig.DryRun {
 			logger.Debugf(ctx, "skipping CreateLaunchPlan request (DryRun)")
 			return nil
-		} else {
-			_, err := cmdCtx.AdminClient().CreateLaunchPlan(ctx,
-				&admin.LaunchPlanCreateRequest{
-					Id: &core.Identifier{
-						ResourceType: core.ResourceType_LAUNCH_PLAN,
-						Project:      config.GetConfig().Project,
-						Domain:       config.GetConfig().Domain,
-						Name:         launchPlan.Id.Name,
-						Version:      rconfig.DefaultFilesConfig.Version,
-					},
-					Spec: launchPlan.Spec,
-				})
-			return err
 		}
+		_, err := cmdCtx.AdminClient().CreateLaunchPlan(ctx,
+			&admin.LaunchPlanCreateRequest{
+				Id: &core.Identifier{
+					ResourceType: core.ResourceType_LAUNCH_PLAN,
+					Project:      config.GetConfig().Project,
+					Domain:       config.GetConfig().Domain,
+					Name:         launchPlan.Id.Name,
+					Version:      rconfig.DefaultFilesConfig.Version,
+				},
+				Spec: launchPlan.Spec,
+			})
+		return err
 	case *admin.WorkflowSpec:
 		workflowSpec := message.(*admin.WorkflowSpec)
 		if rconfig.DefaultFilesConfig.DryRun {
 			logger.Debugf(ctx, "skipping CreateWorkflow request (DryRun)")
 			return nil
-		} else {
-			_, err := cmdCtx.AdminClient().CreateWorkflow(ctx,
-				&admin.WorkflowCreateRequest{
-					Id: &core.Identifier{
-						ResourceType: core.ResourceType_WORKFLOW,
-						Project:      config.GetConfig().Project,
-						Domain:       config.GetConfig().Domain,
-						Name:         workflowSpec.Template.Id.Name,
-						Version:      rconfig.DefaultFilesConfig.Version,
-					},
-					Spec: workflowSpec,
-				})
-			return err
 		}
+		_, err := cmdCtx.AdminClient().CreateWorkflow(ctx,
+			&admin.WorkflowCreateRequest{
+				Id: &core.Identifier{
+					ResourceType: core.ResourceType_WORKFLOW,
+					Project:      config.GetConfig().Project,
+					Domain:       config.GetConfig().Domain,
+					Name:         workflowSpec.Template.Id.Name,
+					Version:      rconfig.DefaultFilesConfig.Version,
+				},
+				Spec: workflowSpec,
+			})
+		return err
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
 		if rconfig.DefaultFilesConfig.DryRun {
 			logger.Debugf(ctx, "skipping CreateTask request (DryRun)")
 			return nil
-		} else {
-			_, err := cmdCtx.AdminClient().CreateTask(ctx,
-				&admin.TaskCreateRequest{
-					Id: &core.Identifier{
-						ResourceType: core.ResourceType_TASK,
-						Project:      config.GetConfig().Project,
-						Domain:       config.GetConfig().Domain,
-						Name:         taskSpec.Template.Id.Name,
-						Version:      rconfig.DefaultFilesConfig.Version,
-					},
-					Spec: taskSpec,
-				})
-			return err
 		}
+		_, err := cmdCtx.AdminClient().CreateTask(ctx,
+			&admin.TaskCreateRequest{
+				Id: &core.Identifier{
+					ResourceType: core.ResourceType_TASK,
+					Project:      config.GetConfig().Project,
+					Domain:       config.GetConfig().Domain,
+					Name:         taskSpec.Template.Id.Name,
+					Version:      rconfig.DefaultFilesConfig.Version,
+				},
+				Spec: taskSpec,
+			})
+		return err
 	default:
 		return fmt.Errorf("Failed registering unknown entity  %v", v)
 	}

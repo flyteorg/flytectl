@@ -14,7 +14,7 @@ import (
 
 // If v is a pointer, it will get its element value or the zero value of the element type.
 // If v is not a pointer, it will return it as is.
-func (ExecutionDeleteConfig) elemValueOrNil(v interface{}) interface{} {
+func (ExecDeleteConfig) elemValueOrNil(v interface{}) interface{} {
 	if t := reflect.TypeOf(v); t.Kind() == reflect.Ptr {
 		if reflect.ValueOf(v).IsNil() {
 			return reflect.Zero(t.Elem()).Interface()
@@ -28,7 +28,7 @@ func (ExecutionDeleteConfig) elemValueOrNil(v interface{}) interface{} {
 	return v
 }
 
-func (ExecutionDeleteConfig) mustJsonMarshal(v interface{}) string {
+func (ExecDeleteConfig) mustJsonMarshal(v interface{}) string {
 	raw, err := json.Marshal(v)
 	if err != nil {
 		panic(err)
@@ -37,7 +37,7 @@ func (ExecutionDeleteConfig) mustJsonMarshal(v interface{}) string {
 	return string(raw)
 }
 
-func (ExecutionDeleteConfig) mustMarshalJSON(v json.Marshaler) string {
+func (ExecDeleteConfig) mustMarshalJSON(v json.Marshaler) string {
 	raw, err := v.MarshalJSON()
 	if err != nil {
 		panic(err)
@@ -46,10 +46,10 @@ func (ExecutionDeleteConfig) mustMarshalJSON(v json.Marshaler) string {
 	return string(raw)
 }
 
-// GetPFlagSet will return strongly types pflags for all fields in ExecutionDeleteConfig and its nested types. The format of the
+// GetPFlagSet will return strongly types pflags for all fields in ExecDeleteConfig and its nested types. The format of the
 // flags is json-name.json-sub-name... etc.
-func (cfg ExecutionDeleteConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
-	cmdFlags := pflag.NewFlagSet("ExecutionDeleteConfig", pflag.ExitOnError)
-	cmdFlags.BoolVar(&DefaultExecutionDeleteConfig.DryRun, fmt.Sprintf("%v%v", prefix, "dryRun"), DefaultExecutionDeleteConfig.DryRun, "execute local operations without making any modifications (skip or mock all server communication)")
+func (cfg ExecDeleteConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
+	cmdFlags := pflag.NewFlagSet("ExecDeleteConfig", pflag.ExitOnError)
+	cmdFlags.BoolVar(&DefaultExecDeleteConfig.DryRun, fmt.Sprintf("%v%v", prefix, "dryRun"), DefaultExecDeleteConfig.DryRun, "execute local operations without making any modifications (skip or mock all server communication)")
 	return cmdFlags
 }

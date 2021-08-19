@@ -65,7 +65,7 @@ func terminateExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.C
 	for i := 0; i < len(args); i++ {
 		name := args[i]
 		logger.Infof(ctx, "Terminating execution of %v execution ", name)
-		if execution.DefaultExecutionDeleteConfig.DryRun {
+		if execution.DefaultExecDeleteConfig.DryRun {
 			logger.Infof(ctx, "skipping TerminateExecution request (dryRun)")
 		} else {
 			_, err := cmdCtx.AdminClient().TerminateExecution(ctx, &admin.ExecutionTerminateRequest{

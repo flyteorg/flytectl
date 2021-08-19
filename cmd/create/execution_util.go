@@ -22,7 +22,7 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName, projec
 	var err error
 	if executionConfig.DryRun {
 		logger.Debugf(ctx, "mocking FetchLPVersion request (DryRun)")
-		lp = &admin.LaunchPlan {}
+		lp = &admin.LaunchPlan{}
 	} else {
 		lp, err = cmdCtx.AdminFetcherExt().FetchLPVersion(ctx, workflowName, executionConfig.Version, project, domain)
 		if err != nil {
