@@ -32,7 +32,7 @@ func WriteIntoFile(data []byte, file string) error {
 
 // SetupFlyteDir will create .flyte dir if not exist
 func SetupFlyteDir() error {
-	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte","k3s"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s"), os.ModePerm); err != nil {
 		return err
 	}
 	// Created a empty file with right permission
