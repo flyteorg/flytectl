@@ -54,9 +54,14 @@ func getTaskSetup() {
 		},
 		Description: "var description",
 	}
-	variableMap := map[string]*core.Variable{
-		"sorted_list1": &sortedListLiteralType,
-		"sorted_list2": &sortedListLiteralType,
+	variableMap := []*core.VariableMapEntry{
+		{
+			Name: "sorted_list1",
+			Var:  &sortedListLiteralType,
+		}, {
+			Name: "sorted_list2",
+			Var:  &sortedListLiteralType,
+		},
 	}
 
 	task1 := &admin.Task{
@@ -245,78 +250,7 @@ func TestGetTaskFunc(t *testing.T) {
 	err = getTaskFunc(ctx, argsTask, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "ListTasks", ctx, resourceListRequestTask)
-	tearDownAndVerify(t, `[
-	{
-		"id": {
-			"name": "task1",
-			"version": "v2"
-		},
-		"closure": {
-			"compiledTask": {
-				"template": {
-					"interface": {
-						"inputs": {
-							"variables": {
-								"sorted_list1": {
-									"type": {
-										"collectionType": {
-											"simple": "INTEGER"
-										}
-									},
-									"description": "var description"
-								},
-								"sorted_list2": {
-									"type": {
-										"collectionType": {
-											"simple": "INTEGER"
-										}
-									},
-									"description": "var description"
-								}
-							}
-						}
-					}
-				}
-			},
-			"createdAt": "1970-01-01T00:00:01Z"
-		}
-	},
-	{
-		"id": {
-			"name": "task1",
-			"version": "v1"
-		},
-		"closure": {
-			"compiledTask": {
-				"template": {
-					"interface": {
-						"inputs": {
-							"variables": {
-								"sorted_list1": {
-									"type": {
-										"collectionType": {
-											"simple": "INTEGER"
-										}
-									},
-									"description": "var description"
-								},
-								"sorted_list2": {
-									"type": {
-										"collectionType": {
-											"simple": "INTEGER"
-										}
-									},
-									"description": "var description"
-								}
-							}
-						}
-					}
-				}
-			},
-			"createdAt": "1970-01-01T00:00:00Z"
-		}
-	}
-]`)
+	tearDownAndVerify(t, `[{"id": {"name": "task1","version": "v2"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": [{"name": "sorted_list1","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}},{"name": "sorted_list2","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}]}}}},"createdAt": "1970-01-01T00:00:01Z"}},{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": [{"name": "sorted_list1","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}},{"name": "sorted_list2","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}]}}}},"createdAt": "1970-01-01T00:00:00Z"}}]`)
 }
 
 func TestGetTaskFuncWithTable(t *testing.T) {

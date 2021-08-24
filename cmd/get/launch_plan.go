@@ -104,8 +104,8 @@ var launchplanColumns = []printer.Column{
 	{Header: "Type", JSONPath: "$.closure.compiledTask.template.type"},
 	{Header: "State", JSONPath: "$.spec.state"},
 	{Header: "Schedule", JSONPath: "$.spec.entityMetadata.schedule"},
-	{Header: "Inputs", JSONPath: "$.closure.expectedInputs.parameters[0].value.var.description"},
-	{Header: "Outputs", JSONPath: "$.closure.expectedOutputs.variables[0].value.description"},
+	{Header: "Inputs", JSONPath: "$.closure.expectedInputs.parameters[0].var.var.description"},
+	{Header: "Outputs", JSONPath: "$.closure.expectedOutputs.variables[0].var.description"},
 }
 
 // Column structure for get all launchplans
@@ -130,14 +130,10 @@ func LaunchplanToTableProtoMessages(l []*admin.LaunchPlan) []proto.Message {
 		m := proto.Clone(m).(*admin.LaunchPlan)
 		if m.Closure != nil {
 			if m.Closure.ExpectedInputs != nil {
-				parameterMap := ParameterMapEntriesToMap(m.Closure.ExpectedInputs.Parameters)
-				printer.FormatParameterDescriptions(parameterMap)
-				m.Closure.ExpectedInputs.Parameters[0].Value = parameterMap[printer.DefaultFormattedDescriptionsKey]
+				printer.FormatParameterDescriptions(m.Closure.ExpectedInputs.Parameters)
 			}
 			if m.Closure.ExpectedOutputs != nil {
-				variableMap := VariableMapEntriesToMap(m.Closure.ExpectedOutputs.Variables)
-				printer.FormatVariableDescriptions(variableMap)
-				m.Closure.ExpectedOutputs.Variables[0].Value = variableMap[printer.DefaultFormattedDescriptionsKey]
+				printer.FormatVariableDescriptions(m.Closure.ExpectedOutputs.Variables)
 			}
 		}
 		messages = append(messages, m)

@@ -98,8 +98,8 @@ var taskColumns = []printer.Column{
 	{Header: "Version", JSONPath: "$.id.version"},
 	{Header: "Name", JSONPath: "$.id.name"},
 	{Header: "Type", JSONPath: "$.closure.compiledTask.template.type"},
-	{Header: "Inputs", JSONPath: "$.closure.compiledTask.template.interface.inputs.variables[0].value.description"},
-	{Header: "Outputs", JSONPath: "$.closure.compiledTask.template.interface.outputs.variables[0].value.description"},
+	{Header: "Inputs", JSONPath: "$.closure.compiledTask.template.interface.inputs.variables[0].var.description"},
+	{Header: "Outputs", JSONPath: "$.closure.compiledTask.template.interface.outputs.variables[0].var.description"},
 	{Header: "Discoverable", JSONPath: "$.closure.compiledTask.template.metadata.discoverable"},
 	{Header: "Discovery Version", JSONPath: "$.closure.compiledTask.template.metadata.discoveryVersion"},
 	{Header: "Created At", JSONPath: "$.closure.createdAt"},
@@ -121,14 +121,10 @@ func TaskToTableProtoMessages(l []*admin.Task) []proto.Message {
 			if m.Closure.CompiledTask.Template != nil {
 				if m.Closure.CompiledTask.Template.Interface != nil {
 					if m.Closure.CompiledTask.Template.Interface.Inputs != nil {
-						variableMap := VariableMapEntriesToMap(m.Closure.CompiledTask.Template.Interface.Inputs.Variables)
-						printer.FormatVariableDescriptions(variableMap)
-						m.Closure.CompiledTask.Template.Interface.Inputs.Variables[0].Value = variableMap[printer.DefaultFormattedDescriptionsKey]
+						printer.FormatVariableDescriptions(m.Closure.CompiledTask.Template.Interface.Inputs.Variables)
 					}
 					if m.Closure.CompiledTask.Template.Interface.Outputs != nil {
-						variableMap := VariableMapEntriesToMap(m.Closure.CompiledTask.Template.Interface.Outputs.Variables)
-						printer.FormatVariableDescriptions(variableMap)
-						m.Closure.CompiledTask.Template.Interface.Outputs.Variables[0].Value = variableMap[printer.DefaultFormattedDescriptionsKey]
+						printer.FormatVariableDescriptions(m.Closure.CompiledTask.Template.Interface.Outputs.Variables)
 					}
 				}
 			}
@@ -138,18 +134,10 @@ func TaskToTableProtoMessages(l []*admin.Task) []proto.Message {
 	return messages
 }
 
-func VariableMapEntriesToMap(mapFieldEntries []*core.VariableMapFieldEntry) (variableMap map[string]*core.Variable) {
+func VariableMapEntriesToMap(mapFieldEntries []*core.VariableMapEntry) (variableMap map[string]*core.Variable) {
 	variableMap = map[string]*core.Variable{}
 	for _, e := range mapFieldEntries {
-		variableMap[e.Key] = e.Value
-	}
-	return
-}
-
-func ParameterMapEntriesToMap(mapFieldEntries []*core.ParameterMapFieldEntry) (parameterMap map[string]*core.Parameter) {
-	parameterMap = map[string]*core.Parameter{}
-	for _, e := range mapFieldEntries {
-		parameterMap[e.Key] = e.Value
+		variableMap[e.Name] = e.Var
 	}
 	return
 }
