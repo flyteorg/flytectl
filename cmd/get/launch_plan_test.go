@@ -250,7 +250,214 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 	err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "ListLaunchPlans", ctx, resourceGetRequest)
-	tearDownAndVerify(t, `[{"id": {"name": "launchplan1","version": "v2"},"spec": {"defaultInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]}},"closure": {"expectedInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]},"createdAt": "1970-01-01T00:00:01Z"}},{"id": {"name": "launchplan1","version": "v1"},"spec": {"defaultInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]}},"closure": {"expectedInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]},"createdAt": "1970-01-01T00:00:00Z"}}]`)
+	tearDownAndVerify(t, `[
+	{
+		"id": {
+			"name": "launchplan1",
+			"version": "v2"
+		},
+		"spec": {
+			"defaultInputs": {
+				"parameters": [
+					{
+						"name": "numbers",
+						"var": {
+							"var": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								},
+								"description": "short desc"
+							}
+						}
+					},
+					{
+						"name": "numbers_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "long description will be truncated in table"
+							}
+						}
+					},
+					{
+						"name": "run_local_at_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "run_local_at_count"
+							},
+							"default": {
+								"scalar": {
+									"primitive": {
+										"integer": "10"
+									}
+								}
+							}
+						}
+					}
+				]
+			}
+		},
+		"closure": {
+			"expectedInputs": {
+				"parameters": [
+					{
+						"name": "numbers",
+						"var": {
+							"var": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								},
+								"description": "short desc"
+							}
+						}
+					},
+					{
+						"name": "numbers_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "long description will be truncated in table"
+							}
+						}
+					},
+					{
+						"name": "run_local_at_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "run_local_at_count"
+							},
+							"default": {
+								"scalar": {
+									"primitive": {
+										"integer": "10"
+									}
+								}
+							}
+						}
+					}
+				]
+			},
+			"createdAt": "1970-01-01T00:00:01Z"
+		}
+	},
+	{
+		"id": {
+			"name": "launchplan1",
+			"version": "v1"
+		},
+		"spec": {
+			"defaultInputs": {
+				"parameters": [
+					{
+						"name": "numbers",
+						"var": {
+							"var": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								},
+								"description": "short desc"
+							}
+						}
+					},
+					{
+						"name": "numbers_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "long description will be truncated in table"
+							}
+						}
+					},
+					{
+						"name": "run_local_at_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "run_local_at_count"
+							},
+							"default": {
+								"scalar": {
+									"primitive": {
+										"integer": "10"
+									}
+								}
+							}
+						}
+					}
+				]
+			}
+		},
+		"closure": {
+			"expectedInputs": {
+				"parameters": [
+					{
+						"name": "numbers",
+						"var": {
+							"var": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								},
+								"description": "short desc"
+							}
+						}
+					},
+					{
+						"name": "numbers_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "long description will be truncated in table"
+							}
+						}
+					},
+					{
+						"name": "run_local_at_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "run_local_at_count"
+							},
+							"default": {
+								"scalar": {
+									"primitive": {
+										"integer": "10"
+									}
+								}
+							}
+						}
+					}
+				]
+			},
+			"createdAt": "1970-01-01T00:00:00Z"
+		}
+	}
+]`)
 }
 
 func TestGetLaunchPlanFuncLatest(t *testing.T) {
@@ -263,7 +470,109 @@ func TestGetLaunchPlanFuncLatest(t *testing.T) {
 	err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "ListLaunchPlans", ctx, resourceGetRequest)
-	tearDownAndVerify(t, `{"id": {"name": "launchplan1","version": "v2"},"spec": {"defaultInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]}},"closure": {"expectedInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]},"createdAt": "1970-01-01T00:00:01Z"}}`)
+	tearDownAndVerify(t, `{
+	"id": {
+		"name": "launchplan1",
+		"version": "v2"
+	},
+	"spec": {
+		"defaultInputs": {
+			"parameters": [
+				{
+					"name": "numbers",
+					"var": {
+						"var": {
+							"type": {
+								"collectionType": {
+									"simple": "INTEGER"
+								}
+							},
+							"description": "short desc"
+						}
+					}
+				},
+				{
+					"name": "numbers_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "long description will be truncated in table"
+						}
+					}
+				},
+				{
+					"name": "run_local_at_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "run_local_at_count"
+						},
+						"default": {
+							"scalar": {
+								"primitive": {
+									"integer": "10"
+								}
+							}
+						}
+					}
+				}
+			]
+		}
+	},
+	"closure": {
+		"expectedInputs": {
+			"parameters": [
+				{
+					"name": "numbers",
+					"var": {
+						"var": {
+							"type": {
+								"collectionType": {
+									"simple": "INTEGER"
+								}
+							},
+							"description": "short desc"
+						}
+					}
+				},
+				{
+					"name": "numbers_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "long description will be truncated in table"
+						}
+					}
+				},
+				{
+					"name": "run_local_at_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "run_local_at_count"
+						},
+						"default": {
+							"scalar": {
+								"primitive": {
+									"integer": "10"
+								}
+							}
+						}
+					}
+				}
+			]
+		},
+		"createdAt": "1970-01-01T00:00:01Z"
+	}
+}`)
 }
 
 func TestGetLaunchPlanWithVersion(t *testing.T) {
@@ -276,7 +585,109 @@ func TestGetLaunchPlanWithVersion(t *testing.T) {
 	err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "GetLaunchPlan", ctx, objectGetRequest)
-	tearDownAndVerify(t, `{"id": {"name": "launchplan1","version": "v2"},"spec": {"defaultInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]}},"closure": {"expectedInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]},"createdAt": "1970-01-01T00:00:01Z"}}`)
+	tearDownAndVerify(t, `{
+	"id": {
+		"name": "launchplan1",
+		"version": "v2"
+	},
+	"spec": {
+		"defaultInputs": {
+			"parameters": [
+				{
+					"name": "numbers",
+					"var": {
+						"var": {
+							"type": {
+								"collectionType": {
+									"simple": "INTEGER"
+								}
+							},
+							"description": "short desc"
+						}
+					}
+				},
+				{
+					"name": "numbers_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "long description will be truncated in table"
+						}
+					}
+				},
+				{
+					"name": "run_local_at_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "run_local_at_count"
+						},
+						"default": {
+							"scalar": {
+								"primitive": {
+									"integer": "10"
+								}
+							}
+						}
+					}
+				}
+			]
+		}
+	},
+	"closure": {
+		"expectedInputs": {
+			"parameters": [
+				{
+					"name": "numbers",
+					"var": {
+						"var": {
+							"type": {
+								"collectionType": {
+									"simple": "INTEGER"
+								}
+							},
+							"description": "short desc"
+						}
+					}
+				},
+				{
+					"name": "numbers_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "long description will be truncated in table"
+						}
+					}
+				},
+				{
+					"name": "run_local_at_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "run_local_at_count"
+						},
+						"default": {
+							"scalar": {
+								"primitive": {
+									"integer": "10"
+								}
+							}
+						}
+					}
+				}
+			]
+		},
+		"createdAt": "1970-01-01T00:00:01Z"
+	}
+}`)
 }
 
 func TestGetLaunchPlans(t *testing.T) {
@@ -287,7 +698,214 @@ func TestGetLaunchPlans(t *testing.T) {
 	argsLp = []string{}
 	err = getLaunchPlanFunc(ctx, argsLp, cmdCtx)
 	assert.Nil(t, err)
-	tearDownAndVerify(t, `[{"id": {"name": "launchplan1","version": "v2"},"spec": {"defaultInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]}},"closure": {"expectedInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]},"createdAt": "1970-01-01T00:00:01Z"}},{"id": {"name": "launchplan1","version": "v1"},"spec": {"defaultInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]}},"closure": {"expectedInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]},"createdAt": "1970-01-01T00:00:00Z"}}]`)
+	tearDownAndVerify(t, `[
+	{
+		"id": {
+			"name": "launchplan1",
+			"version": "v2"
+		},
+		"spec": {
+			"defaultInputs": {
+				"parameters": [
+					{
+						"name": "numbers",
+						"var": {
+							"var": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								},
+								"description": "short desc"
+							}
+						}
+					},
+					{
+						"name": "numbers_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "long description will be truncated in table"
+							}
+						}
+					},
+					{
+						"name": "run_local_at_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "run_local_at_count"
+							},
+							"default": {
+								"scalar": {
+									"primitive": {
+										"integer": "10"
+									}
+								}
+							}
+						}
+					}
+				]
+			}
+		},
+		"closure": {
+			"expectedInputs": {
+				"parameters": [
+					{
+						"name": "numbers",
+						"var": {
+							"var": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								},
+								"description": "short desc"
+							}
+						}
+					},
+					{
+						"name": "numbers_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "long description will be truncated in table"
+							}
+						}
+					},
+					{
+						"name": "run_local_at_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "run_local_at_count"
+							},
+							"default": {
+								"scalar": {
+									"primitive": {
+										"integer": "10"
+									}
+								}
+							}
+						}
+					}
+				]
+			},
+			"createdAt": "1970-01-01T00:00:01Z"
+		}
+	},
+	{
+		"id": {
+			"name": "launchplan1",
+			"version": "v1"
+		},
+		"spec": {
+			"defaultInputs": {
+				"parameters": [
+					{
+						"name": "numbers",
+						"var": {
+							"var": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								},
+								"description": "short desc"
+							}
+						}
+					},
+					{
+						"name": "numbers_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "long description will be truncated in table"
+							}
+						}
+					},
+					{
+						"name": "run_local_at_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "run_local_at_count"
+							},
+							"default": {
+								"scalar": {
+									"primitive": {
+										"integer": "10"
+									}
+								}
+							}
+						}
+					}
+				]
+			}
+		},
+		"closure": {
+			"expectedInputs": {
+				"parameters": [
+					{
+						"name": "numbers",
+						"var": {
+							"var": {
+								"type": {
+									"collectionType": {
+										"simple": "INTEGER"
+									}
+								},
+								"description": "short desc"
+							}
+						}
+					},
+					{
+						"name": "numbers_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "long description will be truncated in table"
+							}
+						}
+					},
+					{
+						"name": "run_local_at_count",
+						"var": {
+							"var": {
+								"type": {
+									"simple": "INTEGER"
+								},
+								"description": "run_local_at_count"
+							},
+							"default": {
+								"scalar": {
+									"primitive": {
+										"integer": "10"
+									}
+								}
+							}
+						}
+					}
+				]
+			},
+			"createdAt": "1970-01-01T00:00:00Z"
+		}
+	}
+]`)
 }
 
 func TestGetLaunchPlansWithExecFile(t *testing.T) {
@@ -302,7 +920,109 @@ func TestGetLaunchPlansWithExecFile(t *testing.T) {
 	os.Remove(launchplan.DefaultConfig.ExecFile)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "GetLaunchPlan", ctx, objectGetRequest)
-	tearDownAndVerify(t, `{"id": {"name": "launchplan1","version": "v2"},"spec": {"defaultInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]}},"closure": {"expectedInputs": {"parameters": [{"name": "numbers","var": {"var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "short desc"}}},{"name": "numbers_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "long description will be truncated in table"}}},{"name": "run_local_at_count","var": {"var": {"type": {"simple": "INTEGER"},"description": "run_local_at_count"},"default": {"scalar": {"primitive": {"integer": "10"}}}}}]},"createdAt": "1970-01-01T00:00:01Z"}}`)
+	tearDownAndVerify(t, `{
+	"id": {
+		"name": "launchplan1",
+		"version": "v2"
+	},
+	"spec": {
+		"defaultInputs": {
+			"parameters": [
+				{
+					"name": "numbers",
+					"var": {
+						"var": {
+							"type": {
+								"collectionType": {
+									"simple": "INTEGER"
+								}
+							},
+							"description": "short desc"
+						}
+					}
+				},
+				{
+					"name": "numbers_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "long description will be truncated in table"
+						}
+					}
+				},
+				{
+					"name": "run_local_at_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "run_local_at_count"
+						},
+						"default": {
+							"scalar": {
+								"primitive": {
+									"integer": "10"
+								}
+							}
+						}
+					}
+				}
+			]
+		}
+	},
+	"closure": {
+		"expectedInputs": {
+			"parameters": [
+				{
+					"name": "numbers",
+					"var": {
+						"var": {
+							"type": {
+								"collectionType": {
+									"simple": "INTEGER"
+								}
+							},
+							"description": "short desc"
+						}
+					}
+				},
+				{
+					"name": "numbers_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "long description will be truncated in table"
+						}
+					}
+				},
+				{
+					"name": "run_local_at_count",
+					"var": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "run_local_at_count"
+						},
+						"default": {
+							"scalar": {
+								"primitive": {
+									"integer": "10"
+								}
+							}
+						}
+					}
+				}
+			]
+		},
+		"createdAt": "1970-01-01T00:00:01Z"
+	}
+}`)
 }
 
 func TestGetLaunchPlanTableFunc(t *testing.T) {
