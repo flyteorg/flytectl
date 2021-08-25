@@ -287,7 +287,47 @@ func TestGetTaskFuncLatest(t *testing.T) {
 	err = getTaskFunc(ctx, argsTask, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "ListTasks", ctx, resourceListRequestTask)
-	tearDownAndVerify(t, `{"id": {"name": "task1","version": "v2"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": [{"name": "sorted_list1","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}},{"name": "sorted_list2","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}]}}}},"createdAt": "1970-01-01T00:00:01Z"}}`)
+	tearDownAndVerify(t, `{
+	"id": {
+		"name": "task1",
+		"version": "v2"
+	},
+	"closure": {
+		"compiledTask": {
+			"template": {
+				"interface": {
+					"inputs": {
+						"variables": [
+							{
+								"name": "sorted_list1",
+								"var": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									},
+									"description": "var description"
+								}
+							},
+							{
+								"name": "sorted_list2",
+								"var": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									},
+									"description": "var description"
+								}
+							}
+						]
+					}
+				}
+			}
+		},
+		"createdAt": "1970-01-01T00:00:01Z"
+	}
+}`)
 }
 
 func TestGetTaskWithVersion(t *testing.T) {
@@ -302,7 +342,47 @@ func TestGetTaskWithVersion(t *testing.T) {
 	err = getTaskFunc(ctx, argsTask, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "GetTask", ctx, objectGetRequestTask)
-	tearDownAndVerify(t, `{"id": {"name": "task1","version": "v2"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": [{"name": "sorted_list1","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}},{"name": "sorted_list2","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}]}}}},"createdAt": "1970-01-01T00:00:01Z"}}`)
+	tearDownAndVerify(t, `{
+	"id": {
+		"name": "task1",
+		"version": "v2"
+	},
+	"closure": {
+		"compiledTask": {
+			"template": {
+				"interface": {
+					"inputs": {
+						"variables": [
+							{
+								"name": "sorted_list1",
+								"var": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									},
+									"description": "var description"
+								}
+							},
+							{
+								"name": "sorted_list2",
+								"var": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									},
+									"description": "var description"
+								}
+							}
+						]
+					}
+				}
+			}
+		},
+		"createdAt": "1970-01-01T00:00:01Z"
+	}
+}`)
 }
 
 func TestGetTasks(t *testing.T) {
@@ -313,7 +393,90 @@ func TestGetTasks(t *testing.T) {
 	mockClient.OnGetTaskMatch(ctx, objectGetRequestTask).Return(task2, nil)
 	err = getTaskFunc(ctx, argsTask, cmdCtx)
 	assert.Nil(t, err)
-	tearDownAndVerify(t, `[{"id": {"name": "task1","version": "v2"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": [{"name": "sorted_list1","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}},{"name": "sorted_list2","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}]}}}},"createdAt": "1970-01-01T00:00:01Z"}},{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": [{"name": "sorted_list1","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}},{"name": "sorted_list2","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}]}}}},"createdAt": "1970-01-01T00:00:00Z"}}]`)
+	tearDownAndVerify(t, `[
+	{
+		"id": {
+			"name": "task1",
+			"version": "v2"
+		},
+		"closure": {
+			"compiledTask": {
+				"template": {
+					"interface": {
+						"inputs": {
+							"variables": [
+								{
+									"name": "sorted_list1",
+									"var": {
+										"type": {
+											"collectionType": {
+												"simple": "INTEGER"
+											}
+										},
+										"description": "var description"
+									}
+								},
+								{
+									"name": "sorted_list2",
+									"var": {
+										"type": {
+											"collectionType": {
+												"simple": "INTEGER"
+											}
+										},
+										"description": "var description"
+									}
+								}
+							]
+						}
+					}
+				}
+			},
+			"createdAt": "1970-01-01T00:00:01Z"
+		}
+	},
+	{
+		"id": {
+			"name": "task1",
+			"version": "v1"
+		},
+		"closure": {
+			"compiledTask": {
+				"template": {
+					"interface": {
+						"inputs": {
+							"variables": [
+								{
+									"name": "sorted_list1",
+									"var": {
+										"type": {
+											"collectionType": {
+												"simple": "INTEGER"
+											}
+										},
+										"description": "var description"
+									}
+								},
+								{
+									"name": "sorted_list2",
+									"var": {
+										"type": {
+											"collectionType": {
+												"simple": "INTEGER"
+											}
+										},
+										"description": "var description"
+									}
+								}
+							]
+						}
+					}
+				}
+			},
+			"createdAt": "1970-01-01T00:00:00Z"
+		}
+	}
+]`)
 }
 
 func TestGetTasksFilters(t *testing.T) {
@@ -325,7 +488,47 @@ func TestGetTasksFilters(t *testing.T) {
 	mockClient.OnListTasksMatch(ctx, resourceListFilterRequestTask).Return(taskListFilterResponse, nil)
 	err = getTaskFunc(ctx, argsTask, cmdCtx)
 	assert.Nil(t, err)
-	tearDownAndVerify(t, `{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": [{"name": "sorted_list1","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}},{"name": "sorted_list2","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}]}}}},"createdAt": "1970-01-01T00:00:00Z"}}`)
+	tearDownAndVerify(t, `{
+	"id": {
+		"name": "task1",
+		"version": "v1"
+	},
+	"closure": {
+		"compiledTask": {
+			"template": {
+				"interface": {
+					"inputs": {
+						"variables": [
+							{
+								"name": "sorted_list1",
+								"var": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									},
+									"description": "var description"
+								}
+							},
+							{
+								"name": "sorted_list2",
+								"var": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									},
+									"description": "var description"
+								}
+							}
+						]
+					}
+				}
+			}
+		},
+		"createdAt": "1970-01-01T00:00:00Z"
+	}
+}`)
 }
 
 func TestGetTaskWithExecFile(t *testing.T) {
@@ -340,5 +543,45 @@ func TestGetTaskWithExecFile(t *testing.T) {
 	os.Remove(taskConfig.DefaultConfig.ExecFile)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "GetTask", ctx, objectGetRequestTask)
-	tearDownAndVerify(t, `{"id": {"name": "task1","version": "v2"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": [{"name": "sorted_list1","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}},{"name": "sorted_list2","var": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}]}}}},"createdAt": "1970-01-01T00:00:01Z"}}`)
+	tearDownAndVerify(t, `{
+	"id": {
+		"name": "task1",
+		"version": "v2"
+	},
+	"closure": {
+		"compiledTask": {
+			"template": {
+				"interface": {
+					"inputs": {
+						"variables": [
+							{
+								"name": "sorted_list1",
+								"var": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									},
+									"description": "var description"
+								}
+							},
+							{
+								"name": "sorted_list2",
+								"var": {
+									"type": {
+										"collectionType": {
+											"simple": "INTEGER"
+										}
+									},
+									"description": "var description"
+								}
+							}
+						]
+					}
+				}
+			}
+		},
+		"createdAt": "1970-01-01T00:00:01Z"
+	}
+}`)
 }
