@@ -189,17 +189,17 @@ func FormatVariableDescriptions(variableMap []*core.VariableMapEntry) {
 func FormatParameterDescriptions(parameterMap []*core.ParameterMapEntry) {
 	var descriptions []string
 	for _, e := range parameterMap {
-		if e.Var == nil || e.Var.Var == nil {
+		if e.Parameter == nil || e.Parameter.Var == nil {
 			continue
 		}
 		// a: a isn't very helpful
-		if e.Name != e.Var.Var.Description {
-			descriptions = append(descriptions, getTruncatedLine(fmt.Sprintf("%s: %s", e.Name, e.Var.Var.Description)))
+		if e.Name != e.Parameter.Var.Description {
+			descriptions = append(descriptions, getTruncatedLine(fmt.Sprintf("%s: %s", e.Name, e.Parameter.Var.Description)))
 		} else {
 			descriptions = append(descriptions, getTruncatedLine(e.Name))
 		}
 	}
-	parameterMap[0] = &core.ParameterMapEntry{Var: &core.Parameter{Var: &core.Variable{Description: strings.Join(descriptions, "\n")}}}
+	parameterMap[0] = &core.ParameterMapEntry{Parameter: &core.Parameter{Var: &core.Variable{Description: strings.Join(descriptions, "\n")}}}
 }
 
 func getTruncatedLine(line string) string {

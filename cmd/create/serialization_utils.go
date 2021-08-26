@@ -31,7 +31,7 @@ func MakeLiteralForVariables(serialize map[string]interface{}, variables []*core
 func MakeLiteralForParams(serialize map[string]interface{}, parameters []*core.ParameterMapEntry) (map[string]*core.Literal, error) {
 	types := make(map[string]*core.LiteralType)
 	for _, e := range parameters {
-		if variable := e.GetVar().GetVar(); variable == nil {
+		if variable := e.GetParameter().GetVar(); variable == nil {
 			return nil, fmt.Errorf("parameter [%v] has nil Variable", e.GetName())
 		} else if t := variable.GetType(); t == nil {
 			return nil, fmt.Errorf("parameter [%v] has nil variable type", e.GetName())

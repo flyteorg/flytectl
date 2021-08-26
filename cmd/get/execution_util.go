@@ -124,9 +124,9 @@ func ParamMapForWorkflow(lp *admin.LaunchPlan) ([]yaml.Node, error) {
 	workflowParams := WorkflowParams(lp)
 	paramMap := make([]yaml.Node, len(workflowParams))
 	for _, e := range workflowParams {
-		varTypeValue, err := coreutils.MakeDefaultLiteralForType(e.Var.Var.Type)
+		varTypeValue, err := coreutils.MakeDefaultLiteralForType(e.Parameter.Var.Type)
 		if err != nil {
-			fmt.Println("error creating default value for literal type ", e.Var.Var.Type)
+			fmt.Println("error creating default value for literal type ", e.Parameter.Var.Type)
 			return nil, err
 		}
 		var nativeLiteral interface{}
@@ -134,19 +134,19 @@ func ParamMapForWorkflow(lp *admin.LaunchPlan) ([]yaml.Node, error) {
 			return nil, err
 		}
 		// Override if there is a default value
-		if paramsDefault, ok := e.Var.Behavior.(*core.Parameter_Default); ok {
+		if paramsDefault, ok := e.Parameter.Behavior.(*core.Parameter_Default); ok {
 			if nativeLiteral, err = coreutils.ExtractFromLiteral(paramsDefault.Default); err != nil {
 				return nil, err
 			}
 		}
-		if e.Name == e.Var.Var.Description {
+		if e.Name == e.Parameter.Var.Description {
 			// a: # a isn't very helpful
 			var n yaml.Node
 			n, err = getCommentedYamlNode(nativeLiteral, "")
 			paramMap = append(paramMap, n)
 		} else {
 			var n yaml.Node
-			n, err = getCommentedYamlNode(nativeLiteral, e.Var.Var.Description)
+			n, err = getCommentedYamlNode(nativeLiteral, e.Parameter.Var.Description)
 			paramMap = append(paramMap, n)
 		}
 

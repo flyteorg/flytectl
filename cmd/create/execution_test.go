@@ -64,7 +64,7 @@ func createExecutionSetup() {
 	parameterMap := []*core.ParameterMapEntry{
 		{
 			Name: "numbers",
-			Var: &core.Parameter{Var: &core.Variable{
+			Parameter: &core.Parameter{Var: &core.Variable{
 				Type: &core.LiteralType{
 					Type: &core.LiteralType_CollectionType{
 						CollectionType: &core.LiteralType{
@@ -78,7 +78,7 @@ func createExecutionSetup() {
 		},
 		{
 			Name: "numbers_count",
-			Var: &core.Parameter{Var: &core.Variable{
+			Parameter: &core.Parameter{Var: &core.Variable{
 				Type: &core.LiteralType{
 					Type: &core.LiteralType_Simple{
 						Simple: core.SimpleType_INTEGER,
@@ -88,7 +88,7 @@ func createExecutionSetup() {
 		},
 		{
 			Name: "run_local_at_count",
-			Var: &core.Parameter{Var: &core.Variable{
+			Parameter: &core.Parameter{Var: &core.Variable{
 				Type: &core.LiteralType{
 					Type: &core.LiteralType_Simple{
 						Simple: core.SimpleType_INTEGER,

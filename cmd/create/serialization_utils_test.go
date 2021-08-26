@@ -70,7 +70,7 @@ func TestMakeLiteralForParams(t *testing.T) {
 		inputParams := []*core.ParameterMapEntry{
 			{
 				Name: "a",
-				Var: &core.Parameter{Var: &core.Variable{
+				Parameter: &core.Parameter{Var: &core.Variable{
 					Type: &core.LiteralType{
 						Type: &core.LiteralType_Simple{
 							Simple: core.SimpleType_STRING,
@@ -88,8 +88,8 @@ func TestMakeLiteralForParams(t *testing.T) {
 	t.Run("Invalid Param", func(t *testing.T) {
 		inputParams := []*core.ParameterMapEntry{
 			{
-				Name: "a",
-				Var:  nil,
+				Name:      "a",
+				Parameter: nil,
 			},
 		}
 
@@ -100,8 +100,8 @@ func TestMakeLiteralForParams(t *testing.T) {
 	t.Run("Invalid Type", func(t *testing.T) {
 		inputParams := []*core.ParameterMapEntry{
 			{
-				Name: "a",
-				Var:  &core.Parameter{Var: &core.Variable{}},
+				Name:      "a",
+				Parameter: &core.Parameter{Var: &core.Variable{}},
 			},
 		}
 

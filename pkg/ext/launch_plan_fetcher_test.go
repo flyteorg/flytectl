@@ -30,7 +30,7 @@ func getLaunchPlanFetcherSetup() {
 	parameterMap := []*core.ParameterMapEntry{
 		{
 			Name: "numbers",
-			Var: &core.Parameter{Var: &core.Variable{
+			Parameter: &core.Parameter{Var: &core.Variable{
 				Type: &core.LiteralType{
 					Type: &core.LiteralType_CollectionType{
 						CollectionType: &core.LiteralType{
@@ -44,7 +44,7 @@ func getLaunchPlanFetcherSetup() {
 		},
 		{
 			Name: "numbers_count",
-			Var: &core.Parameter{Var: &core.Variable{
+			Parameter: &core.Parameter{Var: &core.Variable{
 				Type: &core.LiteralType{
 					Type: &core.LiteralType_Simple{
 						Simple: core.SimpleType_INTEGER,
@@ -54,7 +54,7 @@ func getLaunchPlanFetcherSetup() {
 		},
 		{
 			Name: "run_local_at_count",
-			Var: &core.Parameter{Var: &core.Variable{
+			Parameter: &core.Parameter{Var: &core.Variable{
 				Type: &core.LiteralType{
 					Type: &core.LiteralType_Simple{
 						Simple: core.SimpleType_INTEGER,

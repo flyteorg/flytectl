@@ -317,26 +317,26 @@ func TestFormatParameterDescriptions(t *testing.T) {
 	emptyParam := &core.Parameter{}
 	paramMap := []*core.ParameterMapEntry{
 		{
-			Name: "var1",
-			Var:  fooParam,
+			Name:      "var1",
+			Parameter: fooParam,
 		},
 		{
-			Name: "var2",
-			Var:  barParam,
+			Name:      "var2",
+			Parameter: barParam,
 		},
 		{
-			Name: "foo",
-			Var:  fooParam,
+			Name:      "foo",
+			Parameter: fooParam,
 		},
 		{
-			Name: "bar",
-			Var:  barParam,
+			Name:      "bar",
+			Parameter: barParam,
 		},
 		{
-			Name: "empty",
-			Var:  emptyParam,
+			Name:      "empty",
+			Parameter: emptyParam,
 		},
 	}
 	FormatParameterDescriptions(paramMap)
-	assert.Equal(t, "var1: foo\nvar2: bar\nfoo\nbar", paramMap[0].Var.Var.Description)
+	assert.Equal(t, "var1: foo\nvar2: bar\nfoo\nbar", paramMap[0].Parameter.Var.Description)
 }
