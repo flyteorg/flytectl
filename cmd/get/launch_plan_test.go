@@ -261,7 +261,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 				"parameters": [
 					{
 						"name": "numbers",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"collectionType": {
@@ -274,7 +274,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 					},
 					{
 						"name": "numbers_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -285,7 +285,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 					},
 					{
 						"name": "run_local_at_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -309,7 +309,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 				"parameters": [
 					{
 						"name": "numbers",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"collectionType": {
@@ -322,7 +322,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 					},
 					{
 						"name": "numbers_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -333,7 +333,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 					},
 					{
 						"name": "run_local_at_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -364,7 +364,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 				"parameters": [
 					{
 						"name": "numbers",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"collectionType": {
@@ -377,7 +377,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 					},
 					{
 						"name": "numbers_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -388,7 +388,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 					},
 					{
 						"name": "run_local_at_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -412,7 +412,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 				"parameters": [
 					{
 						"name": "numbers",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"collectionType": {
@@ -425,7 +425,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 					},
 					{
 						"name": "numbers_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -436,7 +436,7 @@ func TestGetLaunchPlanFunc(t *testing.T) {
 					},
 					{
 						"name": "run_local_at_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -480,7 +480,7 @@ func TestGetLaunchPlanFuncLatest(t *testing.T) {
 			"parameters": [
 				{
 					"name": "numbers",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"collectionType": {
@@ -493,7 +493,7 @@ func TestGetLaunchPlanFuncLatest(t *testing.T) {
 				},
 				{
 					"name": "numbers_count",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"simple": "INTEGER"
@@ -504,7 +504,7 @@ func TestGetLaunchPlanFuncLatest(t *testing.T) {
 				},
 				{
 					"name": "run_local_at_count",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"simple": "INTEGER"
@@ -528,7 +528,7 @@ func TestGetLaunchPlanFuncLatest(t *testing.T) {
 			"parameters": [
 				{
 					"name": "numbers",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"collectionType": {
@@ -541,7 +541,7 @@ func TestGetLaunchPlanFuncLatest(t *testing.T) {
 				},
 				{
 					"name": "numbers_count",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"simple": "INTEGER"
@@ -552,7 +552,7 @@ func TestGetLaunchPlanFuncLatest(t *testing.T) {
 				},
 				{
 					"name": "run_local_at_count",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"simple": "INTEGER"
@@ -595,7 +595,7 @@ func TestGetLaunchPlanWithVersion(t *testing.T) {
 			"parameters": [
 				{
 					"name": "numbers",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"collectionType": {
@@ -608,7 +608,7 @@ func TestGetLaunchPlanWithVersion(t *testing.T) {
 				},
 				{
 					"name": "numbers_count",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"simple": "INTEGER"
@@ -619,7 +619,7 @@ func TestGetLaunchPlanWithVersion(t *testing.T) {
 				},
 				{
 					"name": "run_local_at_count",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"simple": "INTEGER"
@@ -643,7 +643,7 @@ func TestGetLaunchPlanWithVersion(t *testing.T) {
 			"parameters": [
 				{
 					"name": "numbers",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"collectionType": {
@@ -656,7 +656,7 @@ func TestGetLaunchPlanWithVersion(t *testing.T) {
 				},
 				{
 					"name": "numbers_count",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"simple": "INTEGER"
@@ -667,7 +667,7 @@ func TestGetLaunchPlanWithVersion(t *testing.T) {
 				},
 				{
 					"name": "run_local_at_count",
-					"var": {
+					"parameter": {
 						"var": {
 							"type": {
 								"simple": "INTEGER"
@@ -709,7 +709,7 @@ func TestGetLaunchPlans(t *testing.T) {
 				"parameters": [
 					{
 						"name": "numbers",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"collectionType": {
@@ -722,7 +722,7 @@ func TestGetLaunchPlans(t *testing.T) {
 					},
 					{
 						"name": "numbers_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -733,7 +733,7 @@ func TestGetLaunchPlans(t *testing.T) {
 					},
 					{
 						"name": "run_local_at_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -757,7 +757,7 @@ func TestGetLaunchPlans(t *testing.T) {
 				"parameters": [
 					{
 						"name": "numbers",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"collectionType": {
@@ -770,7 +770,7 @@ func TestGetLaunchPlans(t *testing.T) {
 					},
 					{
 						"name": "numbers_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -781,7 +781,7 @@ func TestGetLaunchPlans(t *testing.T) {
 					},
 					{
 						"name": "run_local_at_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -812,7 +812,7 @@ func TestGetLaunchPlans(t *testing.T) {
 				"parameters": [
 					{
 						"name": "numbers",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"collectionType": {
@@ -825,7 +825,7 @@ func TestGetLaunchPlans(t *testing.T) {
 					},
 					{
 						"name": "numbers_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -836,7 +836,7 @@ func TestGetLaunchPlans(t *testing.T) {
 					},
 					{
 						"name": "run_local_at_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -860,7 +860,7 @@ func TestGetLaunchPlans(t *testing.T) {
 				"parameters": [
 					{
 						"name": "numbers",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"collectionType": {
@@ -873,7 +873,7 @@ func TestGetLaunchPlans(t *testing.T) {
 					},
 					{
 						"name": "numbers_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -884,7 +884,7 @@ func TestGetLaunchPlans(t *testing.T) {
 					},
 					{
 						"name": "run_local_at_count",
-						"var": {
+						"parameter": {
 							"var": {
 								"type": {
 									"simple": "INTEGER"
@@ -927,80 +927,98 @@ func TestGetLaunchPlansWithExecFile(t *testing.T) {
 	},
 	"spec": {
 		"defaultInputs": {
-			"parameters": {
-				"numbers": {
-					"var": {
-						"type": {
-							"collectionType": {
+			"parameters": [
+				{
+					"name": "numbers",
+					"parameter": {
+						"var": {
+							"type": {
+								"collectionType": {
+									"simple": "INTEGER"
+								}
+							},
+							"description": "short desc"
+						}
+					}
+				},
+				{
+					"name": "numbers_count",
+					"parameter": {
+						"var": {
+							"type": {
 								"simple": "INTEGER"
-							}
-						},
-						"description": "short desc"
+							},
+							"description": "long description will be truncated in table"
+						}
 					}
 				},
-				"numbers_count": {
-					"var": {
-						"type": {
-							"simple": "INTEGER"
+				{
+					"name": "run_local_at_count",
+					"parameter": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "run_local_at_count"
 						},
-						"description": "long description will be truncated in table"
-					}
-				},
-				"run_local_at_count": {
-					"var": {
-						"type": {
-							"simple": "INTEGER"
-						},
-						"description": "run_local_at_count"
-					},
-					"default": {
-						"scalar": {
-							"primitive": {
-								"integer": "10"
+						"default": {
+							"scalar": {
+								"primitive": {
+									"integer": "10"
+								}
 							}
 						}
 					}
 				}
-			}
+			]
 		}
 	},
 	"closure": {
 		"expectedInputs": {
-			"parameters": {
-				"numbers": {
-					"var": {
-						"type": {
-							"collectionType": {
+			"parameters": [
+				{
+					"name": "numbers",
+					"parameter": {
+						"var": {
+							"type": {
+								"collectionType": {
+									"simple": "INTEGER"
+								}
+							},
+							"description": "short desc"
+						}
+					}
+				},
+				{
+					"name": "numbers_count",
+					"parameter": {
+						"var": {
+							"type": {
 								"simple": "INTEGER"
-							}
-						},
-						"description": "short desc"
+							},
+							"description": "long description will be truncated in table"
+						}
 					}
 				},
-				"numbers_count": {
-					"var": {
-						"type": {
-							"simple": "INTEGER"
+				{
+					"name": "run_local_at_count",
+					"parameter": {
+						"var": {
+							"type": {
+								"simple": "INTEGER"
+							},
+							"description": "run_local_at_count"
 						},
-						"description": "long description will be truncated in table"
-					}
-				},
-				"run_local_at_count": {
-					"var": {
-						"type": {
-							"simple": "INTEGER"
-						},
-						"description": "run_local_at_count"
-					},
-					"default": {
-						"scalar": {
-							"primitive": {
-								"integer": "10"
+						"default": {
+							"scalar": {
+								"primitive": {
+									"integer": "10"
+								}
 							}
 						}
 					}
 				}
-			}
+			]
 		},
 		"createdAt": "1970-01-01T00:00:01Z"
 	}
