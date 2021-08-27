@@ -17,14 +17,14 @@ import (
 // ExecutionConfig is duplicated struct from create with the same structure. This is to avoid the circular dependency. Only works with go-yaml.
 // TODO : replace this with a cleaner design
 type ExecutionConfig struct {
-	IamRoleARN      string      `yaml:"iamRoleARN"`
-	Inputs          []yaml.Node `yaml:"inputs"`
-	KubeServiceAcct string      `yaml:"kubeServiceAcct"`
-	TargetDomain    string      `yaml:"targetDomain"`
-	TargetProject   string      `yaml:"targetProject"`
-	Task            string      `yaml:"task,omitempty"`
-	Version         string      `yaml:"version"`
-	Workflow        string      `yaml:"workflow,omitempty"`
+	IamRoleARN      string               `yaml:"iamRoleARN"`
+	Inputs          map[string]yaml.Node `yaml:"inputs"`
+	KubeServiceAcct string               `yaml:"kubeServiceAcct"`
+	TargetDomain    string               `yaml:"targetDomain"`
+	TargetProject   string               `yaml:"targetProject"`
+	Task            string               `yaml:"task,omitempty"`
+	Version         string               `yaml:"version"`
+	Workflow        string               `yaml:"workflow,omitempty"`
 }
 
 func WriteExecConfigToFile(executionConfig ExecutionConfig, fileName string) error {
@@ -78,9 +78,9 @@ func TaskInputs(task *admin.Task) []*core.VariableMapEntry {
 	return task.Closure.CompiledTask.Template.Interface.Inputs.Variables
 }
 
-func ParamMapForTask(task *admin.Task) ([]yaml.Node, error) {
+func ParamMapForTask(task *admin.Task) (map[string]yaml.Node, error) {
 	taskInputs := TaskInputs(task)
-	paramMap := make([]yaml.Node, 0, len(taskInputs))
+	paramMap := make(map[string]yaml.Node, len(taskInputs))
 	for _, e := range taskInputs {
 		varTypeValue, err := coreutils.MakeDefaultLiteralForType(e.Var.Type)
 		if err != nil {
@@ -94,13 +94,9 @@ func ParamMapForTask(task *admin.Task) ([]yaml.Node, error) {
 
 		if e.Name == e.Var.Description {
 			// a: # a isn't very helpful
-			var n yaml.Node
-			n, err = getCommentedYamlNode(nativeLiteral, "")
-			paramMap = append(paramMap, n)
+			paramMap[e.Name], err = getCommentedYamlNode(nativeLiteral, "")
 		} else {
-			var n yaml.Node
-			n, err = getCommentedYamlNode(nativeLiteral, e.Var.Description)
-			paramMap = append(paramMap, n)
+			paramMap[e.Name], err = getCommentedYamlNode(nativeLiteral, e.Var.Description)
 		}
 		if err != nil {
 			return nil, err
@@ -120,9 +116,9 @@ func WorkflowParams(lp *admin.LaunchPlan) []*core.ParameterMapEntry {
 	return lp.Spec.DefaultInputs.Parameters
 }
 
-func ParamMapForWorkflow(lp *admin.LaunchPlan) ([]yaml.Node, error) {
+func ParamMapForWorkflow(lp *admin.LaunchPlan) (map[string]yaml.Node, error) {
 	workflowParams := WorkflowParams(lp)
-	paramMap := make([]yaml.Node, len(workflowParams))
+	paramMap := make(map[string]yaml.Node, len(workflowParams))
 	for _, e := range workflowParams {
 		varTypeValue, err := coreutils.MakeDefaultLiteralForType(e.Parameter.Var.Type)
 		if err != nil {
@@ -141,13 +137,9 @@ func ParamMapForWorkflow(lp *admin.LaunchPlan) ([]yaml.Node, error) {
 		}
 		if e.Name == e.Parameter.Var.Description {
 			// a: # a isn't very helpful
-			var n yaml.Node
-			n, err = getCommentedYamlNode(nativeLiteral, "")
-			paramMap = append(paramMap, n)
+			paramMap[e.Name], err = getCommentedYamlNode(nativeLiteral, "")
 		} else {
-			var n yaml.Node
-			n, err = getCommentedYamlNode(nativeLiteral, e.Parameter.Var.Description)
-			paramMap = append(paramMap, n)
+			paramMap[e.Name], err = getCommentedYamlNode(nativeLiteral, e.Parameter.Var.Description)
 		}
 
 		if err != nil {
