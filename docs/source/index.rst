@@ -8,7 +8,7 @@ Overview
 =========
 The video below will take you on a tour of Flytectl - how to install and configure it, as well as how to use the Verbs and Nouns sections on the left hand side menu.
 
-.. youtube:: 2cI1kNc1Fy8
+.. youtube:: cV8ezYnBANE
 
 
 Install
