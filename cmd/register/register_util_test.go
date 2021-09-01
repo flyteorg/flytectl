@@ -364,8 +364,8 @@ func TestGetAllFlytesnacksExample(t *testing.T) {
 	})
 	t.Run("Successfully get examples", func(t *testing.T) {
 		assets, tag, err := getAllFlytesnacksExample("flyteorg", "flytesnacks", "v0.2.175")
-		assert.NotNil(t, err)
-		assert.Equal(t, len(tag), 0)
+		assert.Nil(t, err)
+		assert.Greater(t, len(tag), 0)
 		assert.Greater(t, len(assets), 0)
 	})
 }
