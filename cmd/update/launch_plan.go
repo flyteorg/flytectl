@@ -3,6 +3,7 @@ package update
 import (
 	"context"
 	"fmt"
+	"github.com/flyteorg/flytestdlib/logger"
 
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/cmd/config"
@@ -54,19 +55,24 @@ func updateLPFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandCont
 		lpState = admin.LaunchPlanState_INACTIVE
 	}
 
-	_, err := cmdCtx.AdminClient().UpdateLaunchPlan(ctx, &admin.LaunchPlanUpdateRequest{
-		Id: &core.Identifier{
-			Project: project,
-			Domain:  domain,
-			Name:    name,
-			Version: version,
-		},
-		State: lpState,
-	})
-	if err != nil {
-		fmt.Printf(clierrors.ErrFailedLPUpdate, name, err)
-		return err
+	if launchplan.UConfig.DryRun {
+		logger.Debugf(ctx, "skipping CreateExecution request (DryRun)")
+	} else {
+		_, err := cmdCtx.AdminClient().UpdateLaunchPlan(ctx, &admin.LaunchPlanUpdateRequest{
+			Id: &core.Identifier{
+				Project: project,
+				Domain:  domain,
+				Name:    name,
+				Version: version,
+			},
+			State: lpState,
+		})
+		if err != nil {
+			fmt.Printf(clierrors.ErrFailedLPUpdate, name, err)
+			return err
+		}
 	}
 	fmt.Printf("updated launchplan successfully on %v", name)
+
 	return nil
 }
