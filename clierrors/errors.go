@@ -7,7 +7,7 @@ var (
 	ErrFailedProjectUpdate = "Project %v failed to get updated to %v state due to %v\n"
 
 	ErrLPNotPassed        = "Launch plan name not passed\n"
-	ErrLPVersionNotPassed = "Launch plan version not passed\n"
+	ErrLPVersionNotPassed = "Launch plan version not passed\n" //nolint
 	ErrFailedLPUpdate     = "Launch plan %v failed to get updated due to %v\n"
 
 	ErrWorkflowNotPassed    = "Workflow name not passed\n"

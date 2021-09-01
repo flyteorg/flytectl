@@ -3,7 +3,6 @@ package update
 import (
 	"context"
 	"fmt"
-	"github.com/flyteorg/flytestdlib/logger"
 
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/cmd/config"
@@ -11,6 +10,7 @@ import (
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+	"github.com/flyteorg/flytestdlib/logger"
 )
 
 const (
