@@ -36,6 +36,10 @@ var (
 func registerExamplesFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	var examples []github.ReleaseAsset
 	var release string
+
+	// Deprecated checks for --k8Service
+	deprecatedCheck(ctx)
+
 	if len(args) == 1 {
 		release = args[0]
 	}

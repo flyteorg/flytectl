@@ -228,9 +228,9 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 
 func hydrateLaunchPlanSpec(lpSpec *admin.LaunchPlanSpec) {
 	assumableIamRole := len(rconfig.DefaultFilesConfig.AssumableIamRole) > 0
-	k8ServiceAcct := len(rconfig.DefaultFilesConfig.K8sServiceAccount) > 0
+	k8sServiceAcct := len(rconfig.DefaultFilesConfig.K8sServiceAccount) > 0
 	outputLocationPrefix := len(rconfig.DefaultFilesConfig.OutputLocationPrefix) > 0
-	if assumableIamRole || k8ServiceAcct {
+	if assumableIamRole || k8sServiceAcct {
 		lpSpec.AuthRole = &admin.AuthRole{
 			AssumableIamRole:         rconfig.DefaultFilesConfig.AssumableIamRole,
 			KubernetesServiceAccount: rconfig.DefaultFilesConfig.K8sServiceAccount,
@@ -567,4 +567,11 @@ func segregateSourceAndProtos(dataRefs []string) (string, []string, []string) {
 		}
 	}
 	return sourceCode, validProto, InvalidFiles
+}
+
+func deprecatedCheck(ctx context.Context) {
+	if len(rconfig.DefaultFilesConfig.K8ServiceAccount) > 0 {
+		logger.Warning(ctx, "--K8ServiceAccount is deprecated, Please use --K8sServiceAccount")
+		rconfig.DefaultFilesConfig.K8sServiceAccount = rconfig.DefaultFilesConfig.K8ServiceAccount
+	}
 }

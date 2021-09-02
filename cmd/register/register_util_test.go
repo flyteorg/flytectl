@@ -278,7 +278,7 @@ func TestHydrateLaunchPlanSpec(t *testing.T) {
 		hydrateLaunchPlanSpec(lpSpec)
 		assert.Equal(t, &admin.AuthRole{AssumableIamRole: "iamRole"}, lpSpec.AuthRole)
 	})
-	t.Run("k8Service account override", func(t *testing.T) {
+	t.Run("k8sService account override", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		rconfig.DefaultFilesConfig.K8sServiceAccount = "k8Account"
@@ -286,7 +286,7 @@ func TestHydrateLaunchPlanSpec(t *testing.T) {
 		hydrateLaunchPlanSpec(lpSpec)
 		assert.Equal(t, &admin.AuthRole{KubernetesServiceAccount: "k8Account"}, lpSpec.AuthRole)
 	})
-	t.Run("Both k8Service and IamRole", func(t *testing.T) {
+	t.Run("Both k8sService and IamRole", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		rconfig.DefaultFilesConfig.AssumableIamRole = "iamRole"
