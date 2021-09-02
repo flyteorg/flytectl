@@ -22,7 +22,9 @@ jobs:
         run: make compile
       - name: Create a sandbox cluster
         run: bin/flytectl sandbox start
+      - name: Setup flytectl config
+        run: bin/flytectl config init
       - name: Register cookbook
-        run: bin/flytectl register examples -d development  -p flytesnacks || true
+        run: bin/flytectl register examples -d development  -p flytesnacks
       - name: Teardown Sandbox cluster
         run: bin/flytectl sandbox teardown
