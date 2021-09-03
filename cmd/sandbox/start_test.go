@@ -90,7 +90,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -120,7 +120,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -165,7 +165,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -204,7 +204,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -241,7 +241,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := docker.Volumes
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:dind-%s", sandboxConfig.DefaultConfig.Image, sha),
+			Image:        fmt.Sprintf("%s:dind-%s", docker.ImageName, sha),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -274,7 +274,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := docker.Volumes
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -312,7 +312,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -349,7 +349,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -389,7 +389,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		sandboxConfig.DefaultConfig.Version = ""
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -426,7 +426,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -464,7 +464,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -507,7 +507,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -544,7 +544,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version),
+			Image:        fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{

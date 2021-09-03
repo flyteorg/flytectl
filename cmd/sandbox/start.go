@@ -136,9 +136,9 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		sandboxConfig.DefaultConfig.Version = fmt.Sprintf("%s-%s", flyteTag, sha)
 	}
 
-	var sandboxImageName = fmt.Sprintf("%s:%s", sandboxConfig.DefaultConfig.Image, sandboxConfig.DefaultConfig.Version)
+	var sandboxImageName = fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version)
 
-	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, sandboxConfig.DefaultConfig.Image)
+	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, docker.ImageName)
 	if err := docker.PullDockerImage(ctx, cli, sandboxImageName); err != nil {
 		return nil, err
 	}
