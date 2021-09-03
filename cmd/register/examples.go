@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/flyteorg/flytestdlib/logger"
+
 	"github.com/google/go-github/github"
 
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
@@ -48,6 +50,7 @@ func registerExamplesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Com
 		return err
 	}
 
+	logger.Infof(ctx, "Register started for %s %s release https://github.com/%s/%s/releases/tag/%s", flytesnacksRepository, tag, githubOrg, flytesnacksRepository, tag)
 	rconfig.DefaultFilesConfig.Archive = true
 	rconfig.DefaultFilesConfig.Version = tag
 	for _, v := range examples {
