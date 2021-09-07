@@ -260,6 +260,9 @@ func createNodeDetailsTreeView(rootView gotree.Tree, nodeExecutionClosures []*No
 
 func extractLiteralMap(literalMap *core.LiteralMap) (map[string]interface{}, error) {
 	m := make(map[string]interface{})
+	if literalMap == nil {
+		return m, nil
+	}
 	for key, literalVal := range literalMap.Literals {
 		extractedLiteralVal, err := coreutils.ExtractFromLiteral(literalVal)
 		if err != nil {
