@@ -133,34 +133,18 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		volumes = append(volumes, *vol)
 	}
 
-	var tag = "dind"
-	if len(sandboxConfig.DefaultConfig.Version) > 0 {
-		isGreater, err := util.IsVersionGreaterThan(sandboxConfig.DefaultConfig.Version, sandboxSupportedVersion)
-		if err != nil {
-			return nil, err
-		}
-		if !isGreater {
-			return nil, fmt.Errorf("version flag only supported with flyte %s+ release", sandboxSupportedVersion)
-		}
-		sha, err := githubutil.GetSHAFromVersion(sandboxConfig.DefaultConfig.Version, flyteRepository)
-		if err != nil {
-			return nil, err
-		}
-		tag = fmt.Sprintf("%s-%s", dind, sha)
+	image, err := getSandboxImage(sandboxConfig.DefaultConfig.Version)
+	if err != nil {
+		return nil, err
 	}
-
-	// Latest release will use image cr.flyte.org/flyteorg/flyte-sandbox:dind
-	// In case of version flytectl will use cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA}
-	var sandboxImageName = fmt.Sprintf("%s:%s", docker.ImageName, tag)
-
-	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, sandboxImageName)
-	if err := docker.PullDockerImage(ctx, cli, sandboxImageName); err != nil {
+	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, image)
+	if err := docker.PullDockerImage(ctx, cli, image); err != nil {
 		return nil, err
 	}
 
 	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
-	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, sandboxImageName)
+	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, image)
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)
 		return nil, err
@@ -172,6 +156,29 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}
 
 	return logReader, nil
+}
+
+func getSandboxImage(version string) (string, error) {
+	// Latest release will use image cr.flyte.org/flyteorg/flyte-sandbox:dind
+	// In case of version flytectl will use cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA}
+
+	var tag = dind
+	if len(version) > 0 {
+		isGreater, err := util.IsVersionGreaterThan(sandboxConfig.DefaultConfig.Version, sandboxSupportedVersion)
+		if err != nil {
+			return "", err
+		}
+		if !isGreater {
+			return "", fmt.Errorf("version flag only supported with flyte %s+ release", sandboxSupportedVersion)
+		}
+		sha, err := githubutil.GetSHAFromVersion(sandboxConfig.DefaultConfig.Version, flyteRepository)
+		if err != nil {
+			return "", err
+		}
+		tag = fmt.Sprintf("%s-%s", dind, sha)
+	}
+
+	return docker.GetSandboxImage(tag), nil
 }
 
 func mountVolume(file, destination string) (*mount.Mount, error) {

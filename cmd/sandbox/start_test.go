@@ -74,10 +74,6 @@ var fakePod = corev1.Pod{
 	},
 }
 
-func sandboxImage(tag string) string {
-	return fmt.Sprintf("%s:%s", docker.ImageName, tag)
-}
-
 func TestStartSandboxFunc(t *testing.T) {
 	p1, p2, _ := docker.GetSandboxPorts()
 	assert.Nil(t, util.SetupFlyteDir())
@@ -91,10 +87,11 @@ func TestStartSandboxFunc(t *testing.T) {
 		ctx := context.Background()
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
+		sandboxConfig.DefaultConfig.Version = ""
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -124,7 +121,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -161,7 +158,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
-		sandboxConfig.DefaultConfig.Version = dind
+		sandboxConfig.DefaultConfig.Version = ""
 		volumes := docker.Volumes
 		volumes = append(volumes, mount.Mount{
 			Type:   mount.TypeBind,
@@ -170,7 +167,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -199,7 +196,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = "../"
-		sandboxConfig.DefaultConfig.Version = dind
+		sandboxConfig.DefaultConfig.Version = ""
 		absPath, err := filepath.Abs(sandboxConfig.DefaultConfig.Source)
 		assert.Nil(t, err)
 		volumes := docker.Volumes
@@ -210,7 +207,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -247,7 +244,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := docker.Volumes
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(fmt.Sprintf("%s-%s", dind, sha)),
+			Image:        docker.GetSandboxImage(fmt.Sprintf("%s-%s", dind, sha)),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -280,7 +277,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		volumes := docker.Volumes
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -318,7 +315,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -355,7 +352,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -395,7 +392,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		sandboxConfig.DefaultConfig.Version = ""
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -432,7 +429,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -461,7 +458,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
-		sandboxConfig.DefaultConfig.Version = dind
+		sandboxConfig.DefaultConfig.Version = ""
 		volumes := docker.Volumes
 		volumes = append(volumes, mount.Mount{
 			Type:   mount.TypeBind,
@@ -470,7 +467,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		})
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -513,7 +510,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -537,7 +534,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
 		docker.Client = mockDocker
 		sandboxConfig.DefaultConfig.Source = ""
-		sandboxConfig.DefaultConfig.Version = dind
+		sandboxConfig.DefaultConfig.Version = ""
 		err = startSandboxCluster(ctx, []string{}, cmdCtx)
 		assert.Nil(t, err)
 	})
@@ -550,7 +547,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        sandboxImage(dind),
+			Image:        docker.GetSandboxImage(dind),
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{

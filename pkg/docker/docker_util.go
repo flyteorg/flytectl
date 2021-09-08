@@ -179,3 +179,8 @@ func InspectExecResp(ctx context.Context, cli Docker, containerID string) error 
 	}
 	return nil
 }
+
+// GetSandboxImage will return the sandbox image with tag
+func GetSandboxImage(tag string) string {
+	return fmt.Sprintf("%s:%s", ImageName, tag)
+}
