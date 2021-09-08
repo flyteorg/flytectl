@@ -133,7 +133,8 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		volumes = append(volumes, *vol)
 	}
 
-	if sandboxConfig.DefaultConfig.Version != dind {
+	var tag = "dind"
+	if len(sandboxConfig.DefaultConfig.Version) > 0 {
 		isGreater, err := util.IsVersionGreaterThan(sandboxConfig.DefaultConfig.Version, sandboxSupportedVersion)
 		if err != nil {
 			return nil, err
@@ -145,12 +146,12 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		if err != nil {
 			return nil, err
 		}
-		sandboxConfig.DefaultConfig.Version = fmt.Sprintf("%s-%s", dind, sha)
+		tag = fmt.Sprintf("%s-%s", dind, sha)
 	}
 
 	// Latest release will use image cr.flyte.org/flyteorg/flyte-sandbox:dind
 	// In case of version flytectl will use cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA}
-	var sandboxImageName = fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version)
+	var sandboxImageName = fmt.Sprintf("%s:%s", docker.ImageName, tag)
 
 	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, sandboxImageName)
 	if err := docker.PullDockerImage(ctx, cli, sandboxImageName); err != nil {
