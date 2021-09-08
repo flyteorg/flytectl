@@ -30,8 +30,6 @@ import (
 	testclient "k8s.io/client-go/kubernetes/fake"
 )
 
-const latest = "latest"
-
 var content = `
 apiVersion: v1
 clusters:
@@ -163,7 +161,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
-		sandboxConfig.DefaultConfig.Version = latest
+		sandboxConfig.DefaultConfig.Version = dind
 		volumes := docker.Volumes
 		volumes = append(volumes, mount.Mount{
 			Type:   mount.TypeBind,
@@ -201,7 +199,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = "../"
-		sandboxConfig.DefaultConfig.Version = latest
+		sandboxConfig.DefaultConfig.Version = dind
 		absPath, err := filepath.Abs(sandboxConfig.DefaultConfig.Source)
 		assert.Nil(t, err)
 		volumes := docker.Volumes
@@ -463,7 +461,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
-		sandboxConfig.DefaultConfig.Version = latest
+		sandboxConfig.DefaultConfig.Version = dind
 		volumes := docker.Volumes
 		volumes = append(volumes, mount.Mount{
 			Type:   mount.TypeBind,
@@ -539,7 +537,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
 		docker.Client = mockDocker
 		sandboxConfig.DefaultConfig.Source = ""
-		sandboxConfig.DefaultConfig.Version = latest
+		sandboxConfig.DefaultConfig.Version = dind
 		err = startSandboxCluster(ctx, []string{}, cmdCtx)
 		assert.Nil(t, err)
 	})

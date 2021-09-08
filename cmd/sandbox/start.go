@@ -53,11 +53,13 @@ Note: Flytectl sandbox will only work for v0.10.0+
 	
 Usage
 	`
-	k8sEndpoint       = "https://127.0.0.1:30086"
-	flyteNamespace    = "flyte"
-	dind              = "dind"
-	diskPressureTaint = "node.kubernetes.io/disk-pressure"
-	taintEffect       = "NoSchedule"
+	k8sEndpoint             = "https://127.0.0.1:30086"
+	flyteNamespace          = "flyte"
+	flyteRepository         = "flyte"
+	dind                    = "dind"
+	sandboxSupportedVersion = "v0.10.0"
+	diskPressureTaint       = "node.kubernetes.io/disk-pressure"
+	taintEffect             = "NoSchedule"
 )
 
 type ExecResult struct {
@@ -131,21 +133,19 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		volumes = append(volumes, *vol)
 	}
 
-	if sandboxConfig.DefaultConfig.Version != "latest" {
-		isGreater, err := util.IsVersionGreaterThan(sandboxConfig.DefaultConfig.Version, "v0.10.0")
+	if sandboxConfig.DefaultConfig.Version != dind {
+		isGreater, err := util.IsVersionGreaterThan(sandboxConfig.DefaultConfig.Version, sandboxSupportedVersion)
 		if err != nil {
 			return nil, err
 		}
 		if !isGreater {
-			return nil, fmt.Errorf("version flag only supported with flyte v0.10.0+ release")
+			return nil, fmt.Errorf("version flag only supported with flyte %s+ release", sandboxSupportedVersion)
 		}
-		sha, err := githubutil.GetSHAFromVersion(sandboxConfig.DefaultConfig.Version, "flyte")
+		sha, err := githubutil.GetSHAFromVersion(sandboxConfig.DefaultConfig.Version, flyteRepository)
 		if err != nil {
 			return nil, err
 		}
 		sandboxConfig.DefaultConfig.Version = fmt.Sprintf("%s-%s", dind, sha)
-	} else {
-		sandboxConfig.DefaultConfig.Version = dind
 	}
 
 	// Latest release will use image cr.flyte.org/flyteorg/flyte-sandbox:dind
