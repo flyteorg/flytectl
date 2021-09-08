@@ -44,16 +44,18 @@ Mount your source code repository inside sandbox
 
  bin/flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
 	
-Run specific version of flyte
+Run specific version of flyte. flytectl sandbox only support flyte version available in Github release https://github.com/flyteorg/flyte/tags
 ::
 
  bin/flytectl sandbox start  --version=v0.14.0
 
+Note: Flytectl sandbox will only work for v0.10.0+
+	
 Usage
 	`
 	k8sEndpoint       = "https://127.0.0.1:30086"
 	flyteNamespace    = "flyte"
-	flyteTag          = "dind"
+	dind              = "dind"
 	diskPressureTaint = "node.kubernetes.io/disk-pressure"
 	taintEffect       = "NoSchedule"
 )
@@ -105,7 +107,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		if err.Error() != clierrors.ErrSandboxExists {
 			return nil, err
 		}
-		fmt.Printf("Existing details of your sandbox:")
+		fmt.Printf("Existing details of your sandbox")
 		util.PrintSandboxMessage()
 		return nil, nil
 	}
@@ -128,17 +130,29 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	} else if vol != nil {
 		volumes = append(volumes, *vol)
 	}
-	if sandboxConfig.DefaultConfig.Version != flyteTag {
+
+	if sandboxConfig.DefaultConfig.Version != "latest" {
+		isGreater, err := util.IsVersionGreaterThan(sandboxConfig.DefaultConfig.Version, "v0.10.0")
+		if err != nil {
+			return nil, err
+		}
+		if !isGreater {
+			return nil, fmt.Errorf("version flag only supported with flyte v0.10.0+ release")
+		}
 		sha, err := githubutil.GetSHAFromVersion(sandboxConfig.DefaultConfig.Version, "flyte")
 		if err != nil {
 			return nil, err
 		}
-		sandboxConfig.DefaultConfig.Version = fmt.Sprintf("%s-%s", flyteTag, sha)
+		sandboxConfig.DefaultConfig.Version = fmt.Sprintf("%s-%s", dind, sha)
+	} else {
+		sandboxConfig.DefaultConfig.Version = dind
 	}
 
+	// Latest release will use image cr.flyte.org/flyteorg/flyte-sandbox:dind
+	// In case of version flytectl will use cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA}
 	var sandboxImageName = fmt.Sprintf("%s:%s", docker.ImageName, sandboxConfig.DefaultConfig.Version)
 
-	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, docker.ImageName)
+	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, sandboxImageName)
 	if err := docker.PullDockerImage(ctx, cli, sandboxImageName); err != nil {
 		return nil, err
 	}
