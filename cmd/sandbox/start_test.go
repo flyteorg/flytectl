@@ -675,3 +675,21 @@ func TestGetNodeTaintStatus(t *testing.T) {
 		assert.Equal(t, true, c)
 	})
 }
+
+func TestGetSandboxImage(t *testing.T) {
+	t.Run("Get Latest sandbox", func(t *testing.T) {
+		image, err := getSandboxImage("")
+		assert.Nil(t, err)
+		assert.Equal(t, docker.GetSandboxImage(dind), image)
+	})
+
+	t.Run("Get sandbox image with version ", func(t *testing.T) {
+		image, err := getSandboxImage("v0.14.0")
+		assert.Nil(t, err)
+		assert.Equal(t, true, strings.HasPrefix(image, docker.ImageName))
+	})
+	t.Run("Get sandbox image with wrong version ", func(t *testing.T) {
+		_, err := getSandboxImage("v100.1.0")
+		assert.NotNil(t, err)
+	})
+}

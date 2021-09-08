@@ -164,14 +164,14 @@ func getSandboxImage(version string) (string, error) {
 
 	var tag = dind
 	if len(version) > 0 {
-		isGreater, err := util.IsVersionGreaterThan(sandboxConfig.DefaultConfig.Version, sandboxSupportedVersion)
+		isGreater, err := util.IsVersionGreaterThan(version, sandboxSupportedVersion)
 		if err != nil {
 			return "", err
 		}
 		if !isGreater {
 			return "", fmt.Errorf("version flag only supported with flyte %s+ release", sandboxSupportedVersion)
 		}
-		sha, err := githubutil.GetSHAFromVersion(sandboxConfig.DefaultConfig.Version, flyteRepository)
+		sha, err := githubutil.GetSHAFromVersion(version, flyteRepository)
 		if err != nil {
 			return "", err
 		}
