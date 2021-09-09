@@ -692,4 +692,12 @@ func TestGetSandboxImage(t *testing.T) {
 		_, err := getSandboxImage("v100.1.0")
 		assert.NotNil(t, err)
 	})
+	t.Run("Get sandbox image with wrong version ", func(t *testing.T) {
+		_, err := getSandboxImage("aaaaaa")
+		assert.NotNil(t, err)
+	})
+	t.Run("Get sandbox image with version that is not supported", func(t *testing.T) {
+		_, err := getSandboxImage("v0.10.0")
+		assert.NotNil(t, err)
+	})
 }
