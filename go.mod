@@ -11,7 +11,7 @@ require (
 	github.com/docker/docker v20.10.7+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/enescakir/emoji v1.0.0
-	github.com/flyteorg/flyteidl v0.21.0
+	github.com/flyteorg/flyteidl v0.21.2
 	github.com/flyteorg/flytestdlib v0.3.34
 	github.com/ghodss/yaml v1.0.0
 	github.com/golang/protobuf v1.4.3
@@ -54,5 +54,3 @@ require (
 	k8s.io/client-go v0.21.3
 	sigs.k8s.io/yaml v1.2.0
 )
-
-replace github.com/flyteorg/flyteidl => github.com/flyteorg/flyteidl v0.20.3-0.20210915101629-bb73a30fd9a4
