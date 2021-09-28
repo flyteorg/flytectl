@@ -17,8 +17,8 @@ To update the documentation, follow these steps:
 3. Run ``make gendocs`` from within the `docs <https://github.com/flyteorg/flytectl/tree/master/docs>`__ folder
 4. Open html files produced by Sphinx in your browser to verify if the changes look as expected (html files can be found in the ``docs/build/html`` folder)
 
-💻 Contribute to API Documentation
-==================================
+💻 Contribute Code
+==================
 
 1. Set up a local cluster by running ``flytectl sandbox start --source=$(pwd)`` in the root directory
 2. xxx
