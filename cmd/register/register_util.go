@@ -15,6 +15,8 @@ import (
 	"sort"
 	"strings"
 
+	structpb "github.com/golang/protobuf/ptypes/struct"
+
 	"github.com/flyteorg/flytestdlib/contextutils"
 	"github.com/flyteorg/flytestdlib/promutils"
 	"github.com/flyteorg/flytestdlib/promutils/labeled"
@@ -34,6 +36,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	v1 "k8s.io/api/core/v1"
 )
 
 // Variable define in serialized proto that needs to be replace in registration time
@@ -211,6 +214,40 @@ func hydrateIdentifier(identifier *core.Identifier) {
 	}
 }
 
+// TODO: once this code is moved to flytestdlib, refactor to remove this duplicate method.
+func marshalObjToStruct(input interface{}) (*structpb.Struct, error) {
+	b, err := json.Marshal(input)
+	if err != nil {
+		return nil, err
+	}
+
+	// Turn JSON into a protobuf struct
+	structObj := &structpb.Struct{}
+	if err := jsonpb.UnmarshalString(string(b), structObj); err != nil {
+		return nil, err
+	}
+	return structObj, nil
+}
+
+// Don't use this if the unmarshalled obj is a proto message.
+// TODO: once this code is moved to flytestdlib, refactor to remove this duplicate method.
+func unmarshalStructToObj(structObj *structpb.Struct, obj interface{}) error {
+	if structObj == nil {
+		return fmt.Errorf("nil Struct Object passed")
+	}
+
+	jsonObj, err := json.Marshal(structObj)
+	if err != nil {
+		return err
+	}
+
+	if err = json.Unmarshal(jsonObj, obj); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 	if task.Template.GetContainer() != nil {
 		for k := range task.Template.GetContainer().Args {
@@ -221,6 +258,33 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 				}
 				task.Template.GetContainer().Args[k] = string(remotePath)
 			}
+		}
+	} else if task.Template.GetK8SPod() != nil && task.Template.GetK8SPod().PodSpec != nil {
+		var podSpec = v1.PodSpec{}
+		err := unmarshalStructToObj(task.Template.GetK8SPod().PodSpec, &podSpec)
+		if err != nil {
+			return err
+		}
+		for containerIdx, container := range podSpec.Containers {
+			for argIdx, arg := range container.Args {
+				if arg == registrationRemotePackagePattern {
+					remotePath, err := getRemoteStoragePath(context.Background(), Client, rconfig.DefaultFilesConfig.SourceUploadPath, sourceCode, rconfig.DefaultFilesConfig.Version)
+					if err != nil {
+						return err
+					}
+					podSpec.Containers[containerIdx].Args[argIdx] = string(remotePath)
+				}
+			}
+		}
+		podSpecStruct, err := marshalObjToStruct(&podSpec)
+		if err != nil {
+			return err
+		}
+		task.Template.Target = &core.TaskTemplate_K8SPod{
+			K8SPod: &core.K8SPod{
+				Metadata: task.Template.GetK8SPod().Metadata,
+				PodSpec:  podSpecStruct,
+			},
 		}
 	}
 	return nil
