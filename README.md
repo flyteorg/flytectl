@@ -60,7 +60,7 @@ FlyteCTL is designed to be a portable and lightweight CLI to work with Flyte. It
     </h2>
 </html>
 
-You can find the detailed contribution guide [here](docs/source/gen/contribute.rst). 
+You can find the detailed contribution guide [here](docs/source/contribute.rst). 
 
 <html>
     <h2 id="file-an-issue"> 
