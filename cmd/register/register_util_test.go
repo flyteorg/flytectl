@@ -3,12 +3,13 @@ package register
 import (
 	"errors"
 	"fmt"
-	"github.com/flyteorg/flytestdlib/utils"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/flyteorg/flytestdlib/utils"
 
 	v1 "k8s.io/api/core/v1"
 
@@ -429,7 +430,7 @@ func TestHydrateTaskSpec(t *testing.T) {
 			},
 		},
 	}
-	podSpecStruct, err := utils.MarshalObjToStruct(podSpec)
+	podSpecStruct, err := marshalObjToStruct(podSpec)
 	if err != nil {
 		t.Fatal(err)
 	}
