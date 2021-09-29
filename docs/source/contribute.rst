@@ -67,5 +67,7 @@ To update the documentation, follow these steps:
         * - ``version``
           - ``flytectl version ...``
           - Command to fetch FlyteCTL version
+     
+     Find all FlyteCTL commands on the `Nouns <https://docs.flyte.org/projects/flytectl/en/stable/nouns.html>`__ page.
    * Run appropriate tests to test the changes by running ``go test ./... -race -coverprofile=coverage.txt -covermode=atomic  -v`` 
      in the root directory
