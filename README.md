@@ -29,26 +29,24 @@ FlyteCTL is designed to be a portable and lightweight CLI to work with Flyte. It
 
 ## 🚀 Quick Start
 
-* Install FlyteCTL with bash or shell script
+1. Install FlyteCTL with bash or shell script
 
     * Bash
         ```bash
         $ brew install flyteorg/homebrew-tap/flytectl
-
-        # Upgrade flytectl 
-        $ brew upgrade flytectl
         ```
     * Shell script
         ```bash
         $ curl -s https://raw.githubusercontent.com/lyft/flytectl/master/install.sh | bash
         ```
+2. (Optional) `flytectl upgrade` provides a general interface to upgrade FlyteCTL; run the command shown in the output
 
-* Start sandbox using FlyteCTL 
+3. Start sandbox using FlyteCTL 
     ```bash
     $ flytectl sandbox start 
     ```
 
-* Register Examples
+4. Register examples
     ```bash
     # Register core workflows 
     $ flytectl register examples -d development -p flytesnacks
