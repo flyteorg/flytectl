@@ -25,10 +25,12 @@ To update the documentation, follow these steps:
 3. Run ``flytectl get project`` to see if things are working
 4. Run the command you want to test in the terminal
 5. If you want to update the command (add additional options, change existing options, etc.):
+   
    * Navigate to `cmd <https://github.com/flyteorg/flytectl/tree/master/cmd>`__ directory
    * Each sub-directory points to a command, for example, ``create`` points to ``flytectl create ...``
    * Here are the directories you can navigate to:
-     .. list-table:: Title
+  
+     .. list-table:: FlyteCTL cmd directories
         :widths: 25 25 50
         :header-rows: 1
 
