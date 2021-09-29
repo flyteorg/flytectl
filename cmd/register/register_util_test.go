@@ -3,6 +3,7 @@ package register
 import (
 	"errors"
 	"fmt"
+	"github.com/flyteorg/flytestdlib/utils"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -428,7 +429,7 @@ func TestHydrateTaskSpec(t *testing.T) {
 			},
 		},
 	}
-	podSpecStruct, err := marshalObjToStruct(podSpec)
+	podSpecStruct, err := utils.MarshalObjToStruct(podSpec)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -446,7 +447,7 @@ func TestHydrateTaskSpec(t *testing.T) {
 	err = hydrateTaskSpec(task, "sourcey")
 	assert.NoError(t, err)
 	var hydratedPodSpec = v1.PodSpec{}
-	err = unmarshalStructToObj(task.Template.GetK8SPod().PodSpec, &hydratedPodSpec)
+	err = utils.UnmarshalStructToObj(task.Template.GetK8SPod().PodSpec, &hydratedPodSpec)
 	assert.NoError(t, err)
 	assert.Len(t, hydratedPodSpec.Containers[1].Args, 2)
 	assert.True(t, strings.HasSuffix(hydratedPodSpec.Containers[1].Args[1], "sourcey"))

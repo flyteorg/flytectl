@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/flyteorg/flytestdlib/utils"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -14,8 +15,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-
-	structpb "github.com/golang/protobuf/ptypes/struct"
 
 	"github.com/flyteorg/flytestdlib/contextutils"
 	"github.com/flyteorg/flytestdlib/promutils"
@@ -214,40 +213,6 @@ func hydrateIdentifier(identifier *core.Identifier) {
 	}
 }
 
-// TODO: once this code is moved to flytestdlib, refactor to remove this duplicate method.
-func marshalObjToStruct(input interface{}) (*structpb.Struct, error) {
-	b, err := json.Marshal(input)
-	if err != nil {
-		return nil, err
-	}
-
-	// Turn JSON into a protobuf struct
-	structObj := &structpb.Struct{}
-	if err := jsonpb.UnmarshalString(string(b), structObj); err != nil {
-		return nil, err
-	}
-	return structObj, nil
-}
-
-// Don't use this if the unmarshalled obj is a proto message.
-// TODO: once this code is moved to flytestdlib, refactor to remove this duplicate method.
-func unmarshalStructToObj(structObj *structpb.Struct, obj interface{}) error {
-	if structObj == nil {
-		return fmt.Errorf("nil Struct Object passed")
-	}
-
-	jsonObj, err := json.Marshal(structObj)
-	if err != nil {
-		return err
-	}
-
-	if err = json.Unmarshal(jsonObj, obj); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 	if task.Template.GetContainer() != nil {
 		for k := range task.Template.GetContainer().Args {
@@ -261,7 +226,7 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 		}
 	} else if task.Template.GetK8SPod() != nil && task.Template.GetK8SPod().PodSpec != nil {
 		var podSpec = v1.PodSpec{}
-		err := unmarshalStructToObj(task.Template.GetK8SPod().PodSpec, &podSpec)
+		err := utils.UnmarshalStructToObj(task.Template.GetK8SPod().PodSpec, &podSpec)
 		if err != nil {
 			return err
 		}
@@ -276,7 +241,7 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 				}
 			}
 		}
-		podSpecStruct, err := marshalObjToStruct(&podSpec)
+		podSpecStruct, err := utils.MarshalObjToStruct(&podSpec)
 		if err != nil {
 			return err
 		}
