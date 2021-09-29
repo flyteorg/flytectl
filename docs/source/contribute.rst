@@ -20,8 +20,8 @@ To update the documentation, follow these steps:
 💻 Contribute Code
 ==================
 
-1. Set up a local cluster by running ``flytectl sandbox start --source=$(pwd)`` in the root directory
-2. Run ``make compile`` in the root directory to compile the code
+1. Run ``make compile`` in the root directory to compile the code
+2. Set up a local cluster by running ``./bin/flytectl sandbox start`` in the root directory
 3. Run ``flytectl get project`` to see if things are working
 4. Run the command you want to test in the terminal
 5. If you want to update the command (add additional options, change existing options, etc.):
@@ -45,13 +45,13 @@ To update the documentation, follow these steps:
           - Command to validate/generate flytectl config
         * - ``create``
           - ``flytectl create ...``
-          - Command to create a task/workflow/launchplan/execution/project
+          - Command to create a project/execution
         * - ``delete``
           - ``flytectl delete ...``
-          - Command to delete a task/workflow/launchplan/execution/project
+          - Command to abort an execution and delete resource attributes
         * - ``get``
           - ``flytectl get ...``
-          - Command to get a task/workflow/launchplan/execution/project
+          - Command to get a task/workflow/launchplan/execution/project/resource's-attributes
         * - ``register``
           - ``flytectl register ...``
           - Command to register a task/workflow/launchplan
@@ -60,7 +60,7 @@ To update the documentation, follow these steps:
           - Command to interact with sandbox
         * - ``update``
           - ``flytectl update ...``
-          - Command to update a project
+          - Command to update a project/launchplan/resource's-attributes
         * - ``upgrade``
           - ``flytectl upgrade ...``
           - Command to upgrade/rollback FlyteCTL version
