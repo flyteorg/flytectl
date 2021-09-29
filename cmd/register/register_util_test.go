@@ -448,6 +448,6 @@ func TestHydrateTaskSpec(t *testing.T) {
 	var hydratedPodSpec = v1.PodSpec{}
 	err = unmarshalStructToObj(task.Template.GetK8SPod().PodSpec, &hydratedPodSpec)
 	assert.NoError(t, err)
-	assert.EqualValues(t, hydratedPodSpec.Containers[1].Args, []string{"baz"}, "/v1-sourcey")
-
+	assert.Len(t, hydratedPodSpec.Containers[1].Args, 2)
+	assert.True(t, strings.HasSuffix(hydratedPodSpec.Containers[1].Args[1], "sourcey"))
 }
