@@ -430,7 +430,7 @@ func TestHydrateTaskSpec(t *testing.T) {
 			},
 		},
 	}
-	podSpecStruct, err := marshalObjToStruct(podSpec)
+	podSpecStruct, err := utils.MarshalObjToStruct(podSpec)
 	if err != nil {
 		t.Fatal(err)
 	}

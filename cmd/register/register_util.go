@@ -15,12 +15,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/flyteorg/flytestdlib/utils"
-	structpb "github.com/golang/protobuf/ptypes/struct"
-
 	"github.com/flyteorg/flytestdlib/contextutils"
 	"github.com/flyteorg/flytestdlib/promutils"
 	"github.com/flyteorg/flytestdlib/promutils/labeled"
+	"github.com/flyteorg/flytestdlib/utils"
 
 	"github.com/google/go-github/github"
 
@@ -215,20 +213,6 @@ func hydrateIdentifier(identifier *core.Identifier) {
 	}
 }
 
-func marshalObjToStruct(input interface{}) (*structpb.Struct, error) {
-	b, err := json.Marshal(input)
-	if err != nil {
-		return nil, err
-	}
-
-	// Turn JSON into a protobuf struct
-	structObj := &structpb.Struct{}
-	if err := jsonpb.UnmarshalString(string(b), structObj); err != nil {
-		return nil, err
-	}
-	return structObj, nil
-}
-
 func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 	if task.Template.GetContainer() != nil {
 		for k := range task.Template.GetContainer().Args {
@@ -257,7 +241,7 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 				}
 			}
 		}
-		podSpecStruct, err := marshalObjToStruct(&podSpec)
+		podSpecStruct, err := utils.MarshalObjToStruct(podSpec)
 		if err != nil {
 			return err
 		}
