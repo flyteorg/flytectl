@@ -12,8 +12,8 @@ Synopsis
 
 Retrieves cluster resource attributes for given project and domain combination or additionally with workflow name.
 
-Retrieves cluster resource attribute for project and domain
-Here the command get cluster resource attributes for  project flytectldemo and development domain.
+Retrieves cluster resource attribute for project and domain.
+Here the command get cluster resource attributes for project flytectldemo and development domain.
 ::
 
  flytectl get cluster-resource-attribute -p flytectldemo -d development 
@@ -24,7 +24,7 @@ eg : output from the command
 
  {"project":"flytectldemo","domain":"development","attributes":{"buzz":"lightyear","foo":"bar"}}
 
-Retrieves cluster resource attribute for project and domain and workflow
+Retrieves cluster resource attribute for project and domain and workflow.
 Here the command get cluster resource attributes for  project flytectldemo, development domain and workflow core.control_flow.run_merge_sort.merge_sort
 ::
 
@@ -36,9 +36,9 @@ eg : output from the command
 
  {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","attributes":{"buzz":"lightyear","foo":"bar"}}
 
-Writing the cluster resource attribute to a file. If there are no cluster resource attributes , command would return an error.
-Here the command gets task resource attributes and writes the config file to cra.yaml
-eg:  content of cra.yaml
+Writing the cluster resource attribute to a file. If there are no cluster resource attributes, command will return an error.
+Here the command gets task resource attributes and writes the config file to cra.yaml,
+e.g., content of cra.yaml.
 
 ::
 
