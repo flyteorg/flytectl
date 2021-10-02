@@ -21,8 +21,8 @@ Here the command deletes execution cluster label for project flytectldemo and de
 
 Deletes execution cluster label using config file which was used for creating it.
 Here the command deletes the execution cluster label from the config file ecl.yaml.
-Value is optional in the file as its unread during the delete command but can be kept as the same file can be used for get, update or delete 
-eg: content of ecl.yaml which will use the project domain and workflow name for deleting the resource.
+Value is optional in the file as its unread during the delete command but can be kept as the same file can be used for get, update or delete, 
+e.g., the content of ecl.yaml, which will use the project domain and workflow name for deleting the resource.
 
 ::
 
