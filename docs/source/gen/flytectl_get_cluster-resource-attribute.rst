@@ -13,7 +13,7 @@ Synopsis
 Retrieves cluster resource attributes for given project and domain combination or additionally with workflow name.
 
 Retrieves cluster resource attribute for project and domain.
-Here the command get cluster resource attributes for project flytectldemo and development domain.
+Here the command gets cluster resource attributes for project flytectldemo and development domain.
 ::
 
  flytectl get cluster-resource-attribute -p flytectldemo -d development 
@@ -25,7 +25,7 @@ eg : output from the command
  {"project":"flytectldemo","domain":"development","attributes":{"buzz":"lightyear","foo":"bar"}}
 
 Retrieves cluster resource attribute for project and domain and workflow.
-Here the command get cluster resource attributes for  project flytectldemo, development domain and workflow core.control_flow.run_merge_sort.merge_sort
+Here the command gets cluster resource attributes for project flytectldemo, development domain and workflow core.control_flow.run_merge_sort.merge_sort
 ::
 
  flytectl get cluster-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
