@@ -3,13 +3,13 @@
 flytectl config
 ---------------
 
-Runs various config commands, look at the help of this command to get a list of available commands..
+Runs various config commands, look at the help of this command to get a list of available commands.
 
 Synopsis
 ~~~~~~~~
 
 
-Runs various config commands, look at the help of this command to get a list of available commands..
+Runs various config commands, look at the help of this command to get a list of available commands.
 
 Options
 ~~~~~~~
