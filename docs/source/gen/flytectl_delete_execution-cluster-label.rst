@@ -12,17 +12,17 @@ Synopsis
 
 Deletes execution cluster label for given project and domain combination or additionally with workflow name.
 
-Deletes execution cluster label for project and domain
-Here the command delete execution cluster label for project flytectldemo and development domain.
+Deletes execution cluster label for project and domain.
+Here the command deletes execution cluster label for project flytectldemo and development domain.
 ::
 
  flytectl delete execution-cluster-label -p flytectldemo -d development 
 
 
 Deletes execution cluster label using config file which was used for creating it.
-Here the command deletes execution cluster label from the config file ecl.yaml
+Here the command deletes the execution cluster label from the config file ecl.yaml.
 Value is optional in the file as its unread during the delete command but can be kept as the same file can be used for get, update or delete 
-eg:  content of ecl.yaml which will use the project domain and workflow name for deleting the resource
+eg: content of ecl.yaml which will use the project domain and workflow name for deleting the resource.
 
 ::
 
