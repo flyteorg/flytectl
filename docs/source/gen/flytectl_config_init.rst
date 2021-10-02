@@ -9,21 +9,21 @@ Synopsis
 ~~~~~~~~
 
 
-Creates a flytectl config file in flyte directory i.e ~/.flyte
+Creates a flytectl config file in flyte directory i.e ~/.flyte.
 	
-Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox https://docs.flyte.org/en/latest/deployment/sandbox.html
+Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox (https://docs.flyte.org/en/latest/deployment/sandbox.html) .
 
 ::
 
  bin/flytectl configuration config 
 
-Generate remote cluster config. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
+Generate remote cluster config. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html .
 	
 ::
 
  bin/flytectl configuration config --host=flyte.myexample.com
 	
-Generate flytectl config with a storage provider
+Generate flytectl config with a storage provider.
 ::
 
  bin/flytectl configuration config --host=flyte.myexample.com --storage
@@ -92,5 +92,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands..
+* :doc:`flytectl_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands.
 
