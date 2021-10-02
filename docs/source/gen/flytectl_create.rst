@@ -70,7 +70,7 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - flyetcl CLI tool
-* :doc:`flytectl_create_execution` 	 - Create execution resources
-* :doc:`flytectl_create_project` 	 - Create project resources
+* :doc:`flytectl` 	 - flyetcl CLI tool.
+* :doc:`flytectl_create_execution` 	 - Create execution resources.
+* :doc:`flytectl_create_project` 	 - Create project resources.
 
