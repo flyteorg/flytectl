@@ -71,5 +71,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands..
+* :doc:`flytectl_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands.
 
