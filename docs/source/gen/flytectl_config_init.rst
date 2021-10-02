@@ -11,7 +11,7 @@ Synopsis
 
 Creates a flytectl config file in flyte directory i.e ~/.flyte.
 	
-Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox (https://docs.flyte.org/en/latest/deployment/sandbox.html) .
+Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox https://docs.flyte.org/en/latest/deployment/sandbox.html .
 
 ::
 
