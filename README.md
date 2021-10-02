@@ -6,7 +6,7 @@
         FlyteCTL
     </h1>
     <p align="center">
-        The official Flyte command-line interface
+       Flyte's official command-line interface
     </p>
     <h3 align="center">
         <a href="https://flytectl.rtfd.io">Documentation</a>
