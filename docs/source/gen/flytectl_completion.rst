@@ -107,5 +107,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - flyetcl CLI tool
+* :doc:`flytectl` 	 - flyetcl CLI tool.
 
