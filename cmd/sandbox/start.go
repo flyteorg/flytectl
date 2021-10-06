@@ -49,10 +49,15 @@ Run specific version of flyte. flytectl sandbox only support flyte version avail
 
  bin/flytectl sandbox start  --version=v0.14.0
 
-Note: Flytectl sandbox will only work for v0.10.0+
-	
+Note: Flytectl sandbox is only supported for Flyte versions > v0.10.0
+
+Specify a Flyte Sandbox compliant image with the registry. This is useful, in case you want to use an image from your registry.
+::
+
+  flytectl 
+
 Usage
-	`
+`
 	k8sEndpoint             = "https://127.0.0.1:30086"
 	flyteNamespace          = "flyte"
 	flyteRepository         = "flyte"
@@ -133,7 +138,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		volumes = append(volumes, *vol)
 	}
 
-	image, err := getSandboxImage(sandboxConfig.DefaultConfig.Version)
+	image, err := getSandboxImage(sandboxConfig.DefaultConfig.Version, sandboxConfig.DefaultConfig.Image)
 	if err != nil {
 		return nil, err
 	}
@@ -158,9 +163,13 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	return logReader, nil
 }
 
-func getSandboxImage(version string) (string, error) {
+func getSandboxImage(version string, alternateImage string) (string, error) {
 	// Latest release will use image cr.flyte.org/flyteorg/flyte-sandbox:dind
 	// In case of version flytectl will use cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA}
+
+	if len(alternateImage) > 0 {
+		return alternateImage, nil
+	}
 
 	var tag = dind
 	if len(version) > 0 {
