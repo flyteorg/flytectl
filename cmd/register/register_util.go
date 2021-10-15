@@ -445,15 +445,12 @@ func registerFile(ctx context.Context, fileName, sourceCode string, registerResu
 func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, error) {
 	dataRef := storage.DataReference(ref)
 	scheme, _, key, err := dataRef.Split()
-	segments := strings.Split(key, ".")
-	ext := segments[len(segments)-1]
 	if err != nil {
 		return nil, err
 	}
 	var dataRefReaderCloser io.ReadCloser
-
-	if ext != "tar" && ext != "tgz" {
-		return nil, errors.New("only .tar and .tgz extension archives are supported")
+	if !strings.HasSuffix(key, ".tar") && !strings.HasSuffix(key, ".tgz") && !strings.HasSuffix(key, ".tar.gz") {
+		return nil, errors.New("only .tar, .tar.gz and .tgz extension archives are supported")
 	}
 
 	if scheme == "http" || scheme == "https" {
@@ -464,7 +461,7 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 	if err != nil {
 		return nil, err
 	}
-	if ext == "tgz" {
+	if strings.HasSuffix(key, ".tgz") || strings.HasSuffix(key, ".tar.gz") {
 		if dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser); err != nil {
 			return nil, err
 		}
@@ -486,7 +483,7 @@ func getJSONSpec(message proto.Message) string {
 func filterExampleFromRelease(releases github.RepositoryRelease) []github.ReleaseAsset {
 	var assets []github.ReleaseAsset
 	for _, v := range releases.Assets {
-		if strings.HasSuffix(*v.Name, ".tgz") {
+		if strings.HasSuffix(*v.Name, ".tar.gz") || strings.HasSuffix(*v.Name, ".tgz") || strings.HasSuffix(*v.Name, ".tar") {
 			assets = append(assets, v)
 		}
 	}
