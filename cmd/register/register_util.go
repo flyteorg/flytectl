@@ -46,8 +46,11 @@ const registrationVersionPattern = "{{ registration.version }}"
 // Additional variable define in fast serialized proto that needs to be replace in registration time
 const registrationRemotePackagePattern = "{{ .remote_package_path }}"
 
-// All supported extensions for register
+// All supported extensions for compress
 var supportedExtensions = []string{".tar", ".tgz", ".tar.gz"}
+
+// All supported extensions for gzip compress
+var validGzipExtensions = []string{".tgz", ".tar.gz"}
 
 type Result struct {
 	Name   string
@@ -453,14 +456,8 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 	}
 	var dataRefReaderCloser io.ReadCloser
 
-	isValidFormat := false
-	for _, extension := range supportedExtensions {
-		if strings.HasSuffix(key, extension) {
-			isValidFormat = true
-		}
-	}
-
-	if !isValidFormat {
+	isValid, extension := checkSupportedExtensionForCompress(key)
+	if !isValid {
 		return nil, errors.New("only .tar, .tar.gz and .tgz extension archives are supported")
 	}
 
@@ -473,7 +470,8 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 		return nil, err
 	}
 
-	if strings.HasSuffix(key, supportedExtensions[1]) || strings.HasSuffix(key, supportedExtensions[2]) {
+	index := sort.Search(len(validGzipExtensions), func(i int) bool { return validGzipExtensions[i] == extension })
+	if index >= len(validGzipExtensions) && validGzipExtensions[index] == extension {
 		if dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser); err != nil {
 			return nil, err
 		}
@@ -495,10 +493,9 @@ func getJSONSpec(message proto.Message) string {
 func filterExampleFromRelease(releases github.RepositoryRelease) []github.ReleaseAsset {
 	var assets []github.ReleaseAsset
 	for _, v := range releases.Assets {
-		for _, format := range supportedExtensions {
-			if strings.HasSuffix(*v.Name, format) {
-				assets = append(assets, v)
-			}
+		isValid, _ := checkSupportedExtensionForCompress(*v.Name)
+		if isValid {
+			assets = append(assets, v)
 		}
 	}
 	return assets
@@ -614,4 +611,13 @@ func deprecatedCheck(ctx context.Context) {
 		logger.Warning(ctx, "--K8ServiceAccount is deprecated, Please use --K8sServiceAccount")
 		rconfig.DefaultFilesConfig.K8sServiceAccount = rconfig.DefaultFilesConfig.K8ServiceAccount
 	}
+}
+
+func checkSupportedExtensionForCompress(file string) (bool, string) {
+	for _, extension := range supportedExtensions {
+		if strings.HasSuffix(file, extension) {
+			return true, extension
+		}
+	}
+	return false, ""
 }
