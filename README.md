@@ -38,7 +38,7 @@ FlyteCTL was designed as a portable and lightweight command-line interface to wo
         ```
     * Shell script
         ```bash
-        $ curl -s https://raw.githubusercontent.com/lyft/flytectl/master/install.sh | bash
+        $ curl -s https://ctl.flyte.org/install | bash
         ```
 2. (Optional) `flytectl upgrade` provides a general interface to upgrading FlyteCTL; run the command in the output
 
