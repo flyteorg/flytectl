@@ -46,8 +46,8 @@ const registrationVersionPattern = "{{ registration.version }}"
 // Additional variable define in fast serialized proto that needs to be replace in registration time
 const registrationRemotePackagePattern = "{{ .remote_package_path }}"
 
-// All supported format for register
-var supportedFormat = []string{".tar", ".tgz", ".tar.gz"}
+// All supported extensions for register
+var supportedExtensions = []string{".tar", ".tgz", ".tar.gz"}
 
 type Result struct {
 	Name   string
@@ -454,8 +454,8 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 	var dataRefReaderCloser io.ReadCloser
 
 	isValidFormat := false
-	for _, format := range supportedFormat {
-		if strings.HasSuffix(key, format) {
+	for _, extension := range supportedExtensions {
+		if strings.HasSuffix(key, extension) {
 			isValidFormat = true
 		}
 	}
@@ -473,7 +473,7 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 		return nil, err
 	}
 
-	if strings.HasSuffix(key, supportedFormat[1]) || strings.HasSuffix(key, supportedFormat[2]) {
+	if strings.HasSuffix(key, supportedExtensions[1]) || strings.HasSuffix(key, supportedExtensions[2]) {
 		if dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser); err != nil {
 			return nil, err
 		}
@@ -495,7 +495,7 @@ func getJSONSpec(message proto.Message) string {
 func filterExampleFromRelease(releases github.RepositoryRelease) []github.ReleaseAsset {
 	var assets []github.ReleaseAsset
 	for _, v := range releases.Assets {
-		for _, format := range supportedFormat {
+		for _, format := range supportedExtensions {
 			if strings.HasSuffix(*v.Name, format) {
 				assets = append(assets, v)
 			}
