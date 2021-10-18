@@ -470,10 +470,12 @@ func getArchiveReaderCloser(ctx context.Context, ref string) (io.ReadCloser, err
 		return nil, err
 	}
 
-	index := sort.Search(len(validGzipExtensions), func(i int) bool { return validGzipExtensions[i] == extension })
-	if index >= len(validGzipExtensions) && validGzipExtensions[index] == extension {
-		if dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser); err != nil {
-			return nil, err
+	for _, ext := range validGzipExtensions {
+		if ext == extension {
+			if dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser); err != nil {
+				return nil, err
+			}
+			break
 		}
 	}
 	return dataRefReaderCloser, err
