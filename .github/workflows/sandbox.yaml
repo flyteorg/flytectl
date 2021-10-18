@@ -25,6 +25,6 @@ jobs:
       - name: Setup flytectl config
         run: bin/flytectl config init
       - name: Register cookbook
-        run: bin/flytectl register examples -d development  -p flytesnacks --continueOnError
+        run: bin/flytectl register examples -d development  -p flytesnacks
       - name: Teardown Sandbox cluster
         run: bin/flytectl sandbox teardown
