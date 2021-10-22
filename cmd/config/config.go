@@ -22,7 +22,6 @@ type Config struct {
 	Project string `json:"project" pflag:",Specifies the project to work on."`
 	Domain  string `json:"domain" pflag:",Specified the domain to work on."`
 	Output  string `json:"output" pflag:",Specified the output type."`
-	Token   string `json:"token" pflag:",Specified the token to get."`
 }
 
 // OutputFormat will return output formate
