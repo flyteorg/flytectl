@@ -96,6 +96,11 @@ func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Co
 }
 
 func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
+  n, err := filepath.Glob(args[0]);
+  if n == nil || err != nil {
+		return fmt.Errorf(args[0]+" is empty or does not exist. You may have forgotten to run \"make serialize\"")
+  }
+
 	var regErr error
 	var dataRefs []string
 
