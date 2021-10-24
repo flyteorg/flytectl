@@ -6,6 +6,7 @@ builds:
       - CGO_ENABLED=0
     main: ./main.go
     binary: flytectl
+    id: flytectl-darwin
     goos:
       - darwin
     goarch:
@@ -17,8 +18,20 @@ builds:
       - CGO_ENABLED=0
     main: ./main.go
     binary: flytectl
+    id: flytectl-linux
     goos:
       - linux
+    goarch:
+      - arm64
+      - amd64
+    ldflags:
+      - -s -w -X github.com/flyteorg/flytestdlib/version.Version={{.Version}} -X github.com/flyteorg/flytestdlib/version.Build={{.ShortCommit}} -X github.com/flyteorg/flytestdlib/version.BuildTime={{.Date}}
+  - env:
+      - CGO_ENABLED=0
+    main: ./main.go
+    binary: flytectl
+    id: flytectl-windows
+    goos:
       - windows
     ldflags:
       - -s -w -X github.com/flyteorg/flytestdlib/version.Version={{.Version}} -X github.com/flyteorg/flytestdlib/version.Build={{.ShortCommit}} -X github.com/flyteorg/flytestdlib/version.BuildTime={{.Date}}
