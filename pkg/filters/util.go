@@ -11,6 +11,7 @@ func BuildResourceListRequestWithName(c Filters, project, domain, name string) (
 	}
 	request := &admin.ResourceListRequest{
 		Limit:   uint32(c.Limit),
+		Token:   c.Token,
 		Filters: fieldSelector,
 		Id: &admin.NamedEntityIdentifier{
 			Project: project,
@@ -33,6 +34,7 @@ func BuildProjectListRequest(c Filters) (*admin.ProjectListRequest, error) {
 	}
 	request := &admin.ProjectListRequest{
 		Limit:   uint32(c.Limit),
+		Token:   c.Token,
 		Filters: fieldSelector,
 		SortBy:  buildSortingRequest(c),
 	}
