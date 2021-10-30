@@ -13,36 +13,36 @@ import (
 const (
 	taskResourceAttributesShort = "Gets matchable resources of task attributes"
 	taskResourceAttributesLong  = `
-Retrieves task  resource attributes for given project,domain combination or additionally with workflow name.
+Retrieves the task resource attributes for a given project, domain combination or additionally with workflow name.
 
-Retrieves task resource attribute for project and domain
-Here the command get task resource attributes for  project flytectldemo and development domain.
+Retrieves the task resource attributes for a project and domain
+Here the command gets the task resource attributes for the project flytectldemo and development domain.
 ::
 
  flytectl get task-resource-attribute -p flytectldemo -d development 
 
-eg : output from the command
+e.g. : output from the command
 
 .. code-block:: json
 
  {"project":"flytectldemo","domain":"development","workflow":"","defaults":{"cpu":"1","memory":"150Mi"},"limits":{"cpu":"2","memory":"450Mi"}}
 
-Retrieves task resource attribute for project and domain and workflow
-Here the command get task resource attributes for  project flytectldemo, development domain and workflow core.control_flow.run_merge_sort.merge_sort
+Retrieves task resource attribute for project, domain and workflow.
+Here the command get task resource attributes for the project flytectldemo, development domain and workflow core.control_flow.run_merge_sort.merge_sort
 ::
 
  flytectl get task-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-eg : output from the command
+e.g. : output from the command
 
 .. code-block:: json
 
  {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","defaults":{"cpu":"1","memory":"150Mi"},"limits":{"cpu":"2","memory":"450Mi"}}
 
 
-Writing the task resource attribute to a file. If there are no task resource attributes a file would be written with basic data populated.
+Writing the task resource attributes to a file. If there are no task resource attributes, a file would be written and populated with basic data.
 Here the command gets task resource attributes and writes the config file to tra.yaml
-eg:  content of tra.yaml
+e.g. :  content of tra.yaml
 
 ::
 
