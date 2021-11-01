@@ -26,7 +26,7 @@ e.g. : output from the command
  {"project":"flytectldemo","domain":"development","workflow":"","defaults":{"cpu":"1","memory":"150Mi"},"limits":{"cpu":"2","memory":"450Mi"}}
 
 Retrieve task resource attributes for the given project, domain, and workflow.
-Here, the command gets task resource attributes for the project flytectldemo, development domain, and workflow `core.control_flow.run_merge_sort.merge_sort`.
+Here, the command gets task resource attributes for the project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort'.
 ::
 
  flytectl get task-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort

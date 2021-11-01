@@ -26,7 +26,7 @@ e.g. : output from the command
  {"project":"flytectldemo","domain":"development","tags":["foo", "bar"]}
 
 Retrieve the execution queue attribute for the given project, domain, and workflow.
-Here, the command gets execution queue attributes for the project flytectldemo, development domain, and workflow `core.control_flow.run_merge_sort.merge_sort`.
+Here, the command gets execution queue attributes for the project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort'.
 ::
 
  flytectl get execution-queue-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
