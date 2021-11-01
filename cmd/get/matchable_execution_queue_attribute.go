@@ -15,8 +15,8 @@ const (
 	executionQueueAttributesLong  = `
 Retrieves the execution queue attributes for a given project and domain, combination or additionally with workflow name.
 
-Retrieves the execution queue attribute for the project and domain.
-Here, the command get execution queue attributes for  project flytectldemo and development domain.
+Retrieve the execution queue attribute for the given project and domain.
+Here, the command gets execution queue attributes for the project flytectldemo and development domain.
 ::
 
  flytectl get execution-queue-attribute -p flytectldemo -d development 
@@ -27,8 +27,8 @@ e.g. : output from the command
 
  {"project":"flytectldemo","domain":"development","tags":["foo", "bar"]}
 
-Retrieves the execution queue attribute for project, domain and workflow.
-Here, the command get execution queue attributes for the project flytectldemo, development domain and workflow core.control_flow.run_merge_sort.merge_sort
+Retrieve the execution queue attribute for the given project, domain, and workflow.
+Here, the command gets execution queue attributes for the project flytectldemo, development domain, and workflow `core.control_flow.run_merge_sort.merge_sort`.
 ::
 
  flytectl get execution-queue-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
@@ -39,8 +39,8 @@ e.g. : output from the command
 
  {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","tags":["foo", "bar"]}
 
-Writing the execution queue attribute to a file. If there are no execution queue attributes, the command would return an error.
-Here, the command gets the execution queue attributes and writes the config file to era.yaml
+Write the execution queue attribute to a file. If there are no execution queue attributes, the command throws an error.
+Here, the command gets the execution queue attributes and writes the config to era.yaml file.
 e.g. :  content of era.yaml
 
 ::
