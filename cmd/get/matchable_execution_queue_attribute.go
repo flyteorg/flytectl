@@ -13,8 +13,6 @@ import (
 const (
 	executionQueueAttributesShort = "Gets matchable resources of execution queue attributes"
 	executionQueueAttributesLong  = `
-Retrieves the execution queue attributes for a given project and domain, combination or additionally with workflow name.
-
 Retrieve the execution queue attribute for the given project and domain.
 Here, the command gets execution queue attributes for the project flytectldemo and development domain.
 ::
