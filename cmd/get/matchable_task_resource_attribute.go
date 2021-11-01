@@ -13,8 +13,6 @@ import (
 const (
 	taskResourceAttributesShort = "Gets matchable resources of task attributes"
 	taskResourceAttributesLong  = `
-Retrieves the task resource attributes for a given project, domain combination or additionally with workflow name.
-
 Retrieve task resource attributes for the given project and domain.
 Here, the command gets the task resource attributes for the project flytectldemo and development domain.
 ::
