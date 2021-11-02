@@ -37,7 +37,7 @@ func SetupFlyteDir() error {
 	}
 
 	// Created a empty file with right permission
-	if _,err := os.Stat(docker.Kubeconfig); err != nil {
+	if _, err := os.Stat(docker.Kubeconfig); err != nil {
 		if os.IsNotExist(err) {
 			if err := ioutil.WriteFile(docker.Kubeconfig, []byte(""), os.ModePerm); err != nil {
 				return err
