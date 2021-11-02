@@ -23,7 +23,6 @@ import (
 	"github.com/google/go-github/github"
 
 	"github.com/flyteorg/flytectl/cmd/config"
-	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -101,7 +100,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 	switch v := message.(type) {
 	case *admin.LaunchPlan:
 		launchPlan := message.(*admin.LaunchPlan)
-		if rconfig.DefaultFilesConfig.DryRun {
+		if defaultFilesConfig.DryRun {
 			logger.Debugf(ctx, "skipping CreateLaunchPlan request (DryRun)")
 			return nil
 		}
@@ -112,14 +111,14 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 					Project:      config.GetConfig().Project,
 					Domain:       config.GetConfig().Domain,
 					Name:         launchPlan.Id.Name,
-					Version:      rconfig.DefaultFilesConfig.Version,
+					Version:      defaultFilesConfig.Version,
 				},
 				Spec: launchPlan.Spec,
 			})
 		return err
 	case *admin.WorkflowSpec:
 		workflowSpec := message.(*admin.WorkflowSpec)
-		if rconfig.DefaultFilesConfig.DryRun {
+		if defaultFilesConfig.DryRun {
 			logger.Debugf(ctx, "skipping CreateWorkflow request (DryRun)")
 			return nil
 		}
@@ -130,14 +129,14 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 					Project:      config.GetConfig().Project,
 					Domain:       config.GetConfig().Domain,
 					Name:         workflowSpec.Template.Id.Name,
-					Version:      rconfig.DefaultFilesConfig.Version,
+					Version:      defaultFilesConfig.Version,
 				},
 				Spec: workflowSpec,
 			})
 		return err
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
-		if rconfig.DefaultFilesConfig.DryRun {
+		if defaultFilesConfig.DryRun {
 			logger.Debugf(ctx, "skipping CreateTask request (DryRun)")
 			return nil
 		}
@@ -148,7 +147,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 					Project:      config.GetConfig().Project,
 					Domain:       config.GetConfig().Domain,
 					Name:         taskSpec.Template.Id.Name,
-					Version:      rconfig.DefaultFilesConfig.Version,
+					Version:      defaultFilesConfig.Version,
 				},
 				Spec: taskSpec,
 			})
@@ -215,7 +214,7 @@ func hydrateIdentifier(identifier *core.Identifier) {
 		identifier.Domain = config.GetConfig().Domain
 	}
 	if identifier.Version == "" || identifier.Version == registrationVersionPattern {
-		identifier.Version = rconfig.DefaultFilesConfig.Version
+		identifier.Version = defaultFilesConfig.Version
 	}
 }
 
@@ -223,7 +222,7 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 	if task.Template.GetContainer() != nil {
 		for k := range task.Template.GetContainer().Args {
 			if task.Template.GetContainer().Args[k] == "" || task.Template.GetContainer().Args[k] == registrationRemotePackagePattern {
-				remotePath, err := getRemoteStoragePath(context.Background(), Client, rconfig.DefaultFilesConfig.SourceUploadPath, sourceCode, rconfig.DefaultFilesConfig.Version)
+				remotePath, err := getRemoteStoragePath(context.Background(), Client, defaultFilesConfig.SourceUploadPath, sourceCode, defaultFilesConfig.Version)
 				if err != nil {
 					return err
 				}
@@ -239,7 +238,7 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 		for containerIdx, container := range podSpec.Containers {
 			for argIdx, arg := range container.Args {
 				if arg == registrationRemotePackagePattern {
-					remotePath, err := getRemoteStoragePath(context.Background(), Client, rconfig.DefaultFilesConfig.SourceUploadPath, sourceCode, rconfig.DefaultFilesConfig.Version)
+					remotePath, err := getRemoteStoragePath(context.Background(), Client, defaultFilesConfig.SourceUploadPath, sourceCode, defaultFilesConfig.Version)
 					if err != nil {
 						return err
 					}
@@ -262,18 +261,18 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string) error {
 }
 
 func hydrateLaunchPlanSpec(lpSpec *admin.LaunchPlanSpec) {
-	assumableIamRole := len(rconfig.DefaultFilesConfig.AssumableIamRole) > 0
-	k8sServiceAcct := len(rconfig.DefaultFilesConfig.K8sServiceAccount) > 0
-	outputLocationPrefix := len(rconfig.DefaultFilesConfig.OutputLocationPrefix) > 0
+	assumableIamRole := len(defaultFilesConfig.AssumableIamRole) > 0
+	k8sServiceAcct := len(defaultFilesConfig.K8sServiceAccount) > 0
+	outputLocationPrefix := len(defaultFilesConfig.OutputLocationPrefix) > 0
 	if assumableIamRole || k8sServiceAcct {
 		lpSpec.AuthRole = &admin.AuthRole{
-			AssumableIamRole:         rconfig.DefaultFilesConfig.AssumableIamRole,
-			KubernetesServiceAccount: rconfig.DefaultFilesConfig.K8sServiceAccount,
+			AssumableIamRole:         defaultFilesConfig.AssumableIamRole,
+			KubernetesServiceAccount: defaultFilesConfig.K8sServiceAccount,
 		}
 	}
 	if outputLocationPrefix {
 		lpSpec.RawOutputDataConfig = &admin.RawOutputDataConfig{
-			OutputLocationPrefix: rconfig.DefaultFilesConfig.OutputLocationPrefix,
+			OutputLocationPrefix: defaultFilesConfig.OutputLocationPrefix,
 		}
 	}
 }
@@ -332,7 +331,7 @@ If the archive flag is on then download the archives to temp directory and extra
 The o/p of this function would be sorted list of the file locations.
 */
 func getSerializeOutputFiles(ctx context.Context, args []string) ([]string, string, error) {
-	if !rconfig.DefaultFilesConfig.Archive {
+	if !defaultFilesConfig.Archive {
 		/*
 		 * Sorting is required for non-archived case since its possible for the user to pass in a list of unordered
 		 * serialized protobuf files , but flyte expects them to be registered in topologically sorted order that it had
@@ -538,15 +537,15 @@ func uploadFastRegisterArtifact(ctx context.Context, file, sourceCodeName, versi
 		return err
 	}
 	var dataRefReaderCloser io.ReadCloser
-	remotePath := storage.DataReference(rconfig.DefaultFilesConfig.SourceUploadPath)
-	if len(rconfig.DefaultFilesConfig.SourceUploadPath) == 0 {
+	remotePath := storage.DataReference(defaultFilesConfig.SourceUploadPath)
+	if len(defaultFilesConfig.SourceUploadPath) == 0 {
 		remotePath, err = dataStore.ConstructReference(ctx, dataStore.GetBaseContainerFQN(ctx), "fast")
 		if err != nil {
 			return err
 		}
 	}
-	rconfig.DefaultFilesConfig.SourceUploadPath = string(remotePath)
-	fullRemotePath, err := getRemoteStoragePath(ctx, dataStore, rconfig.DefaultFilesConfig.SourceUploadPath, sourceCodeName, version)
+	defaultFilesConfig.SourceUploadPath = string(remotePath)
+	fullRemotePath, err := getRemoteStoragePath(ctx, dataStore, defaultFilesConfig.SourceUploadPath, sourceCodeName, version)
 	if err != nil {
 		return err
 	}
@@ -609,9 +608,9 @@ func segregateSourceAndProtos(dataRefs []string) (string, []string, []string) {
 }
 
 func deprecatedCheck(ctx context.Context) {
-	if len(rconfig.DefaultFilesConfig.K8ServiceAccount) > 0 {
+	if len(defaultFilesConfig.K8ServiceAccount) > 0 {
 		logger.Warning(ctx, "--K8ServiceAccount is deprecated, Please use --K8sServiceAccount")
-		rconfig.DefaultFilesConfig.K8sServiceAccount = rconfig.DefaultFilesConfig.K8ServiceAccount
+		defaultFilesConfig.K8sServiceAccount = defaultFilesConfig.K8ServiceAccount
 	}
 }
 

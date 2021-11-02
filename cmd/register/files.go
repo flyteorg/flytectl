@@ -89,7 +89,10 @@ Override Output location prefix during registration.
 Usage
 `
 	sourceCodeExtension = ".tar.gz"
+	
 )
+
+var defaultFilesConfig = rconfig.DefaultFilesConfig
 
 func registerFromFilesFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	return Register(ctx, args, cmdCtx)
