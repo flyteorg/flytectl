@@ -8,8 +8,6 @@ import (
 	"github.com/flyteorg/flytestdlib/promutils/labeled"
 	"github.com/flyteorg/flytestdlib/storage"
 
-	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
-
 	"github.com/flyteorg/flytestdlib/promutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -23,7 +21,7 @@ func TestRegisterFromFiles(t *testing.T) {
 	t.Run("Valid registration", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
-		rconfig.DefaultFilesConfig.Archive = true
+		defaultFilesConfig.Archive = true
 		args = []string{"testdata/valid-parent-folder-register.tar"}
 		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil, nil)
 		mockAdminClient.OnCreateWorkflowMatch(mock.Anything, mock.Anything).Return(nil, nil)
@@ -36,9 +34,9 @@ func TestRegisterFromFiles(t *testing.T) {
 		testScope := promutils.NewTestScope()
 		labeled.SetMetricKeys(contextutils.AppNameKey, contextutils.ProjectKey, contextutils.DomainKey)
 		registerFilesSetup()
-		rconfig.DefaultFilesConfig.Archive = true
-		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.SourceUploadPath = s3Output
+		defaultFilesConfig.Archive = true
+		defaultFilesConfig.OutputLocationPrefix = s3Output
+		defaultFilesConfig.SourceUploadPath = s3Output
 		mockStorage, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))
@@ -58,8 +56,8 @@ func TestRegisterFromFiles(t *testing.T) {
 		registerFilesSetup()
 		testScope := promutils.NewTestScope()
 		labeled.SetMetricKeys(contextutils.AppNameKey, contextutils.ProjectKey, contextutils.DomainKey)
-		rconfig.DefaultFilesConfig.Archive = true
-		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
+		defaultFilesConfig.Archive = true
+		defaultFilesConfig.OutputLocationPrefix = s3Output
 		s, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))
@@ -77,8 +75,8 @@ func TestRegisterFromFiles(t *testing.T) {
 		registerFilesSetup()
 		testScope := promutils.NewTestScope()
 		labeled.SetMetricKeys(contextutils.AppNameKey, contextutils.ProjectKey, contextutils.DomainKey)
-		rconfig.DefaultFilesConfig.Archive = true
-		rconfig.DefaultFilesConfig.SourceUploadPath = ""
+		defaultFilesConfig.Archive = true
+		defaultFilesConfig.SourceUploadPath = ""
 		s, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))
@@ -96,10 +94,10 @@ func TestRegisterFromFiles(t *testing.T) {
 		registerFilesSetup()
 		testScope := promutils.NewTestScope()
 		labeled.SetMetricKeys(contextutils.AppNameKey, contextutils.ProjectKey, contextutils.DomainKey)
-		rconfig.DefaultFilesConfig.Archive = true
+		defaultFilesConfig.Archive = true
 
-		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.SourceUploadPath = s3Output
+		defaultFilesConfig.OutputLocationPrefix = s3Output
+		defaultFilesConfig.SourceUploadPath = s3Output
 		s, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))
@@ -118,10 +116,10 @@ func TestRegisterFromFiles(t *testing.T) {
 		registerFilesSetup()
 		testScope := promutils.NewTestScope()
 		labeled.SetMetricKeys(contextutils.AppNameKey, contextutils.ProjectKey, contextutils.DomainKey)
-		rconfig.DefaultFilesConfig.Archive = true
+		defaultFilesConfig.Archive = true
 
-		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.SourceUploadPath = s3Output
+		defaultFilesConfig.OutputLocationPrefix = s3Output
+		defaultFilesConfig.SourceUploadPath = s3Output
 		s, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))
@@ -140,9 +138,9 @@ func TestRegisterFromFiles(t *testing.T) {
 		registerFilesSetup()
 		testScope := promutils.NewTestScope()
 		labeled.SetMetricKeys(contextutils.AppNameKey, contextutils.ProjectKey, contextutils.DomainKey)
-		rconfig.DefaultFilesConfig.Archive = false
-		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.SourceUploadPath = ""
+		defaultFilesConfig.Archive = false
+		defaultFilesConfig.OutputLocationPrefix = s3Output
+		defaultFilesConfig.SourceUploadPath = ""
 		s, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))

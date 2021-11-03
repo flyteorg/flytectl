@@ -126,14 +126,14 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 	if len(sourceCode) > 0 {
 		logger.Infof(ctx, "Fast Registration detected")
 		_, sourceCodeName = filepath.Split(sourceCode)
-		if err = uploadFastRegisterArtifact(ctx, sourceCode, sourceCodeName, rconfig.DefaultFilesConfig.Version); err != nil {
+		if err = uploadFastRegisterArtifact(ctx, sourceCode, sourceCodeName, defaultFilesConfig.Version); err != nil {
 			return fmt.Errorf("please check your Storage Config. It failed while uploading the source code. %v", err)
 		}
-		logger.Infof(ctx, "Source code successfully uploaded %v/%v ", rconfig.DefaultFilesConfig.SourceUploadPath, sourceCodeName)
+		logger.Infof(ctx, "Source code successfully uploaded %v/%v ", defaultFilesConfig.SourceUploadPath, sourceCodeName)
 	}
 
 	var registerResults []Result
-	fastFail := rconfig.DefaultFilesConfig.ContinueOnError
+	fastFail := defaultFilesConfig.ContinueOnError
 	for i := 0; i < len(validProto) && !(fastFail && regErr != nil); i++ {
 		registerResults, regErr = registerFile(ctx, validProto[i], sourceCodeName, registerResults, cmdCtx)
 	}

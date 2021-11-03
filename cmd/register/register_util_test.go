@@ -20,7 +20,6 @@ import (
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 
-	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -56,15 +55,15 @@ func registerFilesSetup() {
 	mockAdminClient = u.MockClient
 	cmdCtx = cmdCore.NewCommandContext(mockAdminClient, u.MockOutStream)
 
-	rconfig.DefaultFilesConfig.AssumableIamRole = ""
-	rconfig.DefaultFilesConfig.K8sServiceAccount = ""
-	rconfig.DefaultFilesConfig.OutputLocationPrefix = ""
+	defaultFilesConfig.AssumableIamRole = ""
+	defaultFilesConfig.K8sServiceAccount = ""
+	defaultFilesConfig.OutputLocationPrefix = ""
 }
 
 func TestGetSortedArchivedFileWithParentFolderList(t *testing.T) {
 	setup()
 	registerFilesSetup()
-	rconfig.DefaultFilesConfig.Archive = true
+	defaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-parent-folder-register.tar"}
 	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 4)
@@ -81,7 +80,7 @@ func TestGetSortedArchivedFileWithParentFolderList(t *testing.T) {
 func TestGetSortedArchivedFileList(t *testing.T) {
 	setup()
 	registerFilesSetup()
-	rconfig.DefaultFilesConfig.Archive = true
+	defaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-register.tar"}
 	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 4)
@@ -98,7 +97,7 @@ func TestGetSortedArchivedFileList(t *testing.T) {
 func TestGetSortedArchivedFileUnorderedList(t *testing.T) {
 	setup()
 	registerFilesSetup()
-	rconfig.DefaultFilesConfig.Archive = true
+	defaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-unordered-register.tar"}
 	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 4)
@@ -115,7 +114,7 @@ func TestGetSortedArchivedFileUnorderedList(t *testing.T) {
 func TestGetSortedArchivedCorruptedFileList(t *testing.T) {
 	setup()
 	registerFilesSetup()
-	rconfig.DefaultFilesConfig.Archive = true
+	defaultFilesConfig.Archive = true
 	args = []string{"testdata/invalid.tar"}
 	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 0)
@@ -128,7 +127,7 @@ func TestGetSortedArchivedCorruptedFileList(t *testing.T) {
 func TestGetSortedArchivedTgzList(t *testing.T) {
 	setup()
 	registerFilesSetup()
-	rconfig.DefaultFilesConfig.Archive = true
+	defaultFilesConfig.Archive = true
 	args = []string{"testdata/valid-register.tgz"}
 	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 4)
@@ -144,7 +143,7 @@ func TestGetSortedArchivedTgzList(t *testing.T) {
 
 func TestGetSortedArchivedCorruptedTgzFileList(t *testing.T) {
 	setup()
-	rconfig.DefaultFilesConfig.Archive = true
+	defaultFilesConfig.Archive = true
 	args = []string{"testdata/invalid.tgz"}
 	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, 0, len(fileList))
@@ -157,7 +156,7 @@ func TestGetSortedArchivedCorruptedTgzFileList(t *testing.T) {
 func TestGetSortedArchivedInvalidArchiveFileList(t *testing.T) {
 	setup()
 	registerFilesSetup()
-	rconfig.DefaultFilesConfig.Archive = true
+	defaultFilesConfig.Archive = true
 	args = []string{"testdata/invalid-extension-register.zip"}
 	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, 0, len(fileList))
@@ -170,7 +169,7 @@ func TestGetSortedArchivedInvalidArchiveFileList(t *testing.T) {
 
 func TestGetSortedArchivedFileThroughInvalidHttpList(t *testing.T) {
 	setup()
-	rconfig.DefaultFilesConfig.Archive = true
+	defaultFilesConfig.Archive = true
 	args = []string{"http://invalidhost:invalidport/testdata/valid-register.tar"}
 	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, 0, len(fileList))
@@ -183,7 +182,7 @@ func TestGetSortedArchivedFileThroughInvalidHttpList(t *testing.T) {
 func TestGetSortedArchivedFileThroughValidHttpList(t *testing.T) {
 	setup()
 	registerFilesSetup()
-	rconfig.DefaultFilesConfig.Archive = true
+	defaultFilesConfig.Archive = true
 	args = []string{"http://dummyhost:80/testdata/valid-register.tar"}
 	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
 	assert.Equal(t, len(fileList), 4)
@@ -200,7 +199,7 @@ func TestGetSortedArchivedFileThroughValidHttpList(t *testing.T) {
 func TestGetSortedArchivedFileThroughValidHttpWithNullContextList(t *testing.T) {
 	setup()
 	registerFilesSetup()
-	rconfig.DefaultFilesConfig.Archive = true
+	defaultFilesConfig.Archive = true
 	args = []string{"http://dummyhost:80/testdata/valid-register.tar"}
 	ctx = nil
 	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args)
@@ -277,7 +276,7 @@ func TestHydrateLaunchPlanSpec(t *testing.T) {
 	t.Run("IamRole override", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
-		rconfig.DefaultFilesConfig.AssumableIamRole = "iamRole"
+		defaultFilesConfig.AssumableIamRole = "iamRole"
 		lpSpec := &admin.LaunchPlanSpec{}
 		hydrateLaunchPlanSpec(lpSpec)
 		assert.Equal(t, &admin.AuthRole{AssumableIamRole: "iamRole"}, lpSpec.AuthRole)
@@ -285,7 +284,7 @@ func TestHydrateLaunchPlanSpec(t *testing.T) {
 	t.Run("k8sService account override", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
-		rconfig.DefaultFilesConfig.K8sServiceAccount = "k8Account"
+		defaultFilesConfig.K8sServiceAccount = "k8Account"
 		lpSpec := &admin.LaunchPlanSpec{}
 		hydrateLaunchPlanSpec(lpSpec)
 		assert.Equal(t, &admin.AuthRole{KubernetesServiceAccount: "k8Account"}, lpSpec.AuthRole)
@@ -293,8 +292,8 @@ func TestHydrateLaunchPlanSpec(t *testing.T) {
 	t.Run("Both k8sService and IamRole", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
-		rconfig.DefaultFilesConfig.AssumableIamRole = "iamRole"
-		rconfig.DefaultFilesConfig.K8sServiceAccount = "k8Account"
+		defaultFilesConfig.AssumableIamRole = "iamRole"
+		defaultFilesConfig.K8sServiceAccount = "k8Account"
 		lpSpec := &admin.LaunchPlanSpec{}
 		hydrateLaunchPlanSpec(lpSpec)
 		assert.Equal(t, &admin.AuthRole{AssumableIamRole: "iamRole",
@@ -303,7 +302,7 @@ func TestHydrateLaunchPlanSpec(t *testing.T) {
 	t.Run("Output prefix", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
-		rconfig.DefaultFilesConfig.OutputLocationPrefix = "prefix"
+		defaultFilesConfig.OutputLocationPrefix = "prefix"
 		lpSpec := &admin.LaunchPlanSpec{}
 		hydrateLaunchPlanSpec(lpSpec)
 		assert.Equal(t, &admin.RawOutputDataConfig{OutputLocationPrefix: "prefix"}, lpSpec.RawOutputDataConfig)
