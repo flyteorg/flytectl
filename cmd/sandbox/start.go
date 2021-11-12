@@ -143,8 +143,11 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		return nil, err
 	}
 	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, image)
-	if err := docker.PullDockerImage(ctx, cli, image); err != nil {
-		return nil, err
+
+	if !sandboxConfig.DefaultConfig.Local {
+		if err := docker.PullDockerImage(ctx, cli, image); err != nil {
+			return nil, err
+		}
 	}
 
 	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)

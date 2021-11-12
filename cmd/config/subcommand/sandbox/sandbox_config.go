@@ -2,7 +2,9 @@ package sandbox
 
 //go:generate pflags Config --default-var DefaultConfig --bind-default-var
 var (
-	DefaultConfig = &Config{}
+	DefaultConfig = &Config{
+		Local: false,
+	}
 )
 
 //Config
@@ -18,4 +20,8 @@ type Config struct {
 	// Flyte compliant sandbox image. Usually useful, if you want to push the image to your own registry and relaunch
 	// from there.
 	Image string `json:"image" pflag:",Optional. Provide a fully qualified path to a Flyte compliant docker image."`
+
+	// Optionally it is possible to use local sandbox image
+	// If local flag pass then flytectl will not pull image from registry. Usually useful, if you want to test your local images without pushing them to a registry
+	Local bool `json:"local" pflag:",Optional. Enable if you want to use local available image."`
 }
