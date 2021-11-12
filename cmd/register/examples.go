@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-github/github"
 
+	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 )
 
@@ -39,7 +40,7 @@ func registerExamplesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Com
 	var release string
 
 	// Deprecated checks for --k8Service
-	deprecatedCheck(ctx)
+	deprecatedCheck(ctx, &rconfig.DefaultFilesConfig.K8sServiceAccount, rconfig.DefaultFilesConfig.K8ServiceAccount)
 
 	if len(args) == 1 {
 		release = args[0]
@@ -50,8 +51,8 @@ func registerExamplesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Com
 	}
 
 	logger.Infof(ctx, "Register started for %s %s release https://github.com/%s/%s/releases/tag/%s", flytesnacksRepository, tag, githubOrg, flytesnacksRepository, tag)
-	defaultFilesConfig.Archive = true
-	defaultFilesConfig.Version = tag
+	rconfig.DefaultFilesConfig.Archive = true
+	rconfig.DefaultFilesConfig.Version = tag
 	for _, v := range examples {
 		args := []string{
 			*v.BrowserDownloadURL,
