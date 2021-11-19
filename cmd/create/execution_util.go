@@ -47,7 +47,10 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName, projec
 		},
 	}
 
-	return createExecutionRequest(lp.Id, inputs, securityContext, authRole), nil
+	labels := executionConfig.Labels
+	annotations := executionConfig.Annotations
+
+	return createExecutionRequest(lp.Id, inputs, securityContext, authRole, labels, annotations), nil
 }
 
 func createExecutionRequestForTask(ctx context.Context, taskName string, project string, domain string,
@@ -89,7 +92,10 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 		Version:      task.Id.Version,
 	}
 
-	return createExecutionRequest(id, inputs, securityContext, authRole), nil
+	labels := executionConfig.Labels
+	annotations := executionConfig.Annotations
+
+	return createExecutionRequest(id, inputs, securityContext, authRole, labels, annotations), nil
 }
 
 func relaunchExecution(ctx context.Context, executionName string, project string, domain string,
@@ -133,7 +139,7 @@ func recoverExecution(ctx context.Context, executionName string, project string,
 }
 
 func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, securityContext *core.SecurityContext,
-	authRole *admin.AuthRole) *admin.ExecutionCreateRequest {
+	authRole *admin.AuthRole, labels map[string]string, annotations map[string]string) *admin.ExecutionCreateRequest {
 
 	return &admin.ExecutionCreateRequest{
 		Project: executionConfig.TargetProject,
@@ -148,6 +154,12 @@ func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, securi
 			},
 			AuthRole:        authRole,
 			SecurityContext: securityContext,
+			Labels:          &admin.Labels{
+				Values: labels,
+			},
+			Annotations:   &admin.Annotations{
+				Values: annotations,
+			},
 		},
 		Inputs: inputs,
 	}
