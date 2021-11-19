@@ -2,7 +2,8 @@ package sandbox
 
 //go:generate enumer -type=ImagePullPolicy -trimprefix=ImagePullPolicy
 type ImagePullPolicy int
-const(
+
+const (
 	ImagePullPolicyAlways ImagePullPolicy = iota
 	ImagePullPolicyIfNotPresent
 	ImagePullPolicyNever
@@ -10,10 +11,8 @@ const(
 
 //go:generate pflags Config --default-var DefaultConfig --bind-default-var
 var (
-	DefaultConfig = &Config{
-	}
+	DefaultConfig = &Config{}
 )
-
 
 //Config
 type Config struct {
@@ -31,5 +30,5 @@ type Config struct {
 
 	// Optionally it is possible to use local sandbox image
 	// If local flag pass then flytectl will not pull image from registry. Usually useful, if you want to test your local images without pushing them to a registry
-	ImagePullPolicy string `json:"imagePullPolicy" pflag:",Optional. Defines the image pull behavior."`
+	ImagePullPolicy ImagePullPolicy `json:"imagePullPolicy" pflag:",Optional. Defines the image pull behavior. (0/1/2) Always/IfNotPresent/Never"`
 }
