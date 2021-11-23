@@ -1,6 +1,6 @@
 package sandbox
 
-//go:generate enumer -type=ImagePullPolicy -trimprefix=ImagePullPolicy
+//go:generate enumer -type=ImagePullPolicy -trimprefix=ImagePullPolicy --json
 type ImagePullPolicy int
 
 const (
@@ -9,12 +9,28 @@ const (
 	ImagePullPolicyNever
 )
 
+// Set implements PFlag's Value interface to attempt to set the value of the flag from string.
+func (i *ImagePullPolicy) Set(val string) error {
+	policy, err := ImagePullPolicyString(val)
+	if err != nil {
+		return err
+	}
+
+	*i = policy
+	return nil
+}
+
+// Type implements PFlag's Value interface to return type name.
+func (i ImagePullPolicy) Type() string {
+	return "ImagePullPolicy"
+}
+
 //go:generate pflags Config --default-var DefaultConfig --bind-default-var
 var (
 	DefaultConfig = &Config{}
 )
 
-//Config
+//Config holds configuration flags for sandbox command.
 type Config struct {
 	Source string `json:"source" pflag:",Path of your source code"`
 
@@ -30,5 +46,5 @@ type Config struct {
 
 	// Optionally it is possible to use local sandbox image
 	// If local flag pass then flytectl will not pull image from registry. Usually useful, if you want to test your local images without pushing them to a registry
-	ImagePullPolicy ImagePullPolicy `json:"imagePullPolicy" pflag:",Optional. Defines the image pull behavior. (0/1/2) Always/IfNotPresent/Never"`
+	ImagePullPolicy ImagePullPolicy `json:"imagePullPolicy" pflag:",Optional. Defines the image pull behavior [Always/IfNotPresent/Never]"`
 }

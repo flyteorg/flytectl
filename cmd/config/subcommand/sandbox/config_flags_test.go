@@ -147,11 +147,9 @@ func TestConfig_SetFlags(t *testing.T) {
 			testValue := "1"
 
 			cmdFlags.Set("imagePullPolicy", testValue)
-			if vInt, err := cmdFlags.GetInt("imagePullPolicy"); err == nil {
-				testDecodeJson_Config(t, fmt.Sprintf("%v", vInt), &actual.ImagePullPolicy)
+			if v := cmdFlags.Lookup("imagePullPolicy"); v != nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", v.Value.String()), &actual.ImagePullPolicy)
 
-			} else {
-				assert.FailNow(t, err.Error())
 			}
 		})
 	})
