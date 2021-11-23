@@ -101,13 +101,13 @@ func TestRemoveSandboxWithNoReply(t *testing.T) {
 }
 
 func TestPullDockerImage(t *testing.T) {
-	t.Run("Successfully pull image", func(t *testing.T) {
+	t.Run("Successfully pull image Always", func(t *testing.T) {
 		setupSandbox()
 		mockDocker := &mocks.Docker{}
 		context := context.Background()
 		// Verify the attributes
 		mockDocker.OnImagePullMatch(context, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
-		err := PullDockerImage(context, mockDocker, "nginx")
+		err := PullDockerImage(context, mockDocker, "nginx:latest", 0)
 		assert.Nil(t, err)
 	})
 
@@ -117,10 +117,28 @@ func TestPullDockerImage(t *testing.T) {
 		context := context.Background()
 		// Verify the attributes
 		mockDocker.OnImagePullMatch(context, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, fmt.Errorf("error"))
-		err := PullDockerImage(context, mockDocker, "nginx")
+		err := PullDockerImage(context, mockDocker, "nginx:latest", 0)
 		assert.NotNil(t, err)
 	})
 
+	t.Run("Successfully pull image IfNotPresent", func(t *testing.T) {
+		setupSandbox()
+		mockDocker := &mocks.Docker{}
+		context := context.Background()
+		// Verify the attributes
+		mockDocker.OnImagePullMatch(context, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImageListMatch(context, types.ImageListOptions{}).Return([]types.ImageSummary{}, nil)
+		err := PullDockerImage(context, mockDocker, "nginx:latest", 1)
+		assert.Nil(t, err)
+	})
+
+	t.Run("Successfully pull image Never", func(t *testing.T) {
+		setupSandbox()
+		mockDocker := &mocks.Docker{}
+		context := context.Background()
+		err := PullDockerImage(context, mockDocker, "nginx:latest", 2)
+		assert.Nil(t, err)
+	})
 }
 
 func TestStartContainer(t *testing.T) {
