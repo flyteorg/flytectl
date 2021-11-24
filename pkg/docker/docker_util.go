@@ -91,8 +91,8 @@ func GetSandboxPorts() (map[nat.Port]struct{}, map[nat.Port][]nat.PortBinding, e
 
 // PullDockerImage will Pull docker image
 func PullDockerImage(ctx context.Context, cli Docker, image string, pullPolicy sandboxConfig.ImagePullPolicy) error {
-	if pullPolicy == 0 || pullPolicy == 1 {
-		if pullPolicy == 1 {
+	if pullPolicy == sandboxConfig.ImagePullPolicyAlways || pullPolicy == sandboxConfig.ImagePullPolicyIfNotPresent {
+		if pullPolicy == sandboxConfig.ImagePullPolicyIfNotPresent {
 			imageSummary, err := cli.ImageList(ctx, types.ImageListOptions{})
 			if err != nil {
 				return err

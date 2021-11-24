@@ -57,13 +57,10 @@ Specify a Flyte Sandbox compliant image with the registry. This is useful, in ca
   flytectl sandbox start --image docker.io/my-override:latest
 
 	
-Specify a Flyte Sandbox image pull policy. Possible pull policy is 0,1,2
-0 Always
-1 IfNotPresent
-2 Never
+Specify a Flyte Sandbox image pull policy. Possible pull policy values are Always, IfNotPresent, or Never
 ::
 
- flytectl sandbox start  --image docker.io/my-override:latest --imagePullPolicy 0
+ flytectl sandbox start  --image docker.io/my-override:latest --imagePullPolicy Always
 Usage
 `
 	k8sEndpoint             = "https://127.0.0.1:30086"
