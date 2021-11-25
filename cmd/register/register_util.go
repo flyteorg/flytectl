@@ -520,7 +520,6 @@ func getAllFlytesnacksExample(org, repository, version string) ([]github.Release
 	if len(releases) == 0 {
 		return nil, "", fmt.Errorf("repository doesn't have any release")
 	}
-	fmt.Println(*releases[0])
 	return filterExampleFromRelease(*releases[0]), *releases[0].TagName, nil
 
 }
