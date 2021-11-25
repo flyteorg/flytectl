@@ -48,6 +48,7 @@ func registerExamplesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Com
 
 	logger.Infof(ctx, "Register started for %s %s release https://github.com/%s/%s/releases/tag/%s", flytesnacksRepository, tag, githubOrg, flytesnacksRepository, tag)
 	rconfig.DefaultFilesConfig.Archive = true
+	rconfig.DefaultFilesConfig.Version = tag
 	for _, v := range examples {
 		args := []string{
 			*v.BrowserDownloadURL,
