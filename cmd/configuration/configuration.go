@@ -29,13 +29,13 @@ const (
 	
 It generates a flytectl config file in the flyte directory, i.e ~/.flyte.
 It is sandbox config known as 'Flyte Sandbox'. Flyte Sandbox is a complete standalone minimal environment to run Flyte. 
-Read more about sandbox `here. <https://docs.flyte.org/en/latest/deployment/sandbox.html>`_
+Read more about sandbox https://docs.flyte.org/en/latest/deployment/sandbox.html
 ::
 
  bin/flytectl configuration config 
 
 A remote cluster config can be generated with the below command: 
-Read more about the remote deployment 'here. <https://docs.flyte.org/en/latest/deployment/index.html>'_	
+Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
 ::
 
  bin/flytectl configuration config --host=flyte.myexample.com
@@ -43,8 +43,7 @@ Read more about the remote deployment 'here. <https://docs.flyte.org/en/latest/d
 A flytectl config can be generated using a storage provider. It can be generated using the below command:
 ::
 
- bin/flytectl configuration config --host=flyte.myexample.com --storage
-`
+ bin/flytectl configuration config --host=flyte.myexample.com --storage`
 )
 
 var prompt = promptui.Select{
