@@ -12,8 +12,8 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// If v is a pointer, it will get its element value or the zero value of the element type.
-// If v is not a pointer, it will return it as is.
+// If v is a pointer, it gets the element value or the zero value of the element type.
+// If v is not a pointer, it will be returned as is.
 func (ExecutionConfig) elemValueOrNil(v interface{}) interface{} {
 	if t := reflect.TypeOf(v); t.Kind() == reflect.Ptr {
 		if reflect.ValueOf(v).IsNil() {
@@ -46,7 +46,7 @@ func (ExecutionConfig) mustMarshalJSON(v json.Marshaler) string {
 	return string(raw)
 }
 
-// GetPFlagSet will return strongly types pflags for all fields in ExecutionConfig and its nested types. The format of the
+// GetPFlagSet will return strongly typed pflags for all fields in ExecutionConfig and its nested types. The format of the
 // flags is json-name.json-sub-name... etc.
 func (cfg ExecutionConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("ExecutionConfig", pflag.ExitOnError)

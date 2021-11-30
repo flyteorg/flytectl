@@ -23,7 +23,7 @@ func NewCommandContext(adminClient service.AdminServiceClient, out io.Writer) Co
 		adminClientDeleteExt:  &ext.AdminDeleterExtClient{AdminClient: adminClient}}
 }
 
-// NewCommandContextWithExt construct command context with injected extensions. Helps in injecting mocked ones for testing.
+// NewCommandContextWithExt constructs command context with injected extensions. This helps in injecting mocked ones for testing.
 func NewCommandContextWithExt(
 	adminClient service.AdminServiceClient,
 	fetcher ext.AdminFetcherExtInterface,

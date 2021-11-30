@@ -3,51 +3,53 @@
 flytectl completion
 -------------------
 
-Generate completion script
-
 Synopsis
 ~~~~~~~~
 
+This action generates completion scripts.
 
-To load completions:
+Load completions on different platforms can be done in the following ways:
 
-Bash:
-
+To load completions in Bash, the general format is:
+::
   $ source <(flytectl completion bash)
 
-  # To load completions for each session, execute once:
-  # Linux:
+To load completions for each session in Linux, execute the below line:
+::
   $ flytectl completion bash > /etc/bash_completion.d/flytectl
-  # macOS:
+  
+To load completions for each session in Linux, execute the below line:
+:: 
   $ flytectl completion bash > /usr/local/etc/bash_completion.d/flytectl
 
-Zsh:
 
-  # If shell completion is not already enabled in your environment,
-  # you will need to enable it.  You can execute the following once:
 
+If shell completion is not enabled in your environment, it needs to be enabled. This can be done by executing the below command:
+::
   $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
-  # To load completions for each session, execute once:
+To load completions in Zsh, execute the below line:
+::  
   $ flytectl completion zsh > "${fpath[1]}/_flytectl"
 
-  # You will need to start a new shell for this setup to take effect.
+Note: A new shell has to be started for the setup to take effect.
 
-fish:
-
+To load completions in fish, the general format is:
+::
   $ flytectl completion fish | source
 
-  # To load completions for each session, execute once:
+To load completions for each session in fish, execute the below line:
+::
   $ flytectl completion fish > ~/.config/fish/completions/flytectl.fish
 
-PowerShell:
-
+To load completions on PowerShell, the general format is:
+::
   PS> flytectl completion powershell | Out-String | Invoke-Expression
 
-  # To load completions for every new session, run:
+To load completions for a new session, execute the below line, and source this file from your Powershell profile:
+::
   PS> flytectl completion powershell > flytectl.ps1
-  # and source this file from your PowerShell profile.
-
+  
 
 ::
 

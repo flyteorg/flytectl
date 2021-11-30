@@ -3,13 +3,11 @@
 flytectl config validate
 ------------------------
 
-Validates the loaded config.
-
 Synopsis
 ~~~~~~~~
 
 
-Validates the loaded config.
+It validates the loaded config. This is done using the below command:
 
 ::
 

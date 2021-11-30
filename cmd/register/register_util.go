@@ -38,12 +38,12 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-// Variable define in serialized proto that needs to be replace in registration time
+// Variable is defined in serialized proto that needs to be replaced in registration time
 const registrationProjectPattern = "{{ registration.project }}"
 const registrationDomainPattern = "{{ registration.domain }}"
 const registrationVersionPattern = "{{ registration.version }}"
 
-// Additional variable define in fast serialized proto that needs to be replace in registration time
+// Additional variables are defined in fast serialized proto that needs to be replaced in registration time
 const registrationRemotePackagePattern = "{{ .remote_package_path }}"
 
 // All supported extensions for compress
@@ -362,16 +362,16 @@ func DownloadFileFromHTTP(ctx context.Context, ref storage.DataReference) (io.Re
 }
 
 /*
-Get serialize output file list from the args list.
-If the archive flag is on then download the archives to temp directory and extract it. In case of fast register it will also return the compressed source code
-The o/p of this function would be sorted list of the file locations.
+Get serialized output file list from the args list.
+If the archive flag is on, then download the archives to temp directory and extract it. In case of fast register it will also return the compressed source code.
+The output of this function would be a sorted list of the file locations.
 */
 func getSerializeOutputFiles(ctx context.Context, args []string, archive bool) ([]string, string, error) {
 	if !archive {
 		/*
-		 * Sorting is required for non-archived case since its possible for the user to pass in a list of unordered
-		 * serialized protobuf files , but flyte expects them to be registered in topologically sorted order that it had
-		 * generated otherwise the registration can fail if the dependent files are not registered earlier.
+		 * Sorting is required for non-archived case since it is possible for the user to pass in a list of unordered
+		 * serialized protobuf files. But flyte expects them to be registered in topologically sorted order that it
+		 * generated, otherwise the registration can fail if the dependent files are not registered earlier.
 		 */
 
 		sort.Strings(args)
@@ -399,8 +399,8 @@ func getSerializeOutputFiles(ctx context.Context, args []string, archive bool) (
 	}
 
 	/*
-	 * Similarly in case of archived files, it possible to have an archive created in totally different order than the
-	 * listing order of the serialized files which is required by flyte. Hence we explicitly sort here after unarchiving it.
+	 * Similarly in case of archived files, it is possible to have an archive created in totally different order than the
+	 * listing order of the serialized files that is required by flyte. Hence we explicitly sort it here after unarchiving it.
 	 */
 	sort.Strings(unarchivedFiles)
 	return unarchivedFiles, tempDir, nil
@@ -416,7 +416,7 @@ func readAndCopyArchive(src io.Reader, tempDir string, unarchivedFiles []string)
 		case err != nil:
 			return unarchivedFiles, err
 		}
-		// Location to untar. FilePath couldnt be used here due to,
+		// Location to untar. FilePath couldn't be used here due to,
 		// G305: File traversal when extracting zip archive
 		target := tempDir + "/" + header.Name
 		if header.Typeflag == tar.TypeDir {
@@ -466,7 +466,7 @@ func registerFile(ctx context.Context, fileName, sourceCode string, registerResu
 	logger.Debugf(ctx, "Hydrated spec : %v", getJSONSpec(spec))
 
 	if err := register(ctx, spec, cmdCtx, config.DryRun, config.Version); err != nil {
-		// If error is AlreadyExists then dont consider this to be an error but just a warning state
+		// If error is AlreadyExists, then don't consider this as an error, but as a warning state
 		if grpcError := status.Code(err); grpcError == codes.AlreadyExists {
 			registerResult = Result{Name: fileName, Status: "Success", Info: fmt.Sprintf("%v", grpcError.String())}
 			err = nil

@@ -13,15 +13,15 @@ import (
 )
 
 const (
-	projectShort = "Create project resources"
+	projectShort = "Creates project resources"
 	projectLong  = `
-Create the projects.(project,projects can be used interchangeably in these commands)
+It creates the projects.(Here, project/s can be used interchangeably in the commands)
 
 ::
 
  bin/flytectl create project --name flytesnacks --id flytesnacks --description "flytesnacks description"  --labels app=flyte
 
-Create Project by definition file. Note: The name shouldn't contain any whitespace characters'
+It creates project by definition file. Note: The name shouldn't contain any whitespace characters.`s
 ::
 
  bin/flytectl create project --file project.yaml 

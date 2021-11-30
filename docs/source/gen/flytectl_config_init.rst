@@ -3,27 +3,27 @@
 flytectl config init
 --------------------
 
-Generates flytectl config file in the user's home directory.
 
 Synopsis
 ~~~~~~~~
 
-
-Creates a flytectl config file in flyte directory i.e ~/.flyte
+It generates a flytectl config file in the flyte directory, i.e ~/.flyte.
 	
-Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox https://docs.flyte.org/en/latest/deployment/sandbox.html
+It is sandbox config known as 'Flyte Sandbox'. Flyte Sandbox is a complete standalone minimal environment to run Flyte. 
+Read more about sandbox `here. <https://docs.flyte.org/en/latest/deployment/sandbox.html>`_
 
 ::
 
  bin/flytectl configuration config 
 
-Generate remote cluster config. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
+A remote cluster config can be generated with the below command: 
+Read more about the remote deployment 'here. <https://docs.flyte.org/en/latest/deployment/index.html>'_
 	
 ::
 
  bin/flytectl configuration config --host=flyte.myexample.com
 	
-Generate flytectl config with a storage provider
+A flytectl config can be generated using a storage provider. It can be generated using the below command:
 ::
 
  bin/flytectl configuration config --host=flyte.myexample.com --storage

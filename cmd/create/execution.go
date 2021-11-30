@@ -11,24 +11,24 @@ import (
 )
 
 const (
-	executionShort = "Create execution resources"
+	executionShort = "Helps create execution resources"
 	executionLong  = `
-Create the executions for given workflow/task in a project and domain.
+It helps in the creation of executions for a given workflow or task in a project and domain.
 
-There are three steps in generating an execution.
+There are three steps in generating an execution. They are:
 
-- Generate the execution spec file using the get command.
-- Update the inputs for the execution if needed.
-- Run the execution by passing in the generated yaml file.
+- Generate the execution spec file using the 'get' command.
+- Update the inputs for the execution if required.
+- Run the execution by passing the generated yaml file.
 
-The spec file should be generated first and then run the execution using the spec file.
-You can reference the flytectl get task for more details
+Note: The spec file should be generated first and the execution has to be run using the spec file.
+The flytectl get task can be referenced for more details. The below command helps create an execution:
 
 ::
 
  flytectl get tasks -d development -p flytectldemo core.advanced.run_merge_sort.merge  --version v2 --execFile execution_spec.yaml
 
-The generated file would look similar to this
+The generated file would look similar to this:
 
 .. code-block:: yaml
 
@@ -65,35 +65,35 @@ The generated file can be modified to change the input values.
 	 task: core.advanced.run_merge_sort.merge
 	 version: "v2"
 
-And then can be passed through the command line.
-Notice the source and target domain/projects can be different.
-The root project and domain flags of -p and -d should point to task/launch plans project/domain.
+It can be passed through the command line.
+Note: The source and target domain/projects can be different.
+The root project and domain flags of -p and -d should point to task/launch plans project/domain. It has been shown below:
 
 ::
 
  flytectl create execution --execFile execution_spec.yaml -p flytectldemo -d development --targetProject flytesnacks
 
-Also an execution can be relaunched by passing in current execution id.
+Also an execution can be relaunched by passing the current execution id. It has been shown below:
 
 ::
 
  flytectl create execution --relaunch ffb31066a0f8b4d52b77 -p flytectldemo -d development
 
-An execution can be recovered, that is recreated from the last known failure point for a previously-run workflow execution.
+An execution can be recovered, i.e recreated from the last known failure point for a previously-run workflow execution.
 See :ref:` + "`ref_flyteidl.admin.ExecutionRecoverRequest`" + ` for more details.
 
 ::
 
  flytectl create execution --recover ffb31066a0f8b4d52b77 -p flytectldemo -d development
 
-Generic data types are also supported for execution in similar way.Following is sample of how the inputs need to be specified while creating the execution.
-As usual the spec file should be generated first and then run the execution using the spec file.
+Generic data types are also supported for execution in a similar way. Following is a sample of how the inputs need to be specified while creating the execution.
+The spec file should be generated first, and the execution file should be run using the spec file.
 
 ::
 
  flytectl get task -d development -p flytectldemo  core.type_system.custom_objects.add --execFile adddatanum.yaml
 
-The generated file would look similar to this. Here you can see empty values dumped for generic data type x and y. 
+The generated file would look similar to this. Here, empty values are dumped for generic data type x and y. 
 
 ::
 
@@ -107,7 +107,8 @@ The generated file would look similar to this. Here you can see empty values dum
     task: core.type_system.custom_objects.add
     version: v3
 
-Modified file with struct data populated for x and y parameters for the task core.type_system.custom_objects.add
+Modified file with struct data has been populated for x and y parameters for the task core.type_system.custom_objects.add.
+It has been shown below:
 
 ::
 

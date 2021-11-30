@@ -13,19 +13,19 @@ import (
 const (
 	clusterResourceAttributesShort = "Deletes matchable resources of cluster attributes"
 	clusterResourceAttributesLong  = `
-Deletes cluster resource attributes for given project and domain combination or additionally with workflow name.
+It deletes the cluster resource attributes for a given project and domain combination or additionally with the workflow name.
 
-Deletes cluster resource attribute for project and domain
-Here the command delete cluster resource attributes for  project flytectldemo and development domain.
+It deletes the cluster resource attribute for project and domain.
+The command delete cluster-resource-attributes for project flytectldemo in the development domain has been shown:
 ::
 
  flytectl delete cluster-resource-attribute -p flytectldemo -d development 
 
 
-Deletes cluster resource attribute using config file which was used for creating it.
-Here the command deletes cluster resource attributes from the config file cra.yaml
-Attributes are optional in the file as they are unread during the delete command but can be kept as the same file can be used for get, update or delete 
-eg:  content of cra.yaml which will use the project domain and workflow name for deleting the resource
+It deletes cluster resource attribute using config file which was used to create it.
+Here the command deletes the cluster resource attributes from the config file cra.yaml
+Attributes are optional in the file since they are unread during the delete command but can be kept as the same file can be used with get, update or delete commands.
+Ex: Content of cra.yaml which would use the project domain and workflow name to delete the resource.
 
 ::
 
@@ -40,8 +40,8 @@ eg:  content of cra.yaml which will use the project domain and workflow name for
       foo: "bar"
       buzz: "lightyear"
 
-Deletes cluster resource attribute for a workflow
-Here the command deletes cluster resource attributes for a workflow core.control_flow.run_merge_sort.merge_sort
+It deletes the cluster resource attribute for a workflow.
+Here the command deletes the cluster resource attributes for the workflow core.control_flow.run_merge_sort.merge_sort
 
 ::
 

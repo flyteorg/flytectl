@@ -17,19 +17,19 @@ var (
 	section = config.MustRegisterSection("root", defaultConfig)
 )
 
-// Config hold configration for flytectl flag
+// Config holds the configration for flytectl flag
 type Config struct {
 	Project string `json:"project" pflag:",Specifies the project to work on."`
 	Domain  string `json:"domain" pflag:",Specifies the domain to work on."`
 	Output  string `json:"output" pflag:",Specifies the output type."`
 }
 
-// OutputFormat will return output formate
+// OutputFormat will return output format
 func (cfg Config) OutputFormat() (printer.OutputFormat, error) {
 	return printer.OutputFormatString(strings.ToUpper(cfg.Output))
 }
 
-// MustOutputFormat will validate the supported output formate and return output formate
+// MustOutputFormat will validate the supported output formate and return output format
 func (cfg Config) MustOutputFormat() printer.OutputFormat {
 	f, err := cfg.OutputFormat()
 	if err != nil {

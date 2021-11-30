@@ -8,8 +8,6 @@ Registers file resources
 Synopsis
 ~~~~~~~~
 
-
-
 Registers all the serialized protobuf files including tasks, workflows and launchplans with default v1 version.
 If there are already registered entities with v1 version then the command will fail immediately on the first such encounter.
 ::

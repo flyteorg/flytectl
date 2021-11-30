@@ -3,13 +3,11 @@
 flytectl
 --------
 
-flyetcl CLI tool
 
 Synopsis
 ~~~~~~~~
 
-
-flytectl is CLI tool written in go to interact with flyteadmin service
+The flytectl is a CLI tool written in Go to interact with the flyteadmin service.
 
 Options
 ~~~~~~~
@@ -59,14 +57,14 @@ Options
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_completion` 	 - Generate completion script
-* :doc:`flytectl_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands..
-* :doc:`flytectl_create` 	 - Used for creating various flyte resources including tasks/workflows/launchplans/executions/project.
-* :doc:`flytectl_delete` 	 - Used for terminating/deleting various flyte resources including tasks/workflows/launchplans/executions/project.
-* :doc:`flytectl_get` 	 - Used for fetching various flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_completion` 	 - Generates completion script.
+* :doc:`flytectl_config` 	 - Runs various config commands. Take a look at the help of this command to get a list of available commands.
+* :doc:`flytectl_create` 	 - Used to create various flyte resources such as tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_delete` 	 - Used to terminate/delete various flyte resources such as tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_get` 	         - Used to fetch various flyte resources such as tasks/workflows/launchplans/executions/project.
 * :doc:`flytectl_register` 	 - Registers tasks/workflows/launchplans from list of generated serialized files.
 * :doc:`flytectl_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.
-* :doc:`flytectl_update` 	 - Used for updating flyte resources eg: project.
-* :doc:`flytectl_upgrade` 	 - Used for upgrade/rollback flyte version
-* :doc:`flytectl_version` 	 - Used for fetching flyte version
+* :doc:`flytectl_update` 	 - Used to update flyte resources such as project.
+* :doc:`flytectl_upgrade` 	 - Used to upgrade/rollback a flyte version.
+* :doc:`flytectl_version` 	 - Used to fetch flyte version.
 
