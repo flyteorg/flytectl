@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	projectShort = "Creates project resources"
+	projectShort = "Create project resources"
 	projectLong  = `
 It creates the projects.(Here, project/s can be used interchangeably in the commands)
 
