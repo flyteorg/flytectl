@@ -28,7 +28,7 @@ const (
 	initCmdLong  = `Creates a flytectl config file in flyte directory i.e ~/.flyte
 	
 It generates a flytectl config file in the flyte directory, i.e ~/.flyte.
-It is sandbox config known as 'Flyte Sandbox'. Flyte Sandbox is a complete standalone minimal environment to run Flyte. 
+It is sandbox config known as Flyte Sandbox. Flyte Sandbox is a complete standalone minimal environment to run Flyte. 
 Read more about sandbox https://docs.flyte.org/en/latest/deployment/sandbox.html
 ::
 

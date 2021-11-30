@@ -21,7 +21,7 @@ It creates the projects.(Here, project/s can be used interchangeably in the comm
 
  bin/flytectl create project --name flytesnacks --id flytesnacks --description "flytesnacks description"  --labels app=flyte
 
-It creates project by definition file. Note: The name shouldn't contain any whitespace characters.`
+It creates project by definition file. Note: The name shouldn't contain any whitespace characters.
 ::
 
  bin/flytectl create project --file project.yaml 
@@ -46,7 +46,7 @@ type ProjectConfig struct {
 	File        string            `json:"file" pflag:",file for the project definition."`
 	Description string            `json:"description" pflag:",description for the project specified as argument."`
 	Labels      map[string]string `json:"labels" pflag:",labels for the project specified as argument."`
-	DryRun      bool              `json:"dryRun" pflag:",execute command without making any modifications."`
+	DryRun      bool              `json:"dryRun" pflag:",execute command without making any modifications."`)
 }
 
 var (
