@@ -54,3 +54,5 @@ require (
 	k8s.io/client-go v0.21.3
 	sigs.k8s.io/yaml v1.2.0
 )
+
+replace github.com/flyteorg/flyteidl => github.com/flyteorg/flyteidl v0.21.12-0.20211201180300-0c3a0269e017
