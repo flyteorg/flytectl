@@ -3,21 +3,22 @@
 flytectl config
 ---------------
 
+Runs various config commands, look at the help of this command to get a list of available commands..
+
 Synopsis
 ~~~~~~~~
 
-It runs various config commands.
 
-Note: Take a look at the 'help' of 'flytectl config' command to get a list of the available commands.
+Runs various config commands, look at the help of this command to get a list of available commands..
 
 Options
 ~~~~~~~
 
 ::
 
-  --file stringArray   Passes the config file to load.
-                       If empty, it will first search for the config file path. If found, the config file is loaded from here.
-  -h, --help           help for config
+      --file stringArray   Passes the config file to load.
+                           If empty, it'll first search for the config file path then, if found, will load config from there.
+  -h, --help               help for config
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

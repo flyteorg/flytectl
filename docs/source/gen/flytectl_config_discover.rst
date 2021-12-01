@@ -3,12 +3,13 @@
 flytectl config discover
 ------------------------
 
+Searches for a config in one of the default search paths.
 
 Synopsis
 ~~~~~~~~
 
 
-It searches for a configuration in the default search paths.
+Searches for a config in one of the default search paths.
 
 ::
 
