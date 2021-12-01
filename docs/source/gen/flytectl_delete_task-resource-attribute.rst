@@ -110,5 +110,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_delete` 	 - Used for terminating/deleting various flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_delete` 	 - This command is used to terminate/delete various flyte resources including tasks/workflows/launchplans/executions/project.
 

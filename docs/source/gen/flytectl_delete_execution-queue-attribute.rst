@@ -3,26 +3,26 @@
 flytectl delete execution-queue-attribute
 -----------------------------------------
 
-Deletes matchable resources of execution queue attributes
+It deletes the matchable resources of execution queue attributes.
 
 Synopsis
 ~~~~~~~~
 
 
 
-Deletes execution queue attributes for given project and domain combination or additionally with workflow name.
+It deletes the execution queue attributes for a given project and domain combination or additionally with the workflow name.
 
-Deletes execution queue attribute for project and domain
-Here the command delete execution queue attributes for project flytectldemo and development domain.
+It deletes the execution queue attribute for project and domain.
+The command delete execution-queue-attributes for project flytectldemo and development domain has been shown below:
 ::
 
  flytectl delete execution-queue-attribute -p flytectldemo -d development 
 
 
-Deletes execution queue attribute using config file which was used for creating it.
-Here the command deletes execution queue attributes from the config file era.yaml
-Tags are optional in the file as they are unread during the delete command but can be kept as the same file can be used for get, update or delete 
-eg:  content of era.yaml which will use the project domain and workflow name for deleting the resource
+It deletes the execution queue attribute using config file which was used to create it.
+Here the command deletes the execution queue attributes from the config file era.yaml
+Tags are optional in the file since they are unread during the delete command but can be kept since the same file can be used with get, update or delete commands.
+Ex: Content of era.yaml which would use the project domain and workflow name to delete the resource.
 
 ::
 
@@ -39,8 +39,8 @@ eg:  content of era.yaml which will use the project domain and workflow name for
       - buzz
       - lightyear
 
-Deletes execution queue attribute for a workflow
-Here the command deletes the execution queue attributes for a workflow core.control_flow.run_merge_sort.merge_sort
+It deletes the execution queue attribute for a workflow.
+The command deletes the execution queue attributes for a workflow core.control_flow.run_merge_sort.merge_sort
 
 ::
 
@@ -109,5 +109,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_delete` 	 - Used for terminating/deleting various flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_delete` 	 - This command is used to terminate/delete various flyte resources including tasks/workflows/launchplans/executions/project.
 

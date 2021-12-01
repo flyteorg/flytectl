@@ -3,14 +3,14 @@
 flytectl delete
 ---------------
 
-Used for terminating/deleting various flyte resources including tasks/workflows/launchplans/executions/project.
+This command is used to terminate/delete various flyte resources including tasks/workflows/launchplans/executions/project.
 
 Synopsis
 ~~~~~~~~
 
 
 
-Example Delete executions.
+Examples of delete executions have been shown below.
 ::
 
  bin/flytectl delete execution kxd1i72850  -d development  -p flytesnacks
@@ -72,9 +72,9 @@ SEE ALSO
 
 * :doc:`flytectl` 	 - flyetcl CLI tool
 * :doc:`flytectl_delete_cluster-resource-attribute` 	 - Deletes matchable resources of cluster attributes
-* :doc:`flytectl_delete_execution` 	 - Terminate/Delete execution resources.
+* :doc:`flytectl_delete_execution` 	 - It helps terminate/Delete execution resources.
 * :doc:`flytectl_delete_execution-cluster-label` 	 - Deletes matchable resources of execution cluster label
-* :doc:`flytectl_delete_execution-queue-attribute` 	 - Deletes matchable resources of execution queue attributes
+* :doc:`flytectl_delete_execution-queue-attribute` 	 - It deletes the matchable resources of execution queue attributes.
 * :doc:`flytectl_delete_plugin-override` 	 - Deletes matchable resources of plugin overrides
 * :doc:`flytectl_delete_task-resource-attribute` 	 - Deletes matchable resources of task attributes
 * :doc:`flytectl_delete_workflow-execution-config` 	 - Deletes matchable resources of workflow execution config

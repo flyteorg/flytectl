@@ -3,14 +3,15 @@
 flytectl create
 ---------------
 
-Used for creating various flyte resources including tasks/workflows/launchplans/executions/project.
+Used to create various flyte resources including tasks/workflows/launchplans/executions/project.
 
 Synopsis
 ~~~~~~~~
 
 
 
-Example create.
+It is used to create various flyte resources such as tasks/workflows/launchplans/executions/project.
+This is done using the following command:
 ::
 
  bin/flytectl create project --file project.yaml 
@@ -71,6 +72,6 @@ SEE ALSO
 ~~~~~~~~
 
 * :doc:`flytectl` 	 - flyetcl CLI tool
-* :doc:`flytectl_create_execution` 	 - Create execution resources
+* :doc:`flytectl_create_execution` 	 - Helps create execution resources
 * :doc:`flytectl_create_project` 	 - Create project resources
 

@@ -10,18 +10,18 @@ Synopsis
 
 
 
-Registers all latest flytesnacks example
+The below command registers the latest flytesnacks example:
 ::
 
  bin/flytectl register examples  -d development  -p flytesnacks 
 
-Registers specific release of flytesnacks example
+The below command registers specific release of flytesnacks example:
 ::
 
  bin/flytectl register examples  -d development  -p flytesnacks --version v0.2.176
 	
-Note: register command automatically override the version with release version	
-Usage
+Note: The register command automatically overrides the version with release version	
+Usage-
 
 
 ::

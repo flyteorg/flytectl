@@ -59,10 +59,10 @@ Options
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_completion` 	 - Generate completion script
+* :doc:`flytectl_completion` 	 - This action generates completion scripts.
 * :doc:`flytectl_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands..
-* :doc:`flytectl_create` 	 - Used for creating various flyte resources including tasks/workflows/launchplans/executions/project.
-* :doc:`flytectl_delete` 	 - Used for terminating/deleting various flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_create` 	 - Used to create various flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_delete` 	 - This command is used to terminate/delete various flyte resources including tasks/workflows/launchplans/executions/project.
 * :doc:`flytectl_get` 	 - Used for fetching various flyte resources including tasks/workflows/launchplans/executions/project.
 * :doc:`flytectl_register` 	 - Registers tasks/workflows/launchplans from list of generated serialized files.
 * :doc:`flytectl_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.

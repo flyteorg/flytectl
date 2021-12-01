@@ -10,13 +10,13 @@ Synopsis
 
 
 
-Create the projects.(project,projects can be used interchangeably in these commands)
+It creates the projects.(Here, project/s can be used interchangeably in the commands)
 
 ::
 
  bin/flytectl create project --name flytesnacks --id flytesnacks --description "flytesnacks description"  --labels app=flyte
 
-Create Project by definition file. Note: The name shouldn't contain any whitespace characters'
+It creates project by definition file. Note: The name shouldn't contain any whitespace characters.
 ::
 
  bin/flytectl create project --file project.yaml 
@@ -95,5 +95,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_create` 	 - Used for creating various flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_create` 	 - Used to create various flyte resources including tasks/workflows/launchplans/executions/project.
 
