@@ -13,9 +13,6 @@ define PIP_COMPILE
 pip-compile $(1) --upgrade --verbose
 endef
 
-generate:
-	@scripts/go-gen.sh
-
 compile:
 	go build -o bin/flytectl -ldflags=$(LD_FLAGS) main.go
 
