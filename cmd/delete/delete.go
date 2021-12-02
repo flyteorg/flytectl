@@ -15,9 +15,9 @@ import (
 
 // Long descriptions are whitespace sensitive when generating docs using sphinx.
 const (
-	deleteCmdShort = `Used for terminating/deleting various flyte resources including tasks/workflows/launchplans/executions/project.`
+	deleteCmdShort = `Used to terminate/delete various flyte resources including tasks/workflows/launchplans/executions/project.`
 	deleteCmdLong  = `
-Example Delete executions.
+Example Delete executions:
 ::
 
  bin/flytectl delete execution kxd1i72850  -d development  -p flytesnacks

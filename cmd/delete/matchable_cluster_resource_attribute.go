@@ -15,8 +15,8 @@ const (
 	clusterResourceAttributesLong  = `
 Deletes cluster resource attributes for given project and domain combination or additionally with workflow name.
 
-Deletes cluster resource attribute for project and domain
-Here the command delete cluster resource attributes for  project flytectldemo and development domain.
+Deletes cluster resource attribute for project and domain.
+Here the command delete cluster resource attributes for project flytectldemo and development domain.
 ::
 
  flytectl delete cluster-resource-attribute -p flytectldemo -d development 
@@ -40,7 +40,7 @@ eg:  content of cra.yaml which will use the project domain and workflow name for
       foo: "bar"
       buzz: "lightyear"
 
-Deletes cluster resource attribute for a workflow
+Deletes cluster resource attribute for a workflow.
 Here the command deletes cluster resource attributes for a workflow core.control_flow.run_merge_sort.merge_sort
 
 ::
