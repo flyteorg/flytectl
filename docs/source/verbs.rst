@@ -1,6 +1,6 @@
 Verbs
 ------
-Flytectl verbs specify the actions to be performed on the resources such as create, get, update, and delete.
+Flytectl verbs specify the actions to be performed on the resources. Ex: create, get, update, and delete.
 
 .. toctree::
     :maxdepth: 1
