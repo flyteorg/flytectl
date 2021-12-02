@@ -27,19 +27,21 @@ const (
 	initCmdShort = `Generates flytectl config file in the user's home directory.`
 	initCmdLong  = `Creates a flytectl config file in flyte directory i.e ~/.flyte
 	
-Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox https://docs.flyte.org/en/latest/deployment/sandbox.html
+Generate a sandbox config: 
+Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox https://docs.flyte.org/en/latest/deployment/sandbox.html
 
 ::
 
  bin/flytectl configuration config 
 
-Generate remote cluster config. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
+Generate remote cluster config:
+Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
 	
 ::
 
  bin/flytectl configuration config --host=flyte.myexample.com
 	
-Generate flytectl config with a storage provider
+Generate flytectl config with a storage provider:
 ::
 
  bin/flytectl configuration config --host=flyte.myexample.com --storage
