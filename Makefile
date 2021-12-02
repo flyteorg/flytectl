@@ -14,7 +14,7 @@ pip-compile $(1) --upgrade --verbose
 endef
 
 generate:
-	go test github.com/flyteorg/flytectl/cmd --update
+	@scripts/go-gen.sh
 
 compile:
 	go build -o bin/flytectl -ldflags=$(LD_FLAGS) main.go

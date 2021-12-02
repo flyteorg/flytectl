@@ -39,7 +39,12 @@ jobs:
           file: coverage.txt
           flags: unittests
           fail_ci_if_error: true
-      - name: Lint
-        env:
-          GO111MODULE: "on"
-        run: make install && make lint
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Go generate and diff
+        run: DELTA_CHECK=true make generate
