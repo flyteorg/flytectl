@@ -39,8 +39,10 @@ jobs:
           file: coverage.txt
           flags: unittests
           fail_ci_if_error: true
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+      - name: Lint
+        env:
+          GO111MODULE: "on"
+        run: make install && make lint
 
   generate:
     runs-on: ubuntu-latest
