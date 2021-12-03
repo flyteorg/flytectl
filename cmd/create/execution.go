@@ -79,7 +79,7 @@ Also, an execution can be relaunched by passing in the current execution id.
 
  flytectl create execution --relaunch ffb31066a0f8b4d52b77 -p flytectldemo -d development
 
-An execution can be recovered, i.e recreated from the last known failure point for a previously-run workflow execution.
+An execution can be recovered, i.e., recreated from the last known failure point for previously-run workflow execution.
 See :ref:` + "`ref_flyteidl.admin.ExecutionRecoverRequest`" + ` for more details.
 
 ::
