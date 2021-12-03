@@ -13,19 +13,19 @@ import (
 const (
 	executionQueueAttributesShort = "Deletes matchable resources of execution queue attributes"
 	executionQueueAttributesLong  = `
-Deletes execution queue attributes for given project and domain combination or additionally with workflow name.
+Deletes execution queue attributes for the given project and domain combination or additionally with workflow name.
 
-Deletes execution queue attribute for project and domain
-Here the command delete execution queue attributes for project flytectldemo and development domain.
+Deletes execution queue attribute for project and domain.
+The command delete execution queue attributes for project flytectldemo and development domain:
 ::
 
  flytectl delete execution-queue-attribute -p flytectldemo -d development 
 
 
 Deletes execution queue attribute using config file which was used for creating it.
-Here the command deletes execution queue attributes from the config file era.yaml
-Tags are optional in the file as they are unread during the delete command but can be kept as the same file can be used for get, update or delete 
-eg:  content of era.yaml which will use the project domain and workflow name for deleting the resource
+The command deletes execution queue attributes from the config file era.yaml.
+Value is optional in the file as it is unread during the delete command but it can be kept since the same file can be used for get, update or delete commands. 
+Ex:  Content of era.yaml which will use the project domain and workflow name to delete the resource.
 
 ::
 
@@ -42,8 +42,8 @@ eg:  content of era.yaml which will use the project domain and workflow name for
       - buzz
       - lightyear
 
-Deletes execution queue attribute for a workflow
-Here the command deletes the execution queue attributes for a workflow core.control_flow.run_merge_sort.merge_sort
+Deletes execution queue attribute for a workflow.
+The command deletes the execution queue attributes for a workflow core.control_flow.run_merge_sort.merge_sort:
 
 ::
 

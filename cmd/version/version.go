@@ -19,9 +19,9 @@ import (
 
 // Long descriptions are whitespace sensitive when generating docs using sphinx.
 const (
-	versionCmdShort = `Used for fetching flyte version`
+	versionCmdShort = `Used to fetch flyte version`
 	versionCmdLong  = `
-Example version.
+Example version:
 ::
 
  bin/flytectl version

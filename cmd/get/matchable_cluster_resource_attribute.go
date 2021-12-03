@@ -14,32 +14,32 @@ const (
 	clusterResourceAttributesShort = "Gets matchable resources of cluster resource attributes."
 	clusterResourceAttributesLong  = `
 Retrieve cluster resource attributes for the given project and domain.
-Here, the command gets cluster resource attributes for the project flytectldemo and development domain.
+The command get cluster resource attributes for project flytectldemo and development domain:
 ::
 
  flytectl get cluster-resource-attribute -p flytectldemo -d development 
 
-eg : output from the command
+Ex : output from the command
 
 .. code-block:: json
 
  {"project":"flytectldemo","domain":"development","attributes":{"buzz":"lightyear","foo":"bar"}}
 
 Retrieve cluster resource attributes for the given project, domain, and workflow.
-Here, the command gets cluster resource attributes for the project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort'.
+The command get cluster resource attributes for project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort':
 ::
 
  flytectl get cluster-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-eg : output from the command
+Ex : output from the command
 
 .. code-block:: json
 
  {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","attributes":{"buzz":"lightyear","foo":"bar"}}
 
 Writes the cluster resource attributes to a file. If there are no cluster resource attributes,the command throws an error.
-Here, the command gets the task resource attributes and writes the config file to cra.yaml file.
-eg:  content of cra.yaml
+The command get task resource attributes and writes the config file to cra.yaml file:
+Ex :  content of cra.yaml
 
 ::
 

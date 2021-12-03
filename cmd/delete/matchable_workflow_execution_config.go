@@ -14,19 +14,19 @@ import (
 const (
 	workflowExecutionConfigShort = "Deletes matchable resources of workflow execution config"
 	workflowExecutionConfigLong  = `
-Deletes workflow execution config for given project and domain combination or additionally with workflow name.
+Deletes workflow execution config for the given project and domain combination or additionally with workflow name.
 
-Deletes workflow execution config label for project and domain
-Here the command delete workflow execution config for project flytectldemo and development domain.
+Deletes workflow execution config label for project and domain.
+The command delete workflow execution config for project flytectldemo and development domain.
 ::
 
  flytectl delete workflow-execution-config -p flytectldemo -d development 
 
 
 Deletes workflow execution config using config file which was used for creating it.
-Here the command deletes workflow execution config from the config file wec.yaml
-Max_parallelism is optional in the file as its unread during the delete command but can be kept as the same file can be used for get, update or delete 
-eg:  content of wec.yaml which will use the project domain and workflow name for deleting the resource
+The command deletes workflow execution config from the config file wec.yaml.
+Max_parallelism is optional in the file as it is unread during the delete command but can be kept since the same file can be used for get, update or delete commands.
+Ex:  Content of wec.yaml which will use the project domain and workflow name for deleting the resource.
 
 ::
 
@@ -39,8 +39,8 @@ eg:  content of wec.yaml which will use the project domain and workflow name for
     project: flytectldemo
     max_parallelism: 5
 
-Deletes workflow execution config for a workflow
-Here the command deletes workflow execution config for a workflow core.control_flow.run_merge_sort.merge_sort
+Deletes workflow execution config for a workflow.
+The command deletes workflow execution config for a workflow core.control_flow.run_merge_sort.merge_sort:
 
 ::
 

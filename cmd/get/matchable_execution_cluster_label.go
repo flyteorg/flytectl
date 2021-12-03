@@ -16,32 +16,32 @@ const (
 // Retrieves the execution cluster label for a given project and domain, combination or additionally with workflow name.
 
 Retrieve the execution cluster label for the given project and domain.
-Here the command get execution cluster label for project flytectldemo and development domain.
+The command get execution cluster label for project flytectldemo and development domain:
 ::
 
  flytectl get execution-cluster-label -p flytectldemo -d development 
 
-e.g. : output from the command
+Ex : output from the command
 
 .. code-block:: json
 
  {"project":"flytectldemo","domain":"development","value":"foo"}
 
 Retrieve the execution cluster label for the given project, domain and workflow.
-Here, the command gets the execution cluster label for the project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort'.
+The command get execution cluster label for project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort':
 ::
 
  flytectl get execution-cluster-label -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-eg : output from the command
+Ex : output from the command
 
 .. code-block:: json
 
  {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","value":"foo"}
 
-Writes the execution cluster label to a file. If there is no execution cluster label, command throws an error.
-Here, the command gets the execution cluster label and writes the config file to ecl.yaml file.
-eg:  content of ecl.yaml
+Writes the execution cluster label to a file. If there is no execution cluster label, the command throws an error.
+The command get execution cluster label writes the config file to ecl.yaml file.
+Ex:  content of ecl.yaml
 
 ::
 

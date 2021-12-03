@@ -34,36 +34,36 @@ Retrieve the latest version of the task by name within the project and domain.
 
  flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --latest
 
-Retrieves a particular version of the launch plan by name within the project and domain.
+Retrieve a particular version of the launch plan by name within the project and domain.
 
 ::
 
  flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --version v2
 
-Retrieves all the launch plans with filters.
+Retrieve all the launch plans with filters.
 ::
  
   bin/flytectl get launchplan -p flytesnacks -d development --filter.fieldSelector="name=core.basic.lp.go_greet"
  
-Retrieves launch plans entity search across all versions with filters.
+Retrieve launch plans entity search across all versions with filters.
 ::
  
   bin/flytectl get launchplan -p flytesnacks -d development k8s_spark.dataframe_passing.my_smart_schema --filter.fieldSelector="version=v1"
  
  
-Retrieves all the launch plans with limit and sorting.
+Retrieve all the launch plans with limit and sorting.
 ::
  
   bin/flytectl get launchplan -p flytesnacks -d development --filter.sortBy=created_at --filter.limit=1 --filter.asc
  
 
-Retrieves all launch plans within the project and domain in YAML format.
+Retrieve all launch plans within the project and domain in YAML format.
 
 ::
 
  flytectl get launchplan -p flytesnacks -d development -o yaml
 
-Retrieves all launch plans the within the project and domain in JSON format.
+Retrieve all launch plans the within the project and domain in JSON format.
 
 ::
 

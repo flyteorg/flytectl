@@ -15,17 +15,17 @@ import (
 const (
 	registerExampleShort = "Registers flytesnack example"
 	registerExampleLong  = `
-Registers all latest flytesnacks example
+Registers all latest flytesnacks:
 ::
 
  bin/flytectl register examples  -d development  -p flytesnacks 
 
-Registers specific release of flytesnacks example
+Registers specific release of flytesnacks:
 ::
 
  bin/flytectl register examples  -d development  -p flytesnacks --version v0.2.176
 	
-Note: register command automatically override the version with release version	
+Note: The register command automatically override the version with release version	
 Usage
 `
 )

@@ -22,13 +22,13 @@ Retrieve all executions within the project and domain (execution, executions can
 
  bin/flytectl get execution -p flytesnacks -d development
 
-Retrieves executions by name within the project and domain.
+Retrieve executions by name within the project and domain.
 
 ::
 
  bin/flytectl get execution -p flytesnacks -d development oeh94k9r2r
 
-Retrieves all the executions with filters.
+Retrieve all the executions with filters.
 ::
  
   bin/flytectl get execution -p flytesnacks -d development --filter.fieldSelector="execution.phase in (FAILED;SUCCEEDED),execution.duration<200" 

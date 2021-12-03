@@ -16,62 +16,62 @@ import (
 const (
 	taskShort = "Gets task resources"
 	taskLong  = `
-Retrieves all the task within project and domain.(task,tasks can be used interchangeably in these commands)
+Retrieves all the tasks within project and domain(task,tasks can be used interchangeably in these commands):
 ::
 
  bin/flytectl get task -p flytesnacks -d development
 
-Retrieves task by name within project and domain.
+Retrieves task by name within project and domain:
 
 ::
 
  bin/flytectl task -p flytesnacks -d development core.basic.lp.greet
 
-Retrieves latest version of task by name within project and domain.
+Retrieves latest version of task by name within project and domain:
 
 ::
 
  flytectl get task -p flytesnacks -d development  core.basic.lp.greet --latest
 
-Retrieves particular version of task by name within project and domain.
+Retrieves particular version of task by name within project and domain:
 
 ::
 
  flytectl get task -p flytesnacks -d development  core.basic.lp.greet --version v2
 
-Retrieves all the tasks with filters.
+Retrieves all the tasks with filters:
 ::
   
   bin/flytectl get task -p flytesnacks -d development --filter.fieldSelector="task.name=k8s_spark.pyspark_pi.print_every_time,task.version=v1" 
  
-Retrieve a specific task with filters.
+Retrieve a specific task with filters:
 ::
  
   bin/flytectl get task -p flytesnacks -d development k8s_spark.pyspark_pi.print_every_time --filter.fieldSelector="task.version=v1,created_at>=2021-05-24T21:43:12.325335Z" 
   
-Retrieves all the task with limit and sorting.
+Retrieves all the task with limit and sorting:
 ::
    
   bin/flytectl get -p flytesnacks -d development task  --filter.sortBy=created_at --filter.limit=1 --filter.asc
 
-Retrieves all the tasks within project and domain in yaml format.
+Retrieves all the tasks within project and domain in yaml format:
 ::
 
  bin/flytectl get task -p flytesnacks -d development -o yaml
 
-Retrieves all the tasks within project and domain in json format.
+Retrieves all the tasks within project and domain in json format:
 
 ::
 
  bin/flytectl get task -p flytesnacks -d development -o json
 
-Retrieves a tasks within project and domain for a version and generate the execution spec file for it to be used for launching the execution using create execution.
+Retrieves a tasks within project and domain for a version and generate the execution spec file for it to be used for launching the execution using create execution:
 
 ::
 
  bin/flytectl get tasks -d development -p flytesnacks core.advanced.run_merge_sort.merge --execFile execution_spec.yaml --version v2
 
-The generated file would look similar to this
+The generated file would look similar to this:
 
 .. code-block:: yaml
 

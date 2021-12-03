@@ -13,20 +13,19 @@ import (
 const (
 	pluginOverrideShort = "Deletes matchable resources of plugin overrides"
 	pluginOverrideLong  = `
-Deletes plugin override for given project and domain combination or additionally with workflow name.
+Deletes plugin override for the given project and domain combination or additionally with workflow name.
 
-Deletes plugin override for project and domain
-Here the command deletes plugin override for project flytectldemo and development domain.
+Deletes plugin override for project and domain.
+The command deletes plugin override for project flytectldemo and development domain:
 ::
 
  flytectl delete plugin-override -p flytectldemo -d development 
 
 
 Deletes plugin override using config file which was used for creating it.
-Here the command deletes plugin overrides from the config file po.yaml
-Overrides are optional in the file as they are unread during the delete command but can be kept as the same file can be used for get, update or delete 
-eg:  content of po.yaml which will use the project domain and workflow name for deleting the resource
-
+The command deletes plugin overrides from the config file po.yaml.
+Overrides are optional in the file as they are unread during the delete command but can be kept since the same file can be used for get, update or delete commands. 
+Ex:  Content of po.yaml which will use the project domain and workflow name to delete the resource.
 ::
 
  flytectl delete plugin-override --attrFile po.yaml
@@ -43,8 +42,8 @@ eg:  content of po.yaml which will use the project domain and workflow name for 
            - plugin_override2
          missing_plugin_behavior: 1 # Behavior when no specified plugin_id has an associated handler. 0 : FAIL , 1: DEFAULT
 
-Deletes plugin override for a workflow
-Here the command deletes the plugin override for a workflow core.control_flow.run_merge_sort.merge_sort
+Deletes plugin override for a workflow.
+The command deletes the plugin override for a workflow core.control_flow.run_merge_sort.merge_sort:
 
 ::
 

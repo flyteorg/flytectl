@@ -14,16 +14,16 @@ import (
 const (
 	workflowExecutionConfigShort = "Gets matchable resources of workflow execution config"
 	workflowExecutionConfigLong  = `
-Retrieves workflow execution config for given project and domain combination or additionally with workflow name.
+Retrieves workflow execution config for the given project and domain combination or additionally with workflow name.
 
-Retrieves workflow execution config for project and domain
-Here the command get workflow execution config for project flytectldemo and development domain.
+Retrieves workflow execution config for project and domain.
+The command get workflow execution config for project flytectldemo and development domain:
 
 ::
 
  flytectl get workflow-execution-config -p flytectldemo -d development 
 
-eg : output from the command
+Ex : output from the command
 
 .. code-block:: json
 
@@ -33,14 +33,14 @@ eg : output from the command
 	"max_parallelism": 5
  }
 
-Retrieves workflow execution config for project and domain and workflow
-Here the command get workflow execution config for project flytectldemo ,development domain and workflow core.control_flow.run_merge_sort.merge_sort
+Retrieves workflow execution config for the project, domain and workflow.
+The command get workflow execution config for project flytectldemo ,development domain and workflow core.control_flow.run_merge_sort.merge_sort:
 
 ::
 
  flytectl get workflow-execution-config -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-eg : output from the command
+Ex : output from the command
 
 .. code-block:: json
 
@@ -51,9 +51,9 @@ eg : output from the command
 	"max_parallelism": 5
  }
 
-Writing the workflow execution config to a file. If there are no workflow execution config, command would return an error.
-Here the command gets workflow execution config and writes the config file to wec.yaml
-eg:  content of wec.yaml
+Writing the workflow execution config to a file. If there are no workflow execution config, the command would return an error.
+The command get workflow execution config writes the config file to wec.yaml
+Ex:  content of wec.yaml
 
 ::
 
