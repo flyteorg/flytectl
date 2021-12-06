@@ -21,7 +21,7 @@ Create the projects.(project/projects can be used interchangeably in these comma
 
  flytectl create project --name flytesnacks --id flytesnacks --description "flytesnacks description"  --labels app=flyte
 
-Creates project by definition file. Note: The name shouldn't contain any whitespace characters'
+Creates project by definition file. Note: The name shouldn't contain any whitespace characters.
 ::
 
  flytectl create project --file project.yaml 
