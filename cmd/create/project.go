@@ -19,12 +19,12 @@ Create the projects.(project/projects can be used interchangeably in these comma
 
 ::
 
- bin/flytectl create project --name flytesnacks --id flytesnacks --description "flytesnacks description"  --labels app=flyte
+ flytectl create project --name flytesnacks --id flytesnacks --description "flytesnacks description"  --labels app=flyte
 
 Creates project by definition file. Note: The name shouldn't contain any whitespace characters'
 ::
 
- bin/flytectl create project --file project.yaml 
+ flytectl create project --file project.yaml 
 
 .. code-block:: yaml
 

@@ -20,7 +20,7 @@ The command get plugin override for project flytectldemo and development domain:
 
  flytectl get plugin-override -p flytectldemo -d development 
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 
@@ -41,7 +41,7 @@ The command get plugin override for project flytectldemo, development domain and
 
  flytectl get plugin-override -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 
@@ -58,7 +58,7 @@ Ex : output from the command
 
 Writing the plugin overrides to a file. If there are no plugin overrides, the command would return an error.
 The command get plugin override writes the config file to po.yaml
-eg:  content of po.yaml
+Ex:  content of po.yaml
 
 ::
 

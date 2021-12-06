@@ -24,7 +24,7 @@ The command delete task resource attributes for  project flytectldemo and develo
 
 Deletes task resource attribute using config file which was used for creating it.
 The command deletes task resource attributes from the config file tra.yaml.
-dThe efaults/limits are optional in the file as they are unread during the delete command but can be kept since the same file can be used for get, update or delete commands.
+The defaults/limits are optional in the file as they are unread during the delete command but can be kept since the same file can be used for get, update or delete commands.
 Ex:  Content of tra.yaml which will use the project domain and workflow name for deleting the resource.
 
 ::

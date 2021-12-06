@@ -23,7 +23,7 @@ The command get workflow execution config for project flytectldemo and developme
 
  flytectl get workflow-execution-config -p flytectldemo -d development 
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 
@@ -40,7 +40,7 @@ The command get workflow execution config for project flytectldemo ,development 
 
  flytectl get workflow-execution-config -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 

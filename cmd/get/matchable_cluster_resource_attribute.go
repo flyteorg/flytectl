@@ -19,7 +19,7 @@ The command get cluster resource attributes for project flytectldemo and develop
 
  flytectl get cluster-resource-attribute -p flytectldemo -d development 
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 
@@ -31,7 +31,7 @@ The command get cluster resource attributes for project flytectldemo, developmen
 
  flytectl get cluster-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 
@@ -39,7 +39,7 @@ Ex : output from the command
 
 Writes the cluster resource attributes to a file. If there are no cluster resource attributes,the command throws an error.
 The command get task resource attributes and writes the config file to cra.yaml file:
-Ex :  content of cra.yaml
+Ex:  content of cra.yaml
 
 ::
 

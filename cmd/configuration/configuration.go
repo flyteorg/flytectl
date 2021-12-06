@@ -31,18 +31,18 @@ Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment
 
 ::
 
- bin/flytectl configuration config 
+ flytectl configuration config 
 
 Generate remote cluster config. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
 	
 ::
 
- bin/flytectl configuration config --host=flyte.myexample.com
+ flytectl configuration config --host=flyte.myexample.com
 	
 Generate flytectl config with a storage provider
 ::
 
- bin/flytectl configuration config --host=flyte.myexample.com --storage
+ flytectl configuration config --host=flyte.myexample.com --storage
 `
 )
 

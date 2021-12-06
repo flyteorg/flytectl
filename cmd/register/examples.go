@@ -18,12 +18,12 @@ const (
 Registers all latest flytesnacks:
 ::
 
- bin/flytectl register examples  -d development  -p flytesnacks 
+ flytectl register examples  -d development  -p flytesnacks 
 
 Registers specific release of flytesnacks:
 ::
 
- bin/flytectl register examples  -d development  -p flytesnacks --version v0.2.176
+ flytectl register examples  -d development  -p flytesnacks --version v0.2.176
 	
 Note: The register command automatically override the version with release version	
 Usage

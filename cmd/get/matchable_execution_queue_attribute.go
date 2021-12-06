@@ -19,7 +19,7 @@ The command get execution queue attributes for the project flytectldemo and deve
 
  flytectl get execution-queue-attribute -p flytectldemo -d development 
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 
@@ -31,7 +31,7 @@ The command get execution queue attributes for project flytectldemo, development
 
  flytectl get execution-queue-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 
@@ -39,7 +39,7 @@ Ex : output from the command
 
 Write the execution queue attribute to a file. If there are no execution queue attributes, the command throws an error.
 The command get execution queue attributes writes the config to era.yaml file.
-Ex :  content of era.yaml
+Ex:  content of era.yaml
 
 ::
 

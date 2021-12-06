@@ -21,7 +21,7 @@ The command get execution cluster label for project flytectldemo and development
 
  flytectl get execution-cluster-label -p flytectldemo -d development 
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 
@@ -33,7 +33,7 @@ The command get execution cluster label for project flytectldemo, development do
 
  flytectl get execution-cluster-label -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 

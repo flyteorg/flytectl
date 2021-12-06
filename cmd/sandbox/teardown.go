@@ -20,7 +20,7 @@ const (
 Teardown will remove sandbox cluster and all the flyte config created by sandbox start:
 ::
 
- bin/flytectl sandbox teardown 
+ flytectl sandbox teardown 
 	
 
 Usage

@@ -14,47 +14,47 @@ import (
 )
 
 const (
-	launchPlanShort = "Gets launch plan resources"
+	launchPlanShort = "Gets launchplan resources"
 	launchPlanLong  = `
-Retrieve all launch plans within the project and domain (launchplan, launchplans can be used interchangeably).
+Retrieve all launch plans within the project and domain (launchplan, launchplans can be used interchangeably):
 ::
 
  flytectl get launchplan -p flytesnacks -d development
 
- Retrieve a launch plan by name within the project and domain.
+ Retrieve a launch plan by name within the project and domain:
 
 ::
 
  flytectl get launchplan -p flytesnacks -d development core.basic.lp.go_greet
 
 
-Retrieve the latest version of the task by name within the project and domain.
+Retrieve the latest version of the task by name within the project and domain:
 
 ::
 
  flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --latest
 
-Retrieve a particular version of the launch plan by name within the project and domain.
+Retrieve a particular version of the launch plan by name within the project and domain:
 
 ::
 
  flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --version v2
 
-Retrieve all the launch plans with filters.
+Retrieve all the launch plans with filters:
 ::
  
-  bin/flytectl get launchplan -p flytesnacks -d development --filter.fieldSelector="name=core.basic.lp.go_greet"
+  flytectl get launchplan -p flytesnacks -d development --filter.fieldSelector="name=core.basic.lp.go_greet"
  
-Retrieve launch plans entity search across all versions with filters.
+Retrieve launch plans entity search across all versions with filters:
 ::
  
-  bin/flytectl get launchplan -p flytesnacks -d development k8s_spark.dataframe_passing.my_smart_schema --filter.fieldSelector="version=v1"
+  flytectl get launchplan -p flytesnacks -d development k8s_spark.dataframe_passing.my_smart_schema --filter.fieldSelector="version=v1"
  
  
-Retrieve all the launch plans with limit and sorting.
+Retrieve all the launch plans with limit and sorting:
 ::
  
-  bin/flytectl get launchplan -p flytesnacks -d development --filter.sortBy=created_at --filter.limit=1 --filter.asc
+  flytectl get launchplan -p flytesnacks -d development --filter.sortBy=created_at --filter.limit=1 --filter.asc
  
 
 Retrieve all launch plans within the project and domain in YAML format.

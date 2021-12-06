@@ -19,7 +19,7 @@ The command get task resource attributes for project flytectldemo and developmen
 
  flytectl get task-resource-attribute -p flytectldemo -d development 
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 
@@ -31,7 +31,7 @@ The command get task resource attributes for project flytectldemo, development d
 
  flytectl get task-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-Ex : output from the command
+Ex: output from the command
 
 .. code-block:: json
 
@@ -40,7 +40,7 @@ Ex : output from the command
 
 Write the task resource attributes to a file. If there are no task resource attributes, a file would be populated with the basic data.
 The command get task resource attributes writes the config file to tra.yaml
-Ex :  content of tra.yaml
+Ex:  content of tra.yaml
 
 ::
 

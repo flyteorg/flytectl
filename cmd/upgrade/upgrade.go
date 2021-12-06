@@ -30,14 +30,14 @@ const (
 Upgrade flytectl:
 ::
 
- bin/flytectl upgrade
+ flytectl upgrade
 	
 Note: Please use upgrade with sudo. Without sudo it will cause permission issue.
 	
 Rollback flytectl binary:
 ::
 
- bin/flytectl upgrade rollback
+ flytectl upgrade rollback
 
 Note: Upgrade is not available on windows.
 `

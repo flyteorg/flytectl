@@ -10,10 +10,10 @@ import (
 const (
 	createCmdShort = `Used to create various flyte resources including tasks/workflows/launchplans/executions/project.`
 	createCmdLong  = `
-Example create:
+The create command creates flyte resource, i.e project:
 ::
 
- bin/flytectl create project --file project.yaml 
+ flytectl create project --file project.yaml 
 `
 )
 

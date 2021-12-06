@@ -18,7 +18,7 @@ It returns the docker status for this container:
 Usage
 ::
 
- bin/flytectl sandbox status 
+ flytectl sandbox status 
 
 `
 )

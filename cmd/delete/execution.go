@@ -24,7 +24,7 @@ Terminate a single execution with its name:
 
 ::
 
- bin/flytectl delete execution c6a51x2l9e  -d development  -p flytesnacks
+ flytectl delete execution c6a51x2l9e  -d development  -p flytesnacks
 
 Get executions to check its state:
 
@@ -40,13 +40,13 @@ Get executions to check its state:
 Terminate multiple executions with their names:
 ::
 
- bin/flytectl delete execution eeam9s8sny p4wv4hwgc4  -d development  -p flytesnacks
+ flytectl delete execution eeam9s8sny p4wv4hwgc4  -d development  -p flytesnacks
 
 Get executions to find the state of previously terminated executions:
 
 ::
 
- bin/flytectl get execution  -d development  -p flytesnacks
+ flytectl get execution  -d development  -p flytesnacks
   ------------ ------------------------------------------------------------------------- ---------- ----------- -------------------------------- --------------- 
  | NAME (7)   | WORKFLOW NAME                                                           | TYPE     | PHASE     | STARTED                        | ELAPSED TIME  |
   ------------ ------------------------------------------------------------------------- ---------- ----------- -------------------------------- --------------- 
