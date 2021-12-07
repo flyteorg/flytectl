@@ -15,7 +15,7 @@ import (
 const (
 	projectShort = "Creates project resources"
 	projectLong  = `
-Create the projects.(project/projects can be used interchangeably in these commands)
+Create projects.(project/projects can be used interchangeably in these commands)
 
 ::
 
