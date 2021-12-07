@@ -13,7 +13,7 @@ import (
 const (
 	taskResourceAttributesShort = "Deletes matchable resources of task attributes"
 	taskResourceAttributesLong  = `
-Deletes task resource attributes for the given project,domain combination or additionally with workflow name.
+Deletes task resource attributes for the given project, domain combination, or additionally with workflow name.
 
 Deletes task resource attribute for project and domain.
 The command delete task resource attributes for  project flytectldemo and development domain.
