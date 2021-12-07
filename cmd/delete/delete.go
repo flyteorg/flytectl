@@ -17,7 +17,7 @@ import (
 const (
 	deleteCmdShort = `Used to terminate/delete various flyte resources including tasks/workflows/launchplans/executions/project.`
 	deleteCmdLong  = `
-The delete command deletes a resource, i.e an execution:
+The delete command deletes a resource; if an execution:
 ::
 
  flytectl delete execution kxd1i72850  -d development  -p flytesnacks
