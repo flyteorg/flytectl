@@ -16,7 +16,7 @@ const (
 Deletes cluster resource attributes for the given project and domain combination or additionally with workflow name.
 
 Deletes cluster resource attributes for the given project and domain.
-The command delete cluster resource attributes for project flytectldemo and development domain:
+The command delete cluster resource attributes for project FlyteCTLdemo and development domain:
 ::
 
  flytectl delete cluster-resource-attribute -p flytectldemo -d development 

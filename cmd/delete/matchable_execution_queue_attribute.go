@@ -16,7 +16,7 @@ const (
 Deletes execution queue attributes for the given project and domain combination or additionally with workflow name.
 
 Deletes execution queue attribute for project and domain.
-The command delete execution queue attributes for project flytectldemo and development domain:
+The command delete execution queue attributes for project FlyteCTLdemo and development domain:
 ::
 
  flytectl delete execution-queue-attribute -p flytectldemo -d development 

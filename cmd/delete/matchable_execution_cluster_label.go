@@ -16,7 +16,7 @@ const (
 Deletes execution cluster label for given project and domain combination or additionally with workflow name.
 
 Deletes execution cluster label for project and domain.
-The command delete execution cluster label for project flytectldemo and development domain:
+The command delete execution cluster label for project FlyteCTLdemo and development domain:
 ::
 
  flytectl delete execution-cluster-label -p flytectldemo -d development 

@@ -11,7 +11,7 @@ import (
 	"github.com/flyteorg/flytestdlib/logger"
 )
 
-// Long descriptions are whitespace sensitive when generating docs using sphinx.
+// Long descriptions are whitespace sensitive when generating docs using Sphinx.
 const (
 	execCmdShort = `Used to Terminate/Delete execution resources.`
 	execCmdLong  = `

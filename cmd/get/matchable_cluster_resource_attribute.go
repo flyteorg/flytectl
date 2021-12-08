@@ -14,7 +14,7 @@ const (
 	clusterResourceAttributesShort = "Gets matchable resources of cluster resource attributes."
 	clusterResourceAttributesLong  = `
 Retrieve cluster resource attributes for the given project and domain.
-The command get cluster resource attributes for project flytectldemo and development domain:
+The command get cluster resource attributes for project FlyteCTLdemo and development domain:
 ::
 
  flytectl get cluster-resource-attribute -p flytectldemo -d development 
@@ -26,7 +26,7 @@ Ex: output from the command
  {"project":"flytectldemo","domain":"development","attributes":{"buzz":"lightyear","foo":"bar"}}
 
 Retrieve cluster resource attributes for the given project, domain, and workflow.
-The command get cluster resource attributes for project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort':
+The command get cluster resource attributes for project FlyteCTLdemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort':
 ::
 
  flytectl get cluster-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort

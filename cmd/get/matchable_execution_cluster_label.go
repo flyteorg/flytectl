@@ -16,7 +16,7 @@ const (
 // Retrieves the execution cluster label for a given project and domain, combination or additionally with workflow name.
 
 Retrieve the execution cluster label for the given project and domain.
-The command get execution cluster label for project flytectldemo and development domain:
+The command get execution cluster label for project FlyteCTLdemo and development domain:
 ::
 
  flytectl get execution-cluster-label -p flytectldemo -d development 
@@ -28,7 +28,7 @@ Ex: output from the command
  {"project":"flytectldemo","domain":"development","value":"foo"}
 
 Retrieve the execution cluster label for the given project, domain and workflow.
-The command get execution cluster label for project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort':
+The command get execution cluster label for project FlyteCTLdemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort':
 ::
 
  flytectl get execution-cluster-label -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort

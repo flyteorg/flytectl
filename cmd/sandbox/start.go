@@ -44,12 +44,12 @@ Mount your source code repository inside sandbox:
 
  flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
 	
-Run specific version of flyte. flytectl sandbox only supports flyte version available in Github release https://github.com/flyteorg/flyte/tags
+Run specific version of Flyte. FlyteCTL sandbox only supports flyte version available in Github release https://github.com/flyteorg/flyte/tags
 ::
 
  flytectl sandbox start  --version=v0.14.0
 
-Note: Flytectl sandbox is only supported for Flyte versions > v0.10.0
+Note: FlyteCTL sandbox is only supported for Flyte versions > v0.10.0
 
 Specify a Flyte Sandbox compliant image with the registry. This is useful in case you want to use an image from your registry.
 ::

@@ -17,7 +17,7 @@ const (
 Deletes workflow execution config for the given project and domain combination or additionally with workflow name.
 
 Deletes workflow execution config label for project and domain.
-The command delete workflow execution config for project flytectldemo and development domain.
+The command delete workflow execution config for project FlyteCTLdemo and development domain.
 ::
 
  flytectl delete workflow-execution-config -p flytectldemo -d development 

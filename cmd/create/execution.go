@@ -22,7 +22,7 @@ There are three steps in generating an execution:
 - Run the execution by passing in the generated yaml file.
 
 The spec file should be generated first and then, the execution should be run using the spec file.
-You can reference the flytectl get task for more details.
+You can reference the FlyteCTL get task for more details.
 
 ::
 

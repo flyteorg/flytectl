@@ -17,7 +17,7 @@ const (
 Retrieves workflow execution config for the given project and domain combination or additionally with workflow name.
 
 Retrieves workflow execution config for project and domain.
-The command get workflow execution config for project flytectldemo and development domain:
+The command get workflow execution config for project FlyteCTLdemo and development domain:
 
 ::
 

@@ -16,7 +16,7 @@ const (
 Deletes task resource attributes for the given project, domain combination, or additionally with workflow name.
 
 Deletes task resource attribute for project and domain.
-The command delete task resource attributes for  project flytectldemo and development domain.
+The command delete task resource attributes for  project FlyteCTLdemo and development domain.
 ::
 
  flytectl delete task-resource-attribute -p flytectldemo -d development 

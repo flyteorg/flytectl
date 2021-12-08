@@ -11,7 +11,7 @@ import (
 const (
 	execShort = "Execute non-interactive command inside the sandbox container"
 	execLong  = `
-The execute command will run non-interactive command inside the sandbox container and immediately returns the output. By default, flytectl exec is present in /root directory inside the sandbox container.
+The execute command will run non-interactive command inside the sandbox container and immediately returns the output. By default, FlyteCTL exec is present in /root directory inside the sandbox container.
 
 ::
  flytectl sandbox exec -- ls -al 
@@ -27,7 +27,7 @@ func sandboxClusterExec(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	if len(args) > 0 {
 		return execute(ctx, cli, args)
 	}
-	return fmt.Errorf("missing argument. Please check usage examples by running flytectl sandbox exec --help")
+	return fmt.Errorf("missing argument. Please check usage examples by running FlyteCTL sandbox exec --help")
 }
 
 func execute(ctx context.Context, cli docker.Docker, args []string) error {
