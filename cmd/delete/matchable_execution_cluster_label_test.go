@@ -22,7 +22,7 @@ func deleteExecutionClusterLabelSetup() {
 }
 
 func TestDeleteExecutionClusterLabels(t *testing.T) {
-	t.Run("successful project domain attribute deletion commandline", func(t *testing.T) { 
+	t.Run("successful project domain attribute deletion commandline", func(t *testing.T) {
 		setup()
 		deleteExecutionClusterLabelSetup()
 		// Empty attribute file
