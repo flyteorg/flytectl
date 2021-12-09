@@ -34,7 +34,7 @@ e.g., content of wec.yaml
 
 Update workflow execution config for project, domain and workflow combination. This will take precedence over any other
 execution config defined at project domain level.
-Update the workflow execution config for workflow 'core.control_flow.run_merge_sort.merge_sort' in flytectldemo project, development domain.
+To update the workflow execution config for workflow 'core.control_flow.run_merge_sort.merge_sort' in flytectldemo project, development domain.
 
 .. code-block:: yaml
 
