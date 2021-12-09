@@ -20,7 +20,7 @@ const (
 	updatecmdLong = `
 Currently, this command only provides subcommands to update project.
 Takes input project that needs to be archived or unarchived. Name of the project to be updated is a mandatory field.
-Update Flyte resource; if a project, to activate it:
+To update a project:
 ::
 
  flytectl update project -p flytesnacks --activateProject
