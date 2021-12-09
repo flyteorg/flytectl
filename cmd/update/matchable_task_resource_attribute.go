@@ -18,7 +18,7 @@ Updating the task resource attribute is only available from a generated file. Se
 This will completely overwrite any existing custom project, domain and workflow combination attributes.
 It is preferable to do get and generate an attribute file if there is an existing attribute already set and then update it to have new values.
 Refer to get task-resource-attribute section on how to generate this file.
-It takes input for task resource attributes from the config file tra.yaml
+It takes input for task resource attributes from the config file tra.yaml,
 e.g., content of tra.yaml
 
 .. code-block:: yaml
