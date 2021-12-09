@@ -16,7 +16,7 @@ import (
 // Long descriptions are whitespace sensitive when generating docs using sphinx.
 const (
 	updateUse     = "update"
-	updateShort   = `Updates Flyte resources e.g., project.`
+	updateShort   = `Update Flyte resources e.g., project.`
 	updatecmdLong = `
 Currently, this command only provides subcommands to update project.
 Takes input project that needs to be archived or unarchived. Name of the project to be updated is a mandatory field.
