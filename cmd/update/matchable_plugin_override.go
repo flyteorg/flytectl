@@ -18,7 +18,7 @@ Updating to the plugin override is only available from a generated file. See the
 This will completely overwrite any existing plugins overrides on custom project, domain and workflow combination.
 It is preferable to do get and generate a plugin override file if there is an existing override already set and then update it to have new values.
 Refer to get plugin-override section on how to generate this file
-It takes input for plugin overrides from the config file po.yaml
+It takes input for plugin overrides from the config file po.yaml,
 e.g., content of po.yaml
 
 .. code-block:: yaml
