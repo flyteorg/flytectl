@@ -46,7 +46,7 @@ Using local tgz file:
 
  flytectl register files  _pb_output.tgz -d development  -p flytesnacks --archive
 
-If you wish to continue executing registration on other files by ignoring the errors including the version conflicts, then pass them in the continueOnError flag:
+If you wish to continue executing registration on other files by ignoring the errors including the version conflicts, then send the continueOnError flag:
 
 ::
 
