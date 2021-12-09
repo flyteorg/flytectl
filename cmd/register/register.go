@@ -11,7 +11,7 @@ import (
 const (
 	registerCmdShort = "Register tasks/workflows/launchplans from a list of generated serialized files."
 	registercmdLong  = `
-Take input files as serialized versions of the tasks/workflows/launchplans and registers them with flyteadmin.
+Takes input files as serialized versions of the tasks/workflows/launchplans and registers them with flyteadmin.
 Currently, these input files are protobuf files generated as output from Flytekit serialize.
 Project & Domain are mandatory fields to be passed for registration and an optional version which defaults to v1.
 If the entities are already registered with Flyte for the same version, the registration would fail.
