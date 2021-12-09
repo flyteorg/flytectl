@@ -19,7 +19,7 @@ Updating the workflow execution config is only available from a generated file. 
 This will completely overwrite any existing custom project and domain and workflow combination execution config.
 It is preferable to do get and generate a config file if there is an existing execution config already set and then update it to have new values.
 Refer to get workflow-execution-config section on how to generate this file.
-It takes input for workflow execution config from the config file wec.yaml
+It takes input for workflow execution config from the config file wec.yaml,
 e.g., content of wec.yaml
 
 .. code-block:: yaml
