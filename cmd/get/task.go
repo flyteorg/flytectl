@@ -49,7 +49,7 @@ Retrieve a specific task with filters:
  
   flytectl get task -p flytesnacks -d development k8s_spark.pyspark_pi.print_every_time --filter.fieldSelector="task.version=v1,created_at>=2021-05-24T21:43:12.325335Z" 
   
-Retrieve all the task with limit and sorting:
+Retrieve all the tasks with limit and sorting:
 ::
    
   flytectl get -p flytesnacks -d development task  --filter.sortBy=created_at --filter.limit=1 --filter.asc

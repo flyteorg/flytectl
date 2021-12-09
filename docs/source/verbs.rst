@@ -6,13 +6,13 @@ Flytectl verbs specify the actions to be performed on the resources. Ex: create,
     :maxdepth: 1
     :caption: Verbs
  
-    gen/flytectl_create
-    gen/flytectl_completion
-    gen/flytectl_get
-    gen/flytectl_update
-    gen/flytectl_delete
-    gen/flytectl_register
-    gen/flytectl_config
-    gen/flytectl_sandbox
-    gen/flytectl_version
-    gen/flytectl_upgrade
+    gen/FlyteCTL_flytectl_create
+    gen/FlyteCTL_flytectl_completion
+    gen/FlyteCTL_flytectl_get
+    gen/FlyteCTL_flytectl_update
+    gen/FlyteCTL_delete
+    gen/FlyteCTL_register
+    gen/FlyteCTL_config
+    gen/FlyteCTL_sandbox
+    gen/FlyteCTL_version
+    gen/FlyteCTL_upgrade

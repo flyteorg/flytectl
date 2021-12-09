@@ -5,4 +5,4 @@ Workflow
     :maxdepth: 1
     :caption: Workflow
  
-    gen/flytectl_get_workflow
+    gen/FlyteCTL_get_workflow

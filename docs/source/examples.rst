@@ -5,4 +5,4 @@ Examples
     :caption: Examples
 
 
-    gen/flytectl_register_examples
+    gen/FlyteCTL_register_examples

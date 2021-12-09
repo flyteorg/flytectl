@@ -5,7 +5,7 @@ Task resource attribute
     :maxdepth: 1
     :caption: Task resource attribute
 
-    gen/flytectl_get_task-resource-attribute
-    gen/flytectl_update_task-resource-attribute
-    gen/flytectl_delete_task-resource-attribute
+    gen/FlyteCTL_get_task-resource-attribute
+    gen/FlyteCTL_update_task-resource-attribute
+    gen/FlyteCTL_delete_task-resource-attribute
 
