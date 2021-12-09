@@ -20,7 +20,7 @@ Register all latest Flytesnacks examples:
 
  flytectl register examples  -d development  -p flytesnacks 
 
-Register specific release of Flytesnacks:
+Register specific release of Flytesnacks examples:
 ::
 
  flytectl register examples  -d development  -p flytesnacks --version v0.2.176
