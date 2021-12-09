@@ -13,7 +13,7 @@ import (
 const (
 	executionShort = "Create execution resources"
 	executionLong  = `
-Create executions for a given workflow/task in a project and domain.
+Creates executions for a given workflow/task in a project and domain.
 
 There are three steps in generating an execution:
 

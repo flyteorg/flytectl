@@ -14,9 +14,8 @@ import (
 const (
 	workflowExecutionConfigShort = "Get matchable resources of workflow execution config"
 	workflowExecutionConfigLong  = `
-Retrieve workflow execution config for the given project and domain combination or additionally with workflow name.
+Retrieves workflow execution config for the given project and domain combination or additionally with workflow name.
 
-Retrieve workflow execution config for project and domain.
 For project flytectldemo and development domain, it is:
 
 ::
@@ -33,7 +32,7 @@ e.g., output from the command
 	"max_parallelism": 5
  }
 
-Retrieve workflow execution config for the project, domain and workflow.
+Retrieves workflow execution config for the project, domain and workflow.
 For project flytectldemo, development domain and workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
 
 ::
@@ -52,8 +51,8 @@ e.g., output from the command
  }
 
 Writing the workflow execution config to a file. If there are no workflow execution config, the command would return an error.
-Here, the config file is written to wec.yaml
-e.g., content of wec.yaml
+Here, the config file is written to wec.yaml,
+e.g., content of wec.yaml:
 
 ::
 

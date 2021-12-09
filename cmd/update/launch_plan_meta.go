@@ -13,17 +13,17 @@ import (
 const (
 	updateLPMetaShort = "Update launch plan metadata"
 	updateLPMetaLong  = `
-Update the description on the launchplan:
+Update the description on the launch plan:
 ::
 
  flytectl update launchplan -p flytectldemo -d development  core.advanced.run_merge_sort.merge_sort --description "Mergesort example"
 
-Archiving launchplan named entity is not supported and would throw an error:
+Archiving launch plan named entity is not supported and would throw an error:
 ::
 
  flytectl update launchplan -p flytectldemo -d development  core.advanced.run_merge_sort.merge_sort --archive
 
-Activating launchplan named entity would be a noop:
+Activating launch plan named entity would be a noop:
 ::
 
  flytectl update launchplan -p flytectldemo -d development  core.advanced.run_merge_sort.merge_sort --activate

@@ -13,9 +13,8 @@ import (
 const (
 	executionClusterLabelShort = "Get matchable resources of execution cluster label."
 	executionClusterLabelLong  = `
-Retrieve the execution cluster label for a given project and domain, combination or additionally with workflow name.
+Retrieves the execution cluster label for a given project and domain, combination or additionally with workflow name.
 
-Retrieve the execution cluster label for the given project and domain.
 For project flytectldemo and development domain, it is:
 ::
 
@@ -40,8 +39,8 @@ e.g., output from the command
  {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","value":"foo"}
 
 Write the execution cluster label to a file. If there is no execution cluster label, the command throws an error.
-Here, the config file is written to ecl.yaml file.
-e.g., content of ecl.yaml
+Here, the config file is written to ecl.yaml,
+e.g., content of ecl.yaml:
 
 ::
 
