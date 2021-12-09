@@ -30,7 +30,7 @@ e.g., content of ecl.yaml
 
 Update execution cluster label for project, domain and workflow combination. This will take precedence over any other
 execution cluster label defined at project domain level.
-Update the execution cluster label for workflow 'core.control_flow.run_merge_sort.merge_sort' in flytectldemo project, development domain:
+To update the execution cluster label for workflow 'core.control_flow.run_merge_sort.merge_sort' in flytectldemo project, development domain:
 
 .. code-block:: yaml
 
