@@ -15,8 +15,8 @@ const (
 Update cluster resource attributes for given project and domain combination or additionally with workflow name.
 
 Updating to the cluster resource attribute is only available from a generated file. See the get section to generate this file.
-It takes input for cluster resource attributes from the config file cra.yaml
-e.g., content of cra.yaml
+It takes input for cluster resource attributes from the config file cra.yaml,
+e.g., content of cra.yaml:
 
 .. code-block:: yaml
 
