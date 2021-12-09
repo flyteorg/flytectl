@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	updateWorkflowShort = "Updates workflow metadata"
+	updateWorkflowShort = "Update workflow metadata"
 	updateWorkflowLong  = `
-Updates the description on the workflow:
+Update the description on the workflow:
 ::
 
  flytectl update workflow -p flytectldemo -d development core.advanced.run_merge_sort.merge_sort --description "Mergesort workflow example"
@@ -23,7 +23,7 @@ Archiving workflow named entity would cause this to disapper from flyteconsole U
 
  flytectl update workflow -p flytectldemo -d development  core.advanced.run_merge_sort.merge_sort --archive
 
-Activating workflow named entity:
+Activate workflow named entity:
 ::
 
  flytectl update workflow -p flytectldemo -d development  core.advanced.run_merge_sort.merge_sort --activate

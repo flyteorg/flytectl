@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	teardownShort = "Teardown will cleanup the sandbox environment"
+	teardownShort = "Teardown cleans up the sandbox environment"
 	teardownLong  = `
-Teardown will remove sandbox cluster and all the flyte config created by sandbox start:
+Teardown removes sandbox cluster and all the Flyte config created by sandbox start:
 ::
 
  flytectl sandbox teardown 

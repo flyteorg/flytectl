@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	updateLPMetaShort = "Updates launch plan metadata"
+	updateLPMetaShort = "Update launch plan metadata"
 	updateLPMetaLong  = `
-Updates the description on the launchplan:
+Update the description on the launchplan:
 ::
 
  flytectl update launchplan -p flytectldemo -d development  core.advanced.run_merge_sort.merge_sort --description "Mergesort example"

@@ -12,18 +12,18 @@ import (
 )
 
 const (
-	workflowExecutionConfigShort = "Gets matchable resources of workflow execution config"
+	workflowExecutionConfigShort = "Get matchable resources of workflow execution config"
 	workflowExecutionConfigLong  = `
-Retrieves workflow execution config for the given project and domain combination or additionally with workflow name.
+Retrieve workflow execution config for the given project and domain combination or additionally with workflow name.
 
-Retrieves workflow execution config for project and domain.
-The command get workflow execution config for project FlyteCTLdemo and development domain:
+Retrieve workflow execution config for project and domain.
+For project flytectldemo and development domain, it is:
 
 ::
 
  flytectl get workflow-execution-config -p flytectldemo -d development 
 
-Ex: output from the command
+e.g., output from the command
 
 .. code-block:: json
 
@@ -33,14 +33,14 @@ Ex: output from the command
 	"max_parallelism": 5
  }
 
-Retrieves workflow execution config for the project, domain and workflow.
-The command get workflow execution config for project flytectldemo ,development domain and workflow core.control_flow.run_merge_sort.merge_sort:
+Retrieve workflow execution config for the project, domain and workflow.
+For project flytectldemo, development domain and workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
 
 ::
 
  flytectl get workflow-execution-config -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-Ex: output from the command
+e.g., output from the command
 
 .. code-block:: json
 
@@ -52,8 +52,8 @@ Ex: output from the command
  }
 
 Writing the workflow execution config to a file. If there are no workflow execution config, the command would return an error.
-The command get workflow execution config writes the config file to wec.yaml
-Ex:  content of wec.yaml
+Here, the config file is written to wec.yaml
+e.g., content of wec.yaml
 
 ::
 

@@ -25,9 +25,9 @@ type Goos string
 
 // Long descriptions are whitespace sensitive when generating docs using sphinx.
 const (
-	upgradeCmdShort = `Used to upgrade/rollback to a flyte version`
+	upgradeCmdShort = `Upgrade/rollback to a flyte version`
 	upgradeCmdLong  = `
-Upgrade flytectl:
+For flytectl, it is:
 ::
 
  flytectl upgrade

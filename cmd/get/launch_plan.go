@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	launchPlanShort = "Gets launchplan resources"
+	launchPlanShort = "Get launchplan resources"
 	launchPlanLong  = `
-Retrieve all launch plans within the project and domain (launchplan, launchplans can be used interchangeably):
+Retrieve all launchplans within the project and domain (launchplan, launchplans can be used interchangeably):
 ::
 
  flytectl get launchplan -p flytesnacks -d development
 
- Retrieve a launch plan by name within the project and domain:
+ Retrieve a launchplan by name within the project and domain:
 
 ::
 
@@ -34,42 +34,42 @@ Retrieve the latest version of the task by name within the project and domain:
 
  flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --latest
 
-Retrieve a particular version of the launch plan by name within the project and domain:
+Retrieve a particular version of the launchplan by name within the project and domain:
 
 ::
 
  flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --version v2
 
-Retrieve all the launch plans with filters:
+Retrieve all the launch lans with filters:
 ::
  
   flytectl get launchplan -p flytesnacks -d development --filter.fieldSelector="name=core.basic.lp.go_greet"
  
-Retrieve launch plans entity search across all versions with filters:
+Retrieve launchplans entity search across all versions with filters:
 ::
  
   flytectl get launchplan -p flytesnacks -d development k8s_spark.dataframe_passing.my_smart_schema --filter.fieldSelector="version=v1"
  
  
-Retrieve all the launch plans with limit and sorting:
+Retrieve all the launchplans with limit and sorting:
 ::
  
   flytectl get launchplan -p flytesnacks -d development --filter.sortBy=created_at --filter.limit=1 --filter.asc
  
 
-Retrieve all launch plans within the project and domain in YAML format.
+Retrieve all launchplans within the project and domain in YAML format:
 
 ::
 
  flytectl get launchplan -p flytesnacks -d development -o yaml
 
-Retrieve all launch plans the within the project and domain in JSON format.
+Retrieve all launchplans the within the project and domain in JSON format:
 
 ::
 
  flytectl get launchplan -p flytesnacks -d development -o json
 
-Retrieve a launch plan within the project and domain as per a version and generate the execution spec file; the file can be used to launch the execution using the 'create execution' command.
+Retrieve a launchplan within the project and domain as per a version and generate the execution spec file; the file can be used to launch the execution using the 'create execution' command:
 
 ::
 

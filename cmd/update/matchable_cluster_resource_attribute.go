@@ -10,13 +10,13 @@ import (
 )
 
 const (
-	clusterResourceAttributesShort = "Updates matchable resources of cluster attributes"
+	clusterResourceAttributesShort = "Update matchable resources of cluster attributes"
 	clusterResourceAttributesLong  = `
-Updates cluster resource attributes for given project and domain combination or additionally with workflow name.
+Update cluster resource attributes for given project and domain combination or additionally with workflow name.
 
 Updating to the cluster resource attribute is only available from a generated file. See the get section to generate this file.
-The command update takes the input for cluster resource attributes from the config file cra.yaml
-Ex:  content of cra.yaml
+It takes input for cluster resource attributes from the config file cra.yaml
+e.g., content of cra.yaml
 
 .. code-block:: yaml
 
@@ -30,12 +30,12 @@ Ex:  content of cra.yaml
 
  flytectl update cluster-resource-attribute --attrFile cra.yaml
 
-Updating cluster resource attribute for project and domain and workflow combination. This will take precedence over any other
+Update cluster resource attribute for project and domain and workflow combination. This will take precedence over any other
 resource attribute defined at project domain level.
-Also this will completely overwrite any existing custom project, domain and workflow combination attributes.
+This will completely overwrite any existing custom project, domain and workflow combination attributes.
 It is preferable to do get and generate an attribute file if there is an existing attribute that is already set and then update it to have new values.
 Refer to get cluster-resource-attribute section on how to generate this file.
-Update the cluster resource attributes for workflow core.control_flow.run_merge_sort.merge_sort in FlyteCTLdemo, development domain:
+Update the cluster resource attributes for workflow 'core.control_flow.run_merge_sort.merge_sort' in flytectldemo project, development domain:
 
 .. code-block:: yaml
 

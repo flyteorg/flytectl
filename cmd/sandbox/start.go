@@ -32,7 +32,7 @@ import (
 const (
 	startShort = "Start the flyte sandbox cluster"
 	startLong  = `
-The Flyte Sandbox is a fully standalone minimal environment for running Flyte. It provides a simplified way of running flyte-sandbox- as a single Docker container running locally.  
+The Flyte Sandbox is a fully standalone minimal environment for running Flyte. It provides a simplified way of running Flyte sandbox- as a single Docker container running locally.  
 
 Start sandbox cluster without any source code:
 ::
@@ -44,7 +44,7 @@ Mount your source code repository inside sandbox:
 
  flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
 	
-Run specific version of Flyte. FlyteCTL sandbox only supports flyte version available in Github release https://github.com/flyteorg/flyte/tags
+Run specific version of Flyte. FlyteCTL sandbox only supports flyte version available in Github release https://github.com/flyteorg/flyte/tags.
 ::
 
  flytectl sandbox start  --version=v0.14.0

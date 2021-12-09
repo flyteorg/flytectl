@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	updateLPShort = "Updates launch plan status"
+	updateLPShort = "Update launch plan status"
 	updateLPLong  = `
 Activating launchplan activates the scheduled job associated with it:
 ::

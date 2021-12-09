@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	executionShort = "Gets execution resources"
+	executionShort = "Get execution resources"
 	executionLong  = `
 Retrieve all executions within the project and domain (execution, executions can be used interchangeably):
 ::

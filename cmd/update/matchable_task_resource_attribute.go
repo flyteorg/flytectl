@@ -10,16 +10,16 @@ import (
 )
 
 const (
-	taskResourceAttributesShort = "Updates matchable resources of task attributes"
+	taskResourceAttributesShort = "Update matchable resources of task attributes"
 	taskResourceAttributesLong  = `
-Updates task resource attributes for the given project and domain combination or additionally with workflow name.
+Update task resource attributes for the given project and domain combination or additionally with workflow name.
 
 Updating the task resource attribute is only available from a generated file. See the get section for generating this file.
 This will completely overwrite any existing custom project, domain and workflow combination attributes.
 It is preferable to do get and generate an attribute file if there is an existing attribute already set and then update it to have new values.
 Refer to get task-resource-attribute section on how to generate this file.
-The command update takes the input for task resource attributes from the config file tra.yaml
-Ex:  content of tra.yaml
+It takes input for task resource attributes from the config file tra.yaml
+e.g., content of tra.yaml
 
 .. code-block:: yaml
 
@@ -36,9 +36,9 @@ Ex:  content of tra.yaml
 
  flytectl update task-resource-attribute --attrFile tra.yaml
 
-Updating task resource attribute for project, domain and workflow combination. This will take precedence over any other
+Update task resource attribute for project, domain and workflow combination. This will take precedence over any other
 resource attribute defined at project domain level.
-Update the resource attributes for workflow core.control_flow.run_merge_sort.merge_sort in flytectldemo, development domain.
+Update the resource attributes for workflow 'core.control_flow.run_merge_sort.merge_sort' in flytectldemo project, development domain.
 
 .. code-block:: yaml
 

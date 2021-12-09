@@ -10,7 +10,7 @@ import (
 const (
 	createCmdShort = `Create various Flyte resources including tasks/workflows/launchplans/executions/project.`
 	createCmdLong  = `
-Creates Flyte resource; if a project:
+Create Flyte resource; if a project:
 ::
 
  flytectl create project --file project.yaml 

@@ -22,15 +22,15 @@ type ProjectConfig struct {
 }
 
 const (
-	projectShort = "Updates project resources"
+	projectShort = "Update project resources"
 	projectLong  = `
-Updates the project according to the flags passed. Allows you to archive or activate a project.
-Activates project named flytesnacks:
+Update the project according to the flags passed. Allows you to archive or activate a project.
+Activate project flytesnacks:
 ::
 
  flytectl update project -p flytesnacks --activateProject
 
-Archives project named flytesnacks:
+Archive project flytesnacks:
 
 ::
 

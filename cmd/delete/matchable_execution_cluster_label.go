@@ -11,21 +11,21 @@ import (
 )
 
 const (
-	executionClusterLabelShort = "Deletes matchable resources of execution cluster label"
+	executionClusterLabelShort = "Delete matchable resources of execution cluster label"
 	executionClusterLabelLong  = `
-Deletes execution cluster label for given project and domain combination or additionally with workflow name.
+Delete execution cluster label for given project and domain combination or additionally with workflow name.
 
-Deletes execution cluster label for project and domain.
-The command delete execution cluster label for project FlyteCTLdemo and development domain:
+Delete execution cluster label for project and domain.
+For project flytectldemo and development domain, it is:
 ::
 
  flytectl delete execution-cluster-label -p flytectldemo -d development 
 
 
-Deletes execution cluster label using config file which was used for creating it.
-The command deletes execution cluster label from the config file ecl.yaml.
+Delete execution cluster label using config file which was used for creating it.
+Here, the config file is written to ecl.yaml.
 Value is optional in the file as it is unread during the delete command but it can be kept since the same file can be used for get, update or delete commands. 
-Ex:  Content of ecl.yaml which will use the project domain and workflow name to delete the resource.
+e.g., content of ecl.yaml which will use the project domain and workflow name to delete the resource.
 
 ::
 
@@ -38,8 +38,8 @@ Ex:  Content of ecl.yaml which will use the project domain and workflow name to 
     project: flytectldemo
     value: foo
 
-Deletes execution cluster label for a workflow.
-The command deletes execution cluster label for a workflow core.control_flow.run_merge_sort.merge_sort:
+Delete execution cluster label for a workflow.
+For the workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
 
 ::
 

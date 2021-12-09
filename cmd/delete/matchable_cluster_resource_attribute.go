@@ -11,21 +11,21 @@ import (
 )
 
 const (
-	clusterResourceAttributesShort = "Deletes matchable resources of cluster attributes"
+	clusterResourceAttributesShort = "Delete matchable resources of cluster attributes"
 	clusterResourceAttributesLong  = `
-Deletes cluster resource attributes for the given project and domain combination or additionally with workflow name.
+Delete cluster resource attributes for the given project and domain combination or additionally with workflow name.
 
-Deletes cluster resource attributes for the given project and domain.
-The command delete cluster resource attributes for project FlyteCTLdemo and development domain:
+Delete cluster resource attributes for the given project and domain.
+For project flytectldemo and development domain, it is:
 ::
 
  flytectl delete cluster-resource-attribute -p flytectldemo -d development 
 
 
-Deletes cluster resource attribute using config file which was used for creating it.
-The command deletes cluster resource attributes from the config file cra.yaml.
+Delete cluster resource attribute using config file which was used to create it.
+Here, the config file is written to cra.yaml.
 Attributes are optional in the file as they are unread during the delete command but can be kept since the same file can be used for get, update or delete commands.
-Ex:  content of cra.yaml which will use the project domain and workflow name to delete the resource.
+e.g., content of cra.yaml which uses the project domain and workflow name to delete the resource.
 
 ::
 
@@ -40,8 +40,8 @@ Ex:  content of cra.yaml which will use the project domain and workflow name to 
       foo: "bar"
       buzz: "lightyear"
 
-Deletes cluster resource attribute for a workflow.
-The command deletes cluster resource attributes for a workflow core.control_flow.run_merge_sort.merge_sort:
+Delete cluster resource attribute for a workflow.
+For the workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
 
 ::
 

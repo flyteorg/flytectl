@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	registerFilesShort = "Registers file resources"
+	registerFilesShort = "Register file resources"
 	registerFilesLong  = `
-Registers all the serialized protobuf files including tasks, workflows and launchplans with default v1 version.
-If there are already registered entities with v1 version, the command will fail immediately on the first such encounter.
+Register all the serialized protobuf files including tasks, workflows and launchplans with default v1 version.
+If previously registered entities with v1 version are present, the command will fail immediately on the first such encounter.
 ::
 
  flytectl register file  _pb_output/* -d development  -p flytesnacks
@@ -33,7 +33,7 @@ In case of fast registration, if the SourceUploadPath flag is defined, FlyteCTL 
 
  flytectl register file  _pb_output/* -d development  -p flytesnacks  --version v2 --SourceUploadPath="s3://dummy/fast" 
 	
-Using archive file.C urrently supported extensions are .tgz and .tar. They can be local or remote files served through http/https.
+Using archive file. Currently supported extensions are .tgz and .tar. They can be local or remote files served through http/https.
 Use --archive flag:
 
 ::
@@ -57,7 +57,7 @@ Using short format of continueOnError flag:
 
  flytectl register file  _pb_output/* -d development  -p flytesnacks --continueOnError
 
-Overriding the default version v1 using version string:
+Override the default version v1 using version string:
 ::
 
  flytectl register file  _pb_output/* -d development  -p flytesnacks --version v2
