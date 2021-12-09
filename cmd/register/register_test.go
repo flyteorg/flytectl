@@ -38,7 +38,7 @@ func TestRegisterCommand(t *testing.T) {
 
 	assert.Equal(t, cmdNouns[0].Use, "examples")
 	assert.Equal(t, cmdNouns[0].Aliases, []string{"example", "flytesnack", "flytesnacks"})
-	assert.Equal(t, cmdNouns[0].Short, "Register flytesnack example")
+	assert.Equal(t, cmdNouns[0].Short, "Register Flytesnack example")
 
 	assert.Equal(t, cmdNouns[1].Use, "files")
 	assert.Equal(t, cmdNouns[1].Aliases, []string{"file"})
