@@ -27,7 +27,7 @@ type Goos string
 const (
 	upgradeCmdShort = `Upgrade/rollback to a Flyte version`
 	upgradeCmdLong  = `
-For flytectl, it is:
+For FlyteCTL, it is:
 ::
 
  flytectl upgrade
