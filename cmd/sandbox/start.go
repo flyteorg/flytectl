@@ -32,7 +32,7 @@ import (
 const (
 	startShort = "Start the flyte sandbox cluster"
 	startLong  = `
-The Flyte Sandbox is a fully standalone minimal environment for running Flyte. It provides a simplified way of running Flyte sandbox- as a single Docker container running locally.  
+The Flyte Sandbox is a fully standalone minimal environment for running Flyte. It provides a simplified way of running Flyte sandbox as a single Docker container locally.  
 
 Start sandbox cluster without any source code:
 ::
