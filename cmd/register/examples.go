@@ -15,7 +15,7 @@ import (
 const (
 	registerExampleShort = "Register Flytesnacks example"
 	registerExampleLong  = `
-Register all latest Flytesnacks:
+Register all latest Flytesnacks examples:
 ::
 
  flytectl register examples  -d development  -p flytesnacks 
