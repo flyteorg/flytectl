@@ -39,5 +39,5 @@ func TestCreateCommand(t *testing.T) {
 	assert.Equal(t, cmdNouns[0].Short, executionShort)
 	assert.Equal(t, cmdNouns[1].Use, "project")
 	assert.Equal(t, cmdNouns[1].Aliases, []string{"projects"})
-	assert.Equal(t, cmdNouns[1].Short, "Creates project resources")
+	assert.Equal(t, cmdNouns[1].Short, "Create project resources")
 }
