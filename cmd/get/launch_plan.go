@@ -40,7 +40,7 @@ Retrieve a particular version of the launchplan by name within the project and d
 
  flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --version v2
 
-Retrieve all the launch lans with filters:
+Retrieve all the launch plans with filters:
 ::
  
   flytectl get launchplan -p flytesnacks -d development --filter.fieldSelector="name=core.basic.lp.go_greet"
