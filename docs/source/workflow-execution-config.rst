@@ -9,6 +9,3 @@ It specifies the actions to be performed on the resource 'workflow-execution-con
     gen/flytectl_get_workflow-execution-config
     gen/flytectl_update_workflow-execution-config
     gen/flytectl_delete_workflow-execution-config
-    gen/flytectl_get_workflow-execution-config
-    gen/flytectl_update_workflow-execution-config
-    gen/flytectl_delete_workflow-execution-config
