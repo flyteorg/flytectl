@@ -1,5 +1,6 @@
 Execution cluster label
 ------
+It specifies the actions to be performed on the resource 'execution-cluster-label'. 
 
 .. toctree::
     :maxdepth: 1

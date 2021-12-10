@@ -1,5 +1,6 @@
 Files
 ------
+It specifies the actions to be performed on the resource 'files'. 
 
 .. toctree::
     :maxdepth: 1

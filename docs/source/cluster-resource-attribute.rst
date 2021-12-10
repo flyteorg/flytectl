@@ -1,5 +1,7 @@
 Cluster resource attribute
 ------
+It specifies the actions to be performed on the 'cluster-resource-attribute'. 
+
 .. toctree::
     :maxdepth: 1
     :caption: Cluster resource attribute

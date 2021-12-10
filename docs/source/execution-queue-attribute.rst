@@ -1,5 +1,6 @@
 Execution queue attribute
 ------
+It specifies the actions to be performed on the resource 'execution-queue-attribute'. 
 
 .. toctree::
     :maxdepth: 1

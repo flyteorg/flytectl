@@ -1,5 +1,6 @@
 Launchplan
 ------
+It specifies the actions to be performed on the resource 'launchplan'. 
 
 .. toctree::
     :maxdepth: 1

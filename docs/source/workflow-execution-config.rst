@@ -1,5 +1,6 @@
 Workflow execution config
 ------
+It specifies the actions to be performed on the resource 'workflow-execution-config'. 
 
 .. toctree::
     :maxdepth: 1

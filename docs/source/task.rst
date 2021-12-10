@@ -1,5 +1,6 @@
 Task
 ------
+It specifies the actions to be performed on the resource 'task'. 
 
 .. toctree::
     :maxdepth: 1

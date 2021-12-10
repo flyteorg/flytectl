@@ -1,5 +1,6 @@
 Config
 ------
+It specifies the actions to be performed on the resource 'config'. 
 
 .. toctree::
     :maxdepth: 1

@@ -1,5 +1,6 @@
 Sandbox
 ------
+It specifies the actions to be performed on the resource 'sandbox'. 
 
 .. toctree::
     :maxdepth: 1

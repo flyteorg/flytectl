@@ -1,5 +1,6 @@
 Project
 ------
+It specifies the actions to be performed on the resource 'project'. 
 
 .. toctree::
     :maxdepth: 1
