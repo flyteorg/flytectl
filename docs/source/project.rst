@@ -5,6 +5,6 @@ Project
     :maxdepth: 1
     :caption: Project
 
-    gen/FlyteCTL_create_project
-    gen/FlyteCTL_get_project
-    gen/FlyteCTL_update_project   
+    gen/flytectl_create_project
+    gen/flytectl_get_project
+    gen/flytectl_update_project   

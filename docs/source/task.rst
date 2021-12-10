@@ -5,4 +5,4 @@ Task
     :maxdepth: 1
     :caption: Task
 
-    gen/FlyteCTL_get_task
+    gen/flytectl_get_task

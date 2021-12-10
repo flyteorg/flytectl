@@ -5,6 +5,6 @@ Execution queue attribute
     :maxdepth: 1
     :caption: Execution queue attribute
 
-    gen/FlyteCTL_get_execution-queue-attribute
-    gen/FlyteCTL_delete_execution-queue-attribute
-    gen/FlyteCTL_update_execution-queue-attribute
+    gen/flytectl_get_execution-queue-attribute
+    gen/flytectl_delete_execution-queue-attribute
+    gen/flytectl_update_execution-queue-attribute

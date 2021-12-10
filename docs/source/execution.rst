@@ -5,6 +5,6 @@ Execution
     :maxdepth: 1
     :caption: Execution
     
-    gen/FlyteCTL_create_execution
-    gen/FlyteCTL_get_execution
-    gen/FlyteCTL_delete_execution
+    gen/flytectl_create_execution
+    gen/flytectl_get_execution
+    gen/flytectl_delete_execution
