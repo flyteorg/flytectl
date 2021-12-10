@@ -59,5 +59,8 @@ func buildSortingRequest(c Filters) *admin.Sort {
 
 func getToken(c Filters) string {
 	token := int(c.Page-1) * int(c.Limit)
+	if token <= 0 {
+		return ""
+	}
 	return strconv.Itoa(token)
 }
