@@ -6,6 +6,5 @@ It specifies the actions to be performed on the resource 'examples'.
     :maxdepth: 1
     :caption: Examples
 
-
     gen/flytectl_register_examples
     gen/flytectl_register_examples
