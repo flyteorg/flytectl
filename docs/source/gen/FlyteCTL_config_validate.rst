@@ -1,47 +1,28 @@
-.. _flytectl_config_init:
+.. _FlyteCTL_config_validate:
 
-flytectl config init
---------------------
+FlyteCTL config validate
+------------------------
 
-Generates FlyteCTL config file in the user's home directory.
+Validates the loaded config.
 
 Synopsis
 ~~~~~~~~
 
 
-Creates a FlyteCTL config file in Flyte directory i.e ~/.flyte
-	
-Generates sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox https://docs.flyte.org/en/latest/deployment/sandbox.html
+Validates the loaded config.
 
 ::
 
- flytectl configuration config 
-
-Generates remote cluster config. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
-	
-::
-
- flytectl configuration config --host=flyte.myexample.com
-	
-Generates FlyteCTL config with a storage provider
-::
-
- flytectl configuration config --host=flyte.myexample.com --storage
-
-
-::
-
-  flytectl config init [flags]
+  FlyteCTL config validate [flags]
 
 Options
 ~~~~~~~
 
 ::
 
-  -h, --help          help for init
-      --host string   Endpoint of flyte admin
-      --insecure      Enable insecure mode (default true)
-      --storage       Enable storage provider config
+  -h, --help     help for validate
+      --strict   Validates that all keys in loaded config
+                 map to already registered sections.
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -92,5 +73,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands..
+* :doc:`FlyteCTL_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands..
 

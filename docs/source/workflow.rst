@@ -7,3 +7,4 @@ It specifies the actions to be performed on the resource 'workflow'.
     :caption: Workflow
  
     gen/flytectl_get_workflow
+    gen/flytectl_get_workflow

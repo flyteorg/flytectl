@@ -1,26 +1,34 @@
-.. _flytectl_config_discover:
+.. _FlyteCTL_sandbox_status:
 
-flytectl config discover
-------------------------
+FlyteCTL sandbox status
+-----------------------
 
-Searches for a config in one of the default search paths.
+Get status of the sandbox environment.
 
 Synopsis
 ~~~~~~~~
 
 
-Searches for a config in one of the default search paths.
+
+Retrieve the status of the Sandbox environment. Currently, Flyte Sandbox runs as a local Docker container.
+
+Usage
+::
+
+ flytectl sandbox status 
+
+
 
 ::
 
-  flytectl config discover [flags]
+  FlyteCTL sandbox status [flags]
 
 Options
 ~~~~~~~
 
 ::
 
-  -h, --help   help for discover
+  -h, --help   help for status
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,8 +52,6 @@ Options inherited from parent commands
       --admin.useAuth                              Deprecated: Auth will be enabled/disabled based on admin's dynamically discovered information.
   -c, --config string                              config file (default is $HOME/.flyte/config.yaml)
   -d, --domain string                              Specifies the Flyte project's domain.
-      --file stringArray                           Passes the config file to load.
-                                                   If empty, it'll first search for the config file path then, if found, will load config from there.
       --logger.formatter.type string               Sets logging format type. (default "json")
       --logger.level int                           Sets the minimum logging level. (default 4)
       --logger.mute                                Mutes all logs regardless of severity. Intended for benchmarks/tests only.
@@ -71,5 +77,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands..
+* :doc:`FlyteCTL_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.
 

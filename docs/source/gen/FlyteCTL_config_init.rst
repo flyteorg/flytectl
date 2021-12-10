@@ -1,34 +1,47 @@
-.. _flytectl_sandbox_status:
+.. _FlyteCTL_config_init:
 
-flytectl sandbox status
------------------------
+FlyteCTL config init
+--------------------
 
-Get status of the sandbox environment.
+Generates FlyteCTL config file in the user's home directory.
 
 Synopsis
 ~~~~~~~~
 
 
-
-Retrieve the status of the Sandbox environment. Currently, Flyte Sandbox runs as a local Docker container.
-
-Usage
-::
-
- flytectl sandbox status 
-
-
+Creates a FlyteCTL config file in Flyte directory i.e ~/.flyte
+	
+Generates sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox https://docs.flyte.org/en/latest/deployment/sandbox.html
 
 ::
 
-  flytectl sandbox status [flags]
+ flytectl configuration config 
+
+Generates remote cluster config. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
+	
+::
+
+ flytectl configuration config --host=flyte.myexample.com
+	
+Generates FlyteCTL config with a storage provider
+::
+
+ flytectl configuration config --host=flyte.myexample.com --storage
+
+
+::
+
+  FlyteCTL config init [flags]
 
 Options
 ~~~~~~~
 
 ::
 
-  -h, --help   help for status
+  -h, --help          help for init
+      --host string   Endpoint of flyte admin
+      --insecure      Enable insecure mode (default true)
+      --storage       Enable storage provider config
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,6 +65,8 @@ Options inherited from parent commands
       --admin.useAuth                              Deprecated: Auth will be enabled/disabled based on admin's dynamically discovered information.
   -c, --config string                              config file (default is $HOME/.flyte/config.yaml)
   -d, --domain string                              Specifies the Flyte project's domain.
+      --file stringArray                           Passes the config file to load.
+                                                   If empty, it'll first search for the config file path then, if found, will load config from there.
       --logger.formatter.type string               Sets logging format type. (default "json")
       --logger.level int                           Sets the minimum logging level. (default 4)
       --logger.mute                                Mutes all logs regardless of severity. Intended for benchmarks/tests only.
@@ -77,5 +92,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.
+* :doc:`FlyteCTL_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands..
 

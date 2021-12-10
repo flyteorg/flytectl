@@ -1,28 +1,26 @@
-.. _flytectl_config_validate:
+.. _FlyteCTL_config_discover:
 
-flytectl config validate
+FlyteCTL config discover
 ------------------------
 
-Validates the loaded config.
+Searches for a config in one of the default search paths.
 
 Synopsis
 ~~~~~~~~
 
 
-Validates the loaded config.
+Searches for a config in one of the default search paths.
 
 ::
 
-  flytectl config validate [flags]
+  FlyteCTL config discover [flags]
 
 Options
 ~~~~~~~
 
 ::
 
-  -h, --help     help for validate
-      --strict   Validates that all keys in loaded config
-                 map to already registered sections.
+  -h, --help   help for discover
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -73,5 +71,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands..
+* :doc:`FlyteCTL_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands..
 

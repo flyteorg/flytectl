@@ -1,6 +1,6 @@
-.. _flytectl_sandbox_exec:
+.. _FlyteCTL_sandbox_exec:
 
-flytectl sandbox exec
+FlyteCTL sandbox exec
 ---------------------
 
 Execute non-interactive command inside the sandbox container
@@ -19,7 +19,7 @@ Usage
 
 ::
 
-  flytectl sandbox exec [flags]
+  FlyteCTL sandbox exec [flags]
 
 Options
 ~~~~~~~
@@ -75,5 +75,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.
+* :doc:`FlyteCTL_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.
 

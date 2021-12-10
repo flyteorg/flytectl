@@ -7,3 +7,4 @@ It specifies the actions to be performed on the resource 'task'.
     :caption: Task
 
     gen/flytectl_get_task
+    gen/flytectl_get_task

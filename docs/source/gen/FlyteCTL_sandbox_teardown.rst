@@ -1,6 +1,6 @@
-.. _flytectl_sandbox_teardown:
+.. _FlyteCTL_sandbox_teardown:
 
-flytectl sandbox teardown
+FlyteCTL sandbox teardown
 -------------------------
 
 Teardown cleans up the sandbox environment
@@ -21,7 +21,7 @@ Usage
 
 ::
 
-  flytectl sandbox teardown [flags]
+  FlyteCTL sandbox teardown [flags]
 
 Options
 ~~~~~~~
@@ -77,5 +77,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.
+* :doc:`FlyteCTL_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.
 
