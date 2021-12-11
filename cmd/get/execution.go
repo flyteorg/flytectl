@@ -42,7 +42,7 @@ Retrieve executions as per the specified limit and sorting parameters.
 Retrieves all the executions on other pages.
 ::
 
-	bin/flytectl get -p flytesnacks -d development execution --filter.limit=10 --filter.page=2
+  bin/flytectl get -p flytesnacks -d development execution --filter.limit=10 --filter.page=2
 
 Retrieve executions within the project and domain in YAML format.
 
