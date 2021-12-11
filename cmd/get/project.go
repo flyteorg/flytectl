@@ -15,45 +15,45 @@ import (
 )
 
 const (
-	projectShort = "Gets project resources"
+	projectShort = "Get project resources"
 	projectLong  = `
-Retrieves all the projects.(project,projects can be used interchangeably in these commands)
+Retrieve all the projects. (project,projects can be used interchangeably in these commands):
 ::
 
- bin/flytectl get project
+ flytectl get project
 
-Retrieves project by name
+Retrieve project by name:
 
 ::
 
- bin/flytectl get project flytesnacks
+ flytectl get project flytesnacks
 
-Retrieves all the projects with filters.
+Retrieve all the projects with filters:
 ::
 
-  bin/flytectl get project --filter.fieldSelector="project.name=flytesnacks"
+  flytectl get project --filter.fieldSelector="project.name=flytesnacks"
 
-Retrieves all the projects with limit and sorting.
+Retrieve all the projects with limit and sorting:
 ::
 
-  bin/flytectl get project --filter.sortBy=created_at --filter.limit=1 --filter.asc
+  flytectl get project --filter.sortBy=created_at --filter.limit=1 --filter.asc
 
 Retrieves all the projects on other pages.
 ::
 
-  bin/flytectl get project --filter.limit=10 --filter.page=2
+  flytectl get project --filter.limit=10 --filter.page=2
 
-Retrieves all the projects in yaml format
-
-::
-
- bin/flytectl get project -o yaml
-
-Retrieves all the projects in json format
+Retrieve all the projects in yaml format:
 
 ::
 
- bin/flytectl get project -o json
+ flytectl get project -o yaml
+
+Retrieve all the projects in json format:
+
+::
+
+ flytectl get project -o json
 
 Usage
 `
