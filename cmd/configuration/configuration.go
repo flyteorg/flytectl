@@ -51,6 +51,8 @@ var prompt = promptui.Select{
 	Items: []string{"S3", "GCS"},
 }
 
+var dnsPrefix = [3]string{"dns://", "http://", "https://"}
+
 // CreateConfigCommand will return configuration command
 func CreateConfigCommand() *cobra.Command {
 	configCmd := viper.GetConfigCommand()
@@ -82,7 +84,7 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 	templateStr := configutil.GetSandboxTemplate()
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
-		templateValues.Host = fmt.Sprintf("dns:///%v", initConfig.DefaultConfig.Host)
+		templateValues.Host = fmt.Sprintf("dns://%s", trim(initConfig.DefaultConfig.Host))
 		templateStr = configutil.AdminConfigTemplate
 		if initConfig.DefaultConfig.Storage {
 			templateStr = configutil.GetAWSCloudTemplate()
@@ -113,4 +115,12 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 	}
 	fmt.Printf("Init flytectl config file at [%s]", configutil.ConfigFile)
 	return nil
+}
+
+func trim(hostname string) string {
+	for _, prefix := range dnsPrefix {
+		hostname = strings.Trim(hostname, prefix)
+	}
+	return hostname
+
 }
