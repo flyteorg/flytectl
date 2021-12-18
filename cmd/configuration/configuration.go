@@ -79,12 +79,13 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 
 	templateValues := configutil.ConfigTemplateSpec{
 		Host:     "dns:///localhost:30081",
-		Insecure: initConfig.DefaultConfig.Insecure,
+		Insecure: true,
 	}
 	templateStr := configutil.GetSandboxTemplate()
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
 		templateValues.Host = fmt.Sprintf("dns://%s", trim(initConfig.DefaultConfig.Host))
+		templateValues.Insecure = initConfig.DefaultConfig.Insecure
 		templateStr = configutil.AdminConfigTemplate
 		if initConfig.DefaultConfig.Storage {
 			templateStr = configutil.GetAWSCloudTemplate()
