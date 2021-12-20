@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"os"
 	"path/filepath"
 
@@ -120,6 +121,11 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 
 	// In case of fast serialize input upload source code to destination bucket
 	var sourceCodeName string
+
+	if len(rconfig.DefaultFilesConfig.Version) == 0 {
+		rconfig.DefaultFilesConfig.Version = uuid.New().String()
+	}
+
 	if len(sourceCode) > 0 {
 		logger.Infof(ctx, "Fast Registration detected")
 		_, sourceCodeName = filepath.Split(sourceCode)

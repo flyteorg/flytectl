@@ -28,6 +28,7 @@ func TestRegisterFromFiles(t *testing.T) {
 		mockAdminClient.OnCreateWorkflowMatch(mock.Anything, mock.Anything).Return(nil, nil)
 		mockAdminClient.OnCreateLaunchPlanMatch(mock.Anything, mock.Anything).Return(nil, nil)
 		err := registerFromFilesFunc(ctx, args, cmdCtx)
+		assert.NotEqual(t, "", rconfig.DefaultFilesConfig.Version)
 		assert.Nil(t, err)
 	})
 	t.Run("Valid fast registration", func(t *testing.T) {
