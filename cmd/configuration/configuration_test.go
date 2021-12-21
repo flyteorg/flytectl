@@ -61,3 +61,9 @@ func TestSetupConfigFunc(t *testing.T) {
 	initConfig.DefaultConfig.Storage = true
 	assert.NotNil(t, initFlytectlConfig(ctx, yes))
 }
+
+func TestTrimFunc(t *testing.T) {
+	assert.Equal(t, trim("dns://localhost"), "localhost")
+	assert.Equal(t, trim("http://localhost"), "localhost")
+	assert.Equal(t, trim("https://localhost"), "localhost")
+}

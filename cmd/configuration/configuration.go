@@ -31,18 +31,24 @@ Generates sandbox config. Flyte Sandbox is a fully standalone minimal environmen
 
 ::
 
- flytectl configuration config 
+ flytectl config init  
 
-Generates remote cluster config. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
+Generates remote cluster config, By default connection is secure. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
 	
 ::
 
- flytectl configuration config --host=flyte.myexample.com
-	
+ flytectl config init --host=flyte.myexample.com
+
+Generates remote cluster config with insecure connection
+
+::
+
+ flytectl config init --host=flyte.myexample.com --insecure 
+
 Generates FlyteCTL config with a storage provider
 ::
 
- flytectl configuration config --host=flyte.myexample.com --storage
+ flytectl config init --host=flyte.myexample.com --storage
 `
 )
 
@@ -51,7 +57,7 @@ var prompt = promptui.Select{
 	Items: []string{"S3", "GCS"},
 }
 
-var dnsPrefix = [3]string{"dns://", "http://", "https://"}
+var endpointPrefix = [3]string{"dns://", "http://", "https://"}
 
 // CreateConfigCommand will return configuration command
 func CreateConfigCommand() *cobra.Command {
@@ -119,8 +125,8 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 }
 
 func trim(hostname string) string {
-	for _, prefix := range dnsPrefix {
-		hostname = strings.Trim(hostname, prefix)
+	for _, prefix := range endpointPrefix {
+		hostname = strings.TrimPrefix(hostname, prefix)
 	}
 	return hostname
 
