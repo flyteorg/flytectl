@@ -55,4 +55,4 @@ require (
 	sigs.k8s.io/yaml v1.2.0
 )
 
-replace github.com/flyteorg/flyteidl => github.com/flyteorg/flyteidl v0.21.8-0.20211221144726-c4e27e8c9c78
+replace github.com/flyteorg/flyteidl => github.com/flyteorg/flyteidl v0.21.8-0.20211222050335-9a617e56fe37
