@@ -223,12 +223,15 @@ func hydrateIdentifier(identifier *core.Identifier, version string, force bool) 
 func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string, sourceUploadPath string, version string) error {
 	if task.Template.GetContainer() != nil {
 		for k := range task.Template.GetContainer().Args {
-			if task.Template.GetContainer().Args[k] == "" || task.Template.GetContainer().Args[k] == registrationRemotePackagePattern || task.Template.GetContainer().Args[k] == registrationDestDirPattern {
+			if task.Template.GetContainer().Args[k] == registrationRemotePackagePattern {
 				remotePath, err := getRemoteStoragePath(context.Background(), Client, sourceUploadPath, sourceCode, version)
 				if err != nil {
 					return err
 				}
 				task.Template.GetContainer().Args[k] = string(remotePath)
+			}
+			if task.Template.GetContainer().Args[k] == registrationDestDirPattern {
+				task.Template.GetContainer().Args[k] = "."
 			}
 		}
 	} else if task.Template.GetK8SPod() != nil && task.Template.GetK8SPod().PodSpec != nil {
@@ -239,12 +242,15 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string, sourceUploadPath s
 		}
 		for containerIdx, container := range podSpec.Containers {
 			for argIdx, arg := range container.Args {
-				if arg == registrationRemotePackagePattern || arg == registrationDestDirPattern {
+				if arg == registrationRemotePackagePattern {
 					remotePath, err := getRemoteStoragePath(context.Background(), Client, sourceUploadPath, sourceCode, version)
 					if err != nil {
 						return err
 					}
 					podSpec.Containers[containerIdx].Args[argIdx] = string(remotePath)
+				}
+				if arg == registrationDestDirPattern {
+					podSpec.Containers[containerIdx].Args[argIdx] = "."
 				}
 			}
 		}
