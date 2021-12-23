@@ -2,9 +2,12 @@ package configuration
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/flyteorg/flytestdlib/logger"
@@ -90,7 +93,12 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 	templateStr := configutil.GetSandboxTemplate()
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
-		templateValues.Host = fmt.Sprintf("dns://%s", trim(initConfig.DefaultConfig.Host))
+		trimHost := trim(initConfig.DefaultConfig.Host)
+		host := strings.Split(trimHost, ":")
+		if !validateEndpointName(host[0]) {
+			return errors.New("Please use a valid endpoint")
+		}
+		templateValues.Host = fmt.Sprintf("dns://%s", trimHost)
 		templateValues.Insecure = initConfig.DefaultConfig.Insecure
 		templateStr = configutil.AdminConfigTemplate
 		if initConfig.DefaultConfig.Storage {
@@ -130,4 +138,16 @@ func trim(hostname string) string {
 	}
 	return hostname
 
+}
+
+func validateEndpointName(domain string) bool {
+	RegExp := regexp.MustCompile(`^(([a-zA-Z]{1})|([a-zA-Z]{1}[a-zA-Z]{1})|([a-zA-Z]{1}[0-9]{1})|([0-9]{1}[a-zA-Z]{1})|([a-zA-Z0-9][a-zA-Z0-9-_]{1,61}[a-zA-Z0-9]))\.([a-zA-Z]{2,6}|[a-zA-Z0-9-]{2,30}\.[a-zA-Z
+ ]{2,3})$`)
+	if RegExp.MatchString(domain) || domain == "localhost" {
+		return true
+	}
+	if net.ParseIP(domain) == nil {
+		return false
+	}
+	return true
 }
