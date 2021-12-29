@@ -91,7 +91,7 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 	templateStr := configutil.GetSandboxTemplate()
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
-		trimHost := trim(initConfig.DefaultConfig.Host)
+		trimHost := trimmedEndpoint(initConfig.DefaultConfig.Host)
 		if !validateEndpointName(trimHost) {
 			return errors.New("Please use a valid endpoint")
 		}
@@ -129,7 +129,7 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 	return nil
 }
 
-func trim(hostname string) string {
+func trimmedEndpoint(hostname string) string {
 	for _, prefix := range endpointPrefix {
 		hostname = strings.TrimPrefix(hostname, prefix)
 	}
@@ -137,24 +137,24 @@ func trim(hostname string) string {
 
 }
 
-func validateEndpointName(domain string) bool {
+func validateEndpointName(endPoint string) bool {
 	var validate = false
-	if domain == "localhost" {
+	if endPoint == "localhost" {
 		return true
 	}
-	if err := is.URL.Validate(domain); err != nil {
+	if err := is.URL.Validate(endPoint); err != nil {
 		return false
 	}
-	dns := strings.Split(domain, ":")
-	if len(dns) <= 2 && len(dns) > 0 {
-		if err := is.DNSName.Validate(dns[0]); !errors.Is(err, is.ErrDNSName) && err == nil {
+	endPointParts := strings.Split(endPoint, ":")
+	if len(endPointParts) <= 2 && len(endPointParts) > 0 {
+		if err := is.DNSName.Validate(endPointParts[0]); !errors.Is(err, is.ErrDNSName) && err == nil {
 			validate = true
 		}
-		if err := is.IP.Validate(dns[0]); !errors.Is(err, is.ErrIP) && err == nil {
+		if err := is.IP.Validate(endPointParts[0]); !errors.Is(err, is.ErrIP) && err == nil {
 			validate = true
 		}
-		if len(dns) == 2 {
-			if err := is.Port.Validate(dns[1]); err != nil {
+		if len(endPointParts) == 2 {
+			if err := is.Port.Validate(endPointParts[1]); err != nil {
 				return false
 			}
 		}
