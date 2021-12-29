@@ -91,7 +91,7 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 	templateStr := configutil.GetSandboxTemplate()
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
-		trimHost := trimmedEndpoint(initConfig.DefaultConfig.Host)
+		trimHost := trimEndpoint(initConfig.DefaultConfig.Host)
 		if !validateEndpointName(trimHost) {
 			return errors.New("Please use a valid endpoint")
 		}
@@ -129,7 +129,7 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 	return nil
 }
 
-func trimmedEndpoint(hostname string) string {
+func trimEndpoint(hostname string) string {
 	for _, prefix := range endpointPrefix {
 		hostname = strings.TrimPrefix(hostname, prefix)
 	}
