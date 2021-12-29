@@ -48,7 +48,12 @@ on command-line. The following configuration is useful to setup.
 Basic Configuration
 --------------------
 
-Flytectl configuration
+Flytectl configuration. 
+For full list of configurable options available can be found by running ``flytectl --help`` and can be alternately be found `here <https://docs.flyte.org/projects/flytectl/en/stable/gen/flytectl.html#synopsis>`__
+
+.. NOTE::
+
+     Only Project(-p), Domain(-d), Output(-o) currently cannot be used in config file
 
 .. tabbed:: Local Flyte Sandbox
 
