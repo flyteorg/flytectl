@@ -27,6 +27,8 @@ import (
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/util"
+	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 const (
@@ -70,6 +72,8 @@ Usage
 	sandboxSupportedVersion = "v0.10.0"
 	diskPressureTaint       = "node.kubernetes.io/disk-pressure"
 	taintEffect             = "NoSchedule"
+	sandboxContextName      = "flyte-sandbox"
+	sandboxDockerContext    = "default"
 )
 
 type ExecResult struct {
@@ -104,11 +108,69 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		if err != nil {
 			return err
 		}
+		if err = updateLocalKubeContext(); err != nil {
+			return err
+		}
+
 		if err := watchFlyteDeployment(ctx, k8sClient.CoreV1()); err != nil {
 			return err
 		}
 		util.PrintSandboxMessage()
 	}
+	return nil
+}
+
+func updateLocalKubeContext() error {
+	localConfigAccess := clientcmd.NewDefaultPathOptions()
+
+	dockerPathOptions := &clientcmd.PathOptions{
+		GlobalFile:   docker.Kubeconfig,
+		LoadingRules: clientcmd.NewDefaultClientConfigLoadingRules(),
+	}
+	dockerConfigAccess := dockerPathOptions
+
+	_, err := localConfigAccess.GetStartingConfig()
+	if err != nil {
+		return err
+	}
+
+	dockerStartingConfig, err := dockerConfigAccess.GetStartingConfig()
+	if err != nil {
+		return err
+	}
+	_, exists := dockerStartingConfig.Contexts[sandboxDockerContext]
+	if !exists {
+		return fmt.Errorf("context %v doesn't exist", sandboxDockerContext)
+	}
+
+	localStartingConfig, err := localConfigAccess.GetStartingConfig()
+	if err != nil {
+		return err
+	}
+
+	_, exists = localStartingConfig.Contexts[sandboxContextName]
+	if exists {
+		fmt.Printf("context %v already exist. Overwriting it\n", sandboxContextName)
+	} else {
+		delete(localStartingConfig.Contexts, sandboxContextName)
+		localStartingConfig.Contexts[sandboxContextName] = clientcmdapi.NewContext()
+	}
+
+	delete(localStartingConfig.Clusters, sandboxContextName)
+	localStartingConfig.Clusters[sandboxContextName] = dockerStartingConfig.Clusters[sandboxDockerContext]
+	localStartingConfig.Clusters[sandboxContextName].LocationOfOrigin = localConfigAccess.GetDefaultFilename()
+	delete(localStartingConfig.AuthInfos, sandboxContextName)
+	localStartingConfig.AuthInfos[sandboxContextName] = dockerStartingConfig.AuthInfos[sandboxDockerContext]
+	localStartingConfig.AuthInfos[sandboxContextName].LocationOfOrigin = localConfigAccess.GetDefaultFilename()
+	localStartingConfig.Contexts[sandboxContextName].Cluster = sandboxContextName
+	localStartingConfig.Contexts[sandboxContextName].AuthInfo = sandboxContextName
+	localStartingConfig.CurrentContext = sandboxContextName
+
+	if err := clientcmd.ModifyConfig(localConfigAccess, *localStartingConfig, true); err != nil {
+		return err
+	}
+
+	fmt.Printf("context modified for %q and switched over to it.\n", sandboxContextName)
 	return nil
 }
 
