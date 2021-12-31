@@ -152,14 +152,11 @@ func updateLocalKubeContext() error {
 	if exists {
 		fmt.Printf("context %v already exist. Overwriting it\n", sandboxContextName)
 	} else {
-		delete(localStartingConfig.Contexts, sandboxContextName)
 		localStartingConfig.Contexts[sandboxContextName] = clientcmdapi.NewContext()
 	}
 
-	delete(localStartingConfig.Clusters, sandboxContextName)
 	localStartingConfig.Clusters[sandboxContextName] = dockerStartingConfig.Clusters[sandboxDockerContext]
 	localStartingConfig.Clusters[sandboxContextName].LocationOfOrigin = localConfigAccess.GetDefaultFilename()
-	delete(localStartingConfig.AuthInfos, sandboxContextName)
 	localStartingConfig.AuthInfos[sandboxContextName] = dockerStartingConfig.AuthInfos[sandboxDockerContext]
 	localStartingConfig.AuthInfos[sandboxContextName].LocationOfOrigin = localConfigAccess.GetDefaultFilename()
 	localStartingConfig.Contexts[sandboxContextName].Cluster = sandboxContextName
