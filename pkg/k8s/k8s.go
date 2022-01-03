@@ -1,12 +1,14 @@
 package k8s
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/pkg/errors"
 	"k8s.io/client-go/kubernetes"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
+	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 type K8s interface {
@@ -30,4 +32,47 @@ func GetK8sClient(cfg, master string) (K8s, error) {
 		return kubeClient, nil
 	}
 	return Client, nil
+}
+
+func CopyKubeContext(fromConfigAccess, toConfigAccess clientcmd.ConfigAccess, fromContext, toContext string) error {
+	_, err := toConfigAccess.GetStartingConfig()
+	if err != nil {
+		return err
+	}
+
+	fromStartingConfig, err := fromConfigAccess.GetStartingConfig()
+	if err != nil {
+		return err
+	}
+	_, exists := fromStartingConfig.Contexts[fromContext]
+	if !exists {
+		return fmt.Errorf("context %v doesn't exist", fromContext)
+	}
+
+	toStartingConfig, err := toConfigAccess.GetStartingConfig()
+	if err != nil {
+		return err
+	}
+
+	_, exists = toStartingConfig.Contexts[toContext]
+	if exists {
+		fmt.Printf("context %v already exist. Overwriting it\n", toContext)
+	} else {
+		toStartingConfig.Contexts[toContext] = clientcmdapi.NewContext()
+	}
+
+	toStartingConfig.Clusters[toContext] = fromStartingConfig.Clusters[fromContext]
+	toStartingConfig.Clusters[toContext].LocationOfOrigin = toConfigAccess.GetDefaultFilename()
+	toStartingConfig.AuthInfos[toContext] = fromStartingConfig.AuthInfos[fromContext]
+	toStartingConfig.AuthInfos[toContext].LocationOfOrigin = toConfigAccess.GetDefaultFilename()
+	toStartingConfig.Contexts[toContext].Cluster = toContext
+	toStartingConfig.Contexts[toContext].AuthInfo = toContext
+	toStartingConfig.CurrentContext = toContext
+
+	if err := clientcmd.ModifyConfig(toConfigAccess, *toStartingConfig, true); err != nil {
+		return err
+	}
+
+	fmt.Printf("context modified for %q and switched over to it.\n", toContext)
+	return nil
 }

@@ -28,7 +28,6 @@ import (
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/util"
 	"k8s.io/client-go/tools/clientcmd"
-	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
 const (
@@ -123,52 +122,12 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 func updateLocalKubeContext() error {
 	localConfigAccess := clientcmd.NewDefaultPathOptions()
 
-	dockerPathOptions := &clientcmd.PathOptions{
+	dockerConfigAccess := &clientcmd.PathOptions{
 		GlobalFile:   docker.Kubeconfig,
 		LoadingRules: clientcmd.NewDefaultClientConfigLoadingRules(),
 	}
-	dockerConfigAccess := dockerPathOptions
 
-	_, err := localConfigAccess.GetStartingConfig()
-	if err != nil {
-		return err
-	}
-
-	dockerStartingConfig, err := dockerConfigAccess.GetStartingConfig()
-	if err != nil {
-		return err
-	}
-	_, exists := dockerStartingConfig.Contexts[sandboxDockerContext]
-	if !exists {
-		return fmt.Errorf("context %v doesn't exist", sandboxDockerContext)
-	}
-
-	localStartingConfig, err := localConfigAccess.GetStartingConfig()
-	if err != nil {
-		return err
-	}
-
-	_, exists = localStartingConfig.Contexts[sandboxContextName]
-	if exists {
-		fmt.Printf("context %v already exist. Overwriting it\n", sandboxContextName)
-	} else {
-		localStartingConfig.Contexts[sandboxContextName] = clientcmdapi.NewContext()
-	}
-
-	localStartingConfig.Clusters[sandboxContextName] = dockerStartingConfig.Clusters[sandboxDockerContext]
-	localStartingConfig.Clusters[sandboxContextName].LocationOfOrigin = localConfigAccess.GetDefaultFilename()
-	localStartingConfig.AuthInfos[sandboxContextName] = dockerStartingConfig.AuthInfos[sandboxDockerContext]
-	localStartingConfig.AuthInfos[sandboxContextName].LocationOfOrigin = localConfigAccess.GetDefaultFilename()
-	localStartingConfig.Contexts[sandboxContextName].Cluster = sandboxContextName
-	localStartingConfig.Contexts[sandboxContextName].AuthInfo = sandboxContextName
-	localStartingConfig.CurrentContext = sandboxContextName
-
-	if err := clientcmd.ModifyConfig(localConfigAccess, *localStartingConfig, true); err != nil {
-		return err
-	}
-
-	fmt.Printf("context modified for %q and switched over to it.\n", sandboxContextName)
-	return nil
+	return k8s.CopyKubeContext(dockerConfigAccess, localConfigAccess, sandboxDockerContext, sandboxContextName)
 }
 
 func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bufio.Scanner, error) {
