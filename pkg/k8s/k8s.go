@@ -34,6 +34,7 @@ func GetK8sClient(cfg, master string) (K8s, error) {
 	return Client, nil
 }
 
+// CopyKubeContext copies context fromContext part of fromConfigAccess to toContext part of toConfigAccess.
 func CopyKubeContext(fromConfigAccess, toConfigAccess clientcmd.ConfigAccess, fromContext, toContext string) error {
 	_, err := toConfigAccess.GetStartingConfig()
 	if err != nil {
@@ -74,5 +75,29 @@ func CopyKubeContext(fromConfigAccess, toConfigAccess clientcmd.ConfigAccess, fr
 	}
 
 	fmt.Printf("context modified for %q and switched over to it.\n", toContext)
+	return nil
+}
+
+// RemoveKubeContext removes the contextToRemove from the kubeContext pointed to be fromConfigAccess
+func RemoveKubeContext(fromConfigAccess clientcmd.ConfigAccess, contextToRemove string) error {
+	fromStartingConfig, err := fromConfigAccess.GetStartingConfig()
+	if err != nil {
+		return err
+	}
+	_, exists := fromStartingConfig.Contexts[contextToRemove]
+	if !exists {
+		return fmt.Errorf("context %v doesn't exist", contextToRemove)
+	}
+
+	delete(fromStartingConfig.Clusters, contextToRemove)
+	delete(fromStartingConfig.AuthInfos, contextToRemove)
+	delete(fromStartingConfig.Contexts, contextToRemove)
+	fromStartingConfig.CurrentContext = ""
+
+	if err := clientcmd.ModifyConfig(fromConfigAccess, *fromStartingConfig, true); err != nil {
+		return err
+	}
+
+	fmt.Printf("context removed for %q.\n", contextToRemove)
 	return nil
 }
