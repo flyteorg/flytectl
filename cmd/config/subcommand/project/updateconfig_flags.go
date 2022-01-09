@@ -50,11 +50,13 @@ func (UpdateConfig) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg UpdateConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("UpdateConfig", pflag.ExitOnError)
-	cmdFlags.BoolVar(&DefaultUpdateConfig.ActivateProject, fmt.Sprintf("%v%v", prefix, "activateProject"), DefaultUpdateConfig.ActivateProject, "Activates the project specified as argument.")
-	cmdFlags.BoolVar(&DefaultUpdateConfig.ArchiveProject, fmt.Sprintf("%v%v", prefix, "archiveProject"), DefaultUpdateConfig.ArchiveProject, "Archives the project specified as argument.")
+	cmdFlags.StringVar(&DefaultUpdateConfig.ID, fmt.Sprintf("%v%v", prefix, "id"), DefaultUpdateConfig.ID, "id for the project specified as argument.")
+	cmdFlags.BoolVar(&DefaultUpdateConfig.Archive, fmt.Sprintf("%v%v", prefix, "archive"), DefaultUpdateConfig.Archive, "Archives the project specified as argument. By Default state is active")
+	cmdFlags.BoolVar(&DefaultUpdateConfig.ActivateProject, fmt.Sprintf("%v%v", prefix, "activateProject"), DefaultUpdateConfig.ActivateProject, "(Deprecated) Activates the project specified as argument.")
+	cmdFlags.BoolVar(&DefaultUpdateConfig.ArchiveProject, fmt.Sprintf("%v%v", prefix, "archiveProject"), DefaultUpdateConfig.ArchiveProject, "(Deprecated) Archives the project specified as argument.")
 	cmdFlags.BoolVar(&DefaultUpdateConfig.DryRun, fmt.Sprintf("%v%v", prefix, "dryRun"), DefaultUpdateConfig.DryRun, "execute command without making any modifications.")
-	cmdFlags.StringVar(&DefaultUpdateConfig.File, fmt.Sprintf("%v%v", prefix, "file"), DefaultUpdateConfig.File, "file for the project definition.")
 	cmdFlags.StringVar(&DefaultUpdateConfig.Description, fmt.Sprintf("%v%v", prefix, "description"), DefaultUpdateConfig.Description, "description for the project specified as argument.")
 	cmdFlags.StringToStringVar(&DefaultUpdateConfig.Labels, fmt.Sprintf("%v%v", prefix, "labels"), DefaultUpdateConfig.Labels, "labels for the project specified as argument.")
+	cmdFlags.StringVar(&DefaultUpdateConfig.File, fmt.Sprintf("%v%v", prefix, "file"), DefaultUpdateConfig.File, "file for the project definition.")
 	return cmdFlags
 }

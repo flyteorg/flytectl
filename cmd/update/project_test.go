@@ -3,8 +3,9 @@ package update
 import (
 	"errors"
 	"fmt"
-	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 	"testing"
+
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/cmd/config"

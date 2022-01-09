@@ -40,7 +40,7 @@ Create a project by definition file. Note: The name shouldn't contain any whites
 )
 
 func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	projectSpec := project.CreateConfig{}
+	projectSpec := project.Definition{}
 	if project.DefaultCreateConfig.File != "" {
 		yamlFile, err := ioutil.ReadFile(project.DefaultCreateConfig.File)
 		if err != nil {
@@ -62,7 +62,7 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 	if projectSpec.Name == "" {
 		return fmt.Errorf("project name is required flag")
 	}
-	if projectSpec.DryRun {
+	if project.DefaultCreateConfig.DryRun {
 		logger.Debugf(ctx, "skipping RegisterProject request (DryRun)")
 	} else {
 		_, err := cmdCtx.AdminClient().RegisterProject(ctx, &admin.ProjectRegisterRequest{

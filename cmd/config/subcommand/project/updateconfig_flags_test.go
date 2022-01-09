@@ -99,6 +99,34 @@ func TestUpdateConfig_SetFlags(t *testing.T) {
 	cmdFlags := actual.GetPFlagSet("")
 	assert.True(t, cmdFlags.HasFlags())
 
+	t.Run("Test_id", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("id", testValue)
+			if vString, err := cmdFlags.GetString("id"); err == nil {
+				testDecodeJson_UpdateConfig(t, fmt.Sprintf("%v", vString), &actual.ID)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_archive", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("archive", testValue)
+			if vBool, err := cmdFlags.GetBool("archive"); err == nil {
+				testDecodeJson_UpdateConfig(t, fmt.Sprintf("%v", vBool), &actual.Archive)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
 	t.Run("Test_activateProject", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
@@ -141,20 +169,6 @@ func TestUpdateConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
-	t.Run("Test_file", func(t *testing.T) {
-
-		t.Run("Override", func(t *testing.T) {
-			testValue := "1"
-
-			cmdFlags.Set("file", testValue)
-			if vString, err := cmdFlags.GetString("file"); err == nil {
-				testDecodeJson_UpdateConfig(t, fmt.Sprintf("%v", vString), &actual.File)
-
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
-	})
 	t.Run("Test_description", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
@@ -177,6 +191,20 @@ func TestUpdateConfig_SetFlags(t *testing.T) {
 			cmdFlags.Set("labels", testValue)
 			if vStringToString, err := cmdFlags.GetStringToString("labels"); err == nil {
 				testDecodeRaw_UpdateConfig(t, vStringToString, &actual.Labels)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_file", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("file", testValue)
+			if vString, err := cmdFlags.GetString("file"); err == nil {
+				testDecodeJson_UpdateConfig(t, fmt.Sprintf("%v", vString), &actual.File)
 
 			} else {
 				assert.FailNow(t, err.Error())

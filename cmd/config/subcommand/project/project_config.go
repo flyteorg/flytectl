@@ -16,8 +16,6 @@ type Config struct {
 	Filter filters.Filters `json:"filter" pflag:","`
 }
 
-
-
 //go:generate pflags CreateConfig --default-var DefaultCreateConfig --bind-default-var
 
 // CreateConfig Config hold configuration for project create flags.
@@ -37,7 +35,7 @@ var (
 	}
 )
 
-type ProjectDefinition struct {
+type Definition struct {
 	ID          string            `yaml:"id"`
 	Name        string            `yaml:"name"`
 	Description string            `yaml:"description"`
@@ -48,12 +46,14 @@ type ProjectDefinition struct {
 
 // UpdateConfig hold configuration for project update flags.
 type UpdateConfig struct {
-	ActivateProject bool `json:"activateProject" pflag:",Activates the project specified as argument."`
-	ArchiveProject  bool `json:"archiveProject" pflag:",Archives the project specified as argument."`
-	DryRun          bool `json:"dryRun" pflag:",execute command without making any modifications."`
-	File        string            `json:"file" pflag:",file for the project definition."`
-	Description string            `json:"description" pflag:",description for the project specified as argument."`
-	Labels      map[string]string `json:"labels" pflag:",labels for the project specified as argument."`
+	ID              string            `json:"id" pflag:",id for the project specified as argument."`
+	Archive         bool              `json:"archive" pflag:",Archives the project specified as argument. By Default state is active"`
+	ActivateProject bool              `json:"activateProject" pflag:",(Deprecated) Activates the project specified as argument."`
+	ArchiveProject  bool              `json:"archiveProject" pflag:",(Deprecated) Archives the project specified as argument."`
+	DryRun          bool              `json:"dryRun" pflag:",execute command without making any modifications."`
+	Description     string            `json:"description" pflag:",description for the project specified as argument."`
+	Labels          map[string]string `json:"labels" pflag:",labels for the project specified as argument."`
+	File            string            `json:"file" pflag:",file for the project definition."`
 }
 
 var DefaultUpdateConfig = &UpdateConfig{}

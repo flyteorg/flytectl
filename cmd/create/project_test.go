@@ -2,8 +2,9 @@ package create
 
 import (
 	"fmt"
-	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 	"testing"
+
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 
 	"github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"

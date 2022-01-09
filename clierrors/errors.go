@@ -4,7 +4,7 @@ var (
 	ErrInvalidStateUpdate = "Invalid state passed. Specify either activate or archive\n"
 
 	ErrProjectNotPassed    = "Project not passed\n"
-	ErrFailedProjectUpdate = "Project %v failed to get updated to %v state due to %v\n"
+	ErrFailedProjectUpdate = "Project %v failed to get updated due to %v\n"
 
 	ErrLPNotPassed        = "Launch plan name not passed\n"
 	ErrLPVersionNotPassed = "Launch plan version not passed\n" //nolint
