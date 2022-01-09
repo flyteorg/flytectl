@@ -67,6 +67,19 @@ Update a project by definition file. Note: The name shouldn't contain any whites
      app: flyte
     description: "Some description for the project"
 
+Update a project state by definition file. Note: The name shouldn't contain any whitespace characters.
+::
+
+ flytectl update project --file project.yaml  --archiveProject
+
+.. code-block:: yaml
+
+    id: "project-unique-id"
+    name: "Name"
+    labels:
+     app: flyte
+    description: "Some description for the project"
+
 Usage
 `
 )

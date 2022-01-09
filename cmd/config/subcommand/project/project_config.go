@@ -16,6 +16,7 @@ type Config struct {
 	Filter filters.Filters `json:"filter" pflag:","`
 }
 
+
 type Definition struct {
 	ID          string            `yaml:"id"`
 	Name        string            `yaml:"name"`
@@ -25,7 +26,7 @@ type Definition struct {
 
 //go:generate pflags ProjectConfig --default-var DefaultProjectConfig --bind-default-var
 
-// UpdateConfig hold configuration for project update flags.
+// ProjectConfig hold configuration for project update flags.
 type ProjectConfig struct {
 	ID              string            `json:"id" pflag:",id for the project specified as argument."`
 	ActivateProject bool              `json:"activateProject" pflag:",Activates the project specified as argument. Only used in update"`
