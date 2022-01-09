@@ -85,6 +85,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	} else {
 		projectSpec.ID = project.DefaultProjectConfig.ID
 		projectSpec.Description = project.DefaultProjectConfig.Description
+		projectSpec.Name = project.DefaultProjectConfig.Name
 		projectSpec.Labels = project.DefaultProjectConfig.Labels
 	}
 
@@ -97,6 +98,9 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	}
 	if projectSpec.Description != "" {
 		projectDefinition.Description = projectSpec.Description
+	}
+	if projectSpec.Name != "" {
+		projectDefinition.Name = projectSpec.Name
 	}
 	if len(projectSpec.Labels) > 0 {
 		projectDefinition.Labels = &admin.Labels{
