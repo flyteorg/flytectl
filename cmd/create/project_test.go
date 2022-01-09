@@ -33,19 +33,19 @@ func createProjectSetup() {
 			},
 		},
 	}
-	project.DefaultCreateConfig.ID = ""
-	project.DefaultCreateConfig.Name = ""
-	project.DefaultCreateConfig.Labels = map[string]string{}
-	project.DefaultCreateConfig.Description = ""
+	project.DefaultProjectConfig.ID = ""
+	project.DefaultProjectConfig.Name = ""
+	project.DefaultProjectConfig.Labels = map[string]string{}
+	project.DefaultProjectConfig.Description = ""
 }
 func TestCreateProjectFunc(t *testing.T) {
 	setup()
 	createProjectSetup()
 	defer tearDownAndVerify(t, "project Created successfully")
-	project.DefaultCreateConfig.ID = projectValue
-	project.DefaultCreateConfig.Name = projectValue
-	project.DefaultCreateConfig.Labels = map[string]string{}
-	project.DefaultCreateConfig.Description = ""
+	project.DefaultProjectConfig.ID = projectValue
+	project.DefaultProjectConfig.Name = projectValue
+	project.DefaultProjectConfig.Labels = map[string]string{}
+	project.DefaultProjectConfig.Description = ""
 	mockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
 	err := createProjectsCommand(ctx, args, cmdCtx)
 	assert.Nil(t, err)
@@ -56,8 +56,8 @@ func TestEmptyProjectID(t *testing.T) {
 	setup()
 	createProjectSetup()
 	defer tearDownAndVerify(t, "")
-	project.DefaultCreateConfig.Name = projectValue
-	project.DefaultCreateConfig.Labels = map[string]string{}
+	project.DefaultProjectConfig.Name = projectValue
+	project.DefaultProjectConfig.Labels = map[string]string{}
 	mockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
 	err := createProjectsCommand(ctx, args, cmdCtx)
 	assert.Equal(t, fmt.Errorf("project ID is required flag"), err)
@@ -68,9 +68,9 @@ func TestEmptyProjectName(t *testing.T) {
 	setup()
 	createProjectSetup()
 	defer tearDownAndVerify(t, "")
-	project.DefaultCreateConfig.ID = projectValue
-	project.DefaultCreateConfig.Labels = map[string]string{}
-	project.DefaultCreateConfig.Description = ""
+	project.DefaultProjectConfig.ID = projectValue
+	project.DefaultProjectConfig.Labels = map[string]string{}
+	project.DefaultProjectConfig.Description = ""
 	mockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
 	err := createProjectsCommand(ctx, args, cmdCtx)
 	assert.Equal(t, fmt.Errorf("project name is required flag"), err)

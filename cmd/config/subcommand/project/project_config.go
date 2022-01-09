@@ -16,25 +16,6 @@ type Config struct {
 	Filter filters.Filters `json:"filter" pflag:","`
 }
 
-//go:generate pflags CreateConfig --default-var DefaultCreateConfig --bind-default-var
-
-// CreateConfig Config hold configuration for project create flags.
-type CreateConfig struct {
-	ID          string            `json:"id" pflag:",id for the project specified as argument."`
-	Name        string            `json:"name" pflag:",name for the project specified as argument."`
-	File        string            `json:"file" pflag:",file for the project definition."`
-	Description string            `json:"description" pflag:",description for the project specified as argument."`
-	Labels      map[string]string `json:"labels" pflag:",labels for the project specified as argument."`
-	DryRun      bool              `json:"dryRun" pflag:",execute command without making any modifications."`
-}
-
-var (
-	DefaultCreateConfig = &CreateConfig{
-		Description: "",
-		Labels:      map[string]string{},
-	}
-)
-
 type Definition struct {
 	ID          string            `yaml:"id"`
 	Name        string            `yaml:"name"`
@@ -42,18 +23,21 @@ type Definition struct {
 	Labels      map[string]string `yaml:"labels"`
 }
 
-//go:generate pflags UpdateConfig --default-var DefaultUpdateConfig --bind-default-var
+//go:generate pflags ProjectConfig --default-var DefaultProjectConfig --bind-default-var
 
 // UpdateConfig hold configuration for project update flags.
-type UpdateConfig struct {
+type ProjectConfig struct {
 	ID              string            `json:"id" pflag:",id for the project specified as argument."`
-	Archive         bool              `json:"archive" pflag:",Archives the project specified as argument. By Default state is active"`
-	ActivateProject bool              `json:"activateProject" pflag:",(Deprecated) Activates the project specified as argument."`
-	ArchiveProject  bool              `json:"archiveProject" pflag:",(Deprecated) Archives the project specified as argument."`
+	ActivateProject bool              `json:"activateProject" pflag:",Activates the project specified as argument. Only used in update"`
+	ArchiveProject  bool              `json:"archiveProject" pflag:",Archives the project specified as argument. Only used in update"`
+	Name            string            `json:"name" pflag:",name for the project specified as argument."`
 	DryRun          bool              `json:"dryRun" pflag:",execute command without making any modifications."`
 	Description     string            `json:"description" pflag:",description for the project specified as argument."`
 	Labels          map[string]string `json:"labels" pflag:",labels for the project specified as argument."`
 	File            string            `json:"file" pflag:",file for the project definition."`
 }
 
-var DefaultUpdateConfig = &UpdateConfig{}
+var DefaultProjectConfig = &ProjectConfig{
+	Description: "",
+	Labels:      map[string]string{},
+}

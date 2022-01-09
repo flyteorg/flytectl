@@ -73,8 +73,8 @@ Usage
 
 func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	projectSpec := project.Definition{}
-	if len(project.DefaultUpdateConfig.File) > 0 {
-		yamlFile, err := ioutil.ReadFile(project.DefaultUpdateConfig.File)
+	if len(project.DefaultProjectConfig.File) > 0 {
+		yamlFile, err := ioutil.ReadFile(project.DefaultProjectConfig.File)
 		if err != nil {
 			return err
 		}
@@ -83,9 +83,9 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 			return err
 		}
 	} else {
-		projectSpec.ID = project.DefaultUpdateConfig.ID
-		projectSpec.Description = project.DefaultUpdateConfig.Description
-		projectSpec.Labels = project.DefaultUpdateConfig.Labels
+		projectSpec.ID = project.DefaultProjectConfig.ID
+		projectSpec.Description = project.DefaultProjectConfig.Description
+		projectSpec.Labels = project.DefaultProjectConfig.Labels
 	}
 
 	if projectSpec.ID == "" {
@@ -104,8 +104,8 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 		}
 	}
 
-	activateProject := project.DefaultUpdateConfig.ActivateProject
-	archiveProject := project.DefaultUpdateConfig.ArchiveProject
+	activateProject := project.DefaultProjectConfig.ActivateProject
+	archiveProject := project.DefaultProjectConfig.ArchiveProject
 	if activateProject || archiveProject {
 		if activateProject == archiveProject {
 			return fmt.Errorf(clierrors.ErrInvalidStateUpdate)
@@ -116,7 +116,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 		}
 	}
 
-	if project.DefaultUpdateConfig.DryRun {
+	if project.DefaultProjectConfig.DryRun {
 		logger.Infof(ctx, "skipping UpdateProject request (dryRun)")
 	} else {
 		_, err := cmdCtx.AdminClient().UpdateProject(ctx, projectDefinition)

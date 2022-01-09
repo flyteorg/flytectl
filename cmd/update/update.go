@@ -40,7 +40,7 @@ func CreateUpdateCommand() *cobra.Command {
 			Short: updateLPShort, Long: updateLPLong},
 		"launchplan-meta": {CmdFunc: updateLPMetaFunc, Aliases: []string{}, ProjectDomainNotRequired: false, PFlagProvider: namedEntityConfig,
 			Short: updateLPMetaShort, Long: updateLPMetaLong},
-		"project": {CmdFunc: updateProjectsFunc, Aliases: []string{}, ProjectDomainNotRequired: true, PFlagProvider: project.DefaultUpdateConfig,
+		"project": {CmdFunc: updateProjectsFunc, Aliases: []string{}, ProjectDomainNotRequired: true, PFlagProvider: project.DefaultProjectConfig,
 			Short: projectShort, Long: projectLong},
 		"task-meta": {CmdFunc: updateTaskFunc, Aliases: []string{}, ProjectDomainNotRequired: false, PFlagProvider: namedEntityConfig,
 			Short: updateTaskShort, Long: updateTaskLong},

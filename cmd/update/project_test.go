@@ -38,8 +38,8 @@ func modifyProjectFlags(archiveProject *bool, newArchiveVal bool, activateProjec
 func TestActivateProjectFunc(t *testing.T) {
 	setup()
 	updateProjectSetup()
-	project.DefaultUpdateConfig.ID = projectValue
-	modifyProjectFlags(&(project.DefaultUpdateConfig.ArchiveProject), false, &(project.DefaultUpdateConfig.ActivateProject), true)
+	project.DefaultProjectConfig.ID = projectValue
+	modifyProjectFlags(&(project.DefaultProjectConfig.ArchiveProject), false, &(project.DefaultProjectConfig.ActivateProject), true)
 	mockClient.OnUpdateProjectMatch(ctx, projectUpdateRequest).Return(nil, nil)
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.Nil(t, err)
@@ -50,7 +50,7 @@ func TestActivateProjectFunc(t *testing.T) {
 func TestActivateProjectFuncWithError(t *testing.T) {
 	setup()
 	updateProjectSetup()
-	modifyProjectFlags(&(project.DefaultUpdateConfig.ArchiveProject), false, &(project.DefaultUpdateConfig.ActivateProject), true)
+	modifyProjectFlags(&(project.DefaultProjectConfig.ArchiveProject), false, &(project.DefaultProjectConfig.ActivateProject), true)
 	mockClient.OnUpdateProjectMatch(ctx, projectUpdateRequest).Return(nil, errors.New("Error Updating Project"))
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.NotNil(t, err)
@@ -61,7 +61,7 @@ func TestActivateProjectFuncWithError(t *testing.T) {
 func TestArchiveProjectFunc(t *testing.T) {
 	setup()
 	updateProjectSetup()
-	modifyProjectFlags(&(project.DefaultUpdateConfig.ArchiveProject), true, &(project.DefaultUpdateConfig.ActivateProject), false)
+	modifyProjectFlags(&(project.DefaultProjectConfig.ArchiveProject), true, &(project.DefaultProjectConfig.ActivateProject), false)
 	projectUpdateRequest = &admin.Project{
 		Id:    projectValue,
 		State: admin.Project_ARCHIVED,
@@ -76,7 +76,7 @@ func TestArchiveProjectFunc(t *testing.T) {
 func TestArchiveProjectFuncWithError(t *testing.T) {
 	setup()
 	updateProjectSetup()
-	modifyProjectFlags(&(project.DefaultUpdateConfig.ArchiveProject), true, &(project.DefaultUpdateConfig.ActivateProject), false)
+	modifyProjectFlags(&(project.DefaultProjectConfig.ArchiveProject), true, &(project.DefaultProjectConfig.ActivateProject), false)
 	projectUpdateRequest = &admin.Project{
 		Id:    projectValue,
 		State: admin.Project_ARCHIVED,
@@ -91,7 +91,7 @@ func TestArchiveProjectFuncWithError(t *testing.T) {
 func TestEmptyProjectInput(t *testing.T) {
 	setup()
 	updateProjectSetup()
-	project.DefaultUpdateConfig.ID = ""
+	project.DefaultProjectConfig.ID = ""
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.NotNil(t, err)
 }
@@ -99,8 +99,8 @@ func TestEmptyProjectInput(t *testing.T) {
 func TestInvalidInput(t *testing.T) {
 	setup()
 	updateProjectSetup()
-	project.DefaultUpdateConfig.ID = projectValue
-	modifyProjectFlags(&(project.DefaultUpdateConfig.ArchiveProject), true, &(project.DefaultUpdateConfig.ActivateProject), true)
+	project.DefaultProjectConfig.ID = projectValue
+	modifyProjectFlags(&(project.DefaultProjectConfig.ArchiveProject), true, &(project.DefaultProjectConfig.ActivateProject), true)
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.NotNil(t, err)
 	assert.Equal(t, fmt.Errorf(clierrors.ErrInvalidStateUpdate), err)

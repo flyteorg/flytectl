@@ -26,7 +26,7 @@ func RemoteCreateCommand() *cobra.Command {
 		Long:  createCmdLong,
 	}
 	createResourcesFuncs := map[string]cmdcore.CommandEntry{
-		"project": {CmdFunc: createProjectsCommand, Aliases: []string{"projects"}, ProjectDomainNotRequired: true, PFlagProvider: project.DefaultCreateConfig, Short: projectShort,
+		"project": {CmdFunc: createProjectsCommand, Aliases: []string{"projects"}, ProjectDomainNotRequired: true, PFlagProvider: project.DefaultProjectConfig, Short: projectShort,
 			Long: projectLong},
 		"execution": {CmdFunc: createExecutionCommand, Aliases: []string{"executions"}, ProjectDomainNotRequired: false, PFlagProvider: executionConfig, Short: executionShort,
 			Long: executionLong},

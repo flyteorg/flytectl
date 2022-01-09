@@ -41,8 +41,8 @@ Create a project by definition file. Note: The name shouldn't contain any whites
 
 func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	projectSpec := project.Definition{}
-	if project.DefaultCreateConfig.File != "" {
-		yamlFile, err := ioutil.ReadFile(project.DefaultCreateConfig.File)
+	if project.DefaultProjectConfig.File != "" {
+		yamlFile, err := ioutil.ReadFile(project.DefaultProjectConfig.File)
 		if err != nil {
 			return err
 		}
@@ -51,10 +51,10 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 			return err
 		}
 	} else {
-		projectSpec.ID = project.DefaultCreateConfig.ID
-		projectSpec.Name = project.DefaultCreateConfig.Name
-		projectSpec.Description = project.DefaultCreateConfig.Description
-		projectSpec.Labels = project.DefaultCreateConfig.Labels
+		projectSpec.ID = project.DefaultProjectConfig.ID
+		projectSpec.Name = project.DefaultProjectConfig.Name
+		projectSpec.Description = project.DefaultProjectConfig.Description
+		projectSpec.Labels = project.DefaultProjectConfig.Labels
 	}
 	if projectSpec.ID == "" {
 		return fmt.Errorf("project ID is required flag")
@@ -62,7 +62,8 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 	if projectSpec.Name == "" {
 		return fmt.Errorf("project name is required flag")
 	}
-	if project.DefaultCreateConfig.DryRun {
+
+	if project.DefaultProjectConfig.DryRun {
 		logger.Debugf(ctx, "skipping RegisterProject request (DryRun)")
 	} else {
 		_, err := cmdCtx.AdminClient().RegisterProject(ctx, &admin.ProjectRegisterRequest{
