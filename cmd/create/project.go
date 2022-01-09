@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+
 	"gopkg.in/yaml.v2"
 
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -37,58 +39,39 @@ Create a project by definition file. Note: The name shouldn't contain any whites
 `
 )
 
-//go:generate pflags ProjectConfig --default-var projectConfig --bind-default-var
-
-// ProjectConfig Config hold configuration for project create flags.
-type ProjectConfig struct {
-	ID          string            `json:"id" pflag:",id for the project specified as argument."`
-	Name        string            `json:"name" pflag:",name for the project specified as argument."`
-	File        string            `json:"file" pflag:",file for the project definition."`
-	Description string            `json:"description" pflag:",description for the project specified as argument."`
-	Labels      map[string]string `json:"labels" pflag:",labels for the project specified as argument."`
-	DryRun      bool              `json:"dryRun" pflag:",execute command without making any modifications."`
-}
-
-var (
-	projectConfig = &ProjectConfig{
-		Description: "",
-		Labels:      map[string]string{},
-	}
-)
-
 func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	project := projectDefinition{}
-	if projectConfig.File != "" {
-		yamlFile, err := ioutil.ReadFile(projectConfig.File)
+	projectSpec := project.CreateConfig{}
+	if project.DefaultCreateConfig.File != "" {
+		yamlFile, err := ioutil.ReadFile(project.DefaultCreateConfig.File)
 		if err != nil {
 			return err
 		}
-		err = yaml.Unmarshal(yamlFile, &project)
+		err = yaml.Unmarshal(yamlFile, &projectSpec)
 		if err != nil {
 			return err
 		}
 	} else {
-		project.ID = projectConfig.ID
-		project.Name = projectConfig.Name
-		project.Description = projectConfig.Description
-		project.Labels = projectConfig.Labels
+		projectSpec.ID = project.DefaultCreateConfig.ID
+		projectSpec.Name = project.DefaultCreateConfig.Name
+		projectSpec.Description = project.DefaultCreateConfig.Description
+		projectSpec.Labels = project.DefaultCreateConfig.Labels
 	}
-	if project.ID == "" {
+	if projectSpec.ID == "" {
 		return fmt.Errorf("project ID is required flag")
 	}
-	if project.Name == "" {
+	if projectSpec.Name == "" {
 		return fmt.Errorf("project name is required flag")
 	}
-	if projectConfig.DryRun {
+	if projectSpec.DryRun {
 		logger.Debugf(ctx, "skipping RegisterProject request (DryRun)")
 	} else {
 		_, err := cmdCtx.AdminClient().RegisterProject(ctx, &admin.ProjectRegisterRequest{
 			Project: &admin.Project{
-				Id:          project.ID,
-				Name:        project.Name,
-				Description: project.Description,
+				Id:          projectSpec.ID,
+				Name:        projectSpec.Name,
+				Description: projectSpec.Description,
 				Labels: &admin.Labels{
-					Values: project.Labels,
+					Values: projectSpec.Labels,
 				},
 			},
 		})
