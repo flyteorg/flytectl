@@ -8,7 +8,6 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 
 	"github.com/flyteorg/flytectl/clierrors"
-	"github.com/flyteorg/flytectl/cmd/config"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 
@@ -39,12 +38,13 @@ func modifyProjectFlags(archiveProject *bool, newArchiveVal bool, activateProjec
 func TestActivateProjectFunc(t *testing.T) {
 	setup()
 	updateProjectSetup()
+	project.DefaultUpdateConfig.ID = projectValue
 	modifyProjectFlags(&(project.DefaultUpdateConfig.ArchiveProject), false, &(project.DefaultUpdateConfig.ActivateProject), true)
 	mockClient.OnUpdateProjectMatch(ctx, projectUpdateRequest).Return(nil, nil)
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "UpdateProject", ctx, projectUpdateRequest)
-	tearDownAndVerify(t, "Project dummyProject updated to ACTIVE state\n")
+	tearDownAndVerify(t, "Project dummyProject updated\n")
 }
 
 func TestActivateProjectFuncWithError(t *testing.T) {
@@ -55,7 +55,7 @@ func TestActivateProjectFuncWithError(t *testing.T) {
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.NotNil(t, err)
 	mockClient.AssertCalled(t, "UpdateProject", ctx, projectUpdateRequest)
-	tearDownAndVerify(t, "Project dummyProject failed to get updated to ACTIVE state due to Error Updating Project\n")
+	tearDownAndVerify(t, "Project dummyProject failed to get updated due to Error Updating Project\n")
 }
 
 func TestArchiveProjectFunc(t *testing.T) {
@@ -70,7 +70,7 @@ func TestArchiveProjectFunc(t *testing.T) {
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.Nil(t, err)
 	mockClient.AssertCalled(t, "UpdateProject", ctx, projectUpdateRequest)
-	tearDownAndVerify(t, "Project dummyProject updated to ARCHIVED state\n")
+	tearDownAndVerify(t, "Project dummyProject updated\n")
 }
 
 func TestArchiveProjectFuncWithError(t *testing.T) {
@@ -85,29 +85,24 @@ func TestArchiveProjectFuncWithError(t *testing.T) {
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.NotNil(t, err)
 	mockClient.AssertCalled(t, "UpdateProject", ctx, projectUpdateRequest)
-	tearDownAndVerify(t, "Project dummyProject failed to get updated to ARCHIVED state due to Error Updating Project\n")
+	tearDownAndVerify(t, "Project dummyProject failed to get updated due to Error Updating Project\n")
 }
 
 func TestEmptyProjectInput(t *testing.T) {
 	setup()
 	updateProjectSetup()
-	config.GetConfig().Project = ""
-	modifyProjectFlags(&(project.DefaultUpdateConfig.ArchiveProject), false, &(project.DefaultUpdateConfig.ActivateProject), true)
-	mockClient.OnUpdateProjectMatch(ctx, projectUpdateRequest).Return(nil, nil)
+	project.DefaultUpdateConfig.ID = ""
 	err = updateProjectsFunc(ctx, args, cmdCtx)
-	assert.Nil(t, err)
-	mockClient.AssertNotCalled(t, "UpdateProject", ctx, projectUpdateRequest)
-	tearDownAndVerify(t, "Project not passed")
+	assert.NotNil(t, err)
 }
 
 func TestInvalidInput(t *testing.T) {
 	setup()
 	updateProjectSetup()
-	modifyProjectFlags(&(project.DefaultUpdateConfig.ArchiveProject), false, &(project.DefaultUpdateConfig.ActivateProject), false)
-	mockClient.OnUpdateProjectMatch(ctx, projectUpdateRequest).Return(nil, nil)
+	project.DefaultUpdateConfig.ID = projectValue
+	modifyProjectFlags(&(project.DefaultUpdateConfig.ArchiveProject), true, &(project.DefaultUpdateConfig.ActivateProject), true)
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.NotNil(t, err)
 	assert.Equal(t, fmt.Errorf(clierrors.ErrInvalidStateUpdate), err)
-	mockClient.AssertNotCalled(t, "UpdateProject", ctx, projectUpdateRequest)
 	tearDownAndVerify(t, "")
 }

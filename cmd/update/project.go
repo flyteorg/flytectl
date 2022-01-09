@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/flyteorg/flytectl/clierrors"
-	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 	"gopkg.in/yaml.v2"
 
@@ -84,7 +83,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 			return err
 		}
 	} else {
-		projectSpec.ID = config.GetConfig().Project
+		projectSpec.ID = project.DefaultUpdateConfig.ID
 		projectSpec.Description = project.DefaultUpdateConfig.Description
 		projectSpec.Labels = project.DefaultUpdateConfig.Labels
 	}
