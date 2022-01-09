@@ -16,7 +16,6 @@ type Config struct {
 	Filter filters.Filters `json:"filter" pflag:","`
 }
 
-
 type Definition struct {
 	ID          string            `yaml:"id"`
 	Name        string            `yaml:"name"`
