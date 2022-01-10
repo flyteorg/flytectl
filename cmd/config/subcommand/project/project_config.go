@@ -23,10 +23,10 @@ type Definition struct {
 	Labels      map[string]string `yaml:"labels"`
 }
 
-//go:generate pflags ProjectConfig --default-var DefaultProjectConfig --bind-default-var
+//go:generate pflags ConfigProject --default-var DefaultProjectConfig --bind-default-var
 
-// ProjectConfig hold configuration for project update flags.
-type ProjectConfig struct {
+// ConfigProject hold configuration for project update flags.
+type ConfigProject struct {
 	ID              string            `json:"id" pflag:",id for the project specified as argument."`
 	ActivateProject bool              `json:"activateProject" pflag:",Activates the project specified as argument. Only used in update"`
 	ArchiveProject  bool              `json:"archiveProject" pflag:",Archives the project specified as argument. Only used in update"`
@@ -37,7 +37,7 @@ type ProjectConfig struct {
 	File            string            `json:"file" pflag:",file for the project definition."`
 }
 
-var DefaultProjectConfig = &ProjectConfig{
+var DefaultProjectConfig = &ConfigProject{
 	Description: "",
 	Labels:      map[string]string{},
 }

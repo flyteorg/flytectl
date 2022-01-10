@@ -14,7 +14,7 @@ import (
 
 // If v is a pointer, it will get its element value or the zero value of the element type.
 // If v is not a pointer, it will return it as is.
-func (ProjectConfig) elemValueOrNil(v interface{}) interface{} {
+func (ConfigProject) elemValueOrNil(v interface{}) interface{} {
 	if t := reflect.TypeOf(v); t.Kind() == reflect.Ptr {
 		if reflect.ValueOf(v).IsNil() {
 			return reflect.Zero(t.Elem()).Interface()
@@ -28,7 +28,7 @@ func (ProjectConfig) elemValueOrNil(v interface{}) interface{} {
 	return v
 }
 
-func (ProjectConfig) mustJsonMarshal(v interface{}) string {
+func (ConfigProject) mustJsonMarshal(v interface{}) string {
 	raw, err := json.Marshal(v)
 	if err != nil {
 		panic(err)
@@ -37,7 +37,7 @@ func (ProjectConfig) mustJsonMarshal(v interface{}) string {
 	return string(raw)
 }
 
-func (ProjectConfig) mustMarshalJSON(v json.Marshaler) string {
+func (ConfigProject) mustMarshalJSON(v json.Marshaler) string {
 	raw, err := v.MarshalJSON()
 	if err != nil {
 		panic(err)
@@ -46,10 +46,10 @@ func (ProjectConfig) mustMarshalJSON(v json.Marshaler) string {
 	return string(raw)
 }
 
-// GetPFlagSet will return strongly types pflags for all fields in ProjectConfig and its nested types. The format of the
+// GetPFlagSet will return strongly types pflags for all fields in ConfigProject and its nested types. The format of the
 // flags is json-name.json-sub-name... etc.
-func (cfg ProjectConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
-	cmdFlags := pflag.NewFlagSet("ProjectConfig", pflag.ExitOnError)
+func (cfg ConfigProject) GetPFlagSet(prefix string) *pflag.FlagSet {
+	cmdFlags := pflag.NewFlagSet("ConfigProject", pflag.ExitOnError)
 	cmdFlags.StringVar(&DefaultProjectConfig.ID, fmt.Sprintf("%v%v", prefix, "id"), DefaultProjectConfig.ID, "id for the project specified as argument.")
 	cmdFlags.BoolVar(&DefaultProjectConfig.ActivateProject, fmt.Sprintf("%v%v", prefix, "activateProject"), DefaultProjectConfig.ActivateProject, "Activates the project specified as argument. Only used in update")
 	cmdFlags.BoolVar(&DefaultProjectConfig.ArchiveProject, fmt.Sprintf("%v%v", prefix, "archiveProject"), DefaultProjectConfig.ArchiveProject, "Archives the project specified as argument. Only used in update")
