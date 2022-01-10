@@ -3,12 +3,10 @@ package create
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
+	"github.com/flyteorg/flytectl/pkg/util"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
-
-	"gopkg.in/yaml.v2"
 
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -33,30 +31,19 @@ Create a project by definition file. Note: The name shouldn't contain any whites
     id: "project-unique-id"
     name: "Name"
     labels:
-     app: flyte
+       values:
+         app: flyte
     description: "Some description for the project"
 
 `
 )
 
 func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	projectSpec := project.Definition{}
-	if project.DefaultProjectConfig.File != "" {
-		yamlFile, err := ioutil.ReadFile(project.DefaultProjectConfig.File)
-		if err != nil {
-			return err
-		}
-		err = yaml.Unmarshal(yamlFile, &projectSpec)
-		if err != nil {
-			return err
-		}
-	} else {
-		projectSpec.ID = project.DefaultProjectConfig.ID
-		projectSpec.Name = project.DefaultProjectConfig.Name
-		projectSpec.Description = project.DefaultProjectConfig.Description
-		projectSpec.Labels = project.DefaultProjectConfig.Labels
+	projectSpec, err := util.GetProjectSpec(project.DefaultProjectConfig, project.DefaultProjectConfig.ID)
+	if err != nil {
+		return err
 	}
-	if projectSpec.ID == "" {
+	if projectSpec.Id == "" {
 		return fmt.Errorf("project ID is required flag")
 	}
 	if projectSpec.Name == "" {
@@ -68,12 +55,10 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 	} else {
 		_, err := cmdCtx.AdminClient().RegisterProject(ctx, &admin.ProjectRegisterRequest{
 			Project: &admin.Project{
-				Id:          projectSpec.ID,
+				Id:          projectSpec.Id,
 				Name:        projectSpec.Name,
 				Description: projectSpec.Description,
-				Labels: &admin.Labels{
-					Values: projectSpec.Labels,
-				},
+				Labels:      projectSpec.Labels,
 			},
 		})
 		if err != nil {

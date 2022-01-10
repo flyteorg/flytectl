@@ -141,6 +141,34 @@ func TestConfigProject_SetFlags(t *testing.T) {
 			}
 		})
 	})
+	t.Run("Test_activate", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("activate", testValue)
+			if vBool, err := cmdFlags.GetBool("activate"); err == nil {
+				testDecodeJson_ConfigProject(t, fmt.Sprintf("%v", vBool), &actual.Activate)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_archive", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("archive", testValue)
+			if vBool, err := cmdFlags.GetBool("archive"); err == nil {
+				testDecodeJson_ConfigProject(t, fmt.Sprintf("%v", vBool), &actual.Archive)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
 	t.Run("Test_name", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {

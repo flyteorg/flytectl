@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/flyteorg/flytectl/cmd/config"
+	"github.com/flyteorg/flytectl/pkg/util"
+
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
-	"gopkg.in/yaml.v2"
-
-	"io/ioutil"
-
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -22,25 +21,25 @@ Updates the project according to the flags passed. Allows you to archive or acti
 Activate project flytesnacks:
 ::
 
- flytectl update project --id flytesnacks --activateProject
+ flytectl update project --id flytesnacks --activate
 
 Archive project flytesnacks:
 
 ::
 
- flytectl update project --id flytesnacks --archiveProject
+ flytectl update project --id flytesnacks --archive
 
 Incorrect usage when passing both archive and activate:
 
 ::
 
- flytectl update project flytesnacks --archiveProject --activateProject
+ flytectl update project flytesnacks --archiveProject --activate
 
 Incorrect usage when passing unknown-project:
 
 ::
 
- flytectl update project unknown-project --archiveProject
+ flytectl update project unknown-project --archive
 
 project ID is required flag
 
@@ -52,7 +51,7 @@ Update projects.(project/projects can be used interchangeably in these commands)
 
 ::
 
- flytectl update project --id flytesnacks --description "flytesnacks description"  --labels app=flyte
+ flytectl update project -p flytesnacks --description "flytesnacks description"  --labels app=flyte
 
 Update a project by definition file. Note: The name shouldn't contain any whitespace characters.
 ::
@@ -64,20 +63,22 @@ Update a project by definition file. Note: The name shouldn't contain any whites
     id: "project-unique-id"
     name: "Name"
     labels:
-     app: flyte
+       values:
+         app: flyte
     description: "Some description for the project"
 
 Update a project state by definition file. Note: The name shouldn't contain any whitespace characters.
 ::
 
- flytectl update project --file project.yaml  --archiveProject
+ flytectl update project --file project.yaml  --archive
 
 .. code-block:: yaml
 
     id: "project-unique-id"
     name: "Name"
     labels:
-     app: flyte
+       values:
+         app: flyte
     description: "Some description for the project"
 
 Usage
@@ -85,29 +86,16 @@ Usage
 )
 
 func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	projectSpec := project.Definition{}
-	if len(project.DefaultProjectConfig.File) > 0 {
-		yamlFile, err := ioutil.ReadFile(project.DefaultProjectConfig.File)
-		if err != nil {
-			return err
-		}
-		err = yaml.Unmarshal(yamlFile, &projectSpec)
-		if err != nil {
-			return err
-		}
-	} else {
-		projectSpec.ID = project.DefaultProjectConfig.ID
-		projectSpec.Description = project.DefaultProjectConfig.Description
-		projectSpec.Name = project.DefaultProjectConfig.Name
-		projectSpec.Labels = project.DefaultProjectConfig.Labels
+	projectSpec, err := util.GetProjectSpec(project.DefaultProjectConfig, config.GetConfig().Project)
+	if err != nil {
+		return err
 	}
-
-	if projectSpec.ID == "" {
+	if projectSpec.Id == "" {
 		return fmt.Errorf("project ID is required flag")
 	}
 
 	projectDefinition := &admin.Project{
-		Id: projectSpec.ID,
+		Id: projectSpec.Id,
 	}
 	if projectSpec.Description != "" {
 		projectDefinition.Description = projectSpec.Description
@@ -115,22 +103,13 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	if projectSpec.Name != "" {
 		projectDefinition.Name = projectSpec.Name
 	}
-	if len(projectSpec.Labels) > 0 {
-		projectDefinition.Labels = &admin.Labels{
-			Values: projectSpec.Labels,
-		}
+	if projectSpec.Labels != nil {
+		projectDefinition.Labels = projectSpec.Labels
 	}
 
-	activateProject := project.DefaultProjectConfig.ActivateProject
-	archiveProject := project.DefaultProjectConfig.ArchiveProject
-	if activateProject || archiveProject {
-		if activateProject == archiveProject {
-			return fmt.Errorf(clierrors.ErrInvalidStateUpdate)
-		}
-		projectDefinition.State = admin.Project_ACTIVE
-		if archiveProject {
-			projectDefinition.State = admin.Project_ARCHIVED
-		}
+	projectDefinition, err = getState(project.DefaultProjectConfig, projectDefinition)
+	if err != nil {
+		return err
 	}
 
 	if project.DefaultProjectConfig.DryRun {
@@ -138,10 +117,34 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	} else {
 		_, err := cmdCtx.AdminClient().UpdateProject(ctx, projectDefinition)
 		if err != nil {
-			fmt.Printf(clierrors.ErrFailedProjectUpdate, projectSpec.ID, err)
+			fmt.Printf(clierrors.ErrFailedProjectUpdate, projectSpec.Id, err)
 			return err
 		}
 	}
-	fmt.Printf("Project %v updated\n", projectSpec.ID)
+	fmt.Printf("Project %v updated\n", projectSpec.Id)
 	return nil
+}
+
+func getState(flags *project.ConfigProject, spec *admin.Project) (*admin.Project, error) {
+	if flags.ActivateProject {
+		flags.Activate = flags.ActivateProject
+	}
+	if flags.ArchiveProject {
+		flags.Archive = flags.ArchiveProject
+	}
+
+	activate := flags.Activate
+	archive := flags.Archive
+
+	if activate || archive {
+		if activate == archive {
+			return spec, fmt.Errorf(clierrors.ErrInvalidStateUpdate)
+		}
+		spec.State = admin.Project_ACTIVE
+		if activate {
+			spec.State = admin.Project_ARCHIVED
+		}
+		return spec, nil
+	}
+	return spec, nil
 }

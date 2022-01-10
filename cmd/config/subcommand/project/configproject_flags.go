@@ -51,8 +51,10 @@ func (ConfigProject) mustMarshalJSON(v json.Marshaler) string {
 func (cfg ConfigProject) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("ConfigProject", pflag.ExitOnError)
 	cmdFlags.StringVar(&DefaultProjectConfig.ID, fmt.Sprintf("%v%v", prefix, "id"), DefaultProjectConfig.ID, "id for the project specified as argument.")
-	cmdFlags.BoolVar(&DefaultProjectConfig.ActivateProject, fmt.Sprintf("%v%v", prefix, "activateProject"), DefaultProjectConfig.ActivateProject, "Activates the project specified as argument. Only used in update")
-	cmdFlags.BoolVar(&DefaultProjectConfig.ArchiveProject, fmt.Sprintf("%v%v", prefix, "archiveProject"), DefaultProjectConfig.ArchiveProject, "Archives the project specified as argument. Only used in update")
+	cmdFlags.BoolVar(&DefaultProjectConfig.ActivateProject, fmt.Sprintf("%v%v", prefix, "activateProject"), DefaultProjectConfig.ActivateProject, "(Deprecated) Activates the project specified as argument. Only used in update")
+	cmdFlags.BoolVar(&DefaultProjectConfig.ArchiveProject, fmt.Sprintf("%v%v", prefix, "archiveProject"), DefaultProjectConfig.ArchiveProject, "(Deprecated) Archives the project specified as argument. Only used in update")
+	cmdFlags.BoolVar(&DefaultProjectConfig.Activate, fmt.Sprintf("%v%v", prefix, "activate"), DefaultProjectConfig.Activate, "Activates the project specified as argument. Only used in update")
+	cmdFlags.BoolVar(&DefaultProjectConfig.Archive, fmt.Sprintf("%v%v", prefix, "archive"), DefaultProjectConfig.Archive, "Archives the project specified as argument. Only used in update")
 	cmdFlags.StringVar(&DefaultProjectConfig.Name, fmt.Sprintf("%v%v", prefix, "name"), DefaultProjectConfig.Name, "name for the project specified as argument.")
 	cmdFlags.BoolVar(&DefaultProjectConfig.DryRun, fmt.Sprintf("%v%v", prefix, "dryRun"), DefaultProjectConfig.DryRun, "execute command without making any modifications.")
 	cmdFlags.StringVar(&DefaultProjectConfig.Description, fmt.Sprintf("%v%v", prefix, "description"), DefaultProjectConfig.Description, "description for the project specified as argument.")
