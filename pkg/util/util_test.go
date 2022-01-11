@@ -3,6 +3,8 @@ package util
 import (
 	"testing"
 
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -78,5 +80,25 @@ func TestSendRequest(t *testing.T) {
 		response, err := SendRequest("GET", "https://github.com/evalsocket/flyte/archive/refs/tags/source-code.zip", nil)
 		assert.NotNil(t, err)
 		assert.Nil(t, response)
+	})
+}
+
+func TestGetProjectSpec(t *testing.T) {
+	t.Run("Successful get project spec", func(t *testing.T) {
+		c := &project.ConfigProject{
+			Name: "flytesnacks",
+		}
+		response, err := GetProjectSpec(c, "flytesnacks")
+		assert.Nil(t, err)
+		assert.NotNil(t, response)
+	})
+	t.Run("Successful get request spec from file", func(t *testing.T) {
+		c := &project.ConfigProject{
+			File: "./testdata/project.yaml",
+		}
+		response, err := GetProjectSpec(c, "flytesnacks")
+		assert.Nil(t, err)
+		assert.Equal(t, "flytesnacks", response.Name)
+		assert.Equal(t, "flytesnacks test", response.Description)
 	})
 }

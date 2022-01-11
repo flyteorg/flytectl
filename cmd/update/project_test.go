@@ -8,6 +8,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 
 	"github.com/flyteorg/flytectl/clierrors"
+	"github.com/flyteorg/flytectl/cmd/config"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 
@@ -38,7 +39,6 @@ func modifyProjectFlags(archiveProject *bool, newArchiveVal bool, activateProjec
 func TestActivateProjectFunc(t *testing.T) {
 	setup()
 	updateProjectSetup()
-	project.DefaultProjectConfig.ID = projectValue
 	modifyProjectFlags(&(project.DefaultProjectConfig.ArchiveProject), false, &(project.DefaultProjectConfig.ActivateProject), true)
 	mockClient.OnUpdateProjectMatch(ctx, projectUpdateRequest).Return(nil, nil)
 	err = updateProjectsFunc(ctx, args, cmdCtx)
@@ -61,6 +61,7 @@ func TestActivateProjectFuncWithError(t *testing.T) {
 func TestArchiveProjectFunc(t *testing.T) {
 	setup()
 	updateProjectSetup()
+	project.DefaultProjectConfig = &project.ConfigProject{}
 	modifyProjectFlags(&(project.DefaultProjectConfig.ArchiveProject), true, &(project.DefaultProjectConfig.ActivateProject), false)
 	projectUpdateRequest = &admin.Project{
 		Id:    projectValue,
@@ -85,21 +86,24 @@ func TestArchiveProjectFuncWithError(t *testing.T) {
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.NotNil(t, err)
 	mockClient.AssertCalled(t, "UpdateProject", ctx, projectUpdateRequest)
-	tearDownAndVerify(t, "Project dummyProject failed to get updated due to Error Updating Project\n")
+	tearDownAndVerify(t, "Project dummyProject failed to get updated"+
+		" due to Error Updating Project\n")
 }
 
 func TestEmptyProjectInput(t *testing.T) {
 	setup()
 	updateProjectSetup()
-	project.DefaultProjectConfig.ID = ""
+	config.GetConfig().Project = ""
+	modifyProjectFlags(&(project.DefaultProjectConfig.ArchiveProject), false, &(project.DefaultProjectConfig.ActivateProject), true)
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.NotNil(t, err)
+	assert.Equal(t, fmt.Errorf(clierrors.ErrProjectNotPassed), err)
 }
 
 func TestInvalidInput(t *testing.T) {
 	setup()
 	updateProjectSetup()
-	project.DefaultProjectConfig.ID = projectValue
+	config.GetConfig().Project = projectValue
 	modifyProjectFlags(&(project.DefaultProjectConfig.ArchiveProject), true, &(project.DefaultProjectConfig.ActivateProject), true)
 	err = updateProjectsFunc(ctx, args, cmdCtx)
 	assert.NotNil(t, err)

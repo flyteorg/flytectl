@@ -21,19 +21,19 @@ Updates the project according to the flags passed. Allows you to archive or acti
 Activate project flytesnacks:
 ::
 
- flytectl update project --id flytesnacks --activate
+ flytectl update project -p flytesnacks --activate
 
 Archive project flytesnacks:
 
 ::
 
- flytectl update project --id flytesnacks --archive
+ flytectl update project -p flytesnacks --archive
 
 Incorrect usage when passing both archive and activate:
 
 ::
 
- flytectl update project flytesnacks --archiveProject --activate
+ flytectl update project -p flytesnacks --archiveProject --activate
 
 Incorrect usage when passing unknown-project:
 
@@ -45,7 +45,7 @@ project ID is required flag
 
 ::
 
- flytectl update project unknown-project --archiveProject -p known-project
+ flytectl update project unknown-project --archiveProject
 
 Update projects.(project/projects can be used interchangeably in these commands)
 
@@ -91,7 +91,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 		return err
 	}
 	if projectSpec.Id == "" {
-		return fmt.Errorf("project ID is required flag")
+		return fmt.Errorf(clierrors.ErrProjectNotPassed)
 	}
 
 	projectDefinition := &admin.Project{
@@ -103,7 +103,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	if projectSpec.Name != "" {
 		projectDefinition.Name = projectSpec.Name
 	}
-	if projectSpec.Labels != nil {
+	if len(projectSpec.Labels.Values) > 0 {
 		projectDefinition.Labels = projectSpec.Labels
 	}
 
@@ -141,7 +141,7 @@ func getState(flags *project.ConfigProject, spec *admin.Project) (*admin.Project
 			return spec, fmt.Errorf(clierrors.ErrInvalidStateUpdate)
 		}
 		spec.State = admin.Project_ACTIVE
-		if activate {
+		if archive {
 			spec.State = admin.Project_ARCHIVED
 		}
 		return spec, nil
