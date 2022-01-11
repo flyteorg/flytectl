@@ -94,7 +94,7 @@ func TestGetProjectSpec(t *testing.T) {
 	})
 	t.Run("Successful get request spec from file", func(t *testing.T) {
 		c := &project.ConfigProject{
-			File: "./testdata/project.yaml",
+			File: "testdata/project.yaml",
 		}
 		response, err := GetProjectSpec(c, "flytesnacks")
 		assert.Nil(t, err)
