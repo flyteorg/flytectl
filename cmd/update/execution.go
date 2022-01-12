@@ -67,7 +67,7 @@ func updateExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 			return err
 		}
 	}
-	fmt.Printf("updated execution %s successfully to state %s", executionName, executionState.String())
+	fmt.Printf("updated execution %s successfully to state %s\n", executionName, executionState.String())
 
 	return nil
 }
