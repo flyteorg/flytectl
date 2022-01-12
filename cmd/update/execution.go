@@ -16,7 +16,7 @@ import (
 const (
 	updateExecutionShort = "Update execution status"
 	updateExecutionLong  = `
-Activating execution unhides it from cli and UI:
+Activating an execution shows it in the cli and UI:
 ::
 
  flytectl update execution -p flytectldemo -d development  oeh94k9r2r --activate
@@ -38,16 +38,16 @@ func updateExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		return fmt.Errorf(clierrors.ErrExecutionNotPassed)
 	}
 	executionName := args[0]
-	activateLP := execution.UConfig.Activate
-	archiveLP := execution.UConfig.Archive
-	if activateLP == archiveLP && archiveLP {
+	activateExec := execution.UConfig.Activate
+	archiveExec := execution.UConfig.Archive
+	if activateExec && archiveExec {
 		return fmt.Errorf(clierrors.ErrInvalidStateUpdate)
 	}
 
 	var executionState admin.ExecutionStatus_ExecutionState
-	if activateLP {
+	if activateExec {
 		executionState = admin.ExecutionStatus_EXECUTION_ACTIVE
-	} else if archiveLP {
+	} else if archiveExec {
 		executionState = admin.ExecutionStatus_EXECUTION_ARCHIVED
 	}
 
@@ -67,7 +67,7 @@ func updateExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 			return err
 		}
 	}
-	fmt.Printf("updated execution successfully on %v to state %v", executionName, executionState)
+	fmt.Printf("updated execution %s successfully to state %s", executionName, executionState.String())
 
 	return nil
 }
