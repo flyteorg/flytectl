@@ -50,6 +50,9 @@ func TestExecutionUpdateValidationFailure(t *testing.T) {
 	execution.UConfig.Activate = true
 	execution.UConfig.Archive = true
 	assert.NotNil(t, updateExecutionFunc(ctx, args, cmdCtx))
+	// Reset
+	execution.UConfig.Activate = false
+	execution.UConfig.Archive = false
 }
 
 func TestExecutionUpdateFail(t *testing.T) {
