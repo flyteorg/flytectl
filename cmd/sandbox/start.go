@@ -191,28 +191,30 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 // if no version is specified then the Latest release of cr.flyte.org/flyteorg/flyte-sandbox:dind is used
 // else cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA}, where sha is derived from the version.
 func getSandboxImage(version string, alternateImage string) (string, error) {
-
 	if len(alternateImage) > 0 {
 		return alternateImage, nil
 	}
-
-	var tag = dind
-	if len(version) > 0 {
-		isGreater, err := util.IsVersionGreaterThan(version, sandboxSupportedVersion)
+	if len(version) == 0 {
+		var err error
+		client := githubutil.GetGHClient()
+		release, _, err := client.Repositories.GetLatestRelease(context.Background(), githubutil.Owner, flyteRepository)
 		if err != nil {
 			return "", err
 		}
-		if !isGreater {
-			return "", fmt.Errorf("version flag only supported with flyte %s+ release", sandboxSupportedVersion)
-		}
-		sha, err := githubutil.GetSHAFromVersion(version, flyteRepository)
-		if err != nil {
-			return "", err
-		}
-		tag = fmt.Sprintf("%s-%s", dind, sha)
+		version = *release.TagName
 	}
-
-	return docker.GetSandboxImage(tag), nil
+	isGreater, err := util.IsVersionGreaterThan(version, sandboxSupportedVersion)
+	if err != nil {
+		return "", err
+	}
+	if !isGreater {
+		return "", fmt.Errorf("version flag only supported with flyte %s+ release", sandboxSupportedVersion)
+	}
+	sha, err := githubutil.GetSHAFromVersion(version, flyteRepository)
+	if err != nil {
+		return "", err
+	}
+	return docker.GetSandboxImage(fmt.Sprintf("dind-%s", sha)), nil
 }
 
 func mountVolume(file, destination string) (*mount.Mount, error) {

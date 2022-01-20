@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	owner                = "flyteorg"
+	Owner                = "flyteorg"
 	flyte                = "flyte"
 	sandboxManifest      = "flyte_sandbox_manifest.yaml"
 	flytectl             = "flytectl"
@@ -55,7 +55,7 @@ func GetGHClient() *github.Client {
 // GetLatestVersion returns the latest version of provided repository
 func GetLatestVersion(repository string) (*github.RepositoryRelease, error) {
 	client := GetGHClient()
-	release, _, err := client.Repositories.GetLatestRelease(context.Background(), owner, repository)
+	release, _, err := client.Repositories.GetLatestRelease(context.Background(), Owner, repository)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func getFlytectlAssetName() string {
 // CheckVersionExist returns the provided version release if version exist in repository
 func CheckVersionExist(version, repository string) (*github.RepositoryRelease, error) {
 	client := GetGHClient()
-	release, _, err := client.Repositories.GetReleaseByTag(context.Background(), owner, repository, version)
+	release, _, err := client.Repositories.GetReleaseByTag(context.Background(), Owner, repository, version)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +84,7 @@ func CheckVersionExist(version, repository string) (*github.RepositoryRelease, e
 // GetSHAFromVersion returns sha commit hash against a release
 func GetSHAFromVersion(version, repository string) (string, error) {
 	client := GetGHClient()
-	sha, _, err := client.Repositories.GetCommitSHA1(context.Background(), owner, repository, version, "")
+	sha, _, err := client.Repositories.GetCommitSHA1(context.Background(), Owner, repository, version, "")
 	if err != nil {
 		return "", err
 	}
