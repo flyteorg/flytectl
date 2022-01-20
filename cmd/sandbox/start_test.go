@@ -87,11 +87,13 @@ func TestStartSandboxFunc(t *testing.T) {
 		ctx := context.Background()
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
-		sandboxConfig.DefaultConfig.Version = ""
+		sandboxConfig.DefaultConfig.Version = "v0.19.1"
 		bodyStatus := make(chan container.ContainerWaitOKBody)
+		image, err := getSandboxImage("", "")
+		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        docker.GetSandboxImage(dind),
+			Image:        image,
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -111,7 +113,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err := startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully exit when sandbox cluster exist", func(t *testing.T) {
@@ -165,9 +167,11 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
+		image, err := getSandboxImage("", "")
+		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        docker.GetSandboxImage(dind),
+			Image:        image,
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -187,7 +191,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err := startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run sandbox cluster with abs path of source code", func(t *testing.T) {
@@ -205,9 +209,11 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: absPath,
 			Target: docker.Source,
 		})
+		image, err := getSandboxImage("", "")
+		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        docker.GetSandboxImage(dind),
+			Image:        image,
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -390,9 +396,11 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = ""
 		sandboxConfig.DefaultConfig.Version = ""
+		image, err := getSandboxImage("", "")
+		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        docker.GetSandboxImage(dind),
+			Image:        image,
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -412,7 +420,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err := startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, os.Stdin)
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in reading logs", func(t *testing.T) {
@@ -427,9 +435,11 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
+		image, err := getSandboxImage("", "")
+		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        docker.GetSandboxImage(dind),
+			Image:        image,
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -449,7 +459,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, fmt.Errorf("error"))
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err := startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, os.Stdin)
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in list container", func(t *testing.T) {
@@ -465,9 +475,11 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
+		image, err := getSandboxImage("", "")
+		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        docker.GetSandboxImage(dind),
+			Image:        image,
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -487,7 +499,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err := startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run sandbox cluster command", func(t *testing.T) {
@@ -507,10 +519,12 @@ func TestStartSandboxFunc(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+		image, err := getSandboxImage("", "")
+		assert.Nil(t, err)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        docker.GetSandboxImage(dind),
+			Image:        image,
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -545,9 +559,11 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
+		image, err := getSandboxImage("", "")
+		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
-			Image:        docker.GetSandboxImage(dind),
+			Image:        image,
 			Tty:          false,
 			ExposedPorts: p1,
 		}, &container.HostConfig{
@@ -571,7 +587,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
 		docker.Client = mockDocker
 		sandboxConfig.DefaultConfig.Source = ""
-		err := startSandboxCluster(ctx, []string{}, cmdCtx)
+		err = startSandboxCluster(ctx, []string{}, cmdCtx)
 		assert.NotNil(t, err)
 	})
 }
@@ -680,7 +696,7 @@ func TestGetSandboxImage(t *testing.T) {
 	t.Run("Get Latest sandbox", func(t *testing.T) {
 		image, err := getSandboxImage("", "")
 		assert.Nil(t, err)
-		assert.Equal(t, docker.GetSandboxImage(dind), image)
+		assert.Equal(t, true, strings.HasPrefix(image, "cr.flyte.org/flyteorg/flyte-sandbox:dind-"))
 	})
 
 	t.Run("Get sandbox image with version ", func(t *testing.T) {
