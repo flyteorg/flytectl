@@ -1,7 +1,14 @@
 package project
 
 import (
+	"fmt"
+	"io/ioutil"
+
+	"github.com/flyteorg/flytectl/clierrors"
+
 	"github.com/flyteorg/flytectl/pkg/filters"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"gopkg.in/yaml.v2"
 )
 
 //go:generate pflags Config --default-var DefaultConfig --bind-default-var
@@ -35,4 +42,53 @@ type ConfigProject struct {
 var DefaultProjectConfig = &ConfigProject{
 	Description: "",
 	Labels:      map[string]string{},
+}
+
+//GetProjectSpec return project spec from a file/flags
+func (c *ConfigProject) GetProjectSpec(id string) (*admin.Project, error) {
+	projectSpec := admin.Project{}
+	if len(c.File) > 0 {
+		yamlFile, err := ioutil.ReadFile(c.File)
+		if err != nil {
+			return nil, err
+		}
+		err = yaml.Unmarshal(yamlFile, &projectSpec)
+		if err != nil {
+			return nil, err
+		}
+		return &projectSpec, nil
+	}
+
+	projectSpec.Id = id
+	projectSpec.Name = c.Name
+	projectSpec.Description = c.Description
+	projectSpec.Labels = &admin.Labels{
+		Values: c.Labels,
+	}
+	return &projectSpec, nil
+}
+
+//MapToAdminState return project spec from a file/flags
+func (c *ConfigProject) MapToAdminState(spec *admin.Project) (*admin.Project, error) {
+	if c.ActivateProject {
+		c.Activate = c.ActivateProject
+	}
+	if c.ArchiveProject {
+		c.Archive = c.ArchiveProject
+	}
+
+	activate := c.Activate
+	archive := c.Archive
+
+	if activate || archive {
+		if activate == archive {
+			return spec, fmt.Errorf(clierrors.ErrInvalidStateUpdate)
+		}
+		spec.State = admin.Project_ACTIVE
+		if archive {
+			spec.State = admin.Project_ARCHIVED
+		}
+		return spec, nil
+	}
+	return spec, nil
 }

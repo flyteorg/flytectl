@@ -4,9 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/flyteorg/flytectl/cmd/config"
-	"github.com/flyteorg/flytectl/pkg/util"
-
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -86,7 +83,7 @@ Usage
 )
 
 func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	projectSpec, err := util.GetProjectSpec(project.DefaultProjectConfig, config.GetConfig().Project)
+	projectSpec, err := project.DefaultProjectConfig.GetProjectSpec(project.DefaultProjectConfig.ID)
 	if err != nil {
 		return err
 	}
@@ -107,7 +104,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 		projectDefinition.Labels = projectSpec.Labels
 	}
 
-	projectDefinition, err = getState(project.DefaultProjectConfig, projectDefinition)
+	projectDefinition, err = project.DefaultProjectConfig.MapToAdminState(projectDefinition)
 	if err != nil {
 		return err
 	}
@@ -123,28 +120,4 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	}
 	fmt.Printf("Project %v updated\n", projectSpec.Id)
 	return nil
-}
-
-func getState(flags *project.ConfigProject, spec *admin.Project) (*admin.Project, error) {
-	if flags.ActivateProject {
-		flags.Activate = flags.ActivateProject
-	}
-	if flags.ArchiveProject {
-		flags.Archive = flags.ArchiveProject
-	}
-
-	activate := flags.Activate
-	archive := flags.Archive
-
-	if activate || archive {
-		if activate == archive {
-			return spec, fmt.Errorf(clierrors.ErrInvalidStateUpdate)
-		}
-		spec.State = admin.Project_ACTIVE
-		if archive {
-			spec.State = admin.Project_ARCHIVED
-		}
-		return spec, nil
-	}
-	return spec, nil
 }

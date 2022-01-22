@@ -6,10 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
-	"gopkg.in/yaml.v2"
-
 	"os"
 	"strings"
 
@@ -92,28 +88,4 @@ func SendRequest(method, url string, option io.Reader) (*http.Response, error) {
 		return nil, fmt.Errorf("someting goes wrong while sending request to %s. Got status code %v", url, response.StatusCode)
 	}
 	return response, nil
-}
-
-//GetProjectSpec return project spec from a file/flags
-func GetProjectSpec(flags *project.ConfigProject, id string) (*admin.Project, error) {
-	projectSpec := admin.Project{}
-	if len(flags.File) > 0 {
-		yamlFile, err := ioutil.ReadFile(flags.File)
-		if err != nil {
-			return nil, err
-		}
-		err = yaml.Unmarshal(yamlFile, &projectSpec)
-		if err != nil {
-			return nil, err
-		}
-		return &projectSpec, nil
-	}
-
-	projectSpec.Id = id
-	projectSpec.Name = flags.Name
-	projectSpec.Description = flags.Description
-	projectSpec.Labels = &admin.Labels{
-		Values: flags.Labels,
-	}
-	return &projectSpec, nil
 }

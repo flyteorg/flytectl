@@ -48,7 +48,7 @@ func (ConfigProject) mustMarshalJSON(v json.Marshaler) string {
 
 // GetPFlagSet will return strongly types pflags for all fields in ConfigProject and its nested types. The format of the
 // flags is json-name.json-sub-name... etc.
-func (cfg ConfigProject) GetPFlagSet(prefix string) *pflag.FlagSet {
+func (c ConfigProject) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("ConfigProject", pflag.ExitOnError)
 	cmdFlags.StringVar(&DefaultProjectConfig.ID, fmt.Sprintf("%v%v", prefix, "id"), DefaultProjectConfig.ID, "id for the project specified as argument.")
 	cmdFlags.BoolVar(&DefaultProjectConfig.ActivateProject, fmt.Sprintf("%v%v", prefix, "activateProject"), DefaultProjectConfig.ActivateProject, "(Deprecated) Activates the project specified as argument. Only used in update")
