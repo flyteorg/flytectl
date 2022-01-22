@@ -62,6 +62,16 @@ func GetLatestVersion(repository string) (*github.RepositoryRelease, error) {
 	return release, err
 }
 
+// GetListRelease returns the list of release of provided repository
+func GetListRelease(repository string) ([]*github.RepositoryRelease, error) {
+	client := GetGHClient()
+	releases, _, err := client.Repositories.ListReleases(context.Background(), Owner, repository, &github.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	return releases, err
+}
+
 func getFlytectlAssetName() string {
 	if arch == platformutil.ArchAmd64 {
 		arch = platformutil.ArchX86

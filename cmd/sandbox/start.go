@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/flyteorg/flytestdlib/logger"
+
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/pkg/util/githubutil"
 
@@ -188,7 +190,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 }
 
 // Returns the alternate image if specified, else
-// if no version is specified then the Latest release of cr.flyte.org/flyteorg/flyte-sandbox:dind is used
+// if no version is specified then the Latest release of cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA} is used
 // else cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA}, where sha is derived from the version.
 func getSandboxImage(version string, alternateImage string) (string, error) {
 	if len(alternateImage) > 0 {
@@ -196,21 +198,34 @@ func getSandboxImage(version string, alternateImage string) (string, error) {
 	}
 	if len(version) == 0 {
 		var err error
-		client := githubutil.GetGHClient()
-		release, _, err := client.Repositories.GetLatestRelease(context.Background(), githubutil.Owner, flyteRepository)
+		releases, err := githubutil.GetListRelease(flyteRepository)
 		if err != nil {
 			return "", err
 		}
-		version = *release.TagName
+		for _, v := range releases {
+			if *v.Prerelease && sandboxConfig.DefaultConfig.Prerelease {
+				logger.Infof(context.Background(), "sandbox started with pre release %s", *v.TagName)
+				version = *v.TagName
+				break
+			} else if !*v.Prerelease && !sandboxConfig.DefaultConfig.Prerelease {
+				logger.Infof(context.Background(), "sandbox started with release %s", *v.TagName)
+				version = *v.TagName
+				break
+			}
+		}
 	}
-	isGreater, err := util.IsVersionGreaterThan(version, sandboxSupportedVersion)
+	selectedVersion, err := githubutil.CheckVersionExist(version, flyteRepository)
+	if err != nil {
+		return "", err
+	}
+	isGreater, err := util.IsVersionGreaterThan(*selectedVersion.TagName, sandboxSupportedVersion)
 	if err != nil {
 		return "", err
 	}
 	if !isGreater {
 		return "", fmt.Errorf("version flag only supported with flyte %s+ release", sandboxSupportedVersion)
 	}
-	sha, err := githubutil.GetSHAFromVersion(version, flyteRepository)
+	sha, err := githubutil.GetSHAFromVersion(*selectedVersion.TagName, flyteRepository)
 	if err != nil {
 		return "", err
 	}
