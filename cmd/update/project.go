@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/flyteorg/flytectl/cmd/config"
+
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -83,7 +85,7 @@ Usage
 )
 
 func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	projectSpec, err := project.DefaultProjectConfig.GetProjectSpec(project.DefaultProjectConfig.ID)
+	projectSpec, err := project.DefaultProjectConfig.GetProjectSpec(config.GetConfig().Project)
 	if err != nil {
 		return err
 	}
