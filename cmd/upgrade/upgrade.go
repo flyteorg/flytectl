@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/flyteorg/flytectl/pkg/util"
 	stdlibversion "github.com/flyteorg/flytestdlib/version"
 
 	"github.com/flyteorg/flytectl/pkg/util/githubutil"
@@ -111,7 +110,7 @@ func isUpgradeSupported(goos platformutil.Platform) (bool, error) {
 		return false, err
 	}
 
-	if isGreater, err := util.IsVersionGreaterThan(latest, stdlibversion.Version); err != nil {
+	if isGreater, err := githubutil.IsVersionGreaterThan(latest, stdlibversion.Version); err != nil {
 		return false, err
 	} else if !isGreater {
 		fmt.Println("You have already latest version of flytectl")

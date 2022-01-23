@@ -9,8 +9,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/flyteorg/flytestdlib/logger"
-
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/pkg/util/githubutil"
 
@@ -66,15 +64,13 @@ Specify a Flyte Sandbox image pull policy. Possible pull policy values are Alway
  flytectl sandbox start  --image docker.io/my-override:latest --imagePullPolicy Always
 Usage
 `
-	k8sEndpoint             = "https://127.0.0.1:30086"
-	flyteNamespace          = "flyte"
-	flyteRepository         = "flyte"
-	dind                    = "dind"
-	sandboxSupportedVersion = "v0.10.0"
-	diskPressureTaint       = "node.kubernetes.io/disk-pressure"
-	taintEffect             = "NoSchedule"
-	sandboxContextName      = "flyte-sandbox"
-	sandboxDockerContext    = "default"
+	k8sEndpoint          = "https://127.0.0.1:30086"
+	flyteNamespace       = "flyte"
+	dind                 = "dind"
+	diskPressureTaint    = "node.kubernetes.io/disk-pressure"
+	taintEffect          = "NoSchedule"
+	sandboxContextName   = "flyte-sandbox"
+	sandboxDockerContext = "default"
 )
 
 type ExecResult struct {
@@ -196,39 +192,12 @@ func getSandboxImage(version string, alternateImage string) (string, error) {
 	if len(alternateImage) > 0 {
 		return alternateImage, nil
 	}
-	if len(version) == 0 {
-		var err error
-		releases, err := githubutil.GetListRelease(flyteRepository)
-		if err != nil {
-			return "", err
-		}
-		for _, v := range releases {
-			if *v.Prerelease && sandboxConfig.DefaultConfig.Prerelease {
-				logger.Infof(context.Background(), "sandbox started with pre release %s", *v.TagName)
-				version = *v.TagName
-				break
-			} else if !*v.Prerelease && !sandboxConfig.DefaultConfig.Prerelease {
-				logger.Infof(context.Background(), "sandbox started with release %s", *v.TagName)
-				version = *v.TagName
-				break
-			}
-		}
-	}
-	selectedVersion, err := githubutil.CheckVersionExist(version, flyteRepository)
+
+	sha, err := githubutil.GetSandboxImageSha(version)
 	if err != nil {
 		return "", err
 	}
-	isGreater, err := util.IsVersionGreaterThan(*selectedVersion.TagName, sandboxSupportedVersion)
-	if err != nil {
-		return "", err
-	}
-	if !isGreater {
-		return "", fmt.Errorf("version flag only supported with flyte %s+ release", sandboxSupportedVersion)
-	}
-	sha, err := githubutil.GetSHAFromVersion(*selectedVersion.TagName, flyteRepository)
-	if err != nil {
-		return "", err
-	}
+
 	return docker.GetSandboxImage(fmt.Sprintf("dind-%s", sha)), nil
 }
 

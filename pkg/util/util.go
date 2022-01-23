@@ -12,7 +12,6 @@ import (
 	"github.com/flyteorg/flytectl/pkg/configutil"
 	"github.com/flyteorg/flytectl/pkg/docker"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
-	hversion "github.com/hashicorp/go-version"
 )
 
 const (
@@ -46,19 +45,6 @@ func SetupFlyteDir() error {
 	}
 
 	return nil
-}
-
-// IsVersionGreaterThan check version if it's greater then other
-func IsVersionGreaterThan(version1, version2 string) (bool, error) {
-	semanticVersion1, err := hversion.NewVersion(version1)
-	if err != nil {
-		return false, err
-	}
-	semanticVersion2, err := hversion.NewVersion(version2)
-	if err != nil {
-		return false, err
-	}
-	return semanticVersion1.GreaterThan(semanticVersion2), nil
 }
 
 // PrintSandboxMessage will print sandbox success message
