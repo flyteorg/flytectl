@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/pkg/util/githubutil"
 
 	"github.com/avast/retry-go"
+	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/olekukonko/tablewriter"
 	corev1api "k8s.io/api/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -66,11 +66,11 @@ Usage
 `
 	k8sEndpoint          = "https://127.0.0.1:30086"
 	flyteNamespace       = "flyte"
-	dind                 = "dind"
 	diskPressureTaint    = "node.kubernetes.io/disk-pressure"
 	taintEffect          = "NoSchedule"
 	sandboxContextName   = "flyte-sandbox"
 	sandboxDockerContext = "default"
+	imageName            = "cr.flyte.org/flyteorg/flyte-sandbox"
 )
 
 type ExecResult struct {
@@ -159,7 +159,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 		volumes = append(volumes, *vol)
 	}
 
-	image, err := getSandboxImage(sandboxConfig.DefaultConfig.Version, sandboxConfig.DefaultConfig.Image)
+	image, err := githubutil.GetSandboxImage(sandboxConfig.DefaultConfig.Version, imageName, sandboxConfig.DefaultConfig.Image)
 	if err != nil {
 		return nil, err
 	}
@@ -183,22 +183,6 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}
 
 	return logReader, nil
-}
-
-// Returns the alternate image if specified, else
-// if no version is specified then the Latest release of cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA} is used
-// else cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA}, where sha is derived from the version.
-func getSandboxImage(version string, alternateImage string) (string, error) {
-	if len(alternateImage) > 0 {
-		return alternateImage, nil
-	}
-
-	sha, err := githubutil.GetSandboxImageSha(version, sandboxConfig.DefaultConfig.Prerelease)
-	if err != nil {
-		return "", err
-	}
-
-	return docker.GetSandboxImage(fmt.Sprintf("dind-%s", sha)), nil
 }
 
 func mountVolume(file, destination string) (*mount.Mount, error) {

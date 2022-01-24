@@ -8,6 +8,8 @@ import (
 	"runtime"
 	"strings"
 
+	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
+
 	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/flyteorg/flytestdlib/logger"
@@ -208,4 +210,20 @@ func CheckBrewInstall(goos platformutil.Platform) (string, error) {
 		}
 	}
 	return "", nil
+}
+
+// GetSandboxImage Returns the alternate image if specified, else
+// if no version is specified then the Latest release of cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA} is used
+// else cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA}, where sha is derived from the version.
+func GetSandboxImage(version, image, alternateImage string) (string, error) {
+	if len(alternateImage) > 0 {
+		return alternateImage, nil
+	}
+
+	sha, err := GetSandboxImageSha(version, sandboxConfig.DefaultConfig.Prerelease)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s:%s", image, fmt.Sprintf("dind-%s", sha)), nil
 }
