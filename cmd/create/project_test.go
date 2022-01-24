@@ -1,8 +1,11 @@
 package create
 
 import (
+	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/flyteorg/flytectl/clierrors"
 
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 
@@ -56,11 +59,10 @@ func TestEmptyProjectID(t *testing.T) {
 	setup()
 	createProjectSetup()
 	defer tearDownAndVerify(t, "")
-	project.DefaultProjectConfig.Name = projectValue
-	project.DefaultProjectConfig.Labels = map[string]string{}
+	project.DefaultProjectConfig = &project.ConfigProject{}
 	mockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
 	err := createProjectsCommand(ctx, args, cmdCtx)
-	assert.Equal(t, fmt.Errorf("project ID is required flag"), err)
+	assert.Equal(t, errors.New(clierrors.ErrProjectNameNotPassed), err)
 	mockClient.AssertNotCalled(t, "RegisterProject", ctx, mock.Anything)
 }
 
