@@ -9,7 +9,6 @@ import (
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
 )
 
@@ -93,28 +92,15 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 		return fmt.Errorf(clierrors.ErrProjectNotPassed)
 	}
 
-	projectDefinition := &admin.Project{
-		Id: projectSpec.Id,
-	}
-	if projectSpec.Description != "" {
-		projectDefinition.Description = projectSpec.Description
-	}
-	if projectSpec.Name != "" {
-		projectDefinition.Name = projectSpec.Name
-	}
-	if len(projectSpec.Labels.Values) > 0 {
-		projectDefinition.Labels = projectSpec.Labels
-	}
-
-	projectDefinition, err = project.DefaultProjectConfig.MapToAdminState(projectDefinition)
+	state, err := project.DefaultProjectConfig.MapToAdminState()
 	if err != nil {
 		return err
 	}
-
+	projectSpec.State = state
 	if project.DefaultProjectConfig.DryRun {
 		logger.Infof(ctx, "skipping UpdateProject request (dryRun)")
 	} else {
-		_, err := cmdCtx.AdminClient().UpdateProject(ctx, projectDefinition)
+		_, err := cmdCtx.AdminClient().UpdateProject(ctx, projectSpec)
 		if err != nil {
 			fmt.Printf(clierrors.ErrFailedProjectUpdate, projectSpec.Id, err)
 			return err

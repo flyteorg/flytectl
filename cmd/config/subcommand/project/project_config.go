@@ -70,7 +70,7 @@ func (c *ConfigProject) GetProjectSpec(id string) (*admin.Project, error) {
 }
 
 //MapToAdminState return project spec from a file/flags
-func (c *ConfigProject) MapToAdminState(spec *admin.Project) (*admin.Project, error) {
+func (c *ConfigProject) MapToAdminState() (admin.Project_ProjectState, error) {
 	if c.ActivateProject {
 		c.Activate = c.ActivateProject
 	}
@@ -83,13 +83,11 @@ func (c *ConfigProject) MapToAdminState(spec *admin.Project) (*admin.Project, er
 
 	if activate || archive {
 		if activate == archive {
-			return spec, fmt.Errorf(clierrors.ErrInvalidStateUpdate)
+			return admin.Project_ACTIVE, fmt.Errorf(clierrors.ErrInvalidStateUpdate)
 		}
-		spec.State = admin.Project_ACTIVE
 		if archive {
-			spec.State = admin.Project_ARCHIVED
+			return admin.Project_ARCHIVED, nil
 		}
-		return spec, nil
 	}
-	return spec, nil
+	return admin.Project_ACTIVE, nil
 }
