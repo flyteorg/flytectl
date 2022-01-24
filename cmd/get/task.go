@@ -1,5 +1,7 @@
 package get
 
+.. _get_task_resources: 
+
 import (
 	"context"
 

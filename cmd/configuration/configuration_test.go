@@ -21,7 +21,7 @@ import (
 func TestCreateInitCommand(t *testing.T) {
 	configCmd := CreateConfigCommand()
 	assert.Equal(t, configCmd.Use, "config")
-	assert.Equal(t, configCmd.Short, "Runs various config commands, look at the help of this command to get a list of available commands..")
+	assert.Equal(t, configCmd.Short, "Runs various config commands, look at the help of this command to get a list of available commands.")
 	fmt.Println(configCmd.Commands())
 	assert.Equal(t, len(configCmd.Commands()), 3)
 	cmdNouns := configCmd.Commands()

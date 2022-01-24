@@ -1,5 +1,5 @@
 Workflow
-------
+---------
 It specifies the actions to be performed on the resource 'workflow'. 
 
 .. toctree::

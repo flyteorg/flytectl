@@ -1,5 +1,5 @@
 Examples
-------
+--------
 It specifies the actions to be performed on the resource 'examples'. 
 
 .. toctree::
