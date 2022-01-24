@@ -88,12 +88,12 @@ func GetListRelease(repository string) ([]*github.RepositoryRelease, error) {
 }
 
 // GetSandboxImageSha returns the sha as per input
-func GetSandboxImageSha(version string, pre bool) (string, error) {
+func GetSandboxImageSha(version string, pre bool) (string, string, error) {
 	var release *github.RepositoryRelease
 	if len(version) == 0 {
 		releases, err := GetListRelease(flyte)
 		if err != nil {
-			return "", err
+			return "", release.GetTagName(), err
 		}
 		for _, v := range releases {
 			if *v.Prerelease && pre {
@@ -104,26 +104,26 @@ func GetSandboxImageSha(version string, pre bool) (string, error) {
 				break
 			}
 		}
-		logger.Infof(context.Background(), "sandbox started with release %s", *release.TagName)
+		logger.Infof(context.Background(), "sandbox started with release %s", release.GetTagName())
 	} else if len(version) > 0 {
 		r, err := CheckVersionExist(version, flyte)
 		if err != nil {
-			return "", err
+			return "", r.GetTagName(), err
 		}
 		release = r
 	}
-	isGreater, err := util.IsVersionGreaterThan(*release.TagName, sandboxSupportedVersion)
+	isGreater, err := util.IsVersionGreaterThan(release.GetTagName(), sandboxSupportedVersion)
 	if err != nil {
-		return "", err
+		return "", release.GetTagName(), err
 	}
 	if !isGreater {
-		return "", fmt.Errorf("version flag only supported with flyte %s+ release", sandboxSupportedVersion)
+		return "", release.GetTagName(), fmt.Errorf("version flag only supported with flyte %s+ release", sandboxSupportedVersion)
 	}
-	sha, err := GetSHAFromVersion(*release.TagName, flyte)
+	sha, err := GetSHAFromVersion(release.GetTagName(), flyte)
 	if err != nil {
-		return "", err
+		return "", release.GetTagName(), err
 	}
-	return sha, nil
+	return sha, release.GetTagName(), nil
 }
 
 func getFlytectlAssetName() string {
@@ -215,15 +215,11 @@ func CheckBrewInstall(goos platformutil.Platform) (string, error) {
 // GetSandboxImage Returns the alternate image if specified, else
 // if no version is specified then the Latest release of cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA} is used
 // else cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA}, where sha is derived from the version.
-func GetSandboxImage(version, image, alternateImage string) (string, error) {
-	if len(alternateImage) > 0 {
-		return alternateImage, nil
-	}
-
-	sha, err := GetSandboxImageSha(version, sandboxConfig.DefaultConfig.Prerelease)
+func GetSandboxImage(version, image string) (string, string, error) {
+	sha, version, err := GetSandboxImageSha(version, sandboxConfig.DefaultConfig.Prerelease)
 	if err != nil {
-		return "", err
+		return "", version, err
 	}
 
-	return fmt.Sprintf("%s:%s", image, fmt.Sprintf("dind-%s", sha)), nil
+	return fmt.Sprintf("%s:%s", image, fmt.Sprintf("dind-%s", sha)), version, nil
 }

@@ -158,20 +158,23 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	} else if vol != nil {
 		volumes = append(volumes, *vol)
 	}
-
-	image, err := githubutil.GetSandboxImage(sandboxConfig.DefaultConfig.Version, imageName, sandboxConfig.DefaultConfig.Image)
-	if err != nil {
-		return nil, err
+	sandboxImage := sandboxConfig.DefaultConfig.Image
+	if len(sandboxConfig.DefaultConfig.Image) == 0 {
+		image, version, err := githubutil.GetSandboxImage(sandboxConfig.DefaultConfig.Version, imageName)
+		if err != nil {
+			return nil, err
+		}
+		sandboxImage = image
+		fmt.Printf("%v Running Flyte %s release\n", emoji.Whale, version)
 	}
-	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, image)
-
-	if err := docker.PullDockerImage(ctx, cli, image, sandboxConfig.DefaultConfig.ImagePullPolicy); err != nil {
+	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, sandboxImage)
+	if err := docker.PullDockerImage(ctx, cli, sandboxImage, sandboxConfig.DefaultConfig.ImagePullPolicy); err != nil {
 		return nil, err
 	}
 
 	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
-	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, image)
+	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, sandboxImage)
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)
 		return nil, err

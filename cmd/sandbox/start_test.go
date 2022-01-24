@@ -89,7 +89,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		sandboxConfig.DefaultConfig.Version = "v0.19.1"
 		bodyStatus := make(chan container.ContainerWaitOKBody)
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -120,7 +120,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		ctx := context.Background()
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -169,7 +169,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -211,7 +211,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: absPath,
 			Target: docker.Source,
 		})
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -243,12 +243,10 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-		sandboxConfig.DefaultConfig.Version = "v0.15.0"
+		sandboxConfig.DefaultConfig.Version = "v0.18.0"
 		sandboxConfig.DefaultConfig.Source = ""
 
-		sha, err := githubutil.GetSHAFromVersion(sandboxConfig.DefaultConfig.Version, "flyte")
-		assert.Nil(t, err)
-		image, err := githubutil.GetSandboxImage(sha, imageName, "")
+		image, _, err := githubutil.GetSandboxImage(sandboxConfig.DefaultConfig.Version, imageName)
 		assert.Nil(t, err)
 		volumes := docker.Volumes
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -283,7 +281,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Version = "v0.1444.0"
 		sandboxConfig.DefaultConfig.Source = ""
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		volumes := docker.Volumes
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -316,7 +314,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
 		volumes := docker.Volumes
@@ -362,7 +360,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -404,7 +402,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = ""
 		sandboxConfig.DefaultConfig.Version = ""
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -443,7 +441,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -483,7 +481,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -527,7 +525,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -567,7 +565,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -702,33 +700,27 @@ func TestGetNodeTaintStatus(t *testing.T) {
 
 func TestGetSandboxImage(t *testing.T) {
 	t.Run("Get Latest sandbox", func(t *testing.T) {
-		image, err := githubutil.GetSandboxImage("", imageName, "")
+		image, _, err := githubutil.GetSandboxImage("", imageName)
 		assert.Nil(t, err)
 		assert.Equal(t, true, strings.HasPrefix(image, "cr.flyte.org/flyteorg/flyte-sandbox:dind-"))
 	})
 
 	t.Run("Get sandbox image with version ", func(t *testing.T) {
-		image, err := githubutil.GetSandboxImage("", "v0.14.0", "")
+		image, _, err := githubutil.GetSandboxImage("v0.14.0", imageName)
 		assert.Nil(t, err)
 		assert.Equal(t, true, strings.HasPrefix(image, imageName))
 	})
 	t.Run("Get sandbox image with wrong version ", func(t *testing.T) {
-		_, err := githubutil.GetSandboxImage("", "v100.1.0", "")
+		_, _, err := githubutil.GetSandboxImage("v100.1.0", imageName)
 		assert.NotNil(t, err)
 	})
 	t.Run("Get sandbox image with wrong version ", func(t *testing.T) {
-		_, err := githubutil.GetSandboxImage("", "aaaaaa", "")
+		_, _, err := githubutil.GetSandboxImage("aaaaaa", imageName)
 		assert.NotNil(t, err)
 	})
 	t.Run("Get sandbox image with version that is not supported", func(t *testing.T) {
-		_, err := githubutil.GetSandboxImage("", "v0.10.0", "")
+		_, _, err := githubutil.GetSandboxImage("v0.10.0", imageName)
 		assert.NotNil(t, err)
 	})
 
-	t.Run("Get sandbox image with version that is not supported", func(t *testing.T) {
-		img := "docker.io/my-override:latest"
-		i, err := githubutil.GetSandboxImage("", "v0.11.0", img)
-		assert.Nil(t, err)
-		assert.Equal(t, i, img)
-	})
 }
