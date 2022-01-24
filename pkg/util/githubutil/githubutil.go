@@ -8,9 +8,10 @@ import (
 	"runtime"
 	"strings"
 
-	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
+	"github.com/flyteorg/flytectl/pkg/util"
+
 	"github.com/flyteorg/flytestdlib/logger"
-	hversion "github.com/hashicorp/go-version"
+
 	"golang.org/x/oauth2"
 
 	"github.com/flyteorg/flytectl/pkg/util/platformutil"
@@ -85,7 +86,7 @@ func GetListRelease(repository string) ([]*github.RepositoryRelease, error) {
 }
 
 // GetSandboxImageSha returns the sha as per input
-func GetSandboxImageSha(version string) (string, error) {
+func GetSandboxImageSha(version string, pre bool) (string, error) {
 	var release *github.RepositoryRelease
 	if len(version) == 0 {
 		releases, err := GetListRelease(flyte)
@@ -93,16 +94,15 @@ func GetSandboxImageSha(version string) (string, error) {
 			return "", err
 		}
 		for _, v := range releases {
-			if *v.Prerelease && sandboxConfig.DefaultConfig.Prerelease {
-				logger.Infof(context.Background(), "sandbox started with pre release %s", *v.TagName)
+			if *v.Prerelease && pre {
 				release = v
 				break
-			} else if !*v.Prerelease && !sandboxConfig.DefaultConfig.Prerelease {
-				logger.Infof(context.Background(), "sandbox started with release %s", *v.TagName)
+			} else if !*v.Prerelease && !pre {
 				release = v
 				break
 			}
 		}
+		logger.Infof(context.Background(), "sandbox started with release %s", *release.TagName)
 	} else if len(version) > 0 {
 		r, err := CheckVersionExist(version, flyte)
 		if err != nil {
@@ -110,7 +110,7 @@ func GetSandboxImageSha(version string) (string, error) {
 		}
 		release = r
 	}
-	isGreater, err := IsVersionGreaterThan(*release.TagName, sandboxSupportedVersion)
+	isGreater, err := util.IsVersionGreaterThan(*release.TagName, sandboxSupportedVersion)
 	if err != nil {
 		return "", err
 	}
@@ -169,7 +169,7 @@ func GetAssetsFromRelease(version, assets, repository string) (*github.ReleaseAs
 
 // GetUpgradeMessage return the upgrade message
 func GetUpgradeMessage(latest string, goos platformutil.Platform) (string, error) {
-	isGreater, err := IsVersionGreaterThan(latest, stdlibversion.Version)
+	isGreater, err := util.IsVersionGreaterThan(latest, stdlibversion.Version)
 	if err != nil {
 		return "", err
 	}
@@ -208,17 +208,4 @@ func CheckBrewInstall(goos platformutil.Platform) (string, error) {
 		}
 	}
 	return "", nil
-}
-
-// IsVersionGreaterThan check version if it's greater then other
-func IsVersionGreaterThan(version1, version2 string) (bool, error) {
-	semanticVersion1, err := hversion.NewVersion(version1)
-	if err != nil {
-		return false, err
-	}
-	semanticVersion2, err := hversion.NewVersion(version2)
-	if err != nil {
-		return false, err
-	}
-	return semanticVersion1.GreaterThan(semanticVersion2), nil
 }

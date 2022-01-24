@@ -193,7 +193,7 @@ func getSandboxImage(version string, alternateImage string) (string, error) {
 		return alternateImage, nil
 	}
 
-	sha, err := githubutil.GetSandboxImageSha(version)
+	sha, err := githubutil.GetSandboxImageSha(version, sandboxConfig.DefaultConfig.Prerelease)
 	if err != nil {
 		return "", err
 	}

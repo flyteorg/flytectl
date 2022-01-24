@@ -6,6 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const testVersion = "v0.1.20"
+
 func TestWriteIntoFile(t *testing.T) {
 	t.Run("Successfully write into a file", func(t *testing.T) {
 		err := WriteIntoFile([]byte(""), "version.yaml")
@@ -42,5 +44,39 @@ func TestSendRequest(t *testing.T) {
 		response, err := SendRequest("GET", "https://github.com/evalsocket/flyte/archive/refs/tags/source-code.zip", nil)
 		assert.NotNil(t, err)
 		assert.Nil(t, response)
+	})
+}
+
+func TestIsVersionGreaterThan(t *testing.T) {
+	t.Run("Compare FlyteCTL version when upgrade available", func(t *testing.T) {
+		_, err := IsVersionGreaterThan("v1.1.21", testVersion)
+		assert.Nil(t, err)
+	})
+	t.Run("Compare FlyteCTL version greater then", func(t *testing.T) {
+		ok, err := IsVersionGreaterThan("v1.1.21", testVersion)
+		assert.Nil(t, err)
+		assert.Equal(t, true, ok)
+	})
+	t.Run("Compare FlyteCTL version greater then for equal value", func(t *testing.T) {
+		ok, err := IsVersionGreaterThan(testVersion, testVersion)
+		assert.Nil(t, err)
+		assert.Equal(t, false, ok)
+	})
+	t.Run("Compare FlyteCTL version smaller then", func(t *testing.T) {
+		ok, err := IsVersionGreaterThan("v0.1.19", testVersion)
+		assert.Nil(t, err)
+		assert.Equal(t, false, ok)
+	})
+	t.Run("Compare FlyteCTL version", func(t *testing.T) {
+		_, err := IsVersionGreaterThan(testVersion, testVersion)
+		assert.Nil(t, err)
+	})
+	t.Run("Error in compare FlyteCTL version", func(t *testing.T) {
+		_, err := IsVersionGreaterThan("vvvvvvvv", testVersion)
+		assert.NotNil(t, err)
+	})
+	t.Run("Error in compare FlyteCTL version", func(t *testing.T) {
+		_, err := IsVersionGreaterThan(testVersion, "vvvvvvvv")
+		assert.NotNil(t, err)
 	})
 }
