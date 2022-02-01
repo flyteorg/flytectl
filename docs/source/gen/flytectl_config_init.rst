@@ -15,18 +15,24 @@ Generates sandbox config. Flyte Sandbox is a fully standalone minimal environmen
 
 ::
 
- flytectl configuration config 
+ flytectl config init  
 
-Generates remote cluster config. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
+Generates remote cluster config, By default connection is secure. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
 	
 ::
 
- flytectl configuration config --host=flyte.myexample.com
-	
+ flytectl config init --host=flyte.myexample.com
+
+Generates remote cluster config with insecure connection
+
+::
+
+ flytectl config init --host=flyte.myexample.com --insecure 
+
 Generates FlyteCTL config with a storage provider
 ::
 
- flytectl configuration config --host=flyte.myexample.com --storage
+ flytectl config init --host=flyte.myexample.com --storage
 
 
 ::
@@ -40,7 +46,7 @@ Options
 
   -h, --help          help for init
       --host string   Endpoint of flyte admin
-      --insecure      Enable insecure mode (default true)
+      --insecure      Enable insecure mode
       --storage       Enable storage provider config
 
 Options inherited from parent commands
@@ -50,8 +56,10 @@ Options inherited from parent commands
 
       --admin.authorizationHeader string           Custom metadata header to pass JWT
       --admin.authorizationServerUrl string        This is the URL to your IdP's authorization server. It'll default to Endpoint
+      --admin.caCertFilePath string                Use specified certificate file to verify the admin server peer.
       --admin.clientId string                      Client ID (default "flytepropeller")
       --admin.clientSecretLocation string          File containing the client secret (default "/etc/secrets/client_secret")
+      --admin.command strings                      Command for external authentication token generation
       --admin.endpoint string                      For admin types,  specify where the uri of the service is located.
       --admin.insecure                             Use insecure connection.
       --admin.insecureSkipVerify                   InsecureSkipVerify controls whether a client verifies the server's certificate chain and host name. Caution : shouldn't be use for production usecases'

@@ -456,19 +456,17 @@ func TestGetStorageClient(t *testing.T) {
 
 func TestGetAllFlytesnacksExample(t *testing.T) {
 	t.Run("Failed to get manifest with wrong name", func(t *testing.T) {
-		_, tag, err := getAllFlytesnacksExample("no////ne", "no////ne", "")
+		_, _, err := getAllExample("no////ne", "")
 		assert.NotNil(t, err)
-		assert.Equal(t, len(tag), 0)
 	})
 	t.Run("Failed to get release", func(t *testing.T) {
-		_, tag, err := getAllFlytesnacksExample("flyteorg", "homebrew-tap", "")
+		_, _, err := getAllExample("homebrew-tap", "")
 		assert.NotNil(t, err)
-		assert.Equal(t, len(tag), 0)
 	})
 	t.Run("Successfully get examples", func(t *testing.T) {
-		assets, tag, err := getAllFlytesnacksExample("flyteorg", "flytesnacks", "v0.2.175")
+		assets, r, err := getAllExample("flytesnacks", "v0.2.175")
 		assert.Nil(t, err)
-		assert.Greater(t, len(tag), 0)
+		assert.Greater(t, len(*r.TagName), 0)
 		assert.Greater(t, len(assets), 0)
 	})
 }
@@ -478,7 +476,7 @@ func TestRegister(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		node := &admin.NodeExecution{}
-		err := register(ctx, node, cmdCtx, rconfig.DefaultFilesConfig.DryRun, rconfig.DefaultFilesConfig.Version)
+		err := register(ctx, node, cmdCtx, rconfig.DefaultFilesConfig.DryRun)
 		assert.NotNil(t, err)
 	})
 }
@@ -488,7 +486,7 @@ func TestHydrateNode(t *testing.T) {
 		setup()
 		registerFilesSetup()
 		node := &core.Node{}
-		err := hydrateNode(node, rconfig.DefaultFilesConfig.Version)
+		err := hydrateNode(node, rconfig.DefaultFilesConfig.Version, true)
 		assert.NotNil(t, err)
 	})
 
@@ -544,7 +542,7 @@ func TestHydrateTaskSpec(t *testing.T) {
 			},
 		},
 	}
-	err = hydrateTaskSpec(task, "sourcey", rconfig.DefaultFilesConfig.SourceUploadPath, rconfig.DefaultFilesConfig.Version)
+	err = hydrateTaskSpec(task, "sourcey", rconfig.DefaultFilesConfig.SourceUploadPath, rconfig.DefaultFilesConfig.Version, "")
 	assert.NoError(t, err)
 	var hydratedPodSpec = v1.PodSpec{}
 	err = utils.UnmarshalStructToObj(task.Template.GetK8SPod().PodSpec, &hydratedPodSpec)

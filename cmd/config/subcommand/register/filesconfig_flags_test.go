@@ -113,6 +113,20 @@ func TestFilesConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
+	t.Run("Test_force", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("force", testValue)
+			if vBool, err := cmdFlags.GetBool("force"); err == nil {
+				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vBool), &actual.Force)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
 	t.Run("Test_continueOnError", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
@@ -205,6 +219,20 @@ func TestFilesConfig_SetFlags(t *testing.T) {
 			cmdFlags.Set("sourceUploadPath", testValue)
 			if vString, err := cmdFlags.GetString("sourceUploadPath"); err == nil {
 				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vString), &actual.SourceUploadPath)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
+	t.Run("Test_destinationDirectory", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("destinationDirectory", testValue)
+			if vString, err := cmdFlags.GetString("destinationDirectory"); err == nil {
+				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vString), &actual.DestinationDirectory)
 
 			} else {
 				assert.FailNow(t, err.Error())

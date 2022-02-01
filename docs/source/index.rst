@@ -1,8 +1,8 @@
 .. flytectl doc
 
-######################
-``Flytectl`` Reference
-######################
+####################################################
+Flytectl: The Official Flyte Command-line Interface
+####################################################
 
 Overview
 =========
@@ -48,7 +48,11 @@ on command-line. The following configuration is useful to setup.
 Basic Configuration
 --------------------
 
-Flytectl configuration
+The full list of available configurable options can be found by running ``flytectl --help``, or alternately `here <https://docs.flyte.org/projects/flytectl/en/stable/gen/flytectl.html#synopsis>`__
+
+.. NOTE::
+
+    Currently, the Project ``-p``, Domain ``-d``, and Output ``-o`` flags cannot be used in config file
 
 .. tabbed:: Local Flyte Sandbox
 
@@ -59,7 +63,7 @@ Flytectl configuration
         admin:
           # For GRPC endpoints you might want to use dns:///flyte.myexample.com
           endpoint: dns:///localhost:30081
-          insecure: false # insecure: True # Set to true if the endpoint isn't accessible through TLS/SSL connection (not recommended except on local sandbox deployment)
+          insecure: true # Set to false to enable TLS/SSL connection (not recommended except on local sandbox deployment)
           authType: Pkce # authType: Pkce # if using authentication or just drop this.
         storage:
           connection:
@@ -135,12 +139,16 @@ Flytectl configuration
    |book| API Reference <https://docs.flyte.org/en/latest/reference/index.html>
    |hands-helping| Community <https://docs.flyte.org/en/latest/community/index.html>
 
+
+.. NOTE: the caption text is important for the sphinx theme to correctly render the nav header
+.. https://github.com/flyteorg/furo
 .. toctree::
    :maxdepth: -1
    :caption: Flytectl
    :hidden:
 
-   Install and Configure <self>
+   Flytectl <self>
+   CLI Entrypoint <gen/flytectl>
    verbs
    nouns
    contribute

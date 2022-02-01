@@ -50,7 +50,8 @@ func (FilesConfig) mustMarshalJSON(v json.Marshaler) string {
 // flags is json-name.json-sub-name... etc.
 func (cfg FilesConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags := pflag.NewFlagSet("FilesConfig", pflag.ExitOnError)
-	cmdFlags.StringVar(&DefaultFilesConfig.Version, fmt.Sprintf("%v%v", prefix, "version"), DefaultFilesConfig.Version, "version of the entity to be registered with flyte.")
+	cmdFlags.StringVar(&DefaultFilesConfig.Version, fmt.Sprintf("%v%v", prefix, "version"), DefaultFilesConfig.Version, "version of the entity to be registered with flyte which are un-versioned after serialization.")
+	cmdFlags.BoolVar(&DefaultFilesConfig.Force, fmt.Sprintf("%v%v", prefix, "force"), DefaultFilesConfig.Force, "force use of version number on entities registered with flyte.")
 	cmdFlags.BoolVar(&DefaultFilesConfig.ContinueOnError, fmt.Sprintf("%v%v", prefix, "continueOnError"), DefaultFilesConfig.ContinueOnError, "continue on error when registering files.")
 	cmdFlags.BoolVar(&DefaultFilesConfig.Archive, fmt.Sprintf("%v%v", prefix, "archive"), DefaultFilesConfig.Archive, "pass in archive file either an http link or local path.")
 	cmdFlags.StringVar(&DefaultFilesConfig.AssumableIamRole, fmt.Sprintf("%v%v", prefix, "assumableIamRole"), DefaultFilesConfig.AssumableIamRole, " custom assumable iam auth role to register launch plans with.")
@@ -58,6 +59,7 @@ func (cfg FilesConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags.StringVar(&DefaultFilesConfig.K8ServiceAccount, fmt.Sprintf("%v%v", prefix, "k8ServiceAccount"), DefaultFilesConfig.K8ServiceAccount, " deprecated. Please use --K8sServiceAccount")
 	cmdFlags.StringVar(&DefaultFilesConfig.OutputLocationPrefix, fmt.Sprintf("%v%v", prefix, "outputLocationPrefix"), DefaultFilesConfig.OutputLocationPrefix, " custom output location prefix for offloaded types (files/schemas).")
 	cmdFlags.StringVar(&DefaultFilesConfig.SourceUploadPath, fmt.Sprintf("%v%v", prefix, "sourceUploadPath"), DefaultFilesConfig.SourceUploadPath, " Location for source code in storage.")
+	cmdFlags.StringVar(&DefaultFilesConfig.DestinationDirectory, fmt.Sprintf("%v%v", prefix, "destinationDirectory"), DefaultFilesConfig.DestinationDirectory, " Location of source code in container.")
 	cmdFlags.BoolVar(&DefaultFilesConfig.DryRun, fmt.Sprintf("%v%v", prefix, "dryRun"), DefaultFilesConfig.DryRun, "execute command without making any modifications.")
 	return cmdFlags
 }

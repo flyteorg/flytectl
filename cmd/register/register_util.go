@@ -15,12 +15,12 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/flyteorg/flytectl/pkg/util/githubutil"
+
 	"github.com/flyteorg/flytestdlib/contextutils"
 	"github.com/flyteorg/flytestdlib/promutils"
 	"github.com/flyteorg/flytestdlib/promutils/labeled"
 	"github.com/flyteorg/flytestdlib/utils"
-
-	"github.com/google/go-github/github"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
@@ -30,6 +30,7 @@ import (
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/flyteorg/flytestdlib/logger"
 	"github.com/flyteorg/flytestdlib/storage"
+	"github.com/google/go-github/v42/github"
 
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
@@ -45,6 +46,7 @@ const registrationVersionPattern = "{{ registration.version }}"
 
 // Additional variable define in fast serialized proto that needs to be replace in registration time
 const registrationRemotePackagePattern = "{{ .remote_package_path }}"
+const registrationDestDirPattern = "{{ .dest_dir }}"
 
 // All supported extensions for compress
 var supportedExtensions = []string{".tar", ".tgz", ".tar.gz"}
@@ -97,7 +99,7 @@ func unMarshalContents(ctx context.Context, fileContents []byte, fname string) (
 
 }
 
-func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.CommandContext, dryRun bool, version string) error {
+func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.CommandContext, dryRun bool) error {
 	switch v := message.(type) {
 	case *admin.LaunchPlan:
 		launchPlan := message.(*admin.LaunchPlan)
@@ -112,7 +114,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 					Project:      config.GetConfig().Project,
 					Domain:       config.GetConfig().Domain,
 					Name:         launchPlan.Id.Name,
-					Version:      version,
+					Version:      launchPlan.Id.Version,
 				},
 				Spec: launchPlan.Spec,
 			})
@@ -130,7 +132,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 					Project:      config.GetConfig().Project,
 					Domain:       config.GetConfig().Domain,
 					Name:         workflowSpec.Template.Id.Name,
-					Version:      version,
+					Version:      workflowSpec.Template.Id.Version,
 				},
 				Spec: workflowSpec,
 			})
@@ -148,7 +150,7 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 					Project:      config.GetConfig().Project,
 					Domain:       config.GetConfig().Domain,
 					Name:         taskSpec.Template.Id.Name,
-					Version:      version,
+					Version:      taskSpec.Template.Id.Version,
 				},
 				Spec: taskSpec,
 			})
@@ -158,33 +160,33 @@ func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.Command
 	}
 }
 
-func hydrateNode(node *core.Node, version string) error {
+func hydrateNode(node *core.Node, version string, force bool) error {
 	targetNode := node.Target
 	switch v := targetNode.(type) {
 	case *core.Node_TaskNode:
 		taskNodeWrapper := targetNode.(*core.Node_TaskNode)
 		taskNodeReference := taskNodeWrapper.TaskNode.Reference.(*core.TaskNode_ReferenceId)
-		hydrateIdentifier(taskNodeReference.ReferenceId, version)
+		hydrateIdentifier(taskNodeReference.ReferenceId, version, force)
 	case *core.Node_WorkflowNode:
 		workflowNodeWrapper := targetNode.(*core.Node_WorkflowNode)
 		switch workflowNodeWrapper.WorkflowNode.Reference.(type) {
 		case *core.WorkflowNode_SubWorkflowRef:
 			subWorkflowNodeReference := workflowNodeWrapper.WorkflowNode.Reference.(*core.WorkflowNode_SubWorkflowRef)
-			hydrateIdentifier(subWorkflowNodeReference.SubWorkflowRef, version)
+			hydrateIdentifier(subWorkflowNodeReference.SubWorkflowRef, version, force)
 		case *core.WorkflowNode_LaunchplanRef:
 			launchPlanNodeReference := workflowNodeWrapper.WorkflowNode.Reference.(*core.WorkflowNode_LaunchplanRef)
-			hydrateIdentifier(launchPlanNodeReference.LaunchplanRef, version)
+			hydrateIdentifier(launchPlanNodeReference.LaunchplanRef, version, force)
 		default:
 			return fmt.Errorf("unknown type %T", workflowNodeWrapper.WorkflowNode.Reference)
 		}
 	case *core.Node_BranchNode:
 		branchNodeWrapper := targetNode.(*core.Node_BranchNode)
-		if err := hydrateNode(branchNodeWrapper.BranchNode.IfElse.Case.ThenNode, version); err != nil {
+		if err := hydrateNode(branchNodeWrapper.BranchNode.IfElse.Case.ThenNode, version, force); err != nil {
 			return fmt.Errorf("failed to hydrateNode")
 		}
 		if len(branchNodeWrapper.BranchNode.IfElse.Other) > 0 {
 			for _, ifBlock := range branchNodeWrapper.BranchNode.IfElse.Other {
-				if err := hydrateNode(ifBlock.ThenNode, version); err != nil {
+				if err := hydrateNode(ifBlock.ThenNode, version, force); err != nil {
 					return fmt.Errorf("failed to hydrateNode")
 				}
 			}
@@ -192,7 +194,7 @@ func hydrateNode(node *core.Node, version string) error {
 		switch branchNodeWrapper.BranchNode.IfElse.Default.(type) {
 		case *core.IfElseBlock_ElseNode:
 			elseNodeReference := branchNodeWrapper.BranchNode.IfElse.Default.(*core.IfElseBlock_ElseNode)
-			if err := hydrateNode(elseNodeReference.ElseNode, version); err != nil {
+			if err := hydrateNode(elseNodeReference.ElseNode, version, force); err != nil {
 				return fmt.Errorf("failed to hydrateNode")
 			}
 
@@ -207,27 +209,33 @@ func hydrateNode(node *core.Node, version string) error {
 	return nil
 }
 
-func hydrateIdentifier(identifier *core.Identifier, version string) {
+func hydrateIdentifier(identifier *core.Identifier, version string, force bool) {
 	if identifier.Project == "" || identifier.Project == registrationProjectPattern {
 		identifier.Project = config.GetConfig().Project
 	}
 	if identifier.Domain == "" || identifier.Domain == registrationDomainPattern {
 		identifier.Domain = config.GetConfig().Domain
 	}
-	if identifier.Version == "" || identifier.Version == registrationVersionPattern {
+	if force || identifier.Version == "" || identifier.Version == registrationVersionPattern {
 		identifier.Version = version
 	}
 }
 
-func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string, sourceUploadPath string, version string) error {
+func hydrateTaskSpec(task *admin.TaskSpec, sourceCode, sourceUploadPath, version, destinationDir string) error {
 	if task.Template.GetContainer() != nil {
 		for k := range task.Template.GetContainer().Args {
-			if task.Template.GetContainer().Args[k] == "" || task.Template.GetContainer().Args[k] == registrationRemotePackagePattern {
+			if task.Template.GetContainer().Args[k] == registrationRemotePackagePattern {
 				remotePath, err := getRemoteStoragePath(context.Background(), Client, sourceUploadPath, sourceCode, version)
 				if err != nil {
 					return err
 				}
 				task.Template.GetContainer().Args[k] = string(remotePath)
+			}
+			if task.Template.GetContainer().Args[k] == registrationDestDirPattern {
+				task.Template.GetContainer().Args[k] = "."
+				if len(destinationDir) > 0 {
+					task.Template.GetContainer().Args[k] = destinationDir
+				}
 			}
 		}
 	} else if task.Template.GetK8SPod() != nil && task.Template.GetK8SPod().PodSpec != nil {
@@ -244,6 +252,12 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode string, sourceUploadPath s
 						return err
 					}
 					podSpec.Containers[containerIdx].Args[argIdx] = string(remotePath)
+				}
+				if arg == registrationDestDirPattern {
+					podSpec.Containers[containerIdx].Args[argIdx] = "."
+					if len(destinationDir) > 0 {
+						podSpec.Containers[containerIdx].Args[argIdx] = destinationDir
+					}
 				}
 			}
 		}
@@ -315,31 +329,32 @@ func hydrateSpec(message proto.Message, sourceCode string, config rconfig.FilesC
 	switch v := message.(type) {
 	case *admin.LaunchPlan:
 		launchPlan := message.(*admin.LaunchPlan)
-		hydrateIdentifier(launchPlan.Spec.WorkflowId, config.Version)
+		hydrateIdentifier(launchPlan.Id, config.Version, config.Force)
+		hydrateIdentifier(launchPlan.Spec.WorkflowId, config.Version, config.Force)
 		if err := hydrateLaunchPlanSpec(config.AssumableIamRole, config.K8sServiceAccount, config.OutputLocationPrefix, launchPlan.Spec); err != nil {
 			return err
 		}
 	case *admin.WorkflowSpec:
 		workflowSpec := message.(*admin.WorkflowSpec)
 		for _, Noderef := range workflowSpec.Template.Nodes {
-			if err := hydrateNode(Noderef, config.Version); err != nil {
+			if err := hydrateNode(Noderef, config.Version, config.Force); err != nil {
 				return err
 			}
 		}
-		hydrateIdentifier(workflowSpec.Template.Id, config.Version)
+		hydrateIdentifier(workflowSpec.Template.Id, config.Version, config.Force)
 		for _, subWorkflow := range workflowSpec.SubWorkflows {
 			for _, Noderef := range subWorkflow.Nodes {
-				if err := hydrateNode(Noderef, config.Version); err != nil {
+				if err := hydrateNode(Noderef, config.Version, config.Force); err != nil {
 					return err
 				}
 			}
-			hydrateIdentifier(subWorkflow.Id, config.Version)
+			hydrateIdentifier(subWorkflow.Id, config.Version, config.Force)
 		}
 	case *admin.TaskSpec:
 		taskSpec := message.(*admin.TaskSpec)
-		hydrateIdentifier(taskSpec.Template.Id, config.Version)
+		hydrateIdentifier(taskSpec.Template.Id, config.Version, config.Force)
 		// In case of fast serialize input proto also have on additional variable to substitute i.e destination bucket for source code
-		if err := hydrateTaskSpec(taskSpec, sourceCode, config.SourceUploadPath, config.Version); err != nil {
+		if err := hydrateTaskSpec(taskSpec, sourceCode, config.SourceUploadPath, config.Version, config.DestinationDirectory); err != nil {
 			return err
 		}
 
@@ -465,7 +480,7 @@ func registerFile(ctx context.Context, fileName, sourceCode string, registerResu
 
 	logger.Debugf(ctx, "Hydrated spec : %v", getJSONSpec(spec))
 
-	if err := register(ctx, spec, cmdCtx, config.DryRun, config.Version); err != nil {
+	if err := register(ctx, spec, cmdCtx, config.DryRun); err != nil {
 		// If error is AlreadyExists then dont consider this to be an error but just a warning state
 		if grpcError := status.Code(err); grpcError == codes.AlreadyExists {
 			registerResult = Result{Name: fileName, Status: "Success", Info: fmt.Sprintf("%v", grpcError.String())}
@@ -527,8 +542,8 @@ func getJSONSpec(message proto.Message) string {
 	return jsonSpec
 }
 
-func filterExampleFromRelease(releases github.RepositoryRelease) []github.ReleaseAsset {
-	var assets []github.ReleaseAsset
+func filterExampleFromRelease(releases *github.RepositoryRelease) []*github.ReleaseAsset {
+	var assets []*github.ReleaseAsset
 	for _, v := range releases.Assets {
 		isValid, _ := checkSupportedExtensionForCompress(*v.Name)
 		if isValid {
@@ -538,24 +553,27 @@ func filterExampleFromRelease(releases github.RepositoryRelease) []github.Releas
 	return assets
 }
 
-func getAllFlytesnacksExample(org, repository, version string) ([]github.ReleaseAsset, string, error) {
-	c := github.NewClient(nil)
-	opt := &github.ListOptions{Page: 1, PerPage: 1}
+func getAllExample(repository, version string) ([]*github.ReleaseAsset, *github.RepositoryRelease, error) {
 	if len(version) > 0 {
-		releases, _, err := c.Repositories.GetReleaseByTag(context.Background(), org, repository, version)
+		release, err := githubutil.CheckVersionExist(version, repository)
 		if err != nil {
-			return nil, "", err
+			return nil, nil, err
 		}
-		return filterExampleFromRelease(*releases), version, nil
+		return filterExampleFromRelease(release), release, nil
 	}
-	releases, _, err := c.Repositories.ListReleases(context.Background(), org, repository, opt)
+	releases, err := githubutil.GetListRelease(repository)
 	if err != nil {
-		return nil, "", err
+		return nil, nil, err
 	}
 	if len(releases) == 0 {
-		return nil, "", fmt.Errorf("repository doesn't have any release")
+		return nil, nil, fmt.Errorf("repository doesn't have any release")
 	}
-	return filterExampleFromRelease(*releases[0]), *releases[0].TagName, nil
+	for _, v := range releases {
+		if !*v.Prerelease {
+			return filterExampleFromRelease(v), v, nil
+		}
+	}
+	return nil, nil, nil
 
 }
 

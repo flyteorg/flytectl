@@ -30,15 +30,20 @@ Retrieve executions by name within the project and domain:
 
 Retrieve all the executions with filters:
 ::
- 
- flytectl get execution -p flytesnacks -d development --filter.fieldSelector="execution.phase in (FAILED;SUCCEEDED),execution.duration<200" 
 
- 
+ flytectl get execution -p flytesnacks -d development --filter.fieldSelector="execution.phase in (FAILED;SUCCEEDED),execution.duration<200"
+
+
 Retrieve executions as per the specified limit and sorting parameters:
 ::
-  
+
  flytectl get execution -p flytesnacks -d development --filter.sortBy=created_at --filter.limit=1 --filter.asc
-   
+
+Retrieve executions present in other pages by specifying the limit and page number:
+
+::
+
+ flytectl get -p flytesnacks -d development execution --filter.limit=10 --filter.page=2
 
 Retrieve executions within the project and domain in YAML format:
 

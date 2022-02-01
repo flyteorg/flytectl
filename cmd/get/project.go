@@ -30,13 +30,18 @@ Retrieve project by name:
 
 Retrieve all the projects with filters:
 ::
- 
+
   flytectl get project --filter.fieldSelector="project.name=flytesnacks"
- 
+
 Retrieve all the projects with limit and sorting:
 ::
- 
+
   flytectl get project --filter.sortBy=created_at --filter.limit=1 --filter.asc
+
+Retrieve projects present in other pages by specifying the limit and page number:
+::
+
+  flytectl get project --filter.limit=10 --filter.page=2
 
 Retrieve all the projects in yaml format:
 
@@ -77,10 +82,10 @@ func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandC
 	}
 
 	if len(args) == 1 {
-		name := args[0]
+		id := args[0]
 		logger.Debugf(ctx, "Retrieved %v projects", len(projects.Projects))
 		for _, v := range projects.Projects {
-			if v.Name == name {
+			if v.Id == id {
 				err := adminPrinter.Print(config.GetConfig().MustOutputFormat(), projectColumns, v)
 				if err != nil {
 					return err

@@ -54,6 +54,7 @@ Options
   -h, --help                              help for start
       --image string                      Optional. Provide a fully qualified path to a Flyte compliant docker image.
       --imagePullPolicy ImagePullPolicy   Optional. Defines the image pull behavior [Always/IfNotPresent/Never] (default Always)
+      --pre                               Optional. Pre release Version of flyte will be used for sandbox.
       --source string                     Path of your source code
       --version string                    Version of flyte. Only supports flyte releases greater than v0.10.0
 
@@ -64,8 +65,10 @@ Options inherited from parent commands
 
       --admin.authorizationHeader string           Custom metadata header to pass JWT
       --admin.authorizationServerUrl string        This is the URL to your IdP's authorization server. It'll default to Endpoint
+      --admin.caCertFilePath string                Use specified certificate file to verify the admin server peer.
       --admin.clientId string                      Client ID (default "flytepropeller")
       --admin.clientSecretLocation string          File containing the client secret (default "/etc/secrets/client_secret")
+      --admin.command strings                      Command for external authentication token generation
       --admin.endpoint string                      For admin types,  specify where the uri of the service is located.
       --admin.insecure                             Use insecure connection.
       --admin.insecureSkipVerify                   InsecureSkipVerify controls whether a client verifies the server's certificate chain and host name. Caution : shouldn't be use for production usecases'
