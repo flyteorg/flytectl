@@ -93,7 +93,7 @@ The spec file should be generated first and then, the execution should be run us
 
  flytectl get task -d development -p flytectldemo  core.type_system.custom_objects.add --execFile adddatanum.yaml
 
-The generated file would look similar to this. Here, empty values have been dumped for generic data type `x` and `y`. 
+The generated file would look similar to this. Here, empty values have been dumped for generic data type 'x' and 'y'. 
 
 ::
 
@@ -107,7 +107,7 @@ The generated file would look similar to this. Here, empty values have been dump
     task: core.type_system.custom_objects.add
     version: v3
 
-Modified file with struct data populated for `x` and `y` parameters for the task `core.type_system.custom_objects.add`:
+Modified file with struct data populated for 'x' and 'y' parameters for the task "core.type_system.custom_objects.add":
 
 ::
 
