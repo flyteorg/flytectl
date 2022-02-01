@@ -21,7 +21,7 @@ import (
 func TestCreateInitCommand(t *testing.T) {
 	configCmd := CreateConfigCommand()
 	assert.Equal(t, configCmd.Use, "config")
-	assert.Equal(t, configCmd.Short, "Run various config commands, look at the help of this command to get a list of available commands..")
+	assert.Equal(t, configCmd.Short, "Runs various config commands, look at the help of this command to get a list of available commands..")
 	fmt.Println(configCmd.Commands())
 	assert.Equal(t, len(configCmd.Commands()), 3)
 	cmdNouns := configCmd.Commands()
@@ -31,11 +31,11 @@ func TestCreateInitCommand(t *testing.T) {
 	})
 
 	assert.Equal(t, cmdNouns[0].Use, "discover")
-	assert.Equal(t, cmdNouns[0].Short, "Search for a config in one of the default search paths.")
+	assert.Equal(t, cmdNouns[0].Short, "Searches for a config in one of the default search paths.")
 	assert.Equal(t, cmdNouns[1].Use, "init")
 	assert.Equal(t, cmdNouns[1].Short, initCmdShort)
 	assert.Equal(t, cmdNouns[2].Use, "validate")
-	assert.Equal(t, cmdNouns[2].Short, "Validate the loaded config.")
+	assert.Equal(t, cmdNouns[2].Short, "Validates the loaded config.")
 
 }
 
