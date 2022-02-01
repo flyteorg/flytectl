@@ -13,7 +13,7 @@ import (
 const (
 	executionClusterLabelShort = "Get matchable resources of execution cluster label."
 	executionClusterLabelLong  = `
-Retrieves the execution cluster label for a given project and domain, combination or additionally with workflow name.
+Retrieve the execution cluster label for a given project and domain, combination or additionally with workflow name.
 
 For project flytectldemo and development domain, it is:
 ::

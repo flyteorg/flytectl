@@ -17,7 +17,7 @@ import (
 const (
 	projectShort = "Get project resources"
 	projectLong  = `
-Retrieve all the projects. (project,projects can be used interchangeably in these commands):
+Retrieve all the projects. (project/projects can be used interchangeably in these commands):
 ::
 
  flytectl get project

@@ -12,7 +12,7 @@ import (
 const (
 	executionQueueAttributesShort = "Update matchable resources of execution queue attributes"
 	executionQueueAttributesLong  = `
-Updates execution queue attributes for the given project and domain combination or additionally with workflow name.
+Update execution queue attributes for the given project and domain combination or additionally with workflow name.
 
 Updating the execution queue attribute is only available from a generated file. See the get section for generating this file.
 This will completely overwrite any existing custom project, domain and workflow combination attributes.
@@ -35,7 +35,7 @@ e.g., content of era.yaml:
 
  flytectl update execution-queue-attribute --attrFile era.yaml
 
-Updates execution queue attribute for project, domain and workflow combination. This will take precedence over any other
+Update execution queue attribute for project, domain and workflow combination. This will take precedence over any other
 execution queue attribute defined at project domain level.
 For workflow 'core.control_flow.run_merge_sort.merge_sort' in flytectldemo project, development domain, it is:
 

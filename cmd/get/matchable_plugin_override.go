@@ -13,7 +13,7 @@ import (
 const (
 	pluginOverrideShort = "Get matchable resources of plugin override"
 	pluginOverrideLong  = `
-Retrieves the plugin override for the given project and domain.
+Retrieve the plugin override for the given project and domain.
 For project flytectldemo and development domain, it is:
 
 ::
@@ -34,7 +34,7 @@ e.g., output from the command
 	}]
  }
 
-Retrieves the plugin override for the given project, domain and workflow.
+Retrieve the plugin override for the given project, domain and workflow.
 For project flytectldemo, development domain and workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
 
 ::
@@ -56,7 +56,7 @@ e.g., output from the command:
 	}]
  }
 
-Write plugin overrides to a file. If there are no plugin overrides, the command returns an error.
+Write plugin overrides to a file. If there are no plugin overrides, the command throws an error.
 Here, the config file is written to po.yaml,
 e.g., content of po.yaml:
 

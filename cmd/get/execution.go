@@ -17,7 +17,7 @@ import (
 const (
 	executionShort = "Get execution resources"
 	executionLong  = `
-Retrieve all executions within the project and domain (execution, executions can be used interchangeably):
+Retrieve all executions within the project and domain (execution/executions can be used interchangeably):
 ::
 
  flytectl get execution -p flytesnacks -d development

@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	statusShort = "Get status of the sandbox environment."
+	statusShort = "Get the status of the Sandbox environment."
 	statusLong  = `
 Retrieve the status of the Sandbox environment. Currently, Flyte Sandbox runs as a local Docker container.
 

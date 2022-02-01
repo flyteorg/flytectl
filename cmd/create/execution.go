@@ -13,16 +13,16 @@ import (
 const (
 	executionShort = "Create execution resources"
 	executionLong  = `
-Creates executions for a given workflow/task in a project and domain.
+Create executions for a given workflow/task in a project and domain.
 
 There are three steps in generating an execution:
 
 - Generate the execution spec file using the get command.
 - Update the inputs for the execution if needed.
-- Run the execution by passing in the generated yaml file.
+- Run the execution by passing the generated yaml file.
 
 The spec file should be generated first and then, the execution should be run using the spec file.
-You can reference the FlyteCTL get task for more details.
+You can reference the FlyteCTL :ref:` + "`get task <get_task_resources>`" + ` for more details.
 
 ::
 
@@ -67,13 +67,13 @@ The generated file can be modified to change the input values.
 
 It can then be passed through the command line.
 Notice that the source and target domain/projects can be different.
-The root project and domain flags of -p and -d should point to the task/launch plans project/domain.
+The root project and domain flags of `-p` and `-d` should point to the task/launch plans project/domain.
 
 ::
 
  flytectl create execution --execFile execution_spec.yaml -p flytectldemo -d development --targetProject flytesnacks
 
-Also, an execution can be relaunched by passing in the current execution id.
+Also, an execution can be relaunched by passing the current execution id.
 
 ::
 
@@ -93,7 +93,7 @@ The spec file should be generated first and then, the execution should be run us
 
  flytectl get task -d development -p flytectldemo  core.type_system.custom_objects.add --execFile adddatanum.yaml
 
-The generated file would look similar to this. Here, empty values have been dumped for generic data type x and y. 
+The generated file would look similar to this. Here, empty values have been dumped for generic data type `x` and `y`. 
 
 ::
 
@@ -107,7 +107,7 @@ The generated file would look similar to this. Here, empty values have been dump
     task: core.type_system.custom_objects.add
     version: v3
 
-Modified file with struct data populated for x and y parameters for the task core.type_system.custom_objects.add
+Modified file with struct data populated for `x` and `y` parameters for the task `core.type_system.custom_objects.add`:
 
 ::
 

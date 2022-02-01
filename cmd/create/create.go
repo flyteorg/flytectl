@@ -9,7 +9,7 @@ import (
 
 // Long descriptions are whitespace sensitive when generating docs using Sphinx.
 const (
-	createCmdShort = `Create various Flyte resources including tasks/workflows/launchplans/executions/project.`
+	createCmdShort = `Create various Flyte resources such as tasks, workflows, launchplans, executions, project.`
 	createCmdLong  = `
 Create Flyte resource; if a project:
 ::

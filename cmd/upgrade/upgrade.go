@@ -33,14 +33,16 @@ For FlyteCTL, it is:
 
  flytectl upgrade
 	
-Note: Please use upgrade with sudo. Without sudo it will cause permission issue.
+.. note::
+	Please use upgrade with sudo. Without sudo it will cause permission issue.
 	
 Rollback flytectl binary:
 ::
 
  flytectl upgrade rollback
 
-Note: Upgrade is not available on windows.
+.. note:: 
+	Upgrade is not available on windows.
 `
 	rollBackSubCommand = "rollback"
 )

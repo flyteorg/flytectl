@@ -21,7 +21,7 @@ import (
 const (
 	versionCmdShort = `Fetch Flyte version`
 	versionCmdLong  = `
-For FlyteCTL version, it is:
+Fetch FlyteCTL version:
 ::
 
  flytectl version

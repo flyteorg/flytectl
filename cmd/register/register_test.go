@@ -27,7 +27,7 @@ var setup = u.Setup
 func TestRegisterCommand(t *testing.T) {
 	registerCommand := RemoteRegisterCommand()
 	assert.Equal(t, registerCommand.Use, "register")
-	assert.Equal(t, registerCommand.Short, "Register tasks/workflows/launchplans from a list of generated serialized files.")
+	assert.Equal(t, registerCommand.Short, "Register tasks, workflows, launch plans from a list of generated serialized files.")
 	fmt.Println(registerCommand.Commands())
 	assert.Equal(t, len(registerCommand.Commands()), 2)
 	cmdNouns := registerCommand.Commands()
