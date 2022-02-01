@@ -67,7 +67,7 @@ The generated file can be modified to change the input values.
 
 It can then be passed through the command line.
 Notice that the source and target domain/projects can be different.
-The root project and domain flags of `-p` and `-d` should point to the task/launch plans project/domain.
+The root project and domain flags of ``-p`` and ``-d`` should point to the task/launch plans project/domain.
 
 ::
 

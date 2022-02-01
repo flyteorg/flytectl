@@ -28,7 +28,7 @@ const (
 	initCmdShort = `Generate FlyteCTL config file in the user's home directory.`
 	initCmdLong  = `Create a FlyteCTL config file in Flyte directory i.e ~/.flyte
 	
-Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox :ref:`here <https://docs.flyte.org/en/latest/deployment/sandbox.html>`.
+Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about Sandbox :ref:` + "`here <https://docs.flyte.org/en/latest/deployment/sandbox.html>`" + `.
 
 ::
 
