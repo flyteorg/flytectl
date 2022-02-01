@@ -13,7 +13,7 @@ import (
 const (
 	pluginOverrideShort = "Get matchable resources of plugin override"
 	pluginOverrideLong  = `
-Retrieves the plugin override for the given project and domain.
+Retrieve the plugin override for the given project and domain.
 For project flytectldemo and development domain, it is:
 
 ::
@@ -34,8 +34,8 @@ e.g., output from the command
 	}]
  }
 
-Retrieves the plugin override for the given project, domain and workflow.
-For project flytectldemo, development domain and workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
+Retrieve the plugin override for the given project, domain and workflow.
+For project flytectldemo, development domain and workflow `core.control_flow.run_merge_sort.merge_sort`, it is:
 
 ::
 

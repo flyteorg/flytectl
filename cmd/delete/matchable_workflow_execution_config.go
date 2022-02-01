@@ -14,7 +14,7 @@ import (
 const (
 	workflowExecutionConfigShort = "Delete matchable resources of workflow execution config"
 	workflowExecutionConfigLong  = `
-Deletes workflow execution config for the given project and domain combination or additionally with workflow name.
+Delete workflow execution config for the given project and domain combination or additionally with workflow name.
 
 For project flytectldemo and development domain, it is:
 ::
@@ -22,7 +22,7 @@ For project flytectldemo and development domain, it is:
  flytectl delete workflow-execution-config -p flytectldemo -d development 
 
 
-Deletes workflow execution config using config file which was used to create it.
+Delete workflow execution config using config file which was used to create it.
 Here, the config file is written to wec.yaml.
 Max_parallelism is optional in the file as it is unread during the delete command but can be kept since the same file can be used for get, update or delete commands.
 e.g., content of wec.yaml:
@@ -38,8 +38,8 @@ e.g., content of wec.yaml:
     project: flytectldemo
     max_parallelism: 5
 
-Deletes workflow execution config for a workflow.
-For the workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
+Delete workflow execution config for a workflow.
+For the workflow `core.control_flow.run_merge_sort.merge_sort`, it is:
 
 ::
 

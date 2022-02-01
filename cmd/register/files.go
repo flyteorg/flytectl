@@ -16,7 +16,7 @@ import (
 const (
 	registerFilesShort = "Register file resources"
 	registerFilesLong  = `
-Registers all the serialized protobuf files including tasks, workflows and launchplans with default v1 version.
+Register all the serialized protobuf files including tasks, workflows and launchplans with default v1 version.
 If previously registered entities with v1 version are present, the command will fail immediately on the first such encounter.
 ::
 

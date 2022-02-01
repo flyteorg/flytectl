@@ -13,7 +13,7 @@ import (
 const (
 	executionQueueAttributesShort = "Get matchable resources of execution queue attributes"
 	executionQueueAttributesLong  = `
-Retrieves the execution queue attribute for the given project and domain.
+Retrieve the execution queue attribute for the given project and domain.
 For project flytectldemo and development domain, it is:
 ::
 
@@ -25,8 +25,8 @@ e.g., output from the command
 
  {"project":"flytectldemo","domain":"development","tags":["foo", "bar"]}
 
-Retrieves the execution queue attribute for the given project, domain, and workflow.
-For project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
+Retrieve the execution queue attribute for the given project, domain, and workflow.
+For project flytectldemo, development domain, and workflow `core.control_flow.run_merge_sort.merge_sort`, it is:
 ::
 
  flytectl get execution-queue-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort

@@ -49,7 +49,8 @@ Run specific version of Flyte. FlyteCTL sandbox only supports Flyte version avai
 
  flytectl sandbox start  --version=v0.14.0
 
-Note: FlyteCTL sandbox is only supported for Flyte versions > v0.10.0
+.. note::
+    FlyteCTL sandbox is only supported for Flyte versions > v0.10.0
 
 Specify a Flyte Sandbox compliant image with the registry. This is useful in case you want to use an image from your registry.
 ::

@@ -13,7 +13,7 @@ import (
 const (
 	executionClusterLabelShort = "Get matchable resources of execution cluster label."
 	executionClusterLabelLong  = `
-Retrieves the execution cluster label for a given project and domain, combination or additionally with workflow name.
+Retrieve the execution cluster label for a given project and domain, combination or additionally with workflow name.
 
 For project flytectldemo and development domain, it is:
 ::
@@ -27,7 +27,7 @@ e.g., output from the command
  {"project":"flytectldemo","domain":"development","value":"foo"}
 
 Retrieve the execution cluster label for the given project, domain and workflow.
-For project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
+For project flytectldemo, development domain, and workflow `core.control_flow.run_merge_sort.merge_sort`, it is:
 ::
 
  flytectl get execution-cluster-label -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort

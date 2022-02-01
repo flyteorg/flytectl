@@ -24,8 +24,8 @@ import (
 
 // Long descriptions are whitespace sensitive when generating docs using Sphinx.
 const (
-	initCmdShort = `Generates FlyteCTL config file in the user's home directory.`
-	initCmdLong  = `Creates a FlyteCTL config file in Flyte directory i.e ~/.flyte
+	initCmdShort = `Generate FlyteCTL config file in the user's home directory.`
+	initCmdLong  = `Create a FlyteCTL config file in Flyte directory i.e ~/.flyte
 	
 Generates sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about sandbox `here <https://docs.flyte.org/en/latest/deployment/sandbox.html>`_.
 

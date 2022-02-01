@@ -25,7 +25,9 @@ Register specific release of Flytesnacks examples:
 
  flytectl register examples  -d development  -p flytesnacks --version v0.2.176
 	
-Note: The register command automatically override the version with release version	
+.. note::
+    The register command automatically overrides the version with release version.	
+
 Usage
 `
 )
