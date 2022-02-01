@@ -1,4 +1,3 @@
-`.. _get_workflow_execution_config:`
 package get
 
 import (
