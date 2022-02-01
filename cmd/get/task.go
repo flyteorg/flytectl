@@ -1,4 +1,3 @@
-`.. _get_task_resources:`
 package get
 
 import (
