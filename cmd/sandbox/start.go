@@ -161,7 +161,8 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}
 
 	volumes := docker.Volumes
-	if vol, err := mountVolume(sandboxConfig.DefaultConfig.Source, docker.Source); err != nil {
+	sandboxDefaultConfig := sandboxConfig.DefaultConfig
+	if vol, err := mountVolume(sandboxDefaultConfig.Source, docker.Source); err != nil {
 		return nil, err
 	} else if vol != nil {
 		volumes = append(volumes, *vol)
@@ -182,7 +183,9 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 
 	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
-	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, sandboxImage)
+	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName,
+		sandboxImage, sandboxDefaultConfig.Env)
+
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)
 		return nil, err

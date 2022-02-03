@@ -25,6 +25,7 @@ func (i ImagePullPolicy) Type() string {
 	return "ImagePullPolicy"
 }
 
+// DONOT regenerate until the following is fixed https://github.com/flyteorg/flyte/issues/2119
 //go:generate pflags Config --default-var DefaultConfig --bind-default-var
 var (
 	DefaultConfig = &Config{}
@@ -46,6 +47,9 @@ type Config struct {
 
 	// Default value false represents that flytectl will not use latest pre release if exist
 	Prerelease bool `json:"pre" pflag:",Optional. Pre release Version of flyte will be used for sandbox."`
+
+	// Optionally it is possible to pass in environment variables to sandbox container.
+	Env []string `json:"env" pflag:",Optional. Provide Env variable in key=value format which can be passed to sandbox container."`
 
 	// Optionally it is possible to use local sandbox image
 	// If local flag pass then flytectl will not pull image from registry. Usually useful, if you want to test your local images without pushing them to a registry
