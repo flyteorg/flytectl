@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/flyteorg/flytectl/clierrors"
-	"github.com/flyteorg/flytectl/pkg/util/githubutil"
+	"github.com/flyteorg/flytectl/pkg/githubutil"
 
 	"github.com/avast/retry-go"
 	"github.com/olekukonko/tablewriter"

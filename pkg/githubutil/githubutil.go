@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/flyteorg/flytectl/pkg/util/platformutil"
+	"github.com/flyteorg/flytectl/pkg/platformutil"
 	stdlibversion "github.com/flyteorg/flytestdlib/version"
 	"github.com/mouuff/go-rocket-update/pkg/provider"
 	"github.com/mouuff/go-rocket-update/pkg/updater"
