@@ -5,8 +5,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/flyteorg/flytectl/pkg/util"
 	"github.com/flyteorg/flytectl/pkg/githubutil"
+	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/flyteorg/flytectl/pkg/platformutil"
 
