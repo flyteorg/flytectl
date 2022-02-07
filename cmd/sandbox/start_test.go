@@ -89,7 +89,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		sandboxConfig.DefaultConfig.Version = "v0.19.1"
 		bodyStatus := make(chan container.ContainerWaitOKBody)
-		image, _, err := githubutil.GetFullyQualifiedImageName("", sandboxImageName, false)
+		image, _, err := githubutil.GetFullyQualifiedImageName(sandboxConfig.DefaultConfig.Version, sandboxImageName, false)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
