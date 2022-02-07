@@ -1,0 +1,26 @@
+name: Upgrade Automation
+on:
+  workflow_dispatch:
+
+jobs:
+  trigger-flyteidl-upgrade:
+    name: Flyteidl Upgrade
+    uses: flyteorg/flytetools/.github/workflows/flyte_automation.yml@reuseable
+    with:
+      component: flyteidl
+    secrets:
+      FLYTE_BOT_PAT: ${{ secrets.FLYTE_BOT_PAT }}
+
+  trigger-flytestdlib-upgrade:
+    name: Flytestdlib Upgrade
+    uses: flyteorg/flytetools/.github/workflows/flyte_automation.yml@reuseable
+    with:
+      component: flytestdlib
+    secrets:
+      FLYTE_BOT_PAT: ${{ secrets.FLYTE_BOT_PAT }}
+
+  trigger-boilerplate-upgrade:
+    name: ${{ github.event.inputs.component }} Upgrade
+    uses: flyteorg/flytetools/.github/workflows/boilerplate_upgrade.yml@reuseable
+    secrets:
+      FLYTE_BOT_PAT: ${{ secrets.FLYTE_BOT_PAT }}

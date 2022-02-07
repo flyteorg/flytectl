@@ -1,0 +1,91 @@
+name: Bump Version
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - "docs/**"
+      - "boilerplate/**"
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - "docs/**"
+      - "boilerplate/**"
+
+jobs:
+  lint:
+    name: Lint
+    uses: flyteorg/flytetools/.github/workflows/lint.yml@reuseable
+
+  tests:
+    name: Unit Tests
+    uses: flyteorg/flytetools/.github/workflows/tests.yml@reuseable
+
+  generate:
+    name: Check Go Gennerate
+    uses: flyteorg/flytetools/.github/workflows/go_generate.yml@reuseable
+
+  dry_run_goreleaser:
+    name: Dry Run Goreleaser
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: "2"
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+      - uses: actions/setup-go@v2
+        with:
+          go-version: '1.17'
+      - name: Run GoReleaser dry run
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: --snapshot  --skip-publish --rm-dist
+
+  sandbox:
+    name: Test Getting started
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+      - name: Build Flytectl binary
+        run: make compile
+      - name: Create a sandbox cluster
+        run: bin/flytectl sandbox start
+      - name: Setup flytectl config
+        run: bin/flytectl config init
+      - name: Register cookbook
+        run: bin/flytectl register examples -d development  -p flytesnacks
+      - name: Teardown Sandbox cluster
+        run: bin/flytectl sandbox teardown
+
+  bump_version:
+    name: Bump Version
+    if: ${{ github.event_name != 'pull_request' }}
+    needs: [ lint, tests, generate, dry_run_goreleaser ] # Only to ensure it can successfully build
+    uses: flyteorg/flytetools/.github/workflows/bump_version.yml@reuseable
+    secrets:
+      FLYTE_BOT_PAT: ${{ secrets.FLYTE_BOT_PAT }}
+
+  goreleaser:
+    name: Goreleaser
+    needs: [ bump_version ] # Only to ensure it can successfully build
+    uses: flyteorg/flytetools/.github/workflows/goreleaser.yml@reuseable
+    secrets:
+      FLYTE_BOT_PAT: ${{ secrets.FLYTE_BOT_PAT }}
+
