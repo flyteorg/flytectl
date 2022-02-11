@@ -88,9 +88,6 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	if err != nil {
 		return err
 	}
-	if projectSpec.Id != config.GetConfig().Project {
-		return fmt.Errorf(clierrors.ErrProjectNotPassed)
-	}
 	if projectSpec.Id == "" {
 		return fmt.Errorf(clierrors.ErrProjectNotPassed)
 	}
