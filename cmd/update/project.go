@@ -88,11 +88,11 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	if err != nil {
 		return err
 	}
-	if projectSpec.Id == "" {
+	if projectSpec.Id != config.GetConfig().Project {
 		return fmt.Errorf(clierrors.ErrProjectNotPassed)
 	}
-	if projectSpec.Name == "" {
-		return fmt.Errorf(clierrors.ErrProjectNameNotPassed)
+	if projectSpec.Id == "" {
+		return fmt.Errorf(clierrors.ErrProjectNotPassed)
 	}
 
 	state, err := project.DefaultProjectConfig.MapToAdminState()
