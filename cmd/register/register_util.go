@@ -15,6 +15,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/flyteorg/flytectl/pkg/util"
+
 	"github.com/flyteorg/flytectl/pkg/util/githubutil"
 
 	"github.com/flyteorg/flytestdlib/contextutils"
@@ -553,14 +555,29 @@ func filterExampleFromRelease(releases *github.RepositoryRelease) []*github.Rele
 	return assets
 }
 
+func checkCompatibility(release *github.RepositoryRelease) error {
+	isGreater, err := util.IsVersionGreaterThan(release.GetTagName(), "v0.2.89")
+	if err != nil {
+		return err
+	}
+	if !isGreater {
+		return fmt.Errorf("Flytesnacks register example is only available for v0.2.89+")
+	}
+	return nil
+}
+
 func getAllExample(repository, version string) ([]*github.ReleaseAsset, *github.RepositoryRelease, error) {
 	if len(version) > 0 {
 		release, err := githubutil.CheckVersionExist(version, repository)
 		if err != nil {
 			return nil, nil, err
 		}
+		if err := checkCompatibility(release); err != nil {
+			return nil, nil, err
+		}
 		return filterExampleFromRelease(release), release, nil
 	}
+
 	releases, err := githubutil.GetListRelease(repository)
 	if err != nil {
 		return nil, nil, err
@@ -568,12 +585,15 @@ func getAllExample(repository, version string) ([]*github.ReleaseAsset, *github.
 	if len(releases) == 0 {
 		return nil, nil, fmt.Errorf("repository doesn't have any release")
 	}
-	for _, v := range releases {
-		if !*v.Prerelease {
-			return filterExampleFromRelease(v), v, nil
+	for i := len(releases) - 1; i >= 0; i-- {
+		if !*releases[i].Prerelease {
+			if err := checkCompatibility(releases[i]); err != nil {
+				return nil, nil, err
+			}
+			return filterExampleFromRelease(releases[i]), releases[i], nil
 		}
 	}
-	return nil, nil, nil
+	return nil, nil, fmt.Errorf("release not found")
 
 }
 

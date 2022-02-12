@@ -9,6 +9,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/flyteorg/flytectl/pkg/util/githubutil"
+
 	"github.com/flyteorg/flytestdlib/utils"
 
 	v1 "k8s.io/api/core/v1"
@@ -549,4 +551,18 @@ func TestHydrateTaskSpec(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, hydratedPodSpec.Containers[1].Args, 2)
 	assert.True(t, strings.HasSuffix(hydratedPodSpec.Containers[1].Args[1], "sourcey"))
+}
+
+func TestCheckCompatibility(t *testing.T) {
+
+	t.Run("Successful run checkCompatibility", func(t *testing.T) {
+		release, err := githubutil.CheckVersionExist("v0.3.42", "flytesnacks")
+		assert.Nil(t, err)
+		assert.Nil(t, checkCompatibility(release))
+	})
+	t.Run("Failed run checkCompatibility", func(t *testing.T) {
+		release, err := githubutil.CheckVersionExist("v0.1.2", "flytesnacks")
+		assert.Nil(t, err)
+		assert.NotNil(t, checkCompatibility(release))
+	})
 }
