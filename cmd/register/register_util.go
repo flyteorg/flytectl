@@ -561,7 +561,7 @@ func getAllExample(repository, version string) ([]*github.ReleaseAsset, *github.
 		}
 		return filterExampleFromRelease(release), release, nil
 	}
-	release, err := githubutil.GetLatestRelease(repository)
+	release, err := githubutil.GetLatestVersion(repository)
 	if err != nil {
 		return nil, nil, err
 	}

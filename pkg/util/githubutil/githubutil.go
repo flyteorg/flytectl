@@ -65,17 +65,21 @@ func GetGHClient() *github.Client {
 	return github.NewClient(&http.Client{})
 }
 
-// GetLatestVersion returns the latest version of provided repository
-func GetLatestVersion(repository string) (*github.RepositoryRelease, error) {
+// GetListRelease returns the list of release of provided repository
+func GetListRelease(repository string) ([]*github.RepositoryRelease, error) {
 	client := GetGHClient()
-	release, _, err := client.Repositories.GetLatestRelease(context.Background(), owner, repository)
+	releases, _, err := client.Repositories.ListReleases(context.Background(), owner, repository, &github.ListOptions{
+		PerPage: 100,
+	})
 	if err != nil {
 		return nil, err
 	}
-	return release, err
+	return releases, err
 }
 
-func GetLatestRelease(repository string) (*github.RepositoryRelease, error) {
+// GetLatestVersion returns the latest non-prerelease version of provided repository, as
+// described in https://docs.github.com/en/rest/reference/releases#get-the-latest-release
+func GetLatestVersion(repository string) (*github.RepositoryRelease, error) {
 	client := GetGHClient()
 	release, _, err := client.Repositories.GetLatestRelease(context.Background(), owner, repository)
 	if err != nil {
