@@ -578,22 +578,14 @@ func getAllExample(repository, version string) ([]*github.ReleaseAsset, *github.
 		return filterExampleFromRelease(release), release, nil
 	}
 
-	releases, err := githubutil.GetListRelease(repository)
+	release, err := githubutil.GetLatestVersion(repository)
 	if err != nil {
 		return nil, nil, err
 	}
-	if len(releases) == 0 {
-		return nil, nil, fmt.Errorf("repository doesn't have any release")
+	if err := checkCompatibility(release); err != nil {
+		return nil, nil, err
 	}
-	for i := len(releases) - 1; i >= 0; i-- {
-		if !*releases[i].Prerelease {
-			if err := checkCompatibility(releases[i]); err != nil {
-				return nil, nil, err
-			}
-			return filterExampleFromRelease(releases[i]), releases[i], nil
-		}
-	}
-	return nil, nil, fmt.Errorf("release not found")
+	return filterExampleFromRelease(release), release, nil
 
 }
 
