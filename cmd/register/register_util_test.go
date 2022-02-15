@@ -471,6 +471,11 @@ func TestGetAllFlytesnacksExample(t *testing.T) {
 		assert.Greater(t, len(*r.TagName), 0)
 		assert.Greater(t, len(assets), 0)
 	})
+	t.Run("Wrong release", func(t *testing.T) {
+		_, _, err := getAllExample("flytesnacks", "v0.2.53")
+		assert.NotNil(t, err)
+		assert.Equal(t, fmt.Errorf("Flytesnacks register example is only available for v0.2.89+"), err)
+	})
 }
 
 func TestRegister(t *testing.T) {

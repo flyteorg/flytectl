@@ -582,9 +582,6 @@ func getAllExample(repository, version string) ([]*github.ReleaseAsset, *github.
 	if err != nil {
 		return nil, nil, err
 	}
-	if err := checkCompatibility(release); err != nil {
-		return nil, nil, err
-	}
 	return filterExampleFromRelease(release), release, nil
 
 }
