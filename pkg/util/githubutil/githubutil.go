@@ -65,6 +65,17 @@ func GetGHClient() *github.Client {
 	return github.NewClient(&http.Client{})
 }
 
+// GetLatestVersion returns the latest non-prerelease version of provided repository, as
+// described in https://docs.github.com/en/rest/reference/releases#get-the-latest-release
+func GetLatestVersion(repository string) (*github.RepositoryRelease, error) {
+	client := GetGHClient()
+	release, _, err := client.Repositories.GetLatestRelease(context.Background(), owner, repository)
+	if err != nil {
+		return nil, err
+	}
+	return release, err
+}
+
 // GetListRelease returns the list of release of provided repository
 func GetListRelease(repository string) ([]*github.RepositoryRelease, error) {
 	client := GetGHClient()
@@ -75,17 +86,6 @@ func GetListRelease(repository string) ([]*github.RepositoryRelease, error) {
 		return nil, err
 	}
 	return releases, err
-}
-
-// GetLatestVersion returns the latest non-prerelease version of provided repository, as
-// described in https://docs.github.com/en/rest/reference/releases#get-the-latest-release
-func GetLatestVersion(repository string) (*github.RepositoryRelease, error) {
-	client := GetGHClient()
-	release, _, err := client.Repositories.GetLatestRelease(context.Background(), owner, repository)
-	if err != nil {
-		return nil, err
-	}
-	return release, err
 }
 
 // GetSandboxImageSha returns the sha as per input
