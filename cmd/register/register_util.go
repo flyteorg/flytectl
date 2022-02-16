@@ -330,9 +330,7 @@ func leftDiff(a, b []string) []string {
 	}
 
 	for _, item := range b {
-		if _, ok := m[item]; ok {
-			delete(m, item)
-		}
+		delete(m, item)
 	}
 	// nil semantics on return
 	if len(m) == 0 {
