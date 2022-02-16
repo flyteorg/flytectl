@@ -583,7 +583,6 @@ func getAllExample(repository, version string) ([]*github.ReleaseAsset, *github.
 		return nil, nil, err
 	}
 	return filterExampleFromRelease(release), release, nil
-
 }
 
 func getRemoteStoragePath(ctx context.Context, s *storage.DataStore, remoteLocation, file, identifier string) (storage.DataReference, error) {
