@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
@@ -549,4 +550,177 @@ func TestHydrateTaskSpec(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Len(t, hydratedPodSpec.Containers[1].Args, 2)
 	assert.True(t, strings.HasSuffix(hydratedPodSpec.Containers[1].Args[1], "sourcey"))
+}
+
+func TestLeftDiff(t *testing.T) {
+	t.Run("empty slices", func(t *testing.T) {
+		c := leftDiff(nil, nil)
+		assert.Empty(t, c)
+	})
+	t.Run("right empty slice", func(t *testing.T) {
+		a := []string{"1", "2", "3"}
+		c := leftDiff(a, nil)
+		sort.Strings(a)
+		sort.Strings(c)
+		assert.Equal(t, a, c)
+	})
+	t.Run("non empty slices without intersection", func(t *testing.T) {
+		a := []string{"1", "2", "3"}
+		b := []string{"5", "6", "7"}
+		c := leftDiff(a, b)
+		sort.Strings(a)
+		sort.Strings(c)
+		assert.Equal(t, a, c)
+	})
+	t.Run("non empty slices with some intersection", func(t *testing.T) {
+		a := []string{"1", "2", "3"}
+		b := []string{"2", "5", "7"}
+		c := leftDiff(a, b)
+		expected := []string{"1", "3"}
+		sort.Strings(expected)
+		sort.Strings(c)
+		assert.Equal(t, expected, c)
+	})
+
+	t.Run("non empty slices with full intersection same order", func(t *testing.T) {
+		a := []string{"1", "2", "3"}
+		b := []string{"1", "2", "3"}
+		c := leftDiff(a, b)
+		var expected []string
+		sort.Strings(c)
+		assert.Equal(t, expected, c)
+	})
+
+	t.Run("non empty slices with full intersection diff order", func(t *testing.T) {
+		a := []string{"1", "2", "3"}
+		b := []string{"2", "3", "1"}
+		c := leftDiff(a, b)
+		var expected []string
+		sort.Strings(c)
+		assert.Equal(t, expected, c)
+	})
+}
+
+func TestValidateLaunchSpec(t *testing.T) {
+	t.Run("nil launchplan spec", func(t *testing.T) {
+		err := validateLaunchSpec(nil)
+		assert.Nil(t, err)
+	})
+	t.Run("launchplan spec with empty metadata", func(t *testing.T) {
+		lpSpec := &admin.LaunchPlanSpec{}
+		err := validateLaunchSpec(lpSpec)
+		assert.Nil(t, err)
+	})
+	t.Run("launchplan spec with metadata and empty schedule", func(t *testing.T) {
+		lpSpec := &admin.LaunchPlanSpec{
+			EntityMetadata: &admin.LaunchPlanMetadata{},
+		}
+		err := validateLaunchSpec(lpSpec)
+		assert.Nil(t, err)
+	})
+	t.Run("launchplan spec with metadata and non empty schedule", func(t *testing.T) {
+		lpSpec := &admin.LaunchPlanSpec{
+			EntityMetadata: &admin.LaunchPlanMetadata{
+				Schedule: &admin.Schedule{
+					KickoffTimeInputArg: "kick_off_time_arg",
+				},
+			},
+			DefaultInputs: &core.ParameterMap{
+				Parameters: map[string]*core.Parameter{
+					"a": getDefaultIntegerParam(),
+				},
+			},
+		}
+		err := validateLaunchSpec(lpSpec)
+		assert.Nil(t, err)
+	})
+	t.Run("launchplan spec non empty schedule required param fail", func(t *testing.T) {
+		lpSpec := &admin.LaunchPlanSpec{
+			EntityMetadata: &admin.LaunchPlanMetadata{
+				Schedule: &admin.Schedule{
+					KickoffTimeInputArg: "kick_off_time_arg",
+				},
+			},
+			DefaultInputs: &core.ParameterMap{
+				Parameters: map[string]*core.Parameter{
+					"a": getRequiredStringParam(),
+				},
+			},
+		}
+		err := validateLaunchSpec(lpSpec)
+		assert.NotNil(t, err)
+		assert.Equal(t, "param values are missing on scheduled workflow for the following params [a]."+
+			" Either specify them having a default or fixed value", err.Error())
+	})
+	t.Run("launchplan spec non empty schedule required param success", func(t *testing.T) {
+		lpSpec := &admin.LaunchPlanSpec{
+			EntityMetadata: &admin.LaunchPlanMetadata{
+				Schedule: &admin.Schedule{
+					KickoffTimeInputArg: "kick_off_time_arg",
+				},
+			},
+			DefaultInputs: &core.ParameterMap{
+				Parameters: map[string]*core.Parameter{
+					"a": getRequiredStringParam(),
+				},
+			},
+			FixedInputs: &core.LiteralMap{
+				Literals: map[string]*core.Literal{
+					"a": {
+						Value: &core.Literal_Scalar{
+							Scalar: &core.Scalar{
+								Value: &core.Scalar_Primitive{
+									Primitive: &core.Primitive{
+										Value: &core.Primitive_Integer{
+											Integer: 100,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		err := validateLaunchSpec(lpSpec)
+		assert.Nil(t, err)
+	})
+}
+
+func getRequiredStringParam() *core.Parameter {
+	return &core.Parameter{
+		Var: &core.Variable{
+			Type: &core.LiteralType{
+				Type: &core.LiteralType_Simple{Simple: core.SimpleType_STRING},
+			},
+		},
+		Behavior: &core.Parameter_Required{
+			Required: true,
+		},
+	}
+}
+
+func getDefaultIntegerParam() *core.Parameter {
+	return &core.Parameter{
+		Var: &core.Variable{
+			Type: &core.LiteralType{
+				Type: &core.LiteralType_Simple{Simple: core.SimpleType_INTEGER},
+			},
+		},
+		Behavior: &core.Parameter_Default{
+			Default: &core.Literal{
+				Value: &core.Literal_Scalar{
+					Scalar: &core.Scalar{
+						Value: &core.Scalar_Primitive{
+							Primitive: &core.Primitive{
+								Value: &core.Primitive_Integer{
+									Integer: 100,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
 }

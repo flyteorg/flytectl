@@ -275,32 +275,76 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode, sourceUploadPath, version
 	return nil
 }
 
+func validateLPWithSchedule(lpSpec *admin.LaunchPlanSpec) error {
+	if lpSpec.EntityMetadata == nil || lpSpec.EntityMetadata.Schedule == nil {
+		return nil
+	}
+	schedule := lpSpec.EntityMetadata.Schedule
+	var scheduleRequiredParams []string
+	if lpSpec.DefaultInputs != nil {
+		for paramKey, paramValue := range lpSpec.DefaultInputs.Parameters {
+			if (paramValue.GetRequired() || paramValue.Behavior == nil) && paramKey != schedule.KickoffTimeInputArg {
+				scheduleRequiredParams = append(scheduleRequiredParams, paramKey)
+			}
+		}
+	}
+	// Check if all required params exist as fixed inputs
+	var fixedInputKeys []string
+	if lpSpec.FixedInputs != nil && lpSpec.FixedInputs.Literals != nil {
+		fixedInputKeys = make([]string, len(lpSpec.FixedInputs.Literals))
+		index := 0
+		for fixedLiteral := range lpSpec.FixedInputs.Literals {
+			fixedInputKeys[index] = fixedLiteral
+			index++
+		}
+	}
+
+	diffSet := leftDiff(scheduleRequiredParams, fixedInputKeys)
+	if len(diffSet) > 0 {
+		return fmt.Errorf("param values are missing on scheduled workflow "+
+			"for the following params %v. Either specify them having a default or fixed value", diffSet)
+	}
+	return nil
+}
+
 func validateLaunchSpec(lpSpec *admin.LaunchPlanSpec) error {
 	if lpSpec == nil {
 		return nil
 	}
-	if lpSpec.EntityMetadata != nil && lpSpec.EntityMetadata.Schedule != nil {
-		schedule := lpSpec.EntityMetadata.Schedule
-		var scheduleFixedParams []string
-		if lpSpec.DefaultInputs != nil {
-			for paramKey := range lpSpec.DefaultInputs.Parameters {
-				if paramKey != schedule.KickoffTimeInputArg {
-					scheduleFixedParams = append(scheduleFixedParams, paramKey)
-				}
-			}
-		}
-		if (lpSpec.FixedInputs == nil && len(scheduleFixedParams) > 0) ||
-			(len(scheduleFixedParams) > len(lpSpec.FixedInputs.Literals)) {
-			fixedInputLen := 0
-			if lpSpec.FixedInputs != nil {
-				fixedInputLen = len(lpSpec.FixedInputs.Literals)
-			}
-			return fmt.Errorf("param values are missing on scheduled workflow."+
-				"additional args other than %v on scheduled workflow are %v > %v fixed values", schedule.KickoffTimeInputArg,
-				len(scheduleFixedParams), fixedInputLen)
+	return validateLPWithSchedule(lpSpec)
+}
+
+// Finds the left diff between to two string slices
+// If a and b are two sets then the o/p c is defined as :
+// c = a - a ^ b
+// where ^ is intersection slice of a and b
+// and - removes all the common elements and returns a new slice
+// a= {1,2,3}
+// b = {3,4,5}
+// o/p c = {1,2}
+func leftDiff(a, b []string) []string {
+	m := make(map[string]bool)
+
+	for _, item := range a {
+		m[item] = true
+	}
+
+	for _, item := range b {
+		if _, ok := m[item]; ok {
+			delete(m, item)
 		}
 	}
-	return nil
+	// nil semantics on return
+	if len(m) == 0 {
+		return nil
+	}
+	c := make([]string, len(m))
+	index := 0
+	for item := range m {
+		c[index] = item
+		index++
+	}
+	return c
 }
 
 func hydrateLaunchPlanSpec(configAssumableIamRole string, configK8sServiceAccount string, configOutputLocationPrefix string, lpSpec *admin.LaunchPlanSpec) error {
