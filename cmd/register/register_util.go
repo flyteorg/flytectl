@@ -275,31 +275,42 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode, sourceUploadPath, version
 	return nil
 }
 
-func validateLPWithSchedule(lpSpec *admin.LaunchPlanSpec) error {
+func validateLPWithSchedule(lpSpec *admin.LaunchPlanSpec, wf *admin.Workflow) error {
 	if lpSpec.EntityMetadata == nil || lpSpec.EntityMetadata.Schedule == nil {
 		return nil
 	}
 	schedule := lpSpec.EntityMetadata.Schedule
 	var scheduleRequiredParams []string
+	if wf != nil && wf.Closure != nil && wf.Closure.CompiledWorkflow != nil &&
+		wf.Closure.CompiledWorkflow.Primary != nil && wf.Closure.CompiledWorkflow.Primary.Template != nil &&
+		wf.Closure.CompiledWorkflow.Primary.Template.Interface != nil &&
+		wf.Closure.CompiledWorkflow.Primary.Template.Interface.Inputs != nil {
+		variables := wf.Closure.CompiledWorkflow.Primary.Template.Interface.Inputs.Variables
+		for varName := range variables {
+			if varName != schedule.KickoffTimeInputArg {
+				scheduleRequiredParams = append(scheduleRequiredParams, varName)
+			}
+		}
+
+	}
+	// Either the scheduled param should have default or fixed values
+	var scheduleParamsWithValues []string
+	// Check for default values
 	if lpSpec.DefaultInputs != nil {
-		for paramKey, paramValue := range lpSpec.DefaultInputs.Parameters {
-			if (paramValue.GetRequired() || paramValue.Behavior == nil) && paramKey != schedule.KickoffTimeInputArg {
-				scheduleRequiredParams = append(scheduleRequiredParams, paramKey)
+		for paramName := range lpSpec.DefaultInputs.Parameters {
+			if paramName != schedule.KickoffTimeInputArg {
+				scheduleParamsWithValues = append(scheduleParamsWithValues, paramName)
 			}
 		}
 	}
-	// Check if all required params exist as fixed inputs
-	var fixedInputKeys []string
+	// Check for fixed values
 	if lpSpec.FixedInputs != nil && lpSpec.FixedInputs.Literals != nil {
-		fixedInputKeys = make([]string, len(lpSpec.FixedInputs.Literals))
-		index := 0
-		for fixedLiteral := range lpSpec.FixedInputs.Literals {
-			fixedInputKeys[index] = fixedLiteral
-			index++
+		for fixedLiteralName := range lpSpec.FixedInputs.Literals {
+			scheduleParamsWithValues = append(scheduleParamsWithValues, fixedLiteralName)
 		}
 	}
 
-	diffSet := leftDiff(scheduleRequiredParams, fixedInputKeys)
+	diffSet := leftDiff(scheduleRequiredParams, scheduleParamsWithValues)
 	if len(diffSet) > 0 {
 		return fmt.Errorf("param values are missing on scheduled workflow "+
 			"for the following params %v. Either specify them having a default or fixed value", diffSet)
@@ -307,11 +318,19 @@ func validateLPWithSchedule(lpSpec *admin.LaunchPlanSpec) error {
 	return nil
 }
 
-func validateLaunchSpec(lpSpec *admin.LaunchPlanSpec) error {
-	if lpSpec == nil {
+func validateLaunchSpec(ctx context.Context, lpSpec *admin.LaunchPlanSpec, cmdCtx cmdCore.CommandContext) error {
+	if lpSpec == nil || lpSpec.WorkflowId == nil {
 		return nil
 	}
-	return validateLPWithSchedule(lpSpec)
+	// Fetch the workflow spec using the identifier
+	workflowId := lpSpec.WorkflowId
+	wf, err := cmdCtx.AdminFetcherExt().FetchWorkflowVersion(ctx, workflowId.Name, workflowId.Version,
+		workflowId.Project, workflowId.Domain)
+	if err != nil {
+		return err
+	}
+
+	return validateLPWithSchedule(lpSpec, wf)
 }
 
 // Finds the left diff between to two string slices
@@ -346,10 +365,6 @@ func leftDiff(a, b []string) []string {
 }
 
 func hydrateLaunchPlanSpec(configAssumableIamRole string, configK8sServiceAccount string, configOutputLocationPrefix string, lpSpec *admin.LaunchPlanSpec) error {
-
-	if err := validateLaunchSpec(lpSpec); err != nil {
-		return err
-	}
 	assumableIamRole := len(configAssumableIamRole) > 0
 	k8sServiceAcct := len(configK8sServiceAccount) > 0
 	outputLocationPrefix := len(configOutputLocationPrefix) > 0
@@ -362,6 +377,18 @@ func hydrateLaunchPlanSpec(configAssumableIamRole string, configK8sServiceAccoun
 	if outputLocationPrefix {
 		lpSpec.RawOutputDataConfig = &admin.RawOutputDataConfig{
 			OutputLocationPrefix: configOutputLocationPrefix,
+		}
+	}
+	return nil
+}
+
+// Validate the spec before sending it to admin.
+func validateSpec(ctx context.Context, message proto.Message, cmdCtx cmdCore.CommandContext) error {
+	switch v := message.(type) {
+	case *admin.LaunchPlan:
+		launchPlan := v
+		if err := validateLaunchSpec(ctx, launchPlan.Spec, cmdCtx); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -521,7 +548,11 @@ func registerFile(ctx context.Context, fileName, sourceCode string, registerResu
 	}
 
 	logger.Debugf(ctx, "Hydrated spec : %v", getJSONSpec(spec))
-
+	if err = validateSpec(ctx, spec, cmdCtx); err != nil {
+		registerResult = Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error hydrating spec due to %v", err)}
+		registerResults = append(registerResults, registerResult)
+		return registerResults, err
+	}
 	if err := register(ctx, spec, cmdCtx, config.DryRun); err != nil {
 		// If error is AlreadyExists then dont consider this to be an error but just a warning state
 		if grpcError := status.Code(err); grpcError == codes.AlreadyExists {
