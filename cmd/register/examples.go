@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	registerExampleShort = "Registers Flytesnacks example"
+	registerExampleShort = "Registers Flytesnacks example."
 	registerExampleLong  = `
 Register all the latest Flytesnacks examples:
 ::
