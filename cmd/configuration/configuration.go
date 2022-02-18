@@ -25,28 +25,33 @@ import (
 
 // Long descriptions are whitespace sensitive when generating docs using Sphinx.
 const (
-	initCmdShort = `Generate FlyteCTL config file in the user's home directory.`
-	initCmdLong  = `Create a FlyteCTL config file in Flyte directory i.e ~/.flyte
+	initCmdShort = `Generates a Flytectl config file in the user's home directory.`
+	initCmdLong  = `Creates a Flytectl config file in Flyte directory i.e ~/.flyte.
 	
-Generate sandbox config. Flyte Sandbox is a fully standalone minimal environment for running Flyte. Read more about Sandbox :ref:` + "`here <https://docs.flyte.org/en/latest/deployment/sandbox.html>`" + `.
-
+Generate Sandbox config:
 ::
 
  flytectl config init  
 
-Generate remote cluster config, By default connection is secure. Read more about the remote deployment https://docs.flyte.org/en/latest/deployment/index.html
+Flyte Sandbox is a fully standalone minimal environment for running Flyte. 
+Read more about Sandbox deployment :ref:` + "`here <deploy-sandbox-local>`" + `.
+
+Generate remote cluster config: 
 	
 ::
 
  flytectl config init --host=flyte.myexample.com
 
-Generate remote cluster config with insecure connection
+By default, the connection is secure. 
+Read more about remote deployment :ref:` + "`here <Deployment>`" + `.
+
+Generate remote cluster config with insecure connection:
 
 ::
 
  flytectl config init --host=flyte.myexample.com --insecure 
 
-Generate FlyteCTL config with a storage provider
+Generate Flytectl config with a storage provider:
 ::
 
  flytectl config init --host=flyte.myexample.com --storage

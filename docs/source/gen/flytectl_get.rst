@@ -3,7 +3,7 @@
 flytectl get
 ------------
 
-Fetch various Flyte resources including tasks/workflows/launchplans/executions/project.
+Fetch various Flyte resources such as tasks, workflows, launchplans, executions, project.
 
 Synopsis
 ~~~~~~~~
@@ -72,7 +72,7 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - FlyteCTL CLI tool
+* :doc:`flytectl` 	 - Flytectl CLI tool
 * :doc:`flytectl_get_cluster-resource-attribute` 	 - Get matchable resources of cluster resource attributes.
 * :doc:`flytectl_get_execution` 	 - Get execution resources
 * :doc:`flytectl_get_execution-cluster-label` 	 - Get matchable resources of execution cluster label.

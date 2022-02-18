@@ -72,7 +72,7 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - FlyteCTL CLI tool
+* :doc:`flytectl` 	 - Flytectl CLI tool
 * :doc:`flytectl_delete_cluster-resource-attribute` 	 - Delete matchable resources of cluster attributes
 * :doc:`flytectl_delete_execution` 	 - Terminate/Delete execution resources.
 * :doc:`flytectl_delete_execution-cluster-label` 	 - Delete matchable resources of execution cluster label

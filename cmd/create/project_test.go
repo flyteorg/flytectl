@@ -75,6 +75,6 @@ func TestEmptyProjectName(t *testing.T) {
 	project.DefaultProjectConfig.Description = ""
 	mockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
 	err := createProjectsCommand(ctx, args, cmdCtx)
-	assert.Equal(t, fmt.Errorf("project name is required flag"), err)
+	assert.Equal(t, fmt.Errorf("project name is a required flag"), err)
 	mockClient.AssertNotCalled(t, "RegisterProject", ctx, mock.Anything)
 }

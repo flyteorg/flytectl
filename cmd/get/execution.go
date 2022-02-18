@@ -15,15 +15,17 @@ import (
 )
 
 const (
-	executionShort = "Get execution resources"
+	executionShort = "Gets execution resources."
 	executionLong  = `
-Retrieve all executions within the project and domain (execution/executions can be used interchangeably):
+Retrieve all executions within the project and domain:
 ::
 
  flytectl get execution -p flytesnacks -d development
 
-Retrieve executions by name within the project and domain:
+.. note::
+    The term execution/executions can be used interchangeably in these commands.
 
+Retrieve executions by name within the project and domain:
 ::
 
  flytectl get execution -p flytesnacks -d development oeh94k9r2r
@@ -58,14 +60,14 @@ Retrieve executions within the project and domain in JSON format:
  flytectl get execution -p flytesnacks -d development -o json
 
 
-Get more details of the execution using the --details flag, which shows node and task executions. The default view is a tree view, and the TABLE view format is not supported on this view.
+Get more details of the execution using the --details flag, which shows node and task executions. 
+The default view is a tree view, and the TABLE view format is not supported on this view.
 
 ::
 
  flytectl get execution -p flytesnacks -d development oeh94k9r2r --details
 
-Fetch execution details in YAML format. In this view, only node details are available. For task, send the --nodeID flag.
-
+Fetch execution details in YAML format. In this view, only node details are available. For task, pass the --nodeID flag
 ::
 
  flytectl get execution -p flytesnacks -d development oeh94k9r2r --details -o yaml
@@ -76,7 +78,7 @@ Fetch task executions on a specific node using the --nodeID flag. Use the nodeID
 
  flytectl get execution -p flytesnacks -d development oeh94k9r2r --nodeID n0
 
-Task execution view is also available in YAML/JSON format. The following example showcases YAML, where the output also contains input and output data of each node.
+Task execution view is available in YAML/JSON format too. The following example showcases YAML, where the output contains input and output data of each node.
 
 ::
 

@@ -10,8 +10,7 @@ Synopsis
 
 
 
-Terminate executions.(execution,executions can be used interchangeably in these commands)
-
+Terminate executions.(execution/executions can be used interchangeably in these commands)
 Task executions can be aborted only if they are in non-terminal state. If they are FAILED, ABORTED or SUCCEEDED, calling terminate on them has no effect.
 
 Terminate a single execution with its name:

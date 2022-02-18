@@ -3,14 +3,14 @@
 flytectl create
 ---------------
 
-Create various Flyte resources including tasks/workflows/launchplans/executions/project.
+Creates various Flyte resources such as tasks, workflows, launchplans, executions, and projects.
 
 Synopsis
 ~~~~~~~~
 
 
 
-Create Flyte resource; if a project:
+Creates Flyte resource; if a project:
 ::
 
  flytectl create project --file project.yaml 
@@ -72,7 +72,7 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - FlyteCTL CLI tool
-* :doc:`flytectl_create_execution` 	 - Create execution resources
-* :doc:`flytectl_create_project` 	 - Create project resources
+* :doc:`flytectl` 	 - Flytectl CLI tool
+* :doc:`flytectl_create_execution` 	 - Creates execution resources
+* :doc:`flytectl_create_project` 	 - Creates project resources
 

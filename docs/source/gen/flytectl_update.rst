@@ -11,8 +11,8 @@ Synopsis
 
 
 Currently, this command only provides subcommands to update project.
-Takes input project that needs to be archived or unarchived. Name of the project to be updated is a mandatory field.
-To update a project:
+Take input project that needs to be archived or unarchived. Name of the project to be updated is a mandatory field.
+Update Flyte resources; if a project:
 ::
 
  flytectl update project -p flytesnacks --activateProject
@@ -74,7 +74,7 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - FlyteCTL CLI tool
+* :doc:`flytectl` 	 - Flytectl CLI tool
 * :doc:`flytectl_update_cluster-resource-attribute` 	 - Update matchable resources of cluster attributes
 * :doc:`flytectl_update_execution` 	 - Update execution status
 * :doc:`flytectl_update_execution-cluster-label` 	 - Update matchable resources of execution cluster label

@@ -10,7 +10,7 @@ Synopsis
 
 
 
-Updates plugin overrides for given project and domain combination or additionally with workflow name.
+Update plugin overrides for given project and domain combination or additionally with workflow name.
 
 Updating to the plugin override is only available from a generated file. See the get section for generating this file.
 This will completely overwrite any existing plugins overrides on custom project, domain and workflow combination.
@@ -34,7 +34,7 @@ e.g., content of po.yaml:
 
  flytectl update plugin-override --attrFile po.yaml
 
-Updates plugin override for project, domain and workflow combination. This will take precedence over any other
+Update plugin override for project, domain and workflow combination. This will take precedence over any other
 plugin overrides defined at project domain level.
 For workflow 'core.control_flow.run_merge_sort.merge_sort' in flytectldemo project, development domain, it is:
 

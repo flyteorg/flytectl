@@ -3,33 +3,34 @@
 flytectl sandbox start
 ----------------------
 
-Start the Flyte Sandbox cluster
+Starts the Flyte Sandbox cluster
 
 Synopsis
 ~~~~~~~~
 
 
 
-The Flyte Sandbox is a fully standalone minimal environment for running Flyte. It provides a simplified way of running Flyte sandbox as a single Docker container locally.  
+Flyte Sandbox is a fully standalone minimal environment for running Flyte. It provides a simplified way of running Flyte Sandbox as a single Docker container locally.  
 
-Start sandbox cluster without any source code:
+Starts sandbox cluster without any source code:
 ::
 
  flytectl sandbox start
 	
-Mount your source code repository inside sandbox:
+Mounts your source code repository inside the Sandbox:
 ::
 
  flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
 	
-Run specific version of Flyte. FlyteCTL sandbox only supports Flyte version available in the Github release, https://github.com/flyteorg/flyte/tags.
+Runs a specific version of Flyte. Flytectl sandbox only supports Flyte version available in the Github release, https://github.com/flyteorg/flyte/tags.
 ::
 
  flytectl sandbox start  --version=v0.14.0
 
-Note: FlyteCTL sandbox is only supported for Flyte versions > v0.10.0
+.. note::
+	  Flytectl sandbox is only supported for Flyte versions > v0.10.0
 
-Specify a Flyte Sandbox compliant image with the registry. This is useful in case you want to use an image from your registry.
+Specifies a Flyte Sandbox compliant image with the registry. This is useful in case you want to use an image from your registry.
 ::
 
   flytectl sandbox start --image docker.io/my-override:latest
@@ -107,5 +108,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.
+* :doc:`flytectl_sandbox` 	 - Used for Sandbox interactions like start, teardown, status, exec.
 

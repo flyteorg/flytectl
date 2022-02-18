@@ -10,7 +10,7 @@ Synopsis
 
 
 
-Retrieves workflow execution config for the given project and domain combination or additionally with workflow name.
+Retrieve workflow execution config for the given project and domain combination or additionally with workflow name.
 
 For project flytectldemo and development domain, it is:
 
@@ -28,7 +28,7 @@ e.g., output from the command
 	"max_parallelism": 5
  }
 
-Retrieves workflow execution config for the project, domain and workflow.
+Retrieve workflow execution config for the project, domain and workflow.
 For project flytectldemo, development domain and workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
 
 ::
@@ -46,7 +46,7 @@ e.g., output from the command
 	"max_parallelism": 5
  }
 
-Writing the workflow execution config to a file. If there are no workflow execution config, the command would return an error.
+Write the workflow execution config to a file. If there are no workflow execution config, the command throws an error.
 Here, the config file is written to wec.yaml,
 e.g., content of wec.yaml:
 
@@ -125,5 +125,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_get` 	 - Fetch various Flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_get` 	 - Fetch various Flyte resources such as tasks, workflows, launchplans, executions, project.
 

@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	workflowShort = "Get workflow resources"
+	workflowShort = "Gets workflow resources"
 	workflowLong  = `
 Retrieve all the workflows within project and domain (workflow/workflows can be used interchangeably in these commands):
 ::

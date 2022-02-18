@@ -26,23 +26,23 @@ type Goos string
 
 // Long descriptions are whitespace sensitive when generating docs using sphinx.
 const (
-	upgradeCmdShort = `Upgrade/rollback to a Flyte version`
+	upgradeCmdShort = `Upgrades/rollbacks to a Flyte version`
 	upgradeCmdLong  = `
-For FlyteCTL, it is:
+For Flytectl, it is:
 ::
 
  flytectl upgrade
 	
 .. note::
-	Please use upgrade with sudo. Without sudo it will cause permission issue.
+	Please upgrade with sudo. Failing to do so may result in permission issues.
 	
-Rollback flytectl binary:
+Rollback Flytectl binary:
 ::
 
  flytectl upgrade rollback
 
 .. note:: 
-	Upgrade is not available on windows.
+	Upgrade is not available on Windows.
 `
 	rollBackSubCommand = "rollback"
 )
@@ -117,7 +117,7 @@ func isUpgradeSupported(goos platformutil.Platform) (bool, error) {
 	if isGreater, err := util.IsVersionGreaterThan(latest, stdlibversion.Version); err != nil {
 		return false, err
 	} else if !isGreater {
-		fmt.Println("You have already latest version of flytectl")
+		fmt.Println("You already have the latest version of Flytectl")
 		return false, nil
 	}
 

@@ -10,7 +10,7 @@ Synopsis
 
 
 
-Retrieves task resource attributes for the given project and domain.
+Retrieve task resource attributes for the given project and domain.
 For project flytectldemo and development domain, it is:
 ::
 
@@ -22,7 +22,7 @@ e.g., output from the command:
 
  {"project":"flytectldemo","domain":"development","workflow":"","defaults":{"cpu":"1","memory":"150Mi"},"limits":{"cpu":"2","memory":"450Mi"}}
 
-Retrieves task resource attributes for the given project, domain, and workflow.
+Retrieve task resource attributes for the given project, domain, and workflow.
 For project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
 ::
 
@@ -119,5 +119,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_get` 	 - Fetch various Flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_get` 	 - Fetch various Flyte resources such as tasks, workflows, launchplans, executions, project.
 

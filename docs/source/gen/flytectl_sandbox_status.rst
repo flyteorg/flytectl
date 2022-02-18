@@ -3,7 +3,7 @@
 flytectl sandbox status
 -----------------------
 
-Get status of the sandbox environment.
+Get the status of the Sandbox environment.
 
 Synopsis
 ~~~~~~~~
@@ -79,5 +79,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.
+* :doc:`flytectl_sandbox` 	 - Used for Sandbox interactions like start, teardown, status, exec.
 

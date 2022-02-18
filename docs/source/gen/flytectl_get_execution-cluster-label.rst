@@ -10,7 +10,7 @@ Synopsis
 
 
 
-Retrieves the execution cluster label for a given project and domain, combination or additionally with workflow name.
+Retrieve the execution cluster label for a given project and domain, combination or additionally with workflow name.
 
 For project flytectldemo and development domain, it is:
 ::
@@ -114,5 +114,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_get` 	 - Fetch various Flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_get` 	 - Fetch various Flyte resources such as tasks, workflows, launchplans, executions, project.
 

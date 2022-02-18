@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	updateLPShort = "Update launch plan status"
+	updateLPShort = "Updates launch plan status"
 	updateLPLong  = `
-Activating launch plan activates the scheduled job associated with it:
+Activate a launch plan; and this activates the scheduled job associated with it:
 ::
 
  flytectl update launchplan -p flytectldemo -d development  core.advanced.run_merge_sort.merge_sort --version v1 --activate
 
-Archiving launch plan deschedules any scheduled job associated with it:
+Archive a launch plan; and this deschedules any scheduled job associated with it:
 ::
 
  flytectl update launchplan -p flytectldemo -d development  core.advanced.run_merge_sort.merge_sort --version v1 --archive

@@ -69,8 +69,8 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - FlyteCTL CLI tool
+* :doc:`flytectl` 	 - Flytectl CLI tool
 * :doc:`flytectl_config_discover` 	 - Searches for a config in one of the default search paths.
-* :doc:`flytectl_config_init` 	 - Generates FlyteCTL config file in the user's home directory.
+* :doc:`flytectl_config_init` 	 - Generates a Flytectl config file in the user's home directory.
 * :doc:`flytectl_config_validate` 	 - Validates the loaded config.
 

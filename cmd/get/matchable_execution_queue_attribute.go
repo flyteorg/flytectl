@@ -11,35 +11,35 @@ import (
 )
 
 const (
-	executionQueueAttributesShort = "Get matchable resources of execution queue attributes"
+	executionQueueAttributesShort = "Gets matchable resources of execution queue attributes."
 	executionQueueAttributesLong  = `
 Retrieve the execution queue attribute for the given project and domain.
-For project flytectldemo and development domain, it is:
+For project flytectldemo and development domain:
 ::
 
  flytectl get execution-queue-attribute -p flytectldemo -d development 
 
-e.g., output from the command
+E.g., output from the command:
 
 .. code-block:: json
 
  {"project":"flytectldemo","domain":"development","tags":["foo", "bar"]}
 
 Retrieve the execution queue attribute for the given project, domain, and workflow.
-For project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
+For project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort':
 ::
 
  flytectl get execution-queue-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-e.g., output from the command
+E.g., output from the command:
 
 .. code-block:: json
 
  {"project":"flytectldemo","domain":"development","workflow":"core.control_flow.run_merge_sort.merge_sort","tags":["foo", "bar"]}
 
 Write the execution queue attribute to a file. If there are no execution queue attributes, the command throws an error.
-Here, the config file is written to era.yaml,
-e.g., content of era.yaml:
+The config file is written to era.yaml file.
+E.g., content of era.yaml:
 
 ::
 

@@ -3,7 +3,7 @@
 flytectl completion
 -------------------
 
-Generate completion script
+Generates completion script.
 
 Synopsis
 ~~~~~~~~
@@ -13,40 +13,40 @@ To load completions:
 
 Bash:
 
-  $ source <(flytectl completion bash)
+$ source <(flytectl completion bash)
 
-  # To load completions for each session, execute once:
-  # Linux:
-  $ flytectl completion bash > /etc/bash_completion.d/flytectl
-  # macOS:
-  $ flytectl completion bash > /usr/local/etc/bash_completion.d/flytectl
+	# To load completions for each session, execute once:
+	# Linux:
+	$ flytectl completion bash > /etc/bash_completion.d/flytectl
+	# macOS:
+	$ flytectl completion bash > /usr/local/etc/bash_completion.d/flytectl
 
 Zsh:
 
-  # If shell completion is not already enabled in your environment,
-  # you will need to enable it. You can execute the following once:
+	  # If shell completion is not already enabled in your environment,
+	  # you will need to enable it. You can execute the following once:
 
-  $ echo "autoload -U compinit; compinit" >> ~/.zshrc
+	  $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
-  # To load completions for each session, execute once:
-  $ flytectl completion zsh > "${fpath[1]}/_flytectl"
+	  # To load completions for each session, execute once:
+	  $ flytectl completion zsh > "${fpath[1]}/_flytectl"
 
-  # You will need to start a new shell for this setup to take effect.
+	  # You will need to start a new shell for this setup to take effect.
 
 fish:
 
-  $ flytectl completion fish | source
+	  $ flytectl completion fish | source
 
-  # To load completions for each session, execute once:
-  $ flytectl completion fish > ~/.config/fish/completions/flytectl.fish
+	  # To load completions for each session, execute once:
+	  $ flytectl completion fish > ~/.config/fish/completions/flytectl.fish
 
 PowerShell:
 
-  PS> flytectl completion powershell | Out-String | Invoke-Expression
+	  PS> flytectl completion powershell | Out-String | Invoke-Expression
 
-  # To load completions for every new session, run:
-  PS> flytectl completion powershell > flytectl.ps1
-  # and source this file from your PowerShell profile.
+	  # To load completions for every new session, run:
+	  PS> flytectl completion powershell > flytectl.ps1
+	  # and source this file from your PowerShell profile.
 
 
 ::
@@ -109,5 +109,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl` 	 - FlyteCTL CLI tool
+* :doc:`flytectl` 	 - Flytectl CLI tool
 

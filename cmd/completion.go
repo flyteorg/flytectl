@@ -24,18 +24,18 @@ import (
 // completionCmd represents the completion command
 var completionCmd = &cobra.Command{
 	Use:   "completion [bash|zsh|fish|powershell]",
-	Short: "Generate completion script",
+	Short: "Generates completion script",
 	Long: `To load completions:
 
 Bash:
 
-  $ source <(flytectl completion bash)
+    $ source <(flytectl completion bash)
 
-  # To load completions for each session, execute once:
-  # Linux:
-  $ flytectl completion bash > /etc/bash_completion.d/flytectl
-  # macOS:
-  $ flytectl completion bash > /usr/local/etc/bash_completion.d/flytectl
+	  # To load completions for each session, execute once:
+	  # Linux:
+	  $ flytectl completion bash > /etc/bash_completion.d/flytectl
+	  # macOS:
+	  $ flytectl completion bash > /usr/local/etc/bash_completion.d/flytectl
 
 Zsh:
 

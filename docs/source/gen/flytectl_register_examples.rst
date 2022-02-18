@@ -20,7 +20,9 @@ Register specific release of Flytesnacks examples:
 
  flytectl register examples  -d development  -p flytesnacks --version v0.2.176
 	
-Note: The register command automatically override the version with release version	
+.. note::
+	 The register command automatically override the version with release version.	
+
 Usage
 
 
@@ -95,5 +97,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_register` 	 - Register tasks/workflows/launchplans from a list of generated serialized files.
+* :doc:`flytectl_register` 	 - Register tasks, workflows, launch plans from a list of generated serialized files.
 

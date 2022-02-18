@@ -10,7 +10,7 @@ Synopsis
 
 
 
-Updates workflow execution config for given project and domain combination or additionally with workflow name.
+Update workflow execution config for given project and domain combination or additionally with workflow name.
 
 Updating the workflow execution config is only available from a generated file. See the get section for generating this file.
 This will completely overwrite any existing custom project and domain and workflow combination execution config.
@@ -29,7 +29,7 @@ e.g., content of wec.yaml:
 
  flytectl update workflow-execution-config --attrFile wec.yaml
 
-Updates workflow execution config for project, domain and workflow combination. This will take precedence over any other
+Update workflow execution config for project, domain and workflow combination. This will take precedence over any other
 execution config defined at project domain level.
 For workflow 'core.control_flow.run_merge_sort.merge_sort' in flytectldemo project, development domain, it is:
 

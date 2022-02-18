@@ -3,27 +3,27 @@
 flytectl create execution
 -------------------------
 
-Create execution resources
+Creates execution resources
 
 Synopsis
 ~~~~~~~~
 
 
 
-Creates executions for a given workflow/task in a project and domain.
-
-There are three steps in generating an execution:
-
-- Generate the execution spec file using the get command.
-- Update the inputs for the execution if needed.
-- Run the execution by passing in the generated yaml file.
-
-The spec file should be generated first and then, the execution should be run using the spec file.
-You can reference the FlyteCTL get task for more details.
+Creates execution resources for a given workflow/task in a project and domain:
 
 ::
 
  flytectl get tasks -d development -p flytectldemo core.advanced.run_merge_sort.merge  --version v2 --execFile execution_spec.yaml
+
+There are three steps to generate an execution:
+
+- Generate the execution spec file using the get command
+- Update the inputs for the execution if needed
+- Run the execution by passing the generated yaml file
+
+The spec file is generated first. Next, the execution is run using the spec file.
+You can refer to Flytectl :ref:`get task <flytectl_get_task>` for more details.
 
 The generated file would look similar to this:
 
@@ -42,7 +42,7 @@ The generated file would look similar to this:
 	 version: "v2"
 
 
-The generated file can be modified to change the input values.
+The generated spec file can be modified to change the input values, as shown below:
 
 .. code-block:: yaml
 
@@ -70,27 +70,28 @@ The root project and domain flags of -p and -d should point to the task/launch p
 
  flytectl create execution --execFile execution_spec.yaml -p flytectldemo -d development --targetProject flytesnacks
 
-Also, an execution can be relaunched by passing in the current execution id.
+An execution can be relaunched by passing the current execution id:
 
 ::
 
  flytectl create execution --relaunch ffb31066a0f8b4d52b77 -p flytectldemo -d development
 
-An execution can be recovered, i.e., recreated from the last known failure point for previously-run workflow execution.
-See :ref:`ref_flyteidl.admin.ExecutionRecoverRequest` for more details.
+An execution can be recovered, i.e., recreated from the last known failure point for previously-run workflow execution:
 
 ::
 
  flytectl create execution --recover ffb31066a0f8b4d52b77 -p flytectldemo -d development
 
-Generic data types are also supported for execution in a similar manner. Following is a sample of how the inputs need to be specified while creating the execution.
-The spec file should be generated first and then, the execution should be run using the spec file.
+See :ref:`ref_flyteidl.admin.ExecutionRecoverRequest` for more details.
+
+Generic data types are supported for execution in a similar manner. Following is a sample of how the inputs need to be specified while creating the execution.
+The spec file is generated first. Next, the execution is run using the spec file.
 
 ::
 
  flytectl get task -d development -p flytectldemo  core.type_system.custom_objects.add --execFile adddatanum.yaml
 
-The generated file would look similar to this. Here, empty values have been dumped for generic data type x and y. 
+The generated file would look similar to this. Here, empty values have been dumped for generic data type 'x' and 'y'. 
 
 ::
 
@@ -104,7 +105,7 @@ The generated file would look similar to this. Here, empty values have been dump
     task: core.type_system.custom_objects.add
     version: v3
 
-Modified file with struct data populated for x and y parameters for the task core.type_system.custom_objects.add
+Modified file with struct data populated for 'x' and 'y' parameters for the task "core.type_system.custom_objects.add":
 
 ::
 
@@ -202,5 +203,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_create` 	 - Create various Flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_create` 	 - Creates various Flyte resources such as tasks, workflows, launchplans, executions, and projects.
 

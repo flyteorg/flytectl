@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	taskResourceAttributesShort = "Delete matchable resources of task attributes"
+	taskResourceAttributesShort = "Deletes matchable resources of task attributes."
 	taskResourceAttributesLong  = `
-Delete task resource attributes for the given project and domain combination, or additionally with workflow name.
+Delete task resource attributes for the given project and domain combination, or additionally the workflow name.
 
-For project flytectldemo and development domain, it is:
+For project flytectldemo and development domain:
 ::
 
  flytectl delete task-resource-attribute -p flytectldemo -d development 
@@ -23,8 +23,8 @@ For project flytectldemo and development domain, it is:
 
 Delete task resource attribute using config file which was used to create it.
 Here, the config file is written to tra.yaml.
-The defaults/limits are optional in the file as they are unread during the delete command but can be kept since the same file can be used for get, update or delete commands.
-e.g., content of tra.yaml:
+The defaults/limits are optional in the file as they are unread during the delete command but can be retained since the same file can be used for get, update or delete commands.
+E.g., content of tra.yaml:
 
 ::
 
@@ -43,7 +43,7 @@ e.g., content of tra.yaml:
       memory: "450Mi"
 
 Delete task resource attribute for a workflow.
-For the workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
+For the workflow 'core.control_flow.run_merge_sort.merge_sort':
 
 ::
 

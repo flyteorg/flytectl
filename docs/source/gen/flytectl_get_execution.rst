@@ -10,7 +10,7 @@ Synopsis
 
 
 
-Retrieve all executions within the project and domain (execution, executions can be used interchangeably):
+Retrieve all executions within the project and domain (execution/executions can be used interchangeably):
 ::
 
  flytectl get execution -p flytesnacks -d development
@@ -145,5 +145,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_get` 	 - Fetch various Flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_get` 	 - Fetch various Flyte resources such as tasks, workflows, launchplans, executions, project.
 

@@ -10,12 +10,12 @@ Synopsis
 
 
 
-Activating an execution shows it in the cli and UI:
+Activating an execution shows it in the CLI and UI:
 ::
 
  flytectl update execution -p flytectldemo -d development  oeh94k9r2r --activate
 
-Archiving execution hides it from cli and UI:
+Archiving execution hides it from the CLI and UI:
 ::
 
  flytectl update execution -p flytectldemo -d development  oeh94k9r2r --archive
