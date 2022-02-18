@@ -1,6 +1,7 @@
 package register
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 
-	"github.com/flyteorg/flyteidl/clients/go/coreutils"
 	"github.com/flyteorg/flytestdlib/contextutils"
 	"github.com/flyteorg/flytestdlib/promutils"
 	"github.com/flyteorg/flytestdlib/promutils/labeled"
@@ -225,6 +225,61 @@ func TestRegisterFile(t *testing.T) {
 		assert.Equal(t, 1, len(results))
 		assert.Nil(t, err)
 	})
+	t.Run("Failed Scheduled launch plan registration", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		mockAdminClient.OnCreateLaunchPlanMatch(mock.Anything, mock.Anything).Return(nil, nil)
+		variableMap := map[string]*core.Variable{
+			"var1": {
+				Type: &core.LiteralType{
+					Type: &core.LiteralType_CollectionType{
+						CollectionType: &core.LiteralType{
+							Type: &core.LiteralType_Simple{
+								Simple: core.SimpleType_INTEGER,
+							},
+						},
+					},
+				},
+				Description: "var1",
+			},
+			"var2": {
+				Type: &core.LiteralType{
+					Type: &core.LiteralType_CollectionType{
+						CollectionType: &core.LiteralType{
+							Type: &core.LiteralType_Simple{
+								Simple: core.SimpleType_INTEGER,
+							},
+						},
+					},
+				},
+				Description: "var2 long descriptions probably needs truncate",
+			},
+		}
+		wf := &admin.Workflow{
+			Closure: &admin.WorkflowClosure{
+				CompiledWorkflow: &core.CompiledWorkflowClosure{
+					Primary: &core.CompiledWorkflow{
+						Template: &core.WorkflowTemplate{
+							Interface: &core.TypedInterface{
+								Inputs: &core.VariableMap{
+									Variables: variableMap,
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		mockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(wf, nil)
+		args = []string{"testdata/152_my_cron_scheduled_lp_3.pb"}
+		var registerResults []Result
+		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx, *rconfig.DefaultFilesConfig)
+		assert.Equal(t, 1, len(results))
+		assert.Equal(t, "Failed", results[0].Status)
+		assert.Equal(t, "Error hydrating spec due to param values are missing on scheduled workflow for"+
+			" the following params [var1 var2]. Either specify them having a default or fixed value", results[0].Info)
+		assert.NotNil(t, err)
+	})
 	t.Run("Non existent file", func(t *testing.T) {
 		setup()
 		registerFilesSetup()
@@ -313,100 +368,6 @@ func TestHydrateLaunchPlanSpec(t *testing.T) {
 		err := hydrateLaunchPlanSpec(rconfig.DefaultFilesConfig.AssumableIamRole, rconfig.DefaultFilesConfig.K8sServiceAccount, rconfig.DefaultFilesConfig.OutputLocationPrefix, lpSpec)
 		assert.Nil(t, err)
 		assert.Equal(t, &admin.RawOutputDataConfig{OutputLocationPrefix: "prefix"}, lpSpec.RawOutputDataConfig)
-	})
-	t.Run("Validation successful", func(t *testing.T) {
-		lpSpec := &admin.LaunchPlanSpec{
-			EntityMetadata: &admin.LaunchPlanMetadata{
-				Schedule: &admin.Schedule{
-					ScheduleExpression: &admin.Schedule_CronExpression{
-						CronExpression: "foo",
-					},
-					KickoffTimeInputArg: "kickoff_time_arg",
-				},
-			},
-			FixedInputs: &core.LiteralMap{
-				Literals: map[string]*core.Literal{},
-			},
-		}
-		err := hydrateLaunchPlanSpec(rconfig.DefaultFilesConfig.AssumableIamRole, rconfig.DefaultFilesConfig.K8sServiceAccount, rconfig.DefaultFilesConfig.OutputLocationPrefix, lpSpec)
-		assert.Nil(t, err)
-	})
-	t.Run("Validation failure", func(t *testing.T) {
-		lpSpec := &admin.LaunchPlanSpec{
-			EntityMetadata: &admin.LaunchPlanMetadata{
-				Schedule: &admin.Schedule{
-					ScheduleExpression: &admin.Schedule_CronExpression{
-						CronExpression: "expr",
-					},
-					KickoffTimeInputArg: "kickoff_time_arg",
-				},
-			},
-			DefaultInputs: &core.ParameterMap{
-				Parameters: map[string]*core.Parameter{
-					"bar": {
-						Var: &core.Variable{
-							Type: &core.LiteralType{Type: &core.LiteralType_Simple{Simple: core.SimpleType_STRING}},
-						},
-					},
-				},
-			},
-			FixedInputs: &core.LiteralMap{
-				Literals: map[string]*core.Literal{},
-			},
-		}
-		err := hydrateLaunchPlanSpec(rconfig.DefaultFilesConfig.AssumableIamRole, rconfig.DefaultFilesConfig.K8sServiceAccount, rconfig.DefaultFilesConfig.OutputLocationPrefix, lpSpec)
-		assert.NotNil(t, err)
-	})
-	t.Run("Validation failed with fixed inputs empty", func(t *testing.T) {
-		lpSpec := &admin.LaunchPlanSpec{
-			EntityMetadata: &admin.LaunchPlanMetadata{
-				Schedule: &admin.Schedule{
-					ScheduleExpression: &admin.Schedule_CronExpression{
-						CronExpression: "expr",
-					},
-					KickoffTimeInputArg: "kickoff_time_arg",
-				},
-			},
-			DefaultInputs: &core.ParameterMap{
-				Parameters: map[string]*core.Parameter{
-					"bar": {
-						Var: &core.Variable{
-							Type: &core.LiteralType{Type: &core.LiteralType_Simple{Simple: core.SimpleType_STRING}},
-						},
-					},
-				},
-			},
-		}
-		err := hydrateLaunchPlanSpec(rconfig.DefaultFilesConfig.AssumableIamRole, rconfig.DefaultFilesConfig.K8sServiceAccount, rconfig.DefaultFilesConfig.OutputLocationPrefix, lpSpec)
-		assert.NotNil(t, err)
-	})
-	t.Run("Validation success with fixed", func(t *testing.T) {
-		lpSpec := &admin.LaunchPlanSpec{
-			EntityMetadata: &admin.LaunchPlanMetadata{
-				Schedule: &admin.Schedule{
-					ScheduleExpression: &admin.Schedule_CronExpression{
-						CronExpression: "expr",
-					},
-					KickoffTimeInputArg: "kickoff_time_arg",
-				},
-			},
-			DefaultInputs: &core.ParameterMap{
-				Parameters: map[string]*core.Parameter{
-					"bar": {
-						Var: &core.Variable{
-							Type: &core.LiteralType{Type: &core.LiteralType_Simple{Simple: core.SimpleType_STRING}},
-						},
-					},
-				},
-			},
-			FixedInputs: &core.LiteralMap{
-				Literals: map[string]*core.Literal{
-					"bar": coreutils.MustMakeLiteral("bar-value"),
-				},
-			},
-		}
-		err := hydrateLaunchPlanSpec(rconfig.DefaultFilesConfig.AssumableIamRole, rconfig.DefaultFilesConfig.K8sServiceAccount, rconfig.DefaultFilesConfig.OutputLocationPrefix, lpSpec)
-		assert.Nil(t, err)
 	})
 }
 
@@ -602,58 +563,207 @@ func TestLeftDiff(t *testing.T) {
 }
 
 func TestValidateLaunchSpec(t *testing.T) {
+	ctx := context.Background()
 	t.Run("nil launchplan spec", func(t *testing.T) {
-		err := validateLaunchSpec(nil)
+		registerFilesSetup()
+		err := validateLaunchSpec(ctx, nil, cmdCtx)
+		assert.Nil(t, err)
+	})
+	t.Run("launchplan spec with nil workflow id", func(t *testing.T) {
+		registerFilesSetup()
+		lpSpec := &admin.LaunchPlanSpec{}
+		err := validateLaunchSpec(ctx, lpSpec, cmdCtx)
 		assert.Nil(t, err)
 	})
 	t.Run("launchplan spec with empty metadata", func(t *testing.T) {
-		lpSpec := &admin.LaunchPlanSpec{}
-		err := validateLaunchSpec(lpSpec)
+		registerFilesSetup()
+		lpSpec := &admin.LaunchPlanSpec{
+			WorkflowId: &core.Identifier{
+				Project: "projectValue",
+				Domain:  "domainValue",
+				Name:    "workflowNameValue",
+				Version: "workflowVersionValue",
+			},
+		}
+		err := validateLaunchSpec(ctx, lpSpec, cmdCtx)
 		assert.Nil(t, err)
 	})
 	t.Run("launchplan spec with metadata and empty schedule", func(t *testing.T) {
+		registerFilesSetup()
 		lpSpec := &admin.LaunchPlanSpec{
+			WorkflowId: &core.Identifier{
+				Project: "projectValue",
+				Domain:  "domainValue",
+				Name:    "workflowNameValue",
+				Version: "workflowVersionValue",
+			},
 			EntityMetadata: &admin.LaunchPlanMetadata{},
 		}
-		err := validateLaunchSpec(lpSpec)
+		err := validateLaunchSpec(ctx, lpSpec, cmdCtx)
 		assert.Nil(t, err)
 	})
-	t.Run("launchplan spec with metadata and non empty schedule", func(t *testing.T) {
+	t.Run("validate spec failed to fetch workflow", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+
+		mockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed"))
 		lpSpec := &admin.LaunchPlanSpec{
+			WorkflowId: &core.Identifier{
+				Project: "projectValue",
+				Domain:  "domainValue",
+				Name:    "workflowNameValue",
+				Version: "workflowVersionValue",
+			},
 			EntityMetadata: &admin.LaunchPlanMetadata{
 				Schedule: &admin.Schedule{
 					KickoffTimeInputArg: "kick_off_time_arg",
 				},
 			},
-			DefaultInputs: &core.ParameterMap{
-				Parameters: map[string]*core.Parameter{
-					"a": getDefaultIntegerParam(),
-				},
-			},
 		}
-		err := validateLaunchSpec(lpSpec)
-		assert.Nil(t, err)
-	})
-	t.Run("launchplan spec non empty schedule required param fail", func(t *testing.T) {
-		lpSpec := &admin.LaunchPlanSpec{
-			EntityMetadata: &admin.LaunchPlanMetadata{
-				Schedule: &admin.Schedule{
-					KickoffTimeInputArg: "kick_off_time_arg",
-				},
-			},
-			DefaultInputs: &core.ParameterMap{
-				Parameters: map[string]*core.Parameter{
-					"a": getRequiredStringParam(),
-				},
-			},
+		lp := &admin.LaunchPlan{
+			Spec: lpSpec,
 		}
-		err := validateLaunchSpec(lpSpec)
+		err := validateSpec(ctx, lp, cmdCtx)
 		assert.NotNil(t, err)
-		assert.Equal(t, "param values are missing on scheduled workflow for the following params [a]."+
+		assert.Equal(t, "failed", err.Error())
+	})
+	t.Run("failed to fetch workflow", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+
+		mockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed"))
+		lpSpec := &admin.LaunchPlanSpec{
+			WorkflowId: &core.Identifier{
+				Project: "projectValue",
+				Domain:  "domainValue",
+				Name:    "workflowNameValue",
+				Version: "workflowVersionValue",
+			},
+			EntityMetadata: &admin.LaunchPlanMetadata{
+				Schedule: &admin.Schedule{
+					KickoffTimeInputArg: "kick_off_time_arg",
+				},
+			},
+		}
+		err := validateLaunchSpec(ctx, lpSpec, cmdCtx)
+		assert.NotNil(t, err)
+		assert.Equal(t, "failed", err.Error())
+	})
+	t.Run("launchplan spec missing required param schedule", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		variableMap := map[string]*core.Variable{
+			"var1": {
+				Type: &core.LiteralType{
+					Type: &core.LiteralType_CollectionType{
+						CollectionType: &core.LiteralType{
+							Type: &core.LiteralType_Simple{
+								Simple: core.SimpleType_INTEGER,
+							},
+						},
+					},
+				},
+				Description: "var1",
+			},
+			"var2": {
+				Type: &core.LiteralType{
+					Type: &core.LiteralType_CollectionType{
+						CollectionType: &core.LiteralType{
+							Type: &core.LiteralType_Simple{
+								Simple: core.SimpleType_INTEGER,
+							},
+						},
+					},
+				},
+				Description: "var2 long descriptions probably needs truncate",
+			},
+		}
+		wf := &admin.Workflow{
+			Closure: &admin.WorkflowClosure{
+				CompiledWorkflow: &core.CompiledWorkflowClosure{
+					Primary: &core.CompiledWorkflow{
+						Template: &core.WorkflowTemplate{
+							Interface: &core.TypedInterface{
+								Inputs: &core.VariableMap{
+									Variables: variableMap,
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		mockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(wf, nil)
+		lpSpec := &admin.LaunchPlanSpec{
+			WorkflowId: &core.Identifier{
+				Project: "projectValue",
+				Domain:  "domainValue",
+				Name:    "workflowNameValue",
+				Version: "workflowVersionValue",
+			},
+			EntityMetadata: &admin.LaunchPlanMetadata{
+				Schedule: &admin.Schedule{
+					KickoffTimeInputArg: "kick_off_time_arg",
+				},
+			},
+		}
+		err := validateLaunchSpec(ctx, lpSpec, cmdCtx)
+		assert.NotNil(t, err)
+		assert.Equal(t, "param values are missing on scheduled workflow for the following params [var1 var2]."+
 			" Either specify them having a default or fixed value", err.Error())
 	})
 	t.Run("launchplan spec non empty schedule required param success", func(t *testing.T) {
+		setup()
+		registerFilesSetup()
+		variableMap := map[string]*core.Variable{
+			"var1": {
+				Type: &core.LiteralType{
+					Type: &core.LiteralType_CollectionType{
+						CollectionType: &core.LiteralType{
+							Type: &core.LiteralType_Simple{
+								Simple: core.SimpleType_INTEGER,
+							},
+						},
+					},
+				},
+				Description: "var1",
+			},
+			"var2": {
+				Type: &core.LiteralType{
+					Type: &core.LiteralType_CollectionType{
+						CollectionType: &core.LiteralType{
+							Type: &core.LiteralType_Simple{
+								Simple: core.SimpleType_INTEGER,
+							},
+						},
+					},
+				},
+				Description: "var2 long descriptions probably needs truncate",
+			},
+		}
+		wf := &admin.Workflow{
+			Closure: &admin.WorkflowClosure{
+				CompiledWorkflow: &core.CompiledWorkflowClosure{
+					Primary: &core.CompiledWorkflow{
+						Template: &core.WorkflowTemplate{
+							Interface: &core.TypedInterface{
+								Inputs: &core.VariableMap{
+									Variables: variableMap,
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		mockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(wf, nil)
 		lpSpec := &admin.LaunchPlanSpec{
+			WorkflowId: &core.Identifier{
+				Project: "projectValue",
+				Domain:  "domainValue",
+				Name:    "workflowNameValue",
+				Version: "workflowVersionValue",
+			},
 			EntityMetadata: &admin.LaunchPlanMetadata{
 				Schedule: &admin.Schedule{
 					KickoffTimeInputArg: "kick_off_time_arg",
@@ -661,18 +771,24 @@ func TestValidateLaunchSpec(t *testing.T) {
 			},
 			DefaultInputs: &core.ParameterMap{
 				Parameters: map[string]*core.Parameter{
-					"a": getRequiredStringParam(),
+					"var1": {
+						Var: &core.Variable{
+							Type: &core.LiteralType{
+								Type: &core.LiteralType_Simple{Simple: core.SimpleType_INTEGER},
+							},
+						},
+					},
 				},
 			},
 			FixedInputs: &core.LiteralMap{
 				Literals: map[string]*core.Literal{
-					"a": {
+					"var2": {
 						Value: &core.Literal_Scalar{
 							Scalar: &core.Scalar{
 								Value: &core.Scalar_Primitive{
 									Primitive: &core.Primitive{
 										Value: &core.Primitive_Integer{
-											Integer: 100,
+											Integer: 10,
 										},
 									},
 								},
@@ -682,45 +798,7 @@ func TestValidateLaunchSpec(t *testing.T) {
 				},
 			},
 		}
-		err := validateLaunchSpec(lpSpec)
+		err := validateLaunchSpec(ctx, lpSpec, cmdCtx)
 		assert.Nil(t, err)
 	})
-}
-
-func getRequiredStringParam() *core.Parameter {
-	return &core.Parameter{
-		Var: &core.Variable{
-			Type: &core.LiteralType{
-				Type: &core.LiteralType_Simple{Simple: core.SimpleType_STRING},
-			},
-		},
-		Behavior: &core.Parameter_Required{
-			Required: true,
-		},
-	}
-}
-
-func getDefaultIntegerParam() *core.Parameter {
-	return &core.Parameter{
-		Var: &core.Variable{
-			Type: &core.LiteralType{
-				Type: &core.LiteralType_Simple{Simple: core.SimpleType_INTEGER},
-			},
-		},
-		Behavior: &core.Parameter_Default{
-			Default: &core.Literal{
-				Value: &core.Literal_Scalar{
-					Scalar: &core.Scalar{
-						Value: &core.Scalar_Primitive{
-							Primitive: &core.Primitive{
-								Value: &core.Primitive_Integer{
-									Integer: 100,
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
 }

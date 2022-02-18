@@ -276,9 +276,6 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode, sourceUploadPath, version
 }
 
 func validateLPWithSchedule(lpSpec *admin.LaunchPlanSpec, wf *admin.Workflow) error {
-	if lpSpec.EntityMetadata == nil || lpSpec.EntityMetadata.Schedule == nil {
-		return nil
-	}
 	schedule := lpSpec.EntityMetadata.Schedule
 	var scheduleRequiredParams []string
 	if wf != nil && wf.Closure != nil && wf.Closure.CompiledWorkflow != nil &&
@@ -319,13 +316,14 @@ func validateLPWithSchedule(lpSpec *admin.LaunchPlanSpec, wf *admin.Workflow) er
 }
 
 func validateLaunchSpec(ctx context.Context, lpSpec *admin.LaunchPlanSpec, cmdCtx cmdCore.CommandContext) error {
-	if lpSpec == nil || lpSpec.WorkflowId == nil {
+	if lpSpec == nil || lpSpec.WorkflowId == nil || lpSpec.EntityMetadata == nil ||
+		lpSpec.EntityMetadata.Schedule == nil {
 		return nil
 	}
 	// Fetch the workflow spec using the identifier
-	workflowId := lpSpec.WorkflowId
-	wf, err := cmdCtx.AdminFetcherExt().FetchWorkflowVersion(ctx, workflowId.Name, workflowId.Version,
-		workflowId.Project, workflowId.Domain)
+	workflowID := lpSpec.WorkflowId
+	wf, err := cmdCtx.AdminFetcherExt().FetchWorkflowVersion(ctx, workflowID.Name, workflowID.Version,
+		workflowID.Project, workflowID.Domain)
 	if err != nil {
 		return err
 	}
