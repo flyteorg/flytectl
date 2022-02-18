@@ -44,7 +44,7 @@ func createProjectSetup() {
 func TestCreateProjectFunc(t *testing.T) {
 	setup()
 	createProjectSetup()
-	defer tearDownAndVerify(t, "project Created successfully")
+	defer tearDownAndVerify(t, "project created successfully")
 	project.DefaultProjectConfig.ID = projectValue
 	project.DefaultProjectConfig.Name = projectValue
 	project.DefaultProjectConfig.Labels = map[string]string{}
