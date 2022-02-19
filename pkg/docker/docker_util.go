@@ -134,9 +134,7 @@ func PullDockerImage(ctx context.Context, cli Docker, image string, pullPolicy s
 func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, exposedPorts map[nat.Port]struct{},
 	portBindings map[nat.Port][]nat.PortBinding, name, image string, additionalEnvVars []string) (string, error) {
 	// Append the additional env variables to the default list of env
-	for _, additionalEnvVar := range additionalEnvVars {
-		Environment = append(Environment, additionalEnvVar)
-	}
+	Environment = append(Environment, additionalEnvVars...)
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Env:          Environment,
 		Image:        image,
