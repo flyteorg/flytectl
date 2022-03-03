@@ -55,5 +55,6 @@ func (cfg Config) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags.StringVar(&DefaultConfig.Image, fmt.Sprintf("%v%v", prefix, "image"), DefaultConfig.Image, "Optional. Provide a fully qualified path to a Flyte compliant docker image.")
 	cmdFlags.BoolVar(&DefaultConfig.Prerelease, fmt.Sprintf("%v%v", prefix, "pre"), DefaultConfig.Prerelease, "Optional. Pre release Version of flyte will be used for sandbox.")
 	cmdFlags.Var(&DefaultConfig.ImagePullPolicy, fmt.Sprintf("%v%v", prefix, "imagePullPolicy"), "Optional. Defines the image pull behavior [Always/IfNotPresent/Never]")
+	cmdFlags.Int64Var(&DefaultConfig.Timeout, fmt.Sprintf("%v%v", prefix, "timeout"), DefaultConfig.Timeout, "Optional. Timeout to wait for Flyte deployment,  default is 600s.")
 	return cmdFlags
 }

@@ -70,6 +70,11 @@ Specify a Flyte Sandbox image pull policy. Possible pull policy values are Alway
 ::
 
  flytectl sandbox start  --image docker.io/my-override:latest --imagePullPolicy Always
+
+Specify custom timeout to wait for flyte deployment, By default it is 600s(10m) :
+::
+
+ flytectl sandbox start  --timeout=800
 Usage
 `
 	k8sEndpoint          = "https://127.0.0.1:30086"
@@ -182,7 +187,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 
 	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
-	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, sandboxImage)
+	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName, sandboxImage, sandboxConfig.DefaultConfig.Timeout)
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)
 		return nil, err

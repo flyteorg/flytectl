@@ -167,4 +167,18 @@ func TestConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
+	t.Run("Test_timeout", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("timeout", testValue)
+			if vInt64, err := cmdFlags.GetInt64("timeout"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vInt64), &actual.Timeout)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
 }

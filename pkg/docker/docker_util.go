@@ -131,7 +131,10 @@ func PullDockerImage(ctx context.Context, cli Docker, image string, pullPolicy s
 }
 
 //StartContainer will create and start docker container
-func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, name, image string) (string, error) {
+func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, name, image string, timeout int64) (string, error) {
+	if timeout > 0 {
+		Environment = append(Environment, fmt.Sprintf("FLYTE_TIMEOUT=%d", timeout))
+	}
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Env:          Environment,
 		Image:        image,
