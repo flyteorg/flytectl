@@ -158,7 +158,7 @@ func TestConfig_SetFlags(t *testing.T) {
 	t.Run("Test_env", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
-			testValue := join_Config("1,1", ",")
+			testValue := join_Config(DefaultConfig.Env, ",")
 
 			cmdFlags.Set("env", testValue)
 			if vStringSlice, err := cmdFlags.GetStringSlice("env"); err == nil {

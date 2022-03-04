@@ -25,7 +25,6 @@ func (i ImagePullPolicy) Type() string {
 	return "ImagePullPolicy"
 }
 
-// DONOT regenerate until the following is fixed https://github.com/flyteorg/flyte/issues/2119
 //go:generate pflags Config --default-var DefaultConfig --bind-default-var
 var (
 	DefaultConfig = &Config{}
