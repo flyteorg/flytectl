@@ -40,6 +40,12 @@ Retrieve a particular version of the launch plan by name within the project and 
 
  flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --version v2
 
+Retrieve all launch plans for a given workflow name:
+
+::
+
+ flytectl get launchplan -p flytesnacks -d development --workflow core.flyte_basics.lp.go_greet
+
 Retrieve all the launch plans with filters:
 ::
 
@@ -173,6 +179,17 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 	launchPlans, err := cmdCtx.AdminFetcherExt().FetchAllVerOfLP(ctx, "", config.GetConfig().Project, config.GetConfig().Domain, launchplan.DefaultConfig.Filter)
 	if err != nil {
 		return err
+	}
+
+	workflowName := launchplan.DefaultConfig.Workflow
+	var workflowFilteredLps []*admin.LaunchPlan
+	if len(launchplan.DefaultConfig.Workflow) > 0 {
+		for _, lp := range launchPlans {
+			if lp.Spec.WorkflowId.Name == workflowName {
+				workflowFilteredLps = append(workflowFilteredLps, lp)
+			}
+		}
+		launchPlans = workflowFilteredLps
 	}
 
 	logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
