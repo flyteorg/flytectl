@@ -2,6 +2,7 @@ package get
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/launchplan"
@@ -176,20 +177,16 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		return nil
 	}
 
+	if len(launchplan.DefaultConfig.Workflow) > 0 {
+		if len(launchplan.DefaultConfig.Filter.FieldSelector) > 0 {
+			return fmt.Errorf("fieldSelector cannot be specified with workflow flag")
+		}
+		launchplan.DefaultConfig.Filter.FieldSelector = fmt.Sprintf("workflow.name=%s", launchplan.DefaultConfig.Workflow)
+	}
+
 	launchPlans, err := cmdCtx.AdminFetcherExt().FetchAllVerOfLP(ctx, "", config.GetConfig().Project, config.GetConfig().Domain, launchplan.DefaultConfig.Filter)
 	if err != nil {
 		return err
-	}
-
-	workflowName := launchplan.DefaultConfig.Workflow
-	var workflowFilteredLps []*admin.LaunchPlan
-	if len(launchplan.DefaultConfig.Workflow) > 0 {
-		for _, lp := range launchPlans {
-			if lp.Spec.WorkflowId.Name == workflowName {
-				workflowFilteredLps = append(workflowFilteredLps, lp)
-			}
-		}
-		launchPlans = workflowFilteredLps
 	}
 
 	logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
