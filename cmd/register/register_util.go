@@ -4,7 +4,6 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -12,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -48,11 +48,20 @@ const registrationVersionPattern = "{{ registration.version }}"
 const registrationRemotePackagePattern = "{{ .remote_package_path }}"
 const registrationDestDirPattern = "{{ .dest_dir }}"
 
+type SubexpName = string
+type MatchedString = string
+
 // All supported extensions for compress
 var supportedExtensions = []string{".tar", ".tgz", ".tar.gz"}
 
 // All supported extensions for gzip compress
 var validGzipExtensions = []string{".tgz", ".tar.gz"}
+
+type SignedURLPatternMatcher = *regexp.Regexp
+
+var (
+	SignedURLPattern SignedURLPatternMatcher = regexp.MustCompile(`https://((storage\.googleapis\.com/(?P<bucket_gcs>[^/]+))|((?P<bucket_s3>[^\.]+)\.s3\.amazonaws\.com)|(.*\.blob\.core\.windows\.net/(?P<bucket_az>[^/]+)))/(?P<path>[^?]*)`)
+)
 
 type Result struct {
 	Name   string
@@ -97,6 +106,23 @@ func unMarshalContents(ctx context.Context, fileContents []byte, fname string) (
 	logger.Debugf(ctx, "Failed to unmarshal file %v for launch plan type", fname)
 	return nil, fmt.Errorf("failed unmarshalling file %v", fname)
 
+}
+
+// MatchRegex returns all matches for the sub-expressions within the regex.
+func MatchRegex(reg *regexp.Regexp, input string) map[SubexpName]MatchedString {
+	names := reg.SubexpNames()
+	res := reg.FindAllStringSubmatch(input, -1)
+	if len(res) == 0 {
+		return nil
+	}
+
+	dict := make(map[string]string, len(names))
+	// Start from 1 since names[0] is always empty per docs on reg.SubexpNames()
+	for i := 1; i < len(res[0]); i++ {
+		dict[names[i]] = res[0][i]
+	}
+
+	return dict
 }
 
 func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.CommandContext, dryRun bool) error {
@@ -221,15 +247,11 @@ func hydrateIdentifier(identifier *core.Identifier, version string, force bool) 
 	}
 }
 
-func hydrateTaskSpec(task *admin.TaskSpec, sourceCode, sourceUploadPath, version, destinationDir string) error {
+func hydrateTaskSpec(task *admin.TaskSpec, sourceUploadPath storage.DataReference, destinationDir string) error {
 	if task.Template.GetContainer() != nil {
 		for k := range task.Template.GetContainer().Args {
 			if task.Template.GetContainer().Args[k] == registrationRemotePackagePattern {
-				remotePath, err := getRemoteStoragePath(context.Background(), Client, sourceUploadPath, sourceCode, version)
-				if err != nil {
-					return err
-				}
-				task.Template.GetContainer().Args[k] = string(remotePath)
+				task.Template.GetContainer().Args[k] = sourceUploadPath.String()
 			}
 			if task.Template.GetContainer().Args[k] == registrationDestDirPattern {
 				task.Template.GetContainer().Args[k] = "."
@@ -247,11 +269,7 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceCode, sourceUploadPath, version
 		for containerIdx, container := range podSpec.Containers {
 			for argIdx, arg := range container.Args {
 				if arg == registrationRemotePackagePattern {
-					remotePath, err := getRemoteStoragePath(context.Background(), Client, sourceUploadPath, sourceCode, version)
-					if err != nil {
-						return err
-					}
-					podSpec.Containers[containerIdx].Args[argIdx] = string(remotePath)
+					podSpec.Containers[containerIdx].Args[argIdx] = sourceUploadPath.String()
 				}
 				if arg == registrationDestDirPattern {
 					podSpec.Containers[containerIdx].Args[argIdx] = "."
@@ -325,7 +343,7 @@ func hydrateLaunchPlanSpec(configAssumableIamRole string, configK8sServiceAccoun
 	return nil
 }
 
-func hydrateSpec(message proto.Message, sourceCode string, config rconfig.FilesConfig) error {
+func hydrateSpec(message proto.Message, uploadLocation storage.DataReference, config rconfig.FilesConfig) error {
 	switch v := message.(type) {
 	case *admin.LaunchPlan:
 		launchPlan := message.(*admin.LaunchPlan)
@@ -354,7 +372,7 @@ func hydrateSpec(message proto.Message, sourceCode string, config rconfig.FilesC
 		taskSpec := message.(*admin.TaskSpec)
 		hydrateIdentifier(taskSpec.Template.Id, config.Version, config.Force)
 		// In case of fast serialize input proto also have on additional variable to substitute i.e destination bucket for source code
-		if err := hydrateTaskSpec(taskSpec, sourceCode, config.SourceUploadPath, config.Version, config.DestinationDirectory); err != nil {
+		if err := hydrateTaskSpec(taskSpec, uploadLocation, config.DestinationDirectory); err != nil {
 			return err
 		}
 
@@ -389,8 +407,18 @@ func getSerializeOutputFiles(ctx context.Context, args []string, archive bool) (
 		 * generated otherwise the registration can fail if the dependent files are not registered earlier.
 		 */
 
-		sort.Strings(args)
-		return args, "", nil
+		finalList := make([]string, 0, len(args))
+		for _, arg := range args {
+			matches, err := filepath.Glob(arg)
+			if err != nil {
+				return nil, "", fmt.Errorf("failed to glob [%v]. Error: %w", arg, err)
+			}
+
+			finalList = append(finalList, matches...)
+		}
+
+		sort.Strings(finalList)
+		return finalList, "", nil
 	}
 
 	tempDir, err := ioutil.TempDir("/tmp", "register")
@@ -456,7 +484,9 @@ func readAndCopyArchive(src io.Reader, tempDir string, unarchivedFiles []string)
 	}
 }
 
-func registerFile(ctx context.Context, fileName, sourceCode string, registerResults []Result, cmdCtx cmdCore.CommandContext, config rconfig.FilesConfig) ([]Result, error) {
+func registerFile(ctx context.Context, fileName string, registerResults []Result,
+	cmdCtx cmdCore.CommandContext, uploadLocation storage.DataReference, config rconfig.FilesConfig) ([]Result, error) {
+
 	var registerResult Result
 	var fileContents []byte
 	var err error
@@ -472,7 +502,7 @@ func registerFile(ctx context.Context, fileName, sourceCode string, registerResu
 		return registerResults, err
 	}
 
-	if err := hydrateSpec(spec, sourceCode, config); err != nil {
+	if err := hydrateSpec(spec, uploadLocation, config); err != nil {
 		registerResult = Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error hydrating spec due to %v", err)}
 		registerResults = append(registerResults, registerResult)
 		return registerResults, err
@@ -580,44 +610,117 @@ func getAllExample(repository, version string) ([]*github.ReleaseAsset, *github.
 func getRemoteStoragePath(ctx context.Context, s *storage.DataStore, remoteLocation, file, identifier string) (storage.DataReference, error) {
 	remotePath, err := s.ConstructReference(ctx, storage.DataReference(remoteLocation), fmt.Sprintf("%v-%v", identifier, file))
 	if err != nil {
-		return storage.DataReference(""), err
+		return "", err
 	}
+
 	return remotePath, nil
 }
 
-func uploadFastRegisterArtifact(ctx context.Context, file, sourceCodeName, version string, sourceUploadPath *string) error {
+func getTotalSize(reader io.Reader) (size int64, err error) {
+	page := make([]byte, 0, 100)
+	size = 0
+
+	n := 0
+	for n, err = reader.Read(page); n != 0 && err == nil; {
+		size += int64(n)
+	}
+
+	return size, err
+}
+
+func uploadFastRegisterArtifact(ctx context.Context, file, sourceCodeName, version, signedUploadURL,
+	sourceUploadPath string) (uploadLocation storage.DataReference, err error) {
+
 	dataStore, err := getStorageClient(ctx)
 	if err != nil {
-		return err
+		return "", err
 	}
-	var dataRefReaderCloser io.ReadCloser
-	remotePath := storage.DataReference(*sourceUploadPath)
-	if len(*sourceUploadPath) == 0 {
+
+	fileHandle, err := os.Open(file)
+	if err != nil {
+		return "", err
+	}
+
+	dataRefReaderCloser, err := gzip.NewReader(fileHandle)
+	if err != nil {
+		return "", err
+	}
+
+	size, err := getTotalSize(dataRefReaderCloser)
+	if err != nil {
+		return "", err
+	}
+
+	_, err = fileHandle.Seek(0, 0)
+	if err != nil {
+		return "", err
+	}
+
+	err = dataRefReaderCloser.Reset(fileHandle)
+	if err != nil {
+		return "", err
+	}
+
+	remotePath := storage.DataReference(sourceUploadPath)
+	if len(signedUploadURL) > 0 {
+		// If a signed upload url is used, figure out the bucket, and path.
+		parsed := MatchRegex(SignedURLPattern, signedUploadURL)
+		scheme, _, _, err := dataStore.GetBaseContainerFQN(ctx).Split()
+		if err != nil {
+			return "", fmt.Errorf("failed to parse base container fqn. Error: %w", err)
+		}
+
+		baseLocation := storage.DataReference(fmt.Sprintf("%s://%s/", scheme, parsed["bucket_s3"]))
+		remotePath, err = dataStore.ConstructReference(ctx, baseLocation, parsed["path"])
+		if err != nil {
+			return "", fmt.Errorf("failed to construct output reference for [%v]. Error: %w", baseLocation, err)
+		}
+
+		return remotePath, DirectUpload(signedUploadURL, size, dataRefReaderCloser)
+	}
+
+	if len(sourceUploadPath) == 0 {
 		remotePath, err = dataStore.ConstructReference(ctx, dataStore.GetBaseContainerFQN(ctx), "fast")
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
-	*sourceUploadPath = string(remotePath)
-	fullRemotePath, err := getRemoteStoragePath(ctx, dataStore, *sourceUploadPath, sourceCodeName, version)
+
+	remotePath, err = getRemoteStoragePath(ctx, dataStore, remotePath.String(), sourceCodeName, version)
+	if err != nil {
+		return "", err
+	}
+
+	if err := dataStore.ComposedProtobufStore.WriteRaw(ctx, remotePath, size, storage.Options{}, dataRefReaderCloser); err != nil {
+		return "", err
+	}
+
+	return remotePath, nil
+}
+
+func DirectUpload(url string, size int64, data io.Reader) error {
+	req, err := http.NewRequest(http.MethodPut, url, data)
 	if err != nil {
 		return err
 	}
-	raw, err := json.Marshal(file)
+
+	req.ContentLength = size
+
+	client := &http.Client{}
+	res, err := client.Do(req)
 	if err != nil {
 		return err
 	}
-	dataRefReaderCloser, err = os.Open(file)
-	if err != nil {
-		return err
+
+	if res.StatusCode != http.StatusOK {
+		raw, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			return fmt.Errorf("received response code [%v]. Failed to read response body. Error: %w", res.StatusCode, err)
+		}
+
+		return fmt.Errorf("bad status: %s : %s", res.Status, string(raw))
 	}
-	dataRefReaderCloser, err = gzip.NewReader(dataRefReaderCloser)
-	if err != nil {
-		return err
-	}
-	if err := dataStore.ComposedProtobufStore.WriteRaw(ctx, fullRemotePath, int64(len(raw)), storage.Options{}, dataRefReaderCloser); err != nil {
-		return err
-	}
+
 	return nil
 }
 

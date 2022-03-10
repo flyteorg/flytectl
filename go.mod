@@ -16,7 +16,6 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/golang/protobuf v1.5.0
-	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-github/v37 v37.0.0
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.2.0
@@ -35,6 +34,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/pkg/browser v0.0.0-20210115035449-ce105d075bb4
 	github.com/pkg/errors v0.9.1
+	github.com/savaki/amplitude-go v0.0.0-20160610055645-f62e3b57c0e4 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5

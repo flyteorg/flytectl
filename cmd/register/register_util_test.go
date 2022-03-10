@@ -1,6 +1,7 @@
 package register
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net/http"
@@ -213,6 +214,13 @@ func TestGetSortedArchivedFileThroughValidHttpWithNullContextList(t *testing.T) 
 	assert.Nil(t, os.RemoveAll(tmpDir), "unable to delete temp dir %v", tmpDir)
 }
 
+func Test_getTotalSize(t *testing.T) {
+	b := bytes.NewBufferString("hello world")
+	size, err := getTotalSize(b)
+	assert.NoError(t, err)
+	assert.Equal(t, 11, size)
+}
+
 func TestRegisterFile(t *testing.T) {
 	t.Run("Successful run", func(t *testing.T) {
 		setup()
@@ -220,7 +228,7 @@ func TestRegisterFile(t *testing.T) {
 		mockAdminClient.OnCreateTaskMatch(mock.Anything, mock.Anything).Return(nil, nil)
 		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
 		var registerResults []Result
-		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx, *rconfig.DefaultFilesConfig)
+		results, err := registerFile(ctx, args[0], registerResults, cmdCtx, "", *rconfig.DefaultFilesConfig)
 		assert.Equal(t, 1, len(results))
 		assert.Nil(t, err)
 	})
@@ -229,7 +237,7 @@ func TestRegisterFile(t *testing.T) {
 		registerFilesSetup()
 		args = []string{"testdata/non-existent.pb"}
 		var registerResults []Result
-		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx, *rconfig.DefaultFilesConfig)
+		results, err := registerFile(ctx, args[0], registerResults, cmdCtx, "", *rconfig.DefaultFilesConfig)
 		assert.Equal(t, 1, len(results))
 		assert.Equal(t, "Failed", results[0].Status)
 		assert.Equal(t, "Error reading file due to open testdata/non-existent.pb: no such file or directory", results[0].Info)
@@ -240,7 +248,7 @@ func TestRegisterFile(t *testing.T) {
 		registerFilesSetup()
 		args = []string{"testdata/valid-register.tar"}
 		var registerResults []Result
-		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx, *rconfig.DefaultFilesConfig)
+		results, err := registerFile(ctx, args[0], registerResults, cmdCtx, "", *rconfig.DefaultFilesConfig)
 		assert.Equal(t, 1, len(results))
 		assert.Equal(t, "Failed", results[0].Status)
 		assert.Equal(t, "Error unmarshalling file due to failed unmarshalling file testdata/valid-register.tar", results[0].Info)

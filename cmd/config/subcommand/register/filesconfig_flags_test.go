@@ -253,4 +253,18 @@ func TestFilesConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
+	t.Run("Test_signedUploadURL", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("signedUploadURL", testValue)
+			if vString, err := cmdFlags.GetString("signedUploadURL"); err == nil {
+				testDecodeJson_FilesConfig(t, fmt.Sprintf("%v", vString), &actual.SignedUploadURL)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
 }

@@ -35,9 +35,11 @@ func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CommandEntry) {
 			RunE:         generateCommandFunc(cmdEntry),
 			SilenceUsage: true,
 		}
+
 		if cmdEntry.PFlagProvider != nil {
 			cmd.Flags().AddFlagSet(cmdEntry.PFlagProvider.GetPFlagSet(""))
 		}
+
 		rootCmd.AddCommand(cmd)
 	}
 }

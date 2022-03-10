@@ -3,12 +3,14 @@ package cmd
 import (
 	"context"
 	"fmt"
-
 	"os"
+	"strings"
 
 	"github.com/flyteorg/flytectl/cmd/sandbox"
-
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
+	"github.com/flyteorg/flytestdlib/logger"
+	stdlibversion "github.com/flyteorg/flytestdlib/version"
+	"github.com/savaki/amplitude-go"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	configuration "github.com/flyteorg/flytectl/cmd/configuration"
@@ -79,7 +81,39 @@ func newRootCmd() *cobra.Command {
 	return rootCmd
 }
 
+func reportUsage(cmd *cobra.Command) {
+	//apiKey := os.Getenv("5fe33cf23d9a058c972d868629d018bc")
+	client := amplitude.New("5fe33cf23d9a058c972d868629d018bc")
+
+	cmdLst := make([]string, 0, 5)
+	cmdLst = append(cmdLst, cmd.Use)
+	for cmd.HasParent() {
+		cmd = cmd.Parent()
+		cmdLst = append(cmdLst, cmd.Use)
+	}
+
+	sb := strings.Builder{}
+	for i := len(cmdLst) - 1; i >= 0; i-- {
+		sb.WriteString(strings.ToLower(cmdLst[i]) + "_")
+	}
+
+	err := client.Publish(amplitude.Event{
+		AppVersion:     stdlibversion.Version,
+		EventType:      sb.String(),
+		UserProperties: map[string]interface{}{},
+	})
+
+	if err != nil {
+		logger.Infof(context.Background(), "failed to report event. Error: %v", err)
+	}
+
+	client.Flush()
+	client.Close()
+}
+
 func initConfig(cmd *cobra.Command, _ []string) error {
+	//reportUsage(cmd)
+
 	configFile := f.FilePathJoin(f.UserHomeDir(), configFileDir, configFileName)
 	// TODO: Move flyteconfig env variable logic in flytestdlib
 	if len(os.Getenv("FLYTECTL_CONFIG")) > 0 {

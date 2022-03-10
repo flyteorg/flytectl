@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/flyteorg/flytestdlib/storage"
+
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
@@ -126,19 +128,21 @@ func Register(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext)
 
 	// In case of fast serialize input upload source code to destination bucket
 	var sourceCodeName string
+	var uploadLocation storage.DataReference
 	if len(sourceCode) > 0 {
 		logger.Infof(ctx, "Fast Registration detected")
 		_, sourceCodeName = filepath.Split(sourceCode)
-		if err = uploadFastRegisterArtifact(ctx, sourceCode, sourceCodeName, rconfig.DefaultFilesConfig.Version, &rconfig.DefaultFilesConfig.SourceUploadPath); err != nil {
+		if uploadLocation, err = uploadFastRegisterArtifact(ctx, sourceCode, sourceCodeName, rconfig.DefaultFilesConfig.Version, rconfig.DefaultFilesConfig.SignedUploadURL, rconfig.DefaultFilesConfig.SourceUploadPath); err != nil {
 			return fmt.Errorf("please check your Storage Config. It failed while uploading the source code. %v", err)
 		}
+
 		logger.Infof(ctx, "Source code successfully uploaded %v/%v ", rconfig.DefaultFilesConfig.SourceUploadPath, sourceCodeName)
 	}
 
 	var registerResults []Result
 	fastFail := rconfig.DefaultFilesConfig.ContinueOnError
 	for i := 0; i < len(validProto) && !(fastFail && regErr != nil); i++ {
-		registerResults, regErr = registerFile(ctx, validProto[i], sourceCodeName, registerResults, cmdCtx, *rconfig.DefaultFilesConfig)
+		registerResults, regErr = registerFile(ctx, validProto[i], registerResults, cmdCtx, uploadLocation, *rconfig.DefaultFilesConfig)
 	}
 
 	payload, _ := json.Marshal(registerResults)
