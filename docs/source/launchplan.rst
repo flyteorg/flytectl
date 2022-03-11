@@ -1,5 +1,5 @@
 Launchplan
-----------
+-----------
 It specifies the actions to be performed on the 'launchplan' resource. 
 
 .. toctree::

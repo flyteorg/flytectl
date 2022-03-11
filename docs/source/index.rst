@@ -43,7 +43,7 @@ Flytectl is a Golang binary that can be installed on any platform supported by G
 Configuration
 =============
 
-Flytectl allows you to configure using a YAML file or by passing every configuration value
+Flytectl allows you to communicate with FlyteAdmin using a YAML file or by passing every configuration value
 on the command-line. The following configuration can be used for the setup:
 
 Basic Configuration
