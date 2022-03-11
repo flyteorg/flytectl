@@ -15,7 +15,7 @@ import (
 const (
 	execCmdShort = `Terminates/deletes execution resources.`
 	execCmdLong  = `
-Task executions can be aborted only if they are in non-terminal state. If they are FAILED, ABORTED or SUCCEEDED, calling terminate on them has no effect.
+Task executions can be aborted only if they are in non-terminal state. If they are FAILED, ABORTED, or SUCCEEDED, calling terminate on them has no effect.
 Terminate a single execution with its name:
 
 ::
@@ -23,7 +23,7 @@ Terminate a single execution with its name:
  flytectl delete execution c6a51x2l9e  -d development  -p flytesnacks
 
 .. note::
-    The term execution/executions can be used interchangeably in these commands.
+    The terms execution/executions are interchangeable in these commands.
 
 Get an execution to check its state:
 

@@ -64,7 +64,7 @@ The full list of available configurable options can be found by running ``flytec
         admin:
           # For GRPC endpoints you might want to use dns:///flyte.myexample.com
           endpoint: dns:///localhost:30081
-          insecure: true # Set to false to enable TLS/SSL connection (not recommended except on local Sandbox deployment)
+          insecure: true # Set to false to enable TLS/SSL connection (not recommended except on local Sandbox deployment).
           authType: Pkce # authType: Pkce # if using authentication or just drop this.
         storage:
           connection:
@@ -125,7 +125,7 @@ The full list of available configurable options can be found by running ``flytec
     * currDir from where you run flytectl
     * ``/etc/flyte/config``
     
-    You can pass the file name in the command line using ``--config <config-file-path>`` too.
+    You can also pass the file name in the command line using ``--config <config-file-path>``.
 
 
 .. toctree::

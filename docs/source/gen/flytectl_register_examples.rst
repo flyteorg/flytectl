@@ -3,14 +3,14 @@
 flytectl register examples
 --------------------------
 
-Register Flytesnacks example
+Registers Flytesnacks example.
 
 Synopsis
 ~~~~~~~~
 
 
 
-Register all latest Flytesnacks examples:
+Register all the latest Flytesnacks examples:
 ::
 
  flytectl register examples  -d development  -p flytesnacks 
@@ -97,5 +97,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_register` 	 - Register tasks, workflows, launch plans from a list of generated serialized files.
+* :doc:`flytectl_register` 	 - Registers tasks, workflows, and launch plans from a list of generated serialized files.
 

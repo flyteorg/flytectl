@@ -23,8 +23,8 @@ For project flytectldemo and development domain:
 
 Delete cluster resource attribute using the config file that was used to create it.
 Here, the config file is written to cra.yaml.
-Attributes are optional in the file as they are unread during the delete command but can be retained since the same file can be used for get, update or delete commands.
-E.g., content of cra.yaml:
+Attributes are optional in the file. They are unread during the 'delete' command but can be retained since the same file can be used for 'get', 'update' or 'delete' commands.
+Example: content of cra.yaml:
 
 ::
 

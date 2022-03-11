@@ -3,7 +3,7 @@
 flytectl sandbox
 ----------------
 
-Used for Sandbox interactions like start, teardown, status, exec.
+Helps with Sandbox interactions like start, teardown, status, and exec.
 
 Synopsis
 ~~~~~~~~
@@ -12,19 +12,19 @@ Synopsis
 
 Flyte Sandbox is a fully standalone minimal environment for running Flyte. It provides a simplified way of running Flyte Sandbox as a single Docker container locally.
 	
-Creates sandbox cluster:
+Creates Sandbox cluster:
 ::
 
  flytectl sandbox start 
 	
 	
-Removes sandbox cluster:
+Removes Sandbox cluster:
 ::
 
  flytectl sandbox teardown 	
 	
 
-Checks the status of Sandbox container:
+Checks the status of the Sandbox container:
 ::
 
  flytectl sandbox status 	
@@ -93,7 +93,7 @@ SEE ALSO
 
 * :doc:`flytectl` 	 - Flytectl CLI tool
 * :doc:`flytectl_sandbox_exec` 	 - Executes non-interactive command inside the Sandbox container
-* :doc:`flytectl_sandbox_start` 	 - Starts the Flyte Sandbox cluster
-* :doc:`flytectl_sandbox_status` 	 - Get the status of the Sandbox environment.
-* :doc:`flytectl_sandbox_teardown` 	 - Clean up the sandbox environment
+* :doc:`flytectl_sandbox_start` 	 - Starts the Flyte Sandbox cluster.
+* :doc:`flytectl_sandbox_status` 	 - Gets the status of the Sandbox environment.
+* :doc:`flytectl_sandbox_teardown` 	 - Cleans up the sandbox environment
 

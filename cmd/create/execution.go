@@ -13,7 +13,7 @@ import (
 const (
 	executionShort = "Creates execution resources."
 	executionLong  = `
-Create execution resources for a given workflow/task in a project and domain:
+Creates execution resources for a given workflow or task in a project and domain.
 
 ::
 
@@ -93,8 +93,7 @@ The spec file is generated first. Next, the execution is run using the spec file
 
  flytectl get task -d development -p flytectldemo  core.type_system.custom_objects.add --execFile adddatanum.yaml
 
-The generated file would look similar to this. Here, empty values have been dumped for generic data type 'x' and 'y'. 
-
+The generated file would look similar to this. Here, empty values have been dumped for generic data types 'x' and 'y'. 
 ::
 
     iamRoleARN: ""

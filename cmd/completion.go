@@ -25,44 +25,59 @@ import (
 var completionCmd = &cobra.Command{
 	Use:   "completion [bash|zsh|fish|powershell]",
 	Short: "Generates completion script",
-	Long: `To load completions:
+	Long: `To load completions for each session, execute once:
 
 Bash:
 
-    $ source <(flytectl completion bash)
+::
 
-	  # To load completions for each session, execute once:
-	  # Linux:
-	  $ flytectl completion bash > /etc/bash_completion.d/flytectl
-	  # macOS:
-	  $ flytectl completion bash > /usr/local/etc/bash_completion.d/flytectl
+$ source <(flytectl completion bash)
+
+
+Linux:
+::
+   
+ $ flytectl completion bash > /etc/bash_completion.d/flytectl
+
+macOS:
+::
+
+$ flytectl completion bash > /usr/local/etc/bash_completion.d/flytectl
 
 Zsh:
 
-  # If shell completion is not already enabled in your environment,
-  # you will need to enable it. You can execute the following once:
+If shell completion is not already enabled in your environment, enable it:
+::
 
-  $ echo "autoload -U compinit; compinit" >> ~/.zshrc
+$ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
-  # To load completions for each session, execute once:
-  $ flytectl completion zsh > "${fpath[1]}/_flytectl"
+Once enabled, execute once:
+::
 
-  # You will need to start a new shell for this setup to take effect.
+$ flytectl completion zsh > "${fpath[1]}/_flytectl"
+
+.. note::
+     Start a new shell for this setup to take effect.
 
 fish:
+::
 
-  $ flytectl completion fish | source
+$ flytectl completion fish | source
 
-  # To load completions for each session, execute once:
-  $ flytectl completion fish > ~/.config/fish/completions/flytectl.fish
+::
+
+$ flytectl completion fish > ~/.config/fish/completions/flytectl.fish
 
 PowerShell:
+::
 
-  PS> flytectl completion powershell | Out-String | Invoke-Expression
+ PS> flytectl completion powershell | Out-String | Invoke-Expression
 
-  # To load completions for every new session, run:
-  PS> flytectl completion powershell > flytectl.ps1
-  # and source this file from your PowerShell profile.
+::
+
+ PS> flytectl completion powershell > flytectl.ps1
+
+Source this file from your PowerShell profile.
 `,
 	DisableFlagsInUseLine: true,
 	ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},

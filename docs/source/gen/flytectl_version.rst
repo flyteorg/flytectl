@@ -3,14 +3,14 @@
 flytectl version
 ----------------
 
-Fetch Flyte version
+Fetches Flyte version
 
 Synopsis
 ~~~~~~~~
 
 
 
-Fetch Flytectl version:
+Fetch Flytectl version.
 ::
 
  flytectl version

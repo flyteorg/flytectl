@@ -23,7 +23,7 @@ Retrieve all the projects:
  flytectl get project
 
 .. note::
-	  The term project/projects can be used interchangeably in these commands.
+	  The terms project/projects are interchangeable in these commands.
 
 Retrieve project by name:
 

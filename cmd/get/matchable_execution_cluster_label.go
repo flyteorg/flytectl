@@ -20,19 +20,19 @@ For project flytectldemo and development domain:
 
  flytectl get execution-cluster-label -p flytectldemo -d development 
 
-E.g., output from the command:
+Example: output from the command:
 
 .. code-block:: json
 
  {"project":"flytectldemo","domain":"development","value":"foo"}
 
-Retrieve the execution cluster label for the given project, domain and workflow.
+Retrieve the execution cluster label for the given project, domain, and workflow.
 For project flytectldemo, development domain, and workflow 'core.control_flow.run_merge_sort.merge_sort':
 ::
 
  flytectl get execution-cluster-label -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-E.g., output from the command:
+Example: output from the command:
 
 .. code-block:: json
 
@@ -40,7 +40,7 @@ E.g., output from the command:
 
 Write the execution cluster label to a file. If there is no execution cluster label, the command throws an error.
 The config file is written to ecl.yaml file.
-E.g., content of ecl.yaml:
+Example: content of ecl.yaml:
 
 ::
 

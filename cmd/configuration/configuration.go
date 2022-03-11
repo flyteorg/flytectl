@@ -34,7 +34,7 @@ Generate Sandbox config:
  flytectl config init  
 
 Flyte Sandbox is a fully standalone minimal environment for running Flyte. 
-Read more about Sandbox deployment :ref:` + "`here <deploy-sandbox-local>`" + `.
+Read more about the Sandbox deployment :ref:` + "`here <deploy-sandbox-local>`" + `.
 
 Generate remote cluster config: 
 	

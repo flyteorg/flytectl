@@ -23,7 +23,7 @@ Retrieve all the tasks within project and domain:
  flytectl get task -p flytesnacks -d development
 
 .. note::
-	  The term task/tasks can be used interchangeably in these commands.
+	  The terms task/tasks are interchangeable in these commands.
 	  
 Retrieve task by name within project and domain:
 

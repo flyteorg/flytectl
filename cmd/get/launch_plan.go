@@ -22,7 +22,7 @@ Retrieve all launch plans within the project and domain:
  flytectl get launchplan -p flytesnacks -d development
 
 .. note::
-	   The term launch plan/launch plans can be used interchangeably in these commands.
+     The terms launch plan/launch plans are interchangeable in these commands.
 
  Retrieve a launch plan by name within the project and domain:
 

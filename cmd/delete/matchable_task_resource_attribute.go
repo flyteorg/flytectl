@@ -13,7 +13,7 @@ import (
 const (
 	taskResourceAttributesShort = "Deletes matchable resources of task attributes."
 	taskResourceAttributesLong  = `
-Delete task resource attributes for the given project and domain combination, or additionally the workflow name.
+Deletes task resource attributes for the given project and domain combination, or additionally the workflow name.
 
 For project flytectldemo and development domain:
 ::
@@ -21,10 +21,10 @@ For project flytectldemo and development domain:
  flytectl delete task-resource-attribute -p flytectldemo -d development 
 
 
-Delete task resource attribute using config file which was used to create it.
+Deletes task resource attribute using config file which was used to create it.
 Here, the config file is written to tra.yaml.
-The defaults/limits are optional in the file as they are unread during the delete command but can be retained since the same file can be used for get, update or delete commands.
-E.g., content of tra.yaml:
+The defaults/limits are optional in the file as they are unread during the delete command, but can be retained since the same file can be used for 'get', 'update' or 'delete' commands.
+Example: content of tra.yaml:
 
 ::
 

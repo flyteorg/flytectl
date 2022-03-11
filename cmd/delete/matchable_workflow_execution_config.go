@@ -25,7 +25,7 @@ For project flytectldemo and development domain:
 Deletes workflow execution config using config file which was used to create it.
 Here, the config file is written to wec.yaml.
 Max_parallelism is optional in the file as it is unread during the delete command but can be retained since the same file can be used for get, update or delete commands.
-E.g., content of wec.yaml:
+Example: content of wec.yaml:
 
 ::
 

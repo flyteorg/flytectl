@@ -19,7 +19,7 @@ For project flytectldemo and development domain:
 
  flytectl get cluster-resource-attribute -p flytectldemo -d development 
 
-E.g., output from the command:
+Example: output from the command:
 
 .. code-block:: json
 
@@ -31,7 +31,7 @@ For project flytectldemo, development domain, and workflow 'core.control_flow.ru
 
  flytectl get cluster-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-E.g., output from the command:
+Example: output from the command:
 
 .. code-block:: json
 
@@ -39,7 +39,7 @@ E.g., output from the command:
 
 Write the cluster resource attributes to a file. If there are no cluster resource attributes, the command throws an error.
 The config file is written to cra.yaml file.
-E.g., content of cra.yaml:
+Example: content of cra.yaml:
 
 ::
 

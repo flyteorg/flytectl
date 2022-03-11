@@ -24,7 +24,7 @@ For project flytectldemo and development domain:
 Delete plugin override using the config file which was used to create it.
 Here, the config file is written to po.yaml.
 Overrides are optional in the file as they are unread during the delete command but can be retained since the same file can be used for get, update or delete commands. 
-E.g., content of po.yaml:
+Example: content of po.yaml:
 ::
 
  flytectl delete plugin-override --attrFile po.yaml

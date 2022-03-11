@@ -21,7 +21,7 @@ import (
 const (
 	versionCmdShort = `Fetches Flyte version`
 	versionCmdLong  = `
-Fetch Flytectl version:
+Fetch Flytectl version.
 ::
 
  flytectl version
@@ -104,7 +104,7 @@ func getControlPlaneVersion(ctx context.Context, cmdCtx cmdCore.CommandContext) 
 		Version:   v.ControlPlaneVersion.Version,
 		App:       controlPlanAppName,
 	}); err != nil {
-		return fmt.Errorf("Unable to get the control plane version.. Please try again: %v", err)
+		return fmt.Errorf("Unable to get the control plane version. Please try again: %v", err)
 	}
 	return nil
 }

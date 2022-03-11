@@ -11,15 +11,15 @@ Synopsis
 
 Creates a Flytectl config file in Flyte directory i.e ~/.flyte.
 	
-Generates Sandbox config:
+Generate Sandbox config:
 ::
 
  flytectl config init  
 
 Flyte Sandbox is a fully standalone minimal environment for running Flyte. 
-Read more about Sandbox deployment :ref:`here <deploy-sandbox-local>`.
+Read more about the Sandbox deployment :ref:`here <deploy-sandbox-local>`.
 
-Generates remote cluster config: 
+Generate remote cluster config: 
 	
 ::
 
@@ -28,13 +28,13 @@ Generates remote cluster config:
 By default, the connection is secure. 
 Read more about remote deployment :ref:`here <Deployment>`.
 
-Generates remote cluster config with insecure connection:
+Generate remote cluster config with insecure connection:
 
 ::
 
  flytectl config init --host=flyte.myexample.com --insecure 
 
-Generates Flytectl config with a storage provider:
+Generate Flytectl config with a storage provider:
 ::
 
  flytectl config init --host=flyte.myexample.com --storage

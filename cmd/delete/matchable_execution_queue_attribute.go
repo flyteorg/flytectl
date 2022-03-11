@@ -24,7 +24,7 @@ For project flytectldemo and development domain:
 Delete execution queue attribute using the config file which was used to create it.
 Here, the config file is written to era.yaml.
 Value is optional in the file as it is unread during the delete command but it can be retained since the same file can be used for get, update or delete commands. 
-E.g., content of era.yaml:
+Example: content of era.yaml:
 
 ::
 

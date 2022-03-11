@@ -3,7 +3,7 @@
 flytectl get workflow
 ---------------------
 
-Get workflow resources
+Gets workflow resources
 
 Synopsis
 ~~~~~~~~
@@ -147,5 +147,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_get` 	 - Fetch various Flyte resources such as tasks, workflows, launchplans, executions, project.
+* :doc:`flytectl_get` 	 - Fetches various Flyte resources such as tasks, workflows, launch plans, executions, and projects.
 

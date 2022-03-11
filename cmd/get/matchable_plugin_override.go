@@ -20,7 +20,7 @@ For project flytectldemo and development domain:
 
  flytectl get plugin-override -p flytectldemo -d development 
 
-E.g., output from the command
+Example: output from the command
 
 .. code-block:: json
 
@@ -34,13 +34,13 @@ E.g., output from the command
 	}]
  }
 
-Retrieve the plugin override for the given project, domain and workflow.
+Retrieve the plugin override for the given project, domain, and workflow.
 For project flytectldemo, development domain and workflow 'core.control_flow.run_merge_sort.merge_sort':
 ::
 
  flytectl get plugin-override -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-E.g., output from the command:
+Example: output from the command:
 
 .. code-block:: json
 
@@ -57,7 +57,7 @@ E.g., output from the command:
 
 Write plugin overrides to a file. If there are no plugin overrides, the command throws an error.
 The config file is written to po.yaml file.
-E.g., content of po.yaml:
+Example: content of po.yaml:
 
 ::
 

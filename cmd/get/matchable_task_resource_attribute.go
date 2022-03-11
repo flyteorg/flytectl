@@ -19,7 +19,7 @@ For project flytectldemo and development domain:
 
  flytectl get task-resource-attribute -p flytectldemo -d development 
 
-E.g., output from the command:
+Example: output from the command:
 
 .. code-block:: json
 
@@ -31,7 +31,7 @@ For project flytectldemo, development domain, and workflow 'core.control_flow.ru
 
  flytectl get task-resource-attribute -p flytectldemo -d development core.control_flow.run_merge_sort.merge_sort
 
-E.g., output from the command:
+Example: output from the command:
 
 .. code-block:: json
 
@@ -40,7 +40,7 @@ E.g., output from the command:
 
 Write the task resource attributes to a file. If there are no task resource attributes, a file would be populated with the basic data.
 The config file is written to tra.yaml file.
-E.g., content of tra.yaml:
+Example: content of tra.yaml:
 
 ::
 

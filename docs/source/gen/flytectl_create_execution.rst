@@ -3,14 +3,14 @@
 flytectl create execution
 -------------------------
 
-Creates execution resources
+Creates execution resources.
 
 Synopsis
 ~~~~~~~~
 
 
 
-Creates execution resources for a given workflow/task in a project and domain:
+Creates execution resources for a given workflow or task in a project and domain.
 
 ::
 
@@ -63,20 +63,19 @@ The generated spec file can be modified to change the input values, as shown bel
 	 version: "v2"
 
 It can then be passed through the command line.
-Notice that the source and target domain/projects can be different.
-The root project and domain flags of -p and -d should point to the task/launch plans project/domain.
-
+It is worth noting that the source and target domain/projects can be different.
+The root project and domain flags of -p and -d could point to the task or the launch plans' project and domain:
 ::
 
  flytectl create execution --execFile execution_spec.yaml -p flytectldemo -d development --targetProject flytesnacks
 
-An execution can be relaunched by passing the current execution id:
+Relaunch an execution by passing the current execution id:
 
 ::
 
  flytectl create execution --relaunch ffb31066a0f8b4d52b77 -p flytectldemo -d development
 
-An execution can be recovered, i.e., recreated from the last known failure point for previously-run workflow execution:
+Recover an execution, i.e., recreate it from the last known failure point for previously-run workflow execution:
 
 ::
 
@@ -91,8 +90,7 @@ The spec file is generated first. Next, the execution is run using the spec file
 
  flytectl get task -d development -p flytectldemo  core.type_system.custom_objects.add --execFile adddatanum.yaml
 
-The generated file would look similar to this. Here, empty values have been dumped for generic data type 'x' and 'y'. 
-
+The generated file would look similar to this. Here, empty values have been dumped for generic data types 'x' and 'y'. 
 ::
 
     iamRoleARN: ""
@@ -203,5 +201,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_create` 	 - Creates various Flyte resources such as tasks, workflows, launchplans, executions, and projects.
+* :doc:`flytectl_create` 	 - Creates various Flyte resources such as tasks, workflows, launch plans, executions, and projects.
 

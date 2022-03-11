@@ -3,7 +3,7 @@ Contributing Guide
 ###########################
 
 First off, thank you for thinking about contributing! 
-Below you’ll find instructions that will hopefully guide you through how to contribute to, fix, and improve Flytectl.
+Here are the instructions that will guide you through contributing, fixing, and improving Flytectl.
 
 📝 Contribute to Documentation
 ==============================
