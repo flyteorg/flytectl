@@ -47,6 +47,9 @@ type Config struct {
 	// Default value false represents that Flytectl will not use the latest pre-release if it exists.
 	Prerelease bool `json:"pre" pflag:",Optional. Pre release Version of flyte will be used for sandbox."`
 
+	// Optionally it is possible to pass in environment variables to sandbox container.
+	Env []string `json:"env" pflag:",Optional. Provide Env variable in key=value format which can be passed to sandbox container."`
+
 	// Optionally it is possible to use local sandbox image
 	// Flytectl will not pull the image from the registry if the local flag passes. It is usually useful while testing your local images without pushing them to a registry.
 	ImagePullPolicy ImagePullPolicy `json:"imagePullPolicy" pflag:",Optional. Defines the image pull behavior [Always/IfNotPresent/Never]"`
