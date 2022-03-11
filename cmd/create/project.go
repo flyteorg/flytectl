@@ -71,6 +71,6 @@ func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.Co
 			return err
 		}
 	}
-	fmt.Println("Project created successfully")
+	fmt.Println("project created successfully")
 	return nil
 }
