@@ -21,7 +21,7 @@ import (
 const (
 	getCmdShort = `Fetches various Flyte resources such as tasks, workflows, launch plans, executions, and projects.`
 	getCmdLong  = `
-Fetch Flyte resource; if a project:
+To fetch a project, use the following command:
 ::
 
  flytectl get project

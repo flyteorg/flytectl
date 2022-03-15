@@ -10,72 +10,66 @@ Synopsis
 
 
 
-Creates execution resources for a given workflow or task in a project and domain.
+Create execution resources for a given workflow or task in a project and domain.
 
+There are three steps to generate an execution, as outlined below:
+
+1. Generate the execution spec file using the :ref:`get task <flytectl_get_task>` command.
 ::
 
- flytectl get tasks -d development -p flytectldemo core.advanced.run_merge_sort.merge  --version v2 --execFile execution_spec.yaml
+	flytectl get tasks -d development -p flytectldemo core.advanced.run_merge_sort.merge --version v2 --execFile execution_spec.yaml
 
-There are three steps to generate an execution:
-
-- Generate the execution spec file using the get command
-- Update the inputs for the execution if needed
-- Run the execution by passing the generated yaml file
-
-The spec file is generated first. Next, the execution is run using the spec file.
-You can refer to Flytectl :ref:`get task <flytectl_get_task>` for more details.
-
-The generated file would look similar to this:
+The generated file would look similar to the following:
 
 .. code-block:: yaml
 
-	 iamRoleARN: ""
-	 inputs:
-	   sorted_list1:
-	   - 0
-	   sorted_list2:
-	   - 0
-	 kubeServiceAcct: ""
-	 targetDomain: ""
-	 targetProject: ""
-	 task: core.advanced.run_merge_sort.merge
-	 version: "v2"
+	iamRoleARN: ""
+	inputs:
+	sorted_list1:
+	- 0
+	sorted_list2:
+	- 0
+	kubeServiceAcct: ""
+	targetDomain: ""
+	targetProject: ""
+	task: core.advanced.run_merge_sort.merge
+	version: "v2"
 
-
+2. [Optional] Update the inputs for the execution, if needed.
 The generated spec file can be modified to change the input values, as shown below:
 
 .. code-block:: yaml
 
-	 iamRoleARN: 'arn:aws:iam::12345678:role/defaultrole'
-	 inputs:
-	   sorted_list1:
-	   - 2
-	   - 4
-	   - 6
-	   sorted_list2:
-	   - 1
-	   - 3
-	   - 5
-	 kubeServiceAcct: ""
-	 targetDomain: ""
-	 targetProject: ""
-	 task: core.advanced.run_merge_sort.merge
-	 version: "v2"
+	iamRoleARN: 'arn:aws:iam::12345678:role/defaultrole'
+	inputs:
+	sorted_list1:
+	- 2
+	- 4
+	- 6
+	sorted_list2:
+	- 1
+	- 3
+	- 5
+	kubeServiceAcct: ""
+	targetDomain: ""
+	targetProject: ""
+	task: core.advanced.run_merge_sort.merge
+	version: "v2"
 
-It can then be passed through the command line.
-It is worth noting that the source and target domain/projects can be different.
-The root project and domain flags of -p and -d could point to the task or the launch plans' project and domain:
+3. Run the execution by passing the generated YAML file.
+The file can then be passed through the command line.
+It is worth noting that the source's and target's project and domain can be different.
 ::
 
- flytectl create execution --execFile execution_spec.yaml -p flytectldemo -d development --targetProject flytesnacks
+	flytectl create execution --execFile execution_spec.yaml -p flytesnacks -d staging --targetProject flytesnacks
 
-Relaunch an execution by passing the current execution id:
+To relaunch an execution, pass the current execution ID as follows:
 
 ::
 
  flytectl create execution --relaunch ffb31066a0f8b4d52b77 -p flytectldemo -d development
 
-Recover an execution, i.e., recreate it from the last known failure point for previously-run workflow execution:
+To recover an execution, i.e., recreate it from the last known failure point for previously-run workflow execution, run:
 
 ::
 
@@ -83,14 +77,14 @@ Recover an execution, i.e., recreate it from the last known failure point for pr
 
 See :ref:`ref_flyteidl.admin.ExecutionRecoverRequest` for more details.
 
-Generic data types are supported for execution in a similar manner. Following is a sample of how the inputs need to be specified while creating the execution.
-The spec file is generated first. Next, the execution is run using the spec file.
+Generic data types are supported for execution in a similar manner.
+The following is an example of how generic data can be specified while creating the execution.
 
 ::
 
  flytectl get task -d development -p flytectldemo  core.type_system.custom_objects.add --execFile adddatanum.yaml
 
-The generated file would look similar to this. Here, empty values have been dumped for generic data types 'x' and 'y'. 
+The generated file would look similar to this. Here, empty values have been dumped for generic data types 'x' and 'y'.
 ::
 
     iamRoleARN: ""

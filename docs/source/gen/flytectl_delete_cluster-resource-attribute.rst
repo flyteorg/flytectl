@@ -10,34 +10,33 @@ Synopsis
 
 
 
-Delete cluster resource attributes for the given project and domain combination or additionally the workflow name.
+Delete cluster resource attributes for the given project and domain, in combination with the workflow name.
 
-For project flytectldemo and development domain:
+For project flytectldemo and development domain, run:
 ::
 
- flytectl delete cluster-resource-attribute -p flytectldemo -d development 
+ flytectl delete cluster-resource-attribute -p flytectldemo -d development
 
 
-Delete cluster resource attribute using the config file that was used to create it.
-Here, the config file is written to cra.yaml.
-Attributes are optional in the file. They are unread during the 'delete' command but can be retained since the same file can be used for 'get', 'update' or 'delete' commands.
-Example: content of cra.yaml:
+To delete cluster resource attribute using the config file that was used to create it, run:
 
 ::
 
  flytectl delete cluster-resource-attribute --attrFile cra.yaml
 
+For example, here's the config file cra.yaml:
 
 .. code-block:: yaml
-	
+
     domain: development
     project: flytectldemo
     attributes:
       foo: "bar"
       buzz: "lightyear"
 
-Deletes cluster resource attribute for a workflow.
-For the workflow 'core.control_flow.run_merge_sort.merge_sort':
+Attributes are optional in the file, which are unread during the 'delete' command but can be retained since the same file can be used for 'get', 'update' and 'delete' commands.
+
+To delete cluster resource attribute for the workflow 'core.control_flow.run_merge_sort.merge_sort', run:
 
 ::
 

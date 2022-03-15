@@ -48,7 +48,7 @@ To update the documentation, follow these steps:
           - Creates a project/execution
         * - ``delete``
           - ``flytectl delete ...``
-          - Aborts an execution and deletes resource attributes
+          - Aborts an execution and deletes the resource attributes
         * - ``get``
           - ``flytectl get ...``
           - Gets a task/workflow/launchplan/execution/project/resource attribute
@@ -57,7 +57,7 @@ To update the documentation, follow these steps:
           - Registers a task/workflow/launchplan
         * - ``sandbox``
           - ``flytectl sandbox ...``
-          - Interacts with Sandbox
+          - Interacts with sandbox
         * - ``update``
           - ``flytectl update ...``
           - Updates a project/launchplan/resource attribute
@@ -67,7 +67,6 @@ To update the documentation, follow these steps:
         * - ``version``
           - ``flytectl version ...``
           - Fetches Flytectl version
-
+     Find all the Flytectl commands :ref:`here <nouns>`.
    * Run appropriate tests to view the changes by running ``go test ./... -race -coverprofile=coverage.txt -covermode=atomic  -v`` in the root directory.
 
-Find all Flytectl commands :ref:`here <nouns>`.

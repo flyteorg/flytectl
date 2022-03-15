@@ -13,14 +13,14 @@ import (
 const (
 	executionClusterLabelShort = "Gets matchable resources of execution cluster label."
 	executionClusterLabelLong  = `
-Retrieve the execution cluster label for a given project and domain, combination or additionally the workflow name.
+Retrieve the execution cluster label for a given project and domain, in combination with the workflow name.
 
-For project flytectldemo and development domain:
+For project flytectldemo and development domain, run:
 ::
 
  flytectl get execution-cluster-label -p flytectldemo -d development 
 
-Example: output from the command:
+The output would look like:
 
 .. code-block:: json
 

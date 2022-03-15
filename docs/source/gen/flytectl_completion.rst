@@ -3,65 +3,70 @@
 flytectl completion
 -------------------
 
-Generates completion script
+Generates completion script.
 
 Synopsis
 ~~~~~~~~
 
 
-To load completions for each session, execute once:
+To load completion, run the following commands in accordance with the shell you are using:
 
-Bash:
+- Bash
+	::
 
-::
+	$ source <(flytectl completion bash)
 
-$ source <(flytectl completion bash)
+	To load completions for each session:
 
+	- Linux
+	::
 
-Linux:
-::
-   
- $ flytectl completion bash > /etc/bash_completion.d/flytectl
+	$ flytectl completion bash > /etc/bash_completion.d/flytectl
 
-macOS:
-::
+	- macOS
+	::
 
-$ flytectl completion bash > /usr/local/etc/bash_completion.d/flytectl
+	$ flytectl completion bash > /usr/local/etc/bash_completion.d/flytectl
 
-Zsh:
+- Zsh
+	If shell completion is not already enabled in your environment, enable it:
 
-If shell completion is not already enabled in your environment, enable it:
-::
+	::
 
-$ echo "autoload -U compinit; compinit" >> ~/.zshrc
+	$ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
-Once enabled, execute once:
-::
+	Once enabled, execute once:
 
-$ flytectl completion zsh > "${fpath[1]}/_flytectl"
+	::
 
-.. note::
-     Start a new shell for this setup to take effect.
+	$ flytectl completion zsh > "${fpath[1]}/_flytectl"
 
-fish:
-::
+	.. note::
+		Start a new shell for this setup to take effect.
 
-$ flytectl completion fish | source
+- fish
+	::
 
-::
+	$ flytectl completion fish | source
 
-$ flytectl completion fish > ~/.config/fish/completions/flytectl.fish
+	To load completions for each session, run:
 
-PowerShell:
-::
+	::
 
- PS> flytectl completion powershell | Out-String | Invoke-Expression
+	$ flytectl completion fish > ~/.config/fish/completions/flytectl.fish
 
-::
+- PowerShell
+	::
 
- PS> flytectl completion powershell > flytectl.ps1
+	 PS> flytectl completion powershell | Out-String | Invoke-Expression
 
-Source this file from your PowerShell profile.
+	To load completions for each session, run:
+
+	::
+
+	 PS> flytectl completion powershell > flytectl.ps1
+
+	and source this file from your PowerShell profile.
 
 
 ::
