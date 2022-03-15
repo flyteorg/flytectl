@@ -107,7 +107,7 @@ The `remote package path` is determined by uploading the compressed user code (p
 
 The `dest dir` is an optional argument specified by the user to designate where code is downloaded at execution time.
 
-![Registration process](https://raw.githubusercontent.com/flyteorg/static-resources/main/flytectl/readme//flytectl_interaction.png)
+![Registration process](https://raw.githubusercontent.com/flyteorg/static-resources/main/flytectl/readme/flytectl_interaction.png)
 
 ### update
 
