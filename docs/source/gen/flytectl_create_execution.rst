@@ -12,6 +12,11 @@ Synopsis
 
 Create execution resources for a given workflow or task in a project and domain.
 
+
+
+Create execution for a task
+===========================
+
 There are three steps to generate an execution, as outlined below:
 
 1. Generate the execution spec file using the :ref:`get task <flytectl_get_task>` command.
@@ -120,6 +125,13 @@ Modified file with struct data populated for 'x' and 'y' parameters for the task
   targetProject: ""
   task: core.type_system.custom_objects.add
   version: v3
+
+
+
+Create execution for a workflow
+===============================
+
+
 
 Usage
 
