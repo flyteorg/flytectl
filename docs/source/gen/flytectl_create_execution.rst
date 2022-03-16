@@ -131,6 +131,23 @@ Modified file with struct data populated for 'x' and 'y' parameters for the task
 Create execution for a workflow
 ===============================
 
+#. Generate an execution spec file.
+
+   .. prompt:: bash $
+
+      flytectl get launchplan --project flytesnacks --domain development flyte.workflows.example.my_wf --latest --execFile exec_spec.yaml
+
+#. Create an execution using the exec spec file.
+
+   .. prompt:: bash $
+
+      flytectl create execution --project flytesnacks --domain development --execFile exec_spec.yaml
+
+#. Monitor the execution by providing the execution name from the ``create execution`` command.
+
+   .. prompt:: bash $
+
+      flytectl get execution --project flytesnacks --domain development <execname>
 
 
 Usage
