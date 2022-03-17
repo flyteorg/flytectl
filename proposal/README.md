@@ -71,9 +71,11 @@ $ flytectl --endpoint "example.flyte.net" --project "p" --domain "d" delete work
 
 ### Create is special
 
+Create may need more information that can be easily passed in the command line. We recommend using files to create an entity. The file could be in protobuf, jsonpb (json) or jsonpb (yaml) form.
+ Eventually, we may want to simplify the json and yaml representations, but that is not required in the first pass. We may also want to create just a separate option for that.
+
 The create for Task and Workflow is essential to what is encompassed in the pyflyte as the registration process. We will decouple the registration process such that the pyflyte, jflyte (other native cli's or
 code methods) can dump a serialized representations of the workflows and tasks that are directly consumed by **flytectl**. Thus flytectl is essential in every flow for the user.
-
 #### Create Templatization
 
 User-facing SDKs can serialize workflow code to protobuf representations, but these will be incomplete. Specifically, the _project_, _domain_, and _version_ parameters must be supplied at create time since these are attributes of the registerable rather than serialized object. Placeholder template variables include:
@@ -146,6 +148,7 @@ $ flytectl update projects --id project-x ...
 
 ## Tasks
 
+- get
 ```bash
 $ flytectl get tasks [task-name] [-o yaml | -o json | default -o table] [--filters...] [--sort-by...] [--selectors...]
 ```
