@@ -37,7 +37,7 @@ func TestRegisterFromFiles(t *testing.T) {
 		registerFilesSetup()
 		rconfig.DefaultFilesConfig.Archive = true
 		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.SourceUploadPath = s3Output
+		rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath = s3Output
 		mockStorage, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))
@@ -77,7 +77,7 @@ func TestRegisterFromFiles(t *testing.T) {
 		testScope := promutils.NewTestScope()
 		labeled.SetMetricKeys(contextutils.AppNameKey, contextutils.ProjectKey, contextutils.DomainKey)
 		rconfig.DefaultFilesConfig.Archive = true
-		rconfig.DefaultFilesConfig.SourceUploadPath = ""
+		rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath = ""
 		s, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))
@@ -98,7 +98,7 @@ func TestRegisterFromFiles(t *testing.T) {
 		rconfig.DefaultFilesConfig.Archive = true
 
 		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.SourceUploadPath = s3Output
+		rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath = s3Output
 		s, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))
@@ -120,7 +120,7 @@ func TestRegisterFromFiles(t *testing.T) {
 		rconfig.DefaultFilesConfig.Archive = true
 
 		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.SourceUploadPath = s3Output
+		rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath = s3Output
 		s, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))
@@ -141,7 +141,7 @@ func TestRegisterFromFiles(t *testing.T) {
 		labeled.SetMetricKeys(contextutils.AppNameKey, contextutils.ProjectKey, contextutils.DomainKey)
 		rconfig.DefaultFilesConfig.Archive = false
 		rconfig.DefaultFilesConfig.OutputLocationPrefix = s3Output
-		rconfig.DefaultFilesConfig.SourceUploadPath = ""
+		rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath = ""
 		s, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))

@@ -58,9 +58,8 @@ func (cfg FilesConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags.StringVar(&DefaultFilesConfig.K8sServiceAccount, fmt.Sprintf("%v%v", prefix, "k8sServiceAccount"), DefaultFilesConfig.K8sServiceAccount, "Custom kubernetes service account auth role to register launch plans with.")
 	cmdFlags.StringVar(&DefaultFilesConfig.K8ServiceAccount, fmt.Sprintf("%v%v", prefix, "k8ServiceAccount"), DefaultFilesConfig.K8ServiceAccount, "Deprecated. Please use --K8sServiceAccount")
 	cmdFlags.StringVar(&DefaultFilesConfig.OutputLocationPrefix, fmt.Sprintf("%v%v", prefix, "outputLocationPrefix"), DefaultFilesConfig.OutputLocationPrefix, "Custom output location prefix for offloaded types (files/schemas).")
-	cmdFlags.StringVar(&DefaultFilesConfig.SourceUploadPath, fmt.Sprintf("%v%v", prefix, "sourceUploadPath"), DefaultFilesConfig.SourceUploadPath, "Location for source code in storage.")
+	cmdFlags.StringVar(&DefaultFilesConfig.DeprecatedSourceUploadPath, fmt.Sprintf("%v%v", prefix, "sourceUploadPath"), DefaultFilesConfig.DeprecatedSourceUploadPath, "Deprecated: Update flyte admin to avoid having to configure storage access from flytectl.")
 	cmdFlags.StringVar(&DefaultFilesConfig.DestinationDirectory, fmt.Sprintf("%v%v", prefix, "destinationDirectory"), DefaultFilesConfig.DestinationDirectory, "Location of source code in container.")
 	cmdFlags.BoolVar(&DefaultFilesConfig.DryRun, fmt.Sprintf("%v%v", prefix, "dryRun"), DefaultFilesConfig.DryRun, "Execute command without making any modifications.")
-	cmdFlags.StringVar(&DefaultFilesConfig.SignedUploadURL, fmt.Sprintf("%v%v", prefix, "signedUploadURL"), DefaultFilesConfig.SignedUploadURL, "A signed URL that represent the same path as SourceUploadPath parameter and can be used to upload artifacts without requiring authentication to the cloud storage provider beforehand.")
 	return cmdFlags
 }

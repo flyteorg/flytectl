@@ -426,7 +426,7 @@ func TestUploadFastRegisterArtifact(t *testing.T) {
 		}, testScope.NewSubScope("flytectl"))
 		assert.Nil(t, err)
 		Client = s
-		err = uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "flytesnacks-core.tgz", "", &rconfig.DefaultFilesConfig.SourceUploadPath)
+		err = uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "flytesnacks-core.tgz", "", &rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
 		assert.Nil(t, err)
 	})
 	t.Run("Failed upload", func(t *testing.T) {
@@ -437,7 +437,7 @@ func TestUploadFastRegisterArtifact(t *testing.T) {
 		}, testScope.NewSubScope("flytectl"))
 		assert.Nil(t, err)
 		Client = s
-		err = uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "", "", &rconfig.DefaultFilesConfig.SourceUploadPath)
+		err = uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "", "", &rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
 		assert.Nil(t, err)
 	})
 	t.Run("Failed upload", func(t *testing.T) {
@@ -448,7 +448,7 @@ func TestUploadFastRegisterArtifact(t *testing.T) {
 		}, testScope.NewSubScope("flytectl"))
 		assert.Nil(t, err)
 		Client = s
-		err = uploadFastRegisterArtifact(ctx, "testdata/flytesnacksre.tgz", "", "", &rconfig.DefaultFilesConfig.SourceUploadPath)
+		err = uploadFastRegisterArtifact(ctx, "testdata/flytesnacksre.tgz", "", "", &rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
 		assert.NotNil(t, err)
 	})
 }
@@ -550,7 +550,7 @@ func TestHydrateTaskSpec(t *testing.T) {
 			},
 		},
 	}
-	err = hydrateTaskSpec(task, "sourcey", rconfig.DefaultFilesConfig.SourceUploadPath, rconfig.DefaultFilesConfig.Version, "")
+	err = hydrateTaskSpec(task, "sourcey", rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath, rconfig.DefaultFilesConfig.Version, "")
 	assert.NoError(t, err)
 	var hydratedPodSpec = v1.PodSpec{}
 	err = utils.UnmarshalStructToObj(task.Template.GetK8SPod().PodSpec, &hydratedPodSpec)

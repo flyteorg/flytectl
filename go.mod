@@ -34,7 +34,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/pkg/browser v0.0.0-20210115035449-ce105d075bb4
 	github.com/pkg/errors v0.9.1
-	github.com/savaki/amplitude-go v0.0.0-20160610055645-f62e3b57c0e4 // indirect
+	github.com/savaki/amplitude-go v0.0.0-20160610055645-f62e3b57c0e4
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
@@ -55,3 +55,5 @@ require (
 	k8s.io/client-go v0.21.3
 	sigs.k8s.io/yaml v1.2.0
 )
+
+replace github.com/flyteorg/flyteidl => github.com/flyteorg/flyteidl v0.23.2-0.20220318002044-dd004a659e33

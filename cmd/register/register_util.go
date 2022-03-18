@@ -13,7 +13,12 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
+
+	errors2 "github.com/flyteorg/flytestdlib/errors"
+
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/service"
 
 	"github.com/flyteorg/flytectl/pkg/util/githubutil"
 
@@ -90,21 +95,31 @@ var projectColumns = []printer.Column{
 
 func unMarshalContents(ctx context.Context, fileContents []byte, fname string) (proto.Message, error) {
 	workflowSpec := &admin.WorkflowSpec{}
+	errCollection := errors2.ErrorCollection{}
 	if err := proto.Unmarshal(fileContents, workflowSpec); err == nil {
 		return workflowSpec, nil
+	} else {
+		errCollection.Append(fmt.Errorf("as a Workflow: %w", err))
 	}
+
 	logger.Debugf(ctx, "Failed to unmarshal file %v for workflow type", fname)
 	taskSpec := &admin.TaskSpec{}
 	if err := proto.Unmarshal(fileContents, taskSpec); err == nil {
 		return taskSpec, nil
+	} else {
+		errCollection.Append(fmt.Errorf("as a Task: %w", err))
 	}
-	logger.Debugf(ctx, "Failed to unmarshal  file %v for task type", fname)
+
+	logger.Debugf(ctx, "Failed to unmarshal file %v for task type", fname)
 	launchPlan := &admin.LaunchPlan{}
 	if err := proto.Unmarshal(fileContents, launchPlan); err == nil {
 		return launchPlan, nil
+	} else {
+		errCollection.Append(fmt.Errorf("as a Launchplan: %w", err))
 	}
+
 	logger.Debugf(ctx, "Failed to unmarshal file %v for launch plan type", fname)
-	return nil, fmt.Errorf("failed unmarshalling file %v", fname)
+	return nil, fmt.Errorf("failed unmarshalling file %v. Errors: %w", fname, errCollection.ErrorOrDefault())
 
 }
 
@@ -617,26 +632,25 @@ func getRemoteStoragePath(ctx context.Context, s *storage.DataStore, remoteLocat
 }
 
 func getTotalSize(reader io.Reader) (size int64, err error) {
-	page := make([]byte, 0, 100)
+	page := make([]byte, 512, 512)
 	size = 0
 
 	n := 0
-	for n, err = reader.Read(page); n != 0 && err == nil; {
+	for n, err = reader.Read(page); n > 0 && err == nil; n, err = reader.Read(page) {
 		size += int64(n)
+	}
+
+	if err == io.EOF {
+		return size + int64(n), nil
 	}
 
 	return size, err
 }
 
-func uploadFastRegisterArtifact(ctx context.Context, file, sourceCodeName, version, signedUploadURL,
-	sourceUploadPath string) (uploadLocation storage.DataReference, err error) {
+func uploadFastRegisterArtifact(ctx context.Context, project, domain, sourceCodeFilePath, version string,
+	dataProxyClient service.DataProxyClient, deprecatedSourceUploadPath string) (uploadLocation storage.DataReference, err error) {
 
-	dataStore, err := getStorageClient(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	fileHandle, err := os.Open(file)
+	fileHandle, err := os.Open(sourceCodeFilePath)
 	if err != nil {
 		return "", err
 	}
@@ -661,32 +675,39 @@ func uploadFastRegisterArtifact(ctx context.Context, file, sourceCodeName, versi
 		return "", err
 	}
 
-	remotePath := storage.DataReference(sourceUploadPath)
-	if len(signedUploadURL) > 0 {
-		// If a signed upload url is used, figure out the bucket, and path.
-		parsed := MatchRegex(SignedURLPattern, signedUploadURL)
-		scheme, _, _, err := dataStore.GetBaseContainerFQN(ctx).Split()
-		if err != nil {
-			return "", fmt.Errorf("failed to parse base container fqn. Error: %w", err)
-		}
+	remotePath := storage.DataReference(deprecatedSourceUploadPath)
+	_, fileName := filepath.Split(sourceCodeFilePath)
+	resp, err := dataProxyClient.CreateUploadLocation(ctx, &service.CreateUploadLocationRequest{
+		Project: project,
+		Domain:  domain,
+		Suffix:  strings.Join([]string{version, fileName}, "/"),
+	})
 
-		baseLocation := storage.DataReference(fmt.Sprintf("%s://%s/", scheme, parsed["bucket_s3"]))
-		remotePath, err = dataStore.ConstructReference(ctx, baseLocation, parsed["path"])
-		if err != nil {
-			return "", fmt.Errorf("failed to construct output reference for [%v]. Error: %w", baseLocation, err)
+	if err != nil {
+		if status.Code(err) == codes.Unimplemented {
+			logger.Infof(ctx, "Using an older version of FlyteAdmin. Falling back to the configured storage client.")
+		} else {
+			return "", fmt.Errorf("failed to create an upload location. Error: %w", err)
 		}
-
-		return remotePath, DirectUpload(signedUploadURL, size, dataRefReaderCloser)
 	}
 
-	if len(sourceUploadPath) == 0 {
+	if resp != nil && len(resp.SignedUrl) > 0 {
+		return storage.DataReference(resp.NativeUrl), DirectUpload(resp.SignedUrl, size, dataRefReaderCloser)
+	}
+
+	dataStore, err := getStorageClient(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	if len(deprecatedSourceUploadPath) == 0 {
 		remotePath, err = dataStore.ConstructReference(ctx, dataStore.GetBaseContainerFQN(ctx), "fast")
 		if err != nil {
 			return "", err
 		}
 	}
 
-	remotePath, err = getRemoteStoragePath(ctx, dataStore, remotePath.String(), sourceCodeName, version)
+	remotePath, err = getRemoteStoragePath(ctx, dataStore, remotePath.String(), fileName, version)
 	if err != nil {
 		return "", err
 	}
@@ -705,6 +726,7 @@ func DirectUpload(url string, size int64, data io.Reader) error {
 	}
 
 	req.ContentLength = size
+	req.Header.Set("Content-Length", strconv.FormatInt(size, 10))
 
 	client := &http.Client{}
 	res, err := client.Do(req)
