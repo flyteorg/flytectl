@@ -1,18 +1,29 @@
-.. _flytectl:
+.. _flytectl_config_docs:
 
-flytectl
---------
+flytectl config docs
+--------------------
 
-Flytectl CLI tool
+Generate configuration documetation in rst format
 
 Synopsis
 ~~~~~~~~
 
 
-Flytectl is a CLI tool written in Go to interact with the FlyteAdmin service.
+Generate configuration documetation in rst format
+
+::
+
+  flytectl config docs [flags]
 
 Options
 ~~~~~~~
+
+::
+
+  -h, --help   help for docs
+
+Options inherited from parent commands
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -35,7 +46,8 @@ Options
       --admin.useAuth                              Deprecated: Auth will be enabled/disabled based on admin's dynamically discovered information.
   -c, --config string                              config file (default is $HOME/.flyte/config.yaml)
   -d, --domain string                              Specifies the Flyte project's domain.
-  -h, --help                                       help for flytectl
+      --file stringArray                           Passes the config file to load.
+                                                   If empty, it'll first search for the config file path then, if found, will load config from there.
       --logger.formatter.type string               Sets logging format type. (default "json")
       --logger.level int                           Sets the minimum logging level. (default 4)
       --logger.mute                                Mutes all logs regardless of severity. Intended for benchmarks/tests only.
@@ -61,14 +73,5 @@ Options
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_completion` 	 - Generates completion script.
 * :doc:`flytectl_config` 	 - Runs various config commands, look at the help of this command to get a list of available commands..
-* :doc:`flytectl_create` 	 - Creates various Flyte resources such as tasks, workflows, launch plans, executions, and projects.
-* :doc:`flytectl_delete` 	 - Terminates/deletes various Flyte resources such as tasks, workflows, launch plans, executions, and projects.
-* :doc:`flytectl_get` 	 - Fetches various Flyte resources such as tasks, workflows, launch plans, executions, and projects.
-* :doc:`flytectl_register` 	 - Registers tasks, workflows, and launch plans from a list of generated serialized files.
-* :doc:`flytectl_sandbox` 	 - Helps with sandbox interactions like start, teardown, status, and exec.
-* :doc:`flytectl_update` 	 - Update Flyte resources e.g., project.
-* :doc:`flytectl_upgrade` 	 - Upgrades/rollbacks to a Flyte version.
-* :doc:`flytectl_version` 	 - Fetches Flyte version
 

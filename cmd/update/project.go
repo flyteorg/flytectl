@@ -15,7 +15,7 @@ import (
 const (
 	projectShort = "Update project resources"
 	projectLong  = `
-Updates the project according to the flags passed. Allows you to archive or activate a project.
+Update the project according to the flags passed. Allows you to archive or activate a project.
 Activate project flytesnacks:
 ::
 
@@ -90,9 +90,6 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	}
 	if projectSpec.Id == "" {
 		return fmt.Errorf(clierrors.ErrProjectNotPassed)
-	}
-	if projectSpec.Name == "" {
-		return fmt.Errorf(clierrors.ErrProjectNameNotPassed)
 	}
 
 	state, err := project.DefaultProjectConfig.MapToAdminState()

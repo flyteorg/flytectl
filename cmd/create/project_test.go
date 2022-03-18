@@ -44,7 +44,7 @@ func createProjectSetup() {
 func TestCreateProjectFunc(t *testing.T) {
 	setup()
 	createProjectSetup()
-	defer tearDownAndVerify(t, "project Created successfully")
+	defer tearDownAndVerify(t, "project created successfully.")
 	project.DefaultProjectConfig.ID = projectValue
 	project.DefaultProjectConfig.Name = projectValue
 	project.DefaultProjectConfig.Labels = map[string]string{}
@@ -62,7 +62,7 @@ func TestEmptyProjectID(t *testing.T) {
 	project.DefaultProjectConfig = &project.ConfigProject{}
 	mockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
 	err := createProjectsCommand(ctx, args, cmdCtx)
-	assert.Equal(t, errors.New(clierrors.ErrProjectNameNotPassed), err)
+	assert.Equal(t, errors.New(clierrors.ErrProjectNotPassed), err)
 	mockClient.AssertNotCalled(t, "RegisterProject", ctx, mock.Anything)
 }
 
@@ -75,6 +75,6 @@ func TestEmptyProjectName(t *testing.T) {
 	project.DefaultProjectConfig.Description = ""
 	mockClient.OnRegisterProjectMatch(ctx, projectRegisterRequest).Return(nil, nil)
 	err := createProjectsCommand(ctx, args, cmdCtx)
-	assert.Equal(t, fmt.Errorf("project name is required flag"), err)
+	assert.Equal(t, fmt.Errorf("project name is a required flag"), err)
 	mockClient.AssertNotCalled(t, "RegisterProject", ctx, mock.Anything)
 }

@@ -3,17 +3,20 @@
 flytectl get launchplan
 -----------------------
 
-Get launch plan resources
+Gets the launch plan resources.
 
 Synopsis
 ~~~~~~~~
 
 
 
-Retrieve all launch plans within the project and domain (launch plan, launch plans can be used interchangeably):
+Retrieve all launch plans within the project and domain:
 ::
 
  flytectl get launchplan -p flytesnacks -d development
+
+.. note::
+     The terms launchplan/launchplans are interchangeable in these commands.
 
  Retrieve a launch plan by name within the project and domain:
 
@@ -33,6 +36,12 @@ Retrieve a particular version of the launch plan by name within the project and 
 ::
 
  flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --version v2
+
+Retrieve all launch plans for a given workflow name:
+
+::
+
+ flytectl get launchplan -p flytesnacks -d development --workflow core.flyte_basics.lp.go_greet
 
 Retrieve all the launch plans with filters:
 ::
@@ -67,7 +76,7 @@ Retrieve all launch plans the within the project and domain in JSON format:
 
  flytectl get launchplan -p flytesnacks -d development -o json
 
-Retrieve a launch plan within the project and domain as per a version and generate the execution spec file; the file can be used to launch the execution using the 'create execution' command:
+Retrieve a launch plan within the project and domain as per a version and generates the execution spec file; the file can be used to launch the execution using the 'create execution' command:
 
 ::
 
@@ -89,8 +98,7 @@ The generated file would look similar to this:
 	 version: v3
 	 workflow: core.advanced.run_merge_sort.merge_sort
 
-Check the create execution section on how to launch one using the generated file.
-
+Check the :ref:`create execution section<flytectl_create_execution>` on how to launch one using the generated file.
 Usage
 
 
@@ -112,6 +120,7 @@ Options
   -h, --help                          help for launchplan
       --latest                         flag to indicate to fetch the latest version,  version flag will be ignored in this case
       --version string                version of the launchplan to be fetched.
+      --workflow string               name of the workflow for which the launchplans need to be fetched.
 
 Options inherited from parent commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -162,5 +171,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_get` 	 - Fetch various Flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_get` 	 - Fetches various Flyte resources such as tasks, workflows, launch plans, executions, and projects.
 

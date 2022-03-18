@@ -3,42 +3,74 @@
 flytectl sandbox start
 ----------------------
 
-Start the Flyte Sandbox cluster
+Starts the Flyte sandbox cluster.
 
 Synopsis
 ~~~~~~~~
 
 
 
-The Flyte Sandbox is a fully standalone minimal environment for running Flyte. It provides a simplified way of running Flyte sandbox as a single Docker container locally.  
+Flyte sandbox is a fully standalone minimal environment for running Flyte.
+It provides a simplified way of running Flyte sandbox as a single Docker container locally.
 
-Start sandbox cluster without any source code:
+Starts the sandbox cluster without any source code:
 ::
 
  flytectl sandbox start
 	
-Mount your source code repository inside sandbox:
+Mounts your source code repository inside the sandbox:
 ::
 
  flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
 	
-Run specific version of Flyte. FlyteCTL sandbox only supports Flyte version available in the Github release, https://github.com/flyteorg/flyte/tags.
+Runs a specific version of Flyte. Flytectl sandbox only supports Flyte version available in the Github release, https://github.com/flyteorg/flyte/tags.
 ::
 
  flytectl sandbox start  --version=v0.14.0
 
-Note: FlyteCTL sandbox is only supported for Flyte versions > v0.10.0
+.. note::
+	  Flytectl Sandbox is only supported for Flyte versions > v0.10.0.
+
+Runs the latest pre release of  Flyte.
+::
+
+ flytectl sandbox start  --pre
+
+Note: The pre release flag will be ignored if the user passes the version flag. In that case, Flytectl will use a specific version. 
 
 Specify a Flyte Sandbox compliant image with the registry. This is useful in case you want to use an image from your registry.
 ::
 
   flytectl sandbox start --image docker.io/my-override:latest
 
+Note: If image flag is passed then Flytectl will ignore version and pre flags.
 	
 Specify a Flyte Sandbox image pull policy. Possible pull policy values are Always, IfNotPresent, or Never:
 ::
 
  flytectl sandbox start  --image docker.io/my-override:latest --imagePullPolicy Always
+
+Start sandbox cluster passing environment variables. This can be used to pass docker specific env variables or flyte specific env variables.
+eg : for passing timeout value in secs for the sandbox container use the following.
+::
+
+ flytectl sandbox start --env FLYTE_TIMEOUT=700
+
+
+The DURATION can be a positive integer or a floating-point number, followed by an optional unit suffix::
+s - seconds (default)
+m - minutes
+h - hours
+d - days
+When no unit is used, it defaults to seconds. If the duration is set to zero, the associated timeout is disabled.
+
+
+eg : for passing multiple environment variables
+::
+
+ flytectl sandbox start --env USER=foo --env PASSWORD=bar
+
+
 Usage
 
 
@@ -51,9 +83,11 @@ Options
 
 ::
 
+      --env strings                       Optional. Provide Env variable in key=value format which can be passed to sandbox container.
   -h, --help                              help for start
       --image string                      Optional. Provide a fully qualified path to a Flyte compliant docker image.
       --imagePullPolicy ImagePullPolicy   Optional. Defines the image pull behavior [Always/IfNotPresent/Never] (default Always)
+      --pre                               Optional. Pre release Version of flyte will be used for sandbox.
       --source string                     Path of your source code
       --version string                    Version of flyte. Only supports flyte releases greater than v0.10.0
 
@@ -106,5 +140,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_sandbox` 	 - Used for sandbox interactions like start/teardown/status/exec.
+* :doc:`flytectl_sandbox` 	 - Helps with sandbox interactions like start, teardown, status, and exec.
 

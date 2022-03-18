@@ -2,6 +2,7 @@ package get
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/launchplan"
@@ -14,12 +15,15 @@ import (
 )
 
 const (
-	launchPlanShort = "Get launch plan resources"
+	launchPlanShort = "Gets the launch plan resources."
 	launchPlanLong  = `
-Retrieve all launch plans within the project and domain (launch plan, launch plans can be used interchangeably):
+Retrieve all launch plans within the project and domain:
 ::
 
  flytectl get launchplan -p flytesnacks -d development
+
+.. note::
+     The terms launchplan/launchplans are interchangeable in these commands.
 
  Retrieve a launch plan by name within the project and domain:
 
@@ -39,6 +43,12 @@ Retrieve a particular version of the launch plan by name within the project and 
 ::
 
  flytectl get launchplan -p flytesnacks -d development  core.basic.lp.go_greet --version v2
+
+Retrieve all launch plans for a given workflow name:
+
+::
+
+ flytectl get launchplan -p flytesnacks -d development --workflow core.flyte_basics.lp.go_greet
 
 Retrieve all the launch plans with filters:
 ::
@@ -73,7 +83,7 @@ Retrieve all launch plans the within the project and domain in JSON format:
 
  flytectl get launchplan -p flytesnacks -d development -o json
 
-Retrieve a launch plan within the project and domain as per a version and generate the execution spec file; the file can be used to launch the execution using the 'create execution' command:
+Retrieve a launch plan within the project and domain as per a version and generates the execution spec file; the file can be used to launch the execution using the 'create execution' command:
 
 ::
 
@@ -95,8 +105,7 @@ The generated file would look similar to this:
 	 version: v3
 	 workflow: core.advanced.run_merge_sort.merge_sort
 
-Check the create execution section on how to launch one using the generated file.
-
+Check the :ref:` + "`create execution section<flytectl_create_execution>`" + ` on how to launch one using the generated file.
 Usage
 `
 )
@@ -168,6 +177,13 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 			return err
 		}
 		return nil
+	}
+
+	if len(launchplan.DefaultConfig.Workflow) > 0 {
+		if len(launchplan.DefaultConfig.Filter.FieldSelector) > 0 {
+			return fmt.Errorf("fieldSelector cannot be specified with workflow flag")
+		}
+		launchplan.DefaultConfig.Filter.FieldSelector = fmt.Sprintf("workflow.name=%s", launchplan.DefaultConfig.Workflow)
 	}
 
 	launchPlans, err := cmdCtx.AdminFetcherExt().FetchAllVerOfLP(ctx, "", config.GetConfig().Project, config.GetConfig().Domain, launchplan.DefaultConfig.Filter)

@@ -3,39 +3,37 @@
 flytectl delete execution-cluster-label
 ---------------------------------------
 
-Delete matchable resources of execution cluster label
+Deletes matchable resources of execution cluster label.
 
 Synopsis
 ~~~~~~~~
 
 
 
-Deletes execution cluster label for given project and domain combination or additionally with workflow name.
+Delete execution cluster label for a given project and domain, in combination with the workflow name.
 
-For project flytectldemo and development domain, it is:
+For project flytectldemo and development domain, run:
 ::
 
- flytectl delete execution-cluster-label -p flytectldemo -d development 
+ flytectl delete execution-cluster-label -p flytectldemo -d development
 
-
-Deletes execution cluster label using config file which was used for creating it.
-Here, the config file is written to ecl.yaml.
-Value is optional in the file as it is unread during the delete command but it can be kept since the same file can be used for get, update or delete commands. 
-e.g., content of ecl.yaml:
+To delete execution cluster label using the config file that was used to create it, run:
 
 ::
 
  flytectl delete execution-cluster-label --attrFile ecl.yaml
 
+For example, here's the config file ecl.yaml:
 
 .. code-block:: yaml
-	
+
     domain: development
     project: flytectldemo
     value: foo
 
-Deletes execution cluster label for a workflow.
-For the workflow 'core.control_flow.run_merge_sort.merge_sort', it is:
+Value is optional in the file as it is unread during the delete command, but it can be retained since the same file can be used for 'get', 'update' and 'delete' commands.
+
+To delete the execution cluster label of the workflow 'core.control_flow.run_merge_sort.merge_sort', run the following:
 
 ::
 
@@ -106,5 +104,5 @@ Options inherited from parent commands
 SEE ALSO
 ~~~~~~~~
 
-* :doc:`flytectl_delete` 	 - Terminate/delete various Flyte resources including tasks/workflows/launchplans/executions/project.
+* :doc:`flytectl_delete` 	 - Terminates/deletes various Flyte resources such as tasks, workflows, launch plans, executions, and projects.
 

@@ -5,10 +5,10 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/flyteorg/flytectl/pkg/githubutil"
 	"github.com/flyteorg/flytectl/pkg/util"
-	"github.com/flyteorg/flytectl/pkg/util/githubutil"
 
-	"github.com/flyteorg/flytectl/pkg/util/platformutil"
+	"github.com/flyteorg/flytectl/pkg/platformutil"
 
 	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
 	stdlibversion "github.com/flyteorg/flytestdlib/version"
@@ -27,8 +27,8 @@ var (
 
 func TestUpgradeCommand(t *testing.T) {
 	rootCmd := &cobra.Command{
-		Long:              "FlyteCTL is CLI tool written in go to interact with flyteadmin service",
-		Short:             "FlyteCTL CLI tool",
+		Long:              "Flytectl is a CLI tool written in Go to interact with the FlyteAdmin service.",
+		Short:             "Flytectl CLI tool",
 		Use:               "flytectl",
 		DisableAutoGenTag: true,
 	}
