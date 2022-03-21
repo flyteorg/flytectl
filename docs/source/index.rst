@@ -26,7 +26,7 @@ golang
 
   .. prompt:: bash $
 
-      brew update && brew upgrade flytectl
+      flytectl upgrade
 
 .. tabbed:: Other Operating systems
 
