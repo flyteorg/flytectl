@@ -34,6 +34,12 @@ golang
 
       curl -sL https://ctl.flyte.org/install | bash
 
+  *Upgrade* existing installation using the following command:
+
+  .. prompt:: bash $
+
+      flytectl upgrade
+
 **Test** if Flytectl is installed correctly (your Flytectl version should be > 0.2.0) using the following command:
 
 .. prompt:: bash $
