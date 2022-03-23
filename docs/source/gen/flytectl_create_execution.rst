@@ -61,7 +61,20 @@ The generated spec file can be modified to change the input values, as shown bel
 	task: core.advanced.run_merge_sort.merge
 	version: "v2"
 
-3. Run the execution by passing the generated YAML file.
+Create execution for a workflow
+===============================
+
+1. Generate an execution spec file.
+
+   .. prompt:: bash $
+
+      flytectl get launchplan --project flytesnacks --domain development flyte.workflows.example.my_wf --latest --execFile exec_spec.yaml
+
+The generated file looks similar to the above mentioned task file.
+
+The following steps are common to both a task and workflow:
+
+Create an execution by passing the generated YAML file.
 The file can then be passed through the command line.
 It is worth noting that the source's and target's project and domain can be different.
 ::
@@ -126,32 +139,7 @@ Modified file with struct data populated for 'x' and 'y' parameters for the task
   task: core.type_system.custom_objects.add
   version: v3
 
-
-
-Create execution for a workflow
-===============================
-
-#. Generate an execution spec file.
-
-   .. prompt:: bash $
-
-      flytectl get launchplan --project flytesnacks --domain development flyte.workflows.example.my_wf --latest --execFile exec_spec.yaml
-
-#. Create an execution using the exec spec file.
-
-   .. prompt:: bash $
-
-      flytectl create execution --project flytesnacks --domain development --execFile exec_spec.yaml
-
-#. Monitor the execution by providing the execution name from the ``create execution`` command.
-
-   .. prompt:: bash $
-
-      flytectl get execution --project flytesnacks --domain development <execname>
-
-
 Usage
-
 
 ::
 
