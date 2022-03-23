@@ -65,14 +65,15 @@ Create execution for a workflow
 ===============================
 
 1. Generate an execution spec file.
+::
 
-   .. prompt:: bash $
-
-      flytectl get launchplan --project flytesnacks --domain development flyte.workflows.example.my_wf --latest --execFile exec_spec.yaml
+  flytectl get launchplan --project flytesnacks --domain development flyte.workflows.example.my_wf --latest --execFile exec_spec.yaml
 
 The generated file looks similar to the above mentioned task file.
 
+
 The following steps are common to both a task and workflow:
+
 
 Create an execution by passing the generated YAML file.
 The file can then be passed through the command line.
