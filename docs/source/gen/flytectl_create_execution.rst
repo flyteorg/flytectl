@@ -61,12 +61,59 @@ The generated spec file can be modified to change the input values, as shown bel
 	task: core.advanced.run_merge_sort.merge
 	version: "v2"
 
-3. Create an execution by passing the generated YAML file.
+3. Run the execution by passing the generated YAML file.
 The file can then be passed through the command line.
 It is worth noting that the source's and target's project and domain can be different.
 ::
 
 	flytectl create execution --execFile execution_spec.yaml -p flytesnacks -d staging --targetProject flytesnacks
+
+Create execution for a workflow
+===============================
+
+1. Generate an execution spec file.
+::
+
+  flytectl get launchplan --project flytesnacks --domain development flyte.workflows.example.my_wf --latest --execFile exec_spec.yaml
+
+The generated file would look similar to the following:
+
+.. code-block:: yaml
+
+  iamRoleARN: ""
+  inputs: {}
+  kubeServiceAcct: ""
+  targetDomain: ""
+  targetProject: ""
+  version: v1
+  workflow: flyte.workflows.example.my_wf
+
+2. [Optional] Update the inputs for the execution, if needed. The generated spec file can be modified to change the input values, as shown below:
+
+.. code-block:: yaml
+
+  iamRoleARN: 'arn:aws:iam::12345678:role/defaultrole'
+  inputs:
+  sorted_list1:
+  - 2
+  - 4
+  - 6
+  sorted_list2:
+  - 1
+  - 3
+  - 5
+  kubeServiceAcct: ""
+  targetDomain: ""
+  targetProject: ""
+  version: "v1"
+  workflow: flyte.workflows.example.my_wf
+
+3. Run the execution using the exec spec file. The file can then be passed through the command line. It is worth noting that the source’s and target’s project and domain can be different.
+::
+
+  flytectl create execution --project flytesnacks --domain development --execFile exec_spec.yaml
+
+The following commands are common to both task and worflow:
 
 To relaunch an execution, pass the current execution ID as follows:
 
@@ -125,70 +172,6 @@ Modified file with struct data populated for 'x' and 'y' parameters for the task
   targetProject: ""
   task: core.type_system.custom_objects.add
   version: v3
-
-Create execution for a workflow
-===============================
-
-1. Generate an execution spec file.
-::
-
-  flytectl get launchplan --project flytesnacks --domain development flyte.workflows.example.my_wf --latest --execFile exec_spec.yaml
-
-The generated file would look similar to the following:
-
-.. code-block:: yaml
-
-  iamRoleARN: ""
-  inputs: {}
-  kubeServiceAcct: ""
-  targetDomain: ""
-  targetProject: ""
-  version: v1
-  workflow: flyte.workflows.example.my_wf
-
-2. [Optional] Update the inputs for the execution, if needed. The generated spec file can be modified to change the input values, as shown below:
-
-.. code-block:: yaml
-
-  iamRoleARN: 'arn:aws:iam::12345678:role/defaultrole'
-  inputs:
-  sorted_list1:
-  - 2
-  - 4
-  - 6
-  sorted_list2:
-  - 1
-  - 3
-  - 5
-  kubeServiceAcct: ""
-  targetDomain: ""
-  targetProject: ""
-  version: "v1"
-  workflow: flyte.workflows.example.my_wf
-
-3. Create an execution using the exec spec file. The file can then be passed through the command line. It is worth noting that the source’s and target’s project and domain can be different.
-::
-
-  flytectl create execution --project flytesnacks --domain development --execFile exec_spec.yaml
-
-To relaunch an execution, pass the current execution ID as follows:
-
-::
-
-  flytectl create execution --relaunch <execution name> --project flytesnacks --domain development
-
-To recover an execution, i.e., recreate it from the last known failure point for previously-run workflow execution, run:
-
-::
-
-  flytectl create execution --recover <execution name> -p flytesnacks -d development
-
-4. Monitor the execution by providing the execution name from the ``create execution`` command.
-
-::
-
-  flytectl get execution --project flytesnacks --domain development <execution name>
-
 
 Usage
 
