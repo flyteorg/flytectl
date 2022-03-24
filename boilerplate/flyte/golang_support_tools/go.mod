@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/alvaroloes/enumer v1.1.2
-	github.com/flyteorg/flytestdlib v0.4.7
+	github.com/flyteorg/flytestdlib v0.4.15
 	github.com/golangci/golangci-lint v1.38.0
 	github.com/pseudomuto/protoc-gen-doc v1.4.1
 	github.com/vektra/mockery v0.0.0-20181123154057-e78b021dcbb5
@@ -14,7 +14,7 @@ require (
 	4d63.com/gochecknoglobals v0.0.0-20201008074935-acfc0b28355a // indirect
 	cloud.google.com/go v0.75.0 // indirect
 	cloud.google.com/go/storage v1.12.0 // indirect
-	github.com/Azure/azure-sdk-for-go v51.0.0+incompatible // indirect
+	github.com/Azure/azure-sdk-for-go v62.3.0+incompatible // indirect
 	github.com/Azure/go-autorest v14.2.0+incompatible // indirect
 	github.com/Azure/go-autorest/autorest v0.11.17 // indirect
 	github.com/Azure/go-autorest/autorest/adal v0.9.10 // indirect
@@ -41,6 +41,7 @@ require (
 	github.com/daixiang0/gci v0.2.8 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/denis-tingajkin/go-header v0.4.2 // indirect
+	github.com/dnaeon/go-vcr v1.2.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.3.0-java // indirect
 	github.com/ernesto-jimenez/gogen v0.0.0-20180125220232-d7d4131e6607 // indirect
 	github.com/esimonov/ifshort v1.0.1 // indirect
@@ -62,6 +63,7 @@ require (
 	github.com/go-xmlfmt/xmlfmt v0.0.0-20191208150333-d5b6f63a941b // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/gofrs/flock v0.8.0 // indirect
+	github.com/gofrs/uuid v4.2.0+incompatible // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
@@ -135,7 +137,6 @@ require (
 	github.com/ryancurrah/gomodguard v1.2.0 // indirect
 	github.com/ryanrolds/sqlclosecheck v0.3.0 // indirect
 	github.com/sanposhiho/wastedassign v0.1.3 // indirect
-	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/securego/gosec/v2 v2.6.1 // indirect
 	github.com/shazow/go-diff v0.0.0-20160112020656-b6b7b6733b8c // indirect
 	github.com/sirupsen/logrus v1.8.0 // indirect
@@ -163,10 +164,10 @@ require (
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/lint v0.0.0-20201208152925-83fdc39ff7b5 // indirect
 	golang.org/x/mod v0.4.1 // indirect
-	golang.org/x/net v0.0.0-20210119194325-5f4716e94777 // indirect
+	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
 	golang.org/x/oauth2 v0.0.0-20210126194326-f9ce19ea3013 // indirect
-	golang.org/x/sys v0.0.0-20210124154548-22da62e12c0c // indirect
-	golang.org/x/text v0.3.5 // indirect
+	golang.org/x/sys v0.0.0-20210423082822-04245dca01da // indirect
+	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
 	golang.org/x/tools v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
@@ -175,6 +176,7 @@ require (
 	google.golang.org/genproto v0.0.0-20210126160654-44e461bb6506 // indirect
 	google.golang.org/grpc v1.35.0 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
