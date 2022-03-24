@@ -3,6 +3,7 @@ package testutils
 import (
 	"bytes"
 	"context"
+	"github.com/flyteorg/flyteidl/clients/go/admin"
 	"io"
 	"log"
 	"os"
@@ -27,7 +28,7 @@ var (
 	writer        *os.File
 	Err           error
 	Ctx           context.Context
-	MockClient    *mocks.AdminServiceClient
+	MockClient    *admin.Clientset
 	FetcherExt    *extMocks.AdminFetcherExtInterface
 	UpdaterExt    *extMocks.AdminUpdaterExtInterface
 	DeleterExt    *extMocks.AdminDeleterExtInterface

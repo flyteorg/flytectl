@@ -7,16 +7,16 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/flyteorg/flyteidl/clients/go/admin"
+
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
-	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
-
 	"github.com/stretchr/testify/assert"
 )
 
 var (
 	ctx             context.Context
-	mockAdminClient *mocks.AdminServiceClient
+	mockAdminClient *admin.Clientset
 	cmdCtx          cmdCore.CommandContext
 	args            []string
 	GetDoFunc       func(req *http.Request) (*http.Response, error)

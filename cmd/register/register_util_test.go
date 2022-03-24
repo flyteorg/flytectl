@@ -1,11 +1,8 @@
 package register
 
 import (
-<<<<<<< HEAD
 	"bytes"
-=======
 	"context"
->>>>>>> 519a78704d7ee611a532be2aeeb0091878f1a98a
 	"errors"
 	"fmt"
 	"net/http"
@@ -284,7 +281,7 @@ func TestRegisterFile(t *testing.T) {
 		mockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(wf, nil)
 		args = []string{"testdata/152_my_cron_scheduled_lp_3.pb"}
 		var registerResults []Result
-		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx, *rconfig.DefaultFilesConfig)
+		results, err := registerFile(ctx, args[0], registerResults, cmdCtx, "", *rconfig.DefaultFilesConfig)
 		assert.Equal(t, 1, len(results))
 		assert.Equal(t, "Failed", results[0].Status)
 		assert.Contains(t, results[0].Info, "param values are missing on scheduled workflow for the following params")
@@ -319,7 +316,7 @@ func TestRegisterFile(t *testing.T) {
 			status.Error(codes.AlreadyExists, "AlreadyExists"))
 		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
 		var registerResults []Result
-		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx, *rconfig.DefaultFilesConfig)
+		results, err := registerFile(ctx, args[0], registerResults, cmdCtx, "", *rconfig.DefaultFilesConfig)
 		assert.Equal(t, 1, len(results))
 		assert.Equal(t, "Success", results[0].Status)
 		assert.Equal(t, "AlreadyExists", results[0].Info)
@@ -332,7 +329,7 @@ func TestRegisterFile(t *testing.T) {
 			status.Error(codes.InvalidArgument, "Invalid"))
 		args = []string{"testdata/69_core.flyte_basics.lp.greet_1.pb"}
 		var registerResults []Result
-		results, err := registerFile(ctx, args[0], "", registerResults, cmdCtx, *rconfig.DefaultFilesConfig)
+		results, err := registerFile(ctx, args[0], registerResults, cmdCtx, "", *rconfig.DefaultFilesConfig)
 		assert.Equal(t, 1, len(results))
 		assert.Equal(t, "Failed", results[0].Status)
 		assert.Equal(t, "Error registering file due to rpc error: code = InvalidArgument desc = Invalid", results[0].Info)
@@ -390,7 +387,7 @@ func TestUploadFastRegisterArtifact(t *testing.T) {
 		}, testScope.NewSubScope("flytectl"))
 		assert.Nil(t, err)
 		Client = s
-		err = uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "flytesnacks-core.tgz", "", &rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
+		_, err = uploadFastRegisterArtifact(ctx, "flytesnakcs", "development", "testdata/flytesnacks-core.tgz", "", nil, rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
 		assert.Nil(t, err)
 	})
 	t.Run("Failed upload", func(t *testing.T) {
@@ -401,7 +398,7 @@ func TestUploadFastRegisterArtifact(t *testing.T) {
 		}, testScope.NewSubScope("flytectl"))
 		assert.Nil(t, err)
 		Client = s
-		err = uploadFastRegisterArtifact(ctx, "testdata/flytesnacks-core.tgz", "", "", &rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
+		_, err = uploadFastRegisterArtifact(ctx, "flytesnacks", "development", "testdata/flytesnacks-core.tgz", "", nil, rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
 		assert.Nil(t, err)
 	})
 	t.Run("Failed upload", func(t *testing.T) {
@@ -412,7 +409,7 @@ func TestUploadFastRegisterArtifact(t *testing.T) {
 		}, testScope.NewSubScope("flytectl"))
 		assert.Nil(t, err)
 		Client = s
-		err = uploadFastRegisterArtifact(ctx, "testdata/flytesnacksre.tgz", "", "", &rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
+		_, err = uploadFastRegisterArtifact(ctx, "flytesnacks", "development", "testdata/flytesnacksre.tgz", "", nil, rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
 		assert.NotNil(t, err)
 	})
 }
