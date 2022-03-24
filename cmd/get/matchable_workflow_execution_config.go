@@ -2,8 +2,11 @@ package get
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflowexecutionconfig"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	sconfig "github.com/flyteorg/flytectl/cmd/config/subcommand"
@@ -88,7 +91,12 @@ func getWorkflowExecutionConfigFunc(ctx context.Context, args []string, cmdCtx c
 	// Updates the workflowExecutionConfigFileConfig with the fetched matchable attribute
 	if err := FetchAndUnDecorateMatchableAttr(ctx, project, domain, workflowName, cmdCtx.AdminFetcherExt(),
 		&workflowExecutionConfigFileConfig, admin.MatchableResource_WORKFLOW_EXECUTION_CONFIG); err != nil {
-		return err
+		if grpcError := status.Code(err); grpcError == codes.NotFound && workflowexecutionconfig.DefaultFetchConfig.Gen {
+			fmt.Println("Generating a sample workflow execution config file")
+			workflowExecutionConfigFileConfig = getSampleWorkflowExecutionFileConfig(project, domain, workflowName)
+		} else {
+			return err
+		}
 	}
 
 	// Write the config to the file which can be used for update
@@ -97,3 +105,30 @@ func getWorkflowExecutionConfigFunc(ctx context.Context, args []string, cmdCtx c
 	}
 	return nil
 }
+
+
+func getSampleWorkflowExecutionFileConfig(project, domain, workflow string) workflowexecutionconfig.FileConfig {
+	return workflowexecutionconfig.FileConfig{
+		Project: project,
+		Domain:  domain,
+		Workflow: workflow,
+		WorkflowExecutionConfig: &admin.WorkflowExecutionConfig{
+			MaxParallelism: 10,
+			SecurityContext: &core.SecurityContext{
+				RunAs: &core.Identity{
+					K8SServiceAccount: "default",
+					IamRole:           "",
+				},
+			},
+			Labels: &admin.Labels{
+				Values: map[string]string{"cliLabelKey": "cliLabelValue"},
+			},
+			Annotations: &admin.Annotations{
+				Values: map[string]string{"cliAnnotationKey": "cliAnnotationValue"},
+			},
+			RawOutputDataConfig: &admin.RawOutputDataConfig{
+				OutputLocationPrefix: "cliOutputLocationPrefix",
+			},
+		},
+	}
+} 

@@ -54,7 +54,16 @@ func DumpTaskResourceAttr(matchableAttrConfig interface{}, fileName string) erro
 		}
 		fmt.Printf("wrote the config to file %v", fileName)
 	} else {
-		fmt.Printf("%v", String(matchableAttrConfig))
+		fmt.Printf("%v", PrettyPrint(matchableAttrConfig))
 	}
 	return nil
+}
+
+// PrettyPrint returns a human-readable representation of an item.
+func PrettyPrint(item interface{}) string {
+	data, err := json.MarshalIndent(item, "", "  ")
+	if err == nil {
+		return string(data)
+	}
+	return fmt.Sprintf("%+v", item)
 }
