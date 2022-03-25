@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/flyteorg/flytectl/pkg/githubutil"
-
-	"github.com/flyteorg/flytectl/pkg/platformutil"
-
+	sconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/version"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/pkg/githubutil"
+	"github.com/flyteorg/flytectl/pkg/platformutil"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
 	stdlibversion "github.com/flyteorg/flytestdlib/version"
+
 	"github.com/spf13/cobra"
 )
 
@@ -25,6 +25,12 @@ Fetch Flytectl version.
 ::
 
  flytectl version
+
+Retrieve control plane version.
+::
+
+ flytectl version --ctrlPlane
+
 `
 	flytectlAppName    = "flytectl"
 	controlPlanAppName = "controlPlane"
@@ -46,7 +52,7 @@ func GetVersionCommand(rootCmd *cobra.Command) map[string]cmdCore.CommandEntry {
 	getResourcesFuncs := map[string]cmdCore.CommandEntry{
 		"version": {CmdFunc: getVersion, Aliases: []string{"versions"}, ProjectDomainNotRequired: true,
 			Short: versionCmdShort,
-			Long:  versionCmdLong},
+			Long:  versionCmdLong, PFlagProvider: sconfig.DefaultConfig},
 	}
 	return getResourcesFuncs
 }
@@ -75,9 +81,11 @@ func getVersion(ctx context.Context, args []string, cmdCtx cmdCore.CommandContex
 	}); err != nil {
 		return err
 	}
-	// Print Flyteadmin version if available
-	if err := getControlPlaneVersion(ctx, cmdCtx); err != nil {
-		logger.Debug(ctx, err)
+	if sconfig.DefaultConfig.ControlPlane {
+		// Print Flyteadmin version if control plane flag is set
+		if err := getControlPlaneVersion(ctx, cmdCtx); err != nil {
+			logger.Debug(ctx, err)
+		}
 	}
 	return nil
 }

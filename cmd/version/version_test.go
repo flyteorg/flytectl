@@ -8,13 +8,14 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/spf13/cobra"
-
+	sconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/version"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	stdlibversion "github.com/flyteorg/flytestdlib/version"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -60,6 +61,7 @@ func TestVersionCommandFunc(t *testing.T) {
 	stdlibversion.Build = ""
 	stdlibversion.BuildTime = ""
 	stdlibversion.Version = testVersion
+	sconfig.DefaultConfig.ControlPlane = true
 	mockClient.OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, nil)
 	err := getVersion(ctx, args, cmdCtx)
 	assert.Nil(t, err)
@@ -75,6 +77,7 @@ func TestVersionCommandFuncError(t *testing.T) {
 	stdlibversion.Build = ""
 	stdlibversion.BuildTime = ""
 	stdlibversion.Version = "v"
+	sconfig.DefaultConfig.ControlPlane = true
 	mockClient.OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, nil)
 	err := getVersion(ctx, args, cmdCtx)
 	assert.Nil(t, err)
@@ -90,6 +93,7 @@ func TestVersionCommandFuncErr(t *testing.T) {
 	stdlibversion.Build = ""
 	stdlibversion.BuildTime = ""
 	stdlibversion.Version = testVersion
+	sconfig.DefaultConfig.ControlPlane = true
 	mockClient.OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, errors.New("error"))
 	err := getVersion(ctx, args, cmdCtx)
 	assert.Nil(t, err)
@@ -100,6 +104,7 @@ func TestVersionUtilFunc(t *testing.T) {
 	stdlibversion.Build = ""
 	stdlibversion.BuildTime = ""
 	stdlibversion.Version = testVersion
+	sconfig.DefaultConfig.ControlPlane = true
 	t.Run("Error in getting control plan version", func(t *testing.T) {
 		ctx := context.Background()
 		mockClient := new(mocks.AdminServiceClient)
@@ -117,6 +122,16 @@ func TestVersionUtilFunc(t *testing.T) {
 		mockClient.OnGetVersionMatch(ctx, &admin.GetVersionRequest{}).Return(nil, fmt.Errorf("error"))
 		err := getVersion(ctx, []string{}, cmdCtx)
 		assert.Nil(t, err)
+	})
+	t.Run("skip control plane version", func(t *testing.T) {
+		ctx := context.Background()
+		mockClient := new(mocks.AdminServiceClient)
+		mockOutStream := new(io.Writer)
+		sconfig.DefaultConfig.ControlPlane = false
+		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+		err := getVersion(ctx, []string{}, cmdCtx)
+		assert.Nil(t, err)
+		mockClient.AssertNotCalled(t, "GetVersion", ctx, versionRequest)
 	})
 
 }
