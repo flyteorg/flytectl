@@ -9,7 +9,7 @@ require (
 	github.com/docker/docker v20.10.7+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/enescakir/emoji v1.0.0
-	github.com/flyteorg/flyteidl v0.21.24
+	github.com/flyteorg/flyteidl v0.24.6
 	github.com/flyteorg/flytestdlib v0.4.14
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
@@ -145,5 +145,3 @@ require (
 	k8s.io/utils v0.0.0-20201110183641-67b214c5f920 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 )
-
-replace github.com/flyteorg/flyteidl => github.com/flyteorg/flyteidl v0.24.4-0.20220324115508-8fb0189903bf
