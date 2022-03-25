@@ -13,7 +13,7 @@ func deleteMatchableAttr(ctx context.Context, project, domain, workflowName stri
 	if len(workflowName) > 0 {
 		// Delete the workflow attribute from the admin. If the attribute doesn't exist , admin deesn't return an error and same behavior is followed here
 		if dryRun {
-			fmt.Print( "skipping DeleteWorkflowAttributes request (dryRun)\n")
+			fmt.Print("skipping DeleteWorkflowAttributes request (dryRun)\n")
 		} else {
 			err := deleter.DeleteWorkflowAttributes(ctx, project, domain, workflowName, rsType)
 			if err != nil {
@@ -31,7 +31,7 @@ func deleteMatchableAttr(ctx context.Context, project, domain, workflowName stri
 				return err
 			}
 		}
-		fmt.Printf( "Deleted matchable resources from %v project and domain %v\n", project, domain)
+		fmt.Printf("Deleted matchable resources from %v project and domain %v\n", project, domain)
 	}
 	return nil
 }

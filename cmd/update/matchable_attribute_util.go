@@ -21,11 +21,11 @@ func DecorateAndUpdateMatchableAttr(ctx context.Context, project, domain, workfl
 				return err
 			}
 		}
-		fmt.Printf( "Updated attributes from %v project and domain %v and workflow %v\n", project, domain, workflowName)
+		fmt.Printf("Updated attributes from %v project and domain %v and workflow %v\n", project, domain, workflowName)
 	} else {
 		// Update the project domain attribute using the admin.
 		if dryRun {
-			fmt.Printf( "skipping UpdateProjectDomainAttributes request (dryRun)\n")
+			fmt.Printf("skipping UpdateProjectDomainAttributes request (dryRun)\n")
 		} else {
 			err := updater.UpdateProjectDomainAttributes(ctx, project, domain, matchingAttr)
 			if err != nil {

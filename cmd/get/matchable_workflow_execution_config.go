@@ -3,15 +3,16 @@ package get
 import (
 	"context"
 	"fmt"
-	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflowexecutionconfig"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	sconfig "github.com/flyteorg/flytectl/cmd/config/subcommand"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflowexecutionconfig"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -106,11 +107,10 @@ func getWorkflowExecutionConfigFunc(ctx context.Context, args []string, cmdCtx c
 	return nil
 }
 
-
 func getSampleWorkflowExecutionFileConfig(project, domain, workflow string) workflowexecutionconfig.FileConfig {
 	return workflowexecutionconfig.FileConfig{
-		Project: project,
-		Domain:  domain,
+		Project:  project,
+		Domain:   domain,
 		Workflow: workflow,
 		WorkflowExecutionConfig: &admin.WorkflowExecutionConfig{
 			MaxParallelism: 10,
@@ -131,4 +131,4 @@ func getSampleWorkflowExecutionFileConfig(project, domain, workflow string) work
 			},
 		},
 	}
-} 
+}
