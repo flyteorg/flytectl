@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
+
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/execution"
 	"github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -24,7 +26,8 @@ func TestExecutionUpdate(t *testing.T) {
 	args = []string{"execution1"}
 	// Activate
 	execution.UConfig.Activate = true
-	mockClient.OnUpdateExecutionMatch(mock.Anything, mock.Anything).Return(&admin.ExecutionUpdateResponse{}, nil)
+	mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
+	mockAdminClient.OnUpdateExecutionMatch(mock.Anything, mock.Anything).Return(&admin.ExecutionUpdateResponse{}, nil)
 	assert.Nil(t, updateExecutionFunc(ctx, args, cmdCtx))
 	// Archive
 	execution.UConfig.Activate = false
@@ -37,7 +40,7 @@ func TestExecutionUpdate(t *testing.T) {
 	// Dry run
 	execution.UConfig.DryRun = true
 	assert.Nil(t, updateExecutionFunc(ctx, args, cmdCtx))
-	mockClient.AssertNotCalled(t, "UpdateExecution", mock.Anything)
+	mockAdminClient.AssertNotCalled(t, "UpdateExecution", mock.Anything)
 
 	// Reset
 	execution.UConfig.DryRun = false
@@ -59,7 +62,8 @@ func TestExecutionUpdateFail(t *testing.T) {
 	testutils.Setup()
 	UpdateExecutionSetup()
 	args = []string{"execution1"}
-	mockClient.OnUpdateExecutionMatch(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed to update"))
+	mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
+	mockAdminClient.OnUpdateExecutionMatch(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed to update"))
 	assert.NotNil(t, updateExecutionFunc(ctx, args, cmdCtx))
 }
 

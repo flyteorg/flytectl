@@ -3,7 +3,6 @@ package testutils
 import (
 	"bytes"
 	"context"
-	"github.com/flyteorg/flyteidl/clients/go/admin"
 	"io"
 	"log"
 	"os"
@@ -11,11 +10,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/flyteorg/flyteidl/clients/go/admin"
+
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	extMocks "github.com/flyteorg/flytectl/pkg/ext/mocks"
-	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -49,13 +48,13 @@ func Setup() {
 	os.Stdout = writer
 	os.Stderr = writer
 	log.SetOutput(writer)
-	MockClient = new(mocks.AdminServiceClient)
+	MockClient = admin.InitializeMockClientset()
 	FetcherExt = new(extMocks.AdminFetcherExtInterface)
 	UpdaterExt = new(extMocks.AdminUpdaterExtInterface)
 	DeleterExt = new(extMocks.AdminDeleterExtInterface)
-	FetcherExt.OnAdminServiceClient().Return(MockClient)
-	UpdaterExt.OnAdminServiceClient().Return(MockClient)
-	DeleterExt.OnAdminServiceClient().Return(MockClient)
+	FetcherExt.OnAdminServiceClient().Return(MockClient.AdminClient())
+	UpdaterExt.OnAdminServiceClient().Return(MockClient.AdminClient())
+	DeleterExt.OnAdminServiceClient().Return(MockClient.AdminClient())
 	MockOutStream = writer
 	CmdCtx = cmdCore.NewCommandContextWithExt(MockClient, FetcherExt, UpdaterExt, DeleterExt, MockOutStream)
 	config.GetConfig().Project = projectValue

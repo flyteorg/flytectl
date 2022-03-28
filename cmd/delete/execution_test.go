@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
+
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -40,25 +42,27 @@ func TestTerminateExecutionFunc(t *testing.T) {
 	setup()
 	terminateExecutionSetup()
 	terminateExecResponse := &admin.ExecutionTerminateResponse{}
-	mockClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[0]).Return(terminateExecResponse, nil)
-	mockClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[1]).Return(terminateExecResponse, nil)
+	mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
+	mockAdminClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[0]).Return(terminateExecResponse, nil)
+	mockAdminClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[1]).Return(terminateExecResponse, nil)
 	err = terminateExecutionFunc(ctx, args, cmdCtx)
 	assert.Nil(t, err)
-	mockClient.AssertCalled(t, "TerminateExecution", ctx, terminateExecRequests[0])
-	mockClient.AssertCalled(t, "TerminateExecution", ctx, terminateExecRequests[1])
+	mockAdminClient.AssertCalled(t, "TerminateExecution", ctx, terminateExecRequests[0])
+	mockAdminClient.AssertCalled(t, "TerminateExecution", ctx, terminateExecRequests[1])
 	tearDownAndVerify(t, "")
 }
 
 func TestTerminateExecutionFuncWithError(t *testing.T) {
 	setup()
 	terminateExecutionSetup()
+	mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
 	terminateExecResponse := &admin.ExecutionTerminateResponse{}
-	mockClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[0]).Return(nil, errors.New("failed to terminate"))
-	mockClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[1]).Return(terminateExecResponse, nil)
+	mockAdminClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[0]).Return(nil, errors.New("failed to terminate"))
+	mockAdminClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[1]).Return(terminateExecResponse, nil)
 	err = terminateExecutionFunc(ctx, args, cmdCtx)
 	assert.Equal(t, errors.New("failed to terminate"), err)
-	mockClient.AssertCalled(t, "TerminateExecution", ctx, terminateExecRequests[0])
-	mockClient.AssertNotCalled(t, "TerminateExecution", ctx, terminateExecRequests[1])
+	mockAdminClient.AssertCalled(t, "TerminateExecution", ctx, terminateExecRequests[0])
+	mockAdminClient.AssertNotCalled(t, "TerminateExecution", ctx, terminateExecRequests[1])
 	tearDownAndVerify(t, "")
 }
 
@@ -66,11 +70,12 @@ func TestTerminateExecutionFuncWithPartialSuccess(t *testing.T) {
 	setup()
 	terminateExecutionSetup()
 	terminateExecResponse := &admin.ExecutionTerminateResponse{}
-	mockClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[0]).Return(terminateExecResponse, nil)
-	mockClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[1]).Return(nil, errors.New("failed to terminate"))
+	mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
+	mockAdminClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[0]).Return(terminateExecResponse, nil)
+	mockAdminClient.OnTerminateExecutionMatch(ctx, terminateExecRequests[1]).Return(nil, errors.New("failed to terminate"))
 	err = terminateExecutionFunc(ctx, args, cmdCtx)
 	assert.Equal(t, errors.New("failed to terminate"), err)
-	mockClient.AssertCalled(t, "TerminateExecution", ctx, terminateExecRequests[0])
-	mockClient.AssertCalled(t, "TerminateExecution", ctx, terminateExecRequests[1])
+	mockAdminClient.AssertCalled(t, "TerminateExecution", ctx, terminateExecRequests[0])
+	mockAdminClient.AssertCalled(t, "TerminateExecution", ctx, terminateExecRequests[1])
 	tearDownAndVerify(t, "")
 }

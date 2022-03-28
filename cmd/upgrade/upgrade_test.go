@@ -5,12 +5,13 @@ import (
 	"sort"
 	"testing"
 
+	admin2 "github.com/flyteorg/flyteidl/clients/go/admin"
+
 	"github.com/flyteorg/flytectl/pkg/githubutil"
 	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/flyteorg/flytectl/pkg/platformutil"
 
-	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
 	stdlibversion "github.com/flyteorg/flytestdlib/version"
 
 	"context"
@@ -113,7 +114,7 @@ func TestSelfUpgrade(t *testing.T) {
 	t.Run("Successful upgrade", func(t *testing.T) {
 		ctx := context.Background()
 		var args []string
-		mockClient := new(mocks.AdminServiceClient)
+		mockClient := admin2.InitializeMockClientset()
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
@@ -131,7 +132,7 @@ func TestSelfUpgradeError(t *testing.T) {
 	t.Run("Successful upgrade", func(t *testing.T) {
 		ctx := context.Background()
 		var args []string
-		mockClient := new(mocks.AdminServiceClient)
+		mockClient := admin2.InitializeMockClientset()
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
@@ -150,7 +151,7 @@ func TestSelfUpgradeRollback(t *testing.T) {
 	t.Run("Successful rollback", func(t *testing.T) {
 		ctx := context.Background()
 		var args = []string{rollBackSubCommand}
-		mockClient := new(mocks.AdminServiceClient)
+		mockClient := admin2.InitializeMockClientset()
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
@@ -162,7 +163,7 @@ func TestSelfUpgradeRollback(t *testing.T) {
 	t.Run("Successful rollback failed", func(t *testing.T) {
 		ctx := context.Background()
 		var args = []string{rollBackSubCommand}
-		mockClient := new(mocks.AdminServiceClient)
+		mockClient := admin2.InitializeMockClientset()
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
@@ -174,7 +175,7 @@ func TestSelfUpgradeRollback(t *testing.T) {
 	t.Run("Successful rollback for windows", func(t *testing.T) {
 		ctx := context.Background()
 		var args = []string{rollBackSubCommand}
-		mockClient := new(mocks.AdminServiceClient)
+		mockClient := admin2.InitializeMockClientset()
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
@@ -187,7 +188,7 @@ func TestSelfUpgradeRollback(t *testing.T) {
 	t.Run("Successful rollback for windows", func(t *testing.T) {
 		ctx := context.Background()
 		var args = []string{rollBackSubCommand}
-		mockClient := new(mocks.AdminServiceClient)
+		mockClient := admin2.InitializeMockClientset()
 		mockOutStream := new(io.Writer)
 		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""

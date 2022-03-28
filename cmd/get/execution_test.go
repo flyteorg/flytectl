@@ -7,6 +7,8 @@ import (
 	"io"
 	"testing"
 
+	admin2 "github.com/flyteorg/flyteidl/clients/go/admin"
+
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/execution"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -35,7 +37,7 @@ func TestListExecutionFunc(t *testing.T) {
 	ctx := context.Background()
 	getExecutionSetup()
 	var args []string
-	mockClient := new(mocks.AdminServiceClient)
+	mockClient := admin2.InitializeMockClientset()
 	mockOutStream := new(io.Writer)
 	cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 	execListRequest := &admin.ResourceListRequest{
@@ -77,19 +79,21 @@ func TestListExecutionFunc(t *testing.T) {
 	executionList := &admin.ExecutionList{
 		Executions: executions,
 	}
-	mockClient.OnListExecutionsMatch(mock.Anything, mock.MatchedBy(func(o *admin.ResourceListRequest) bool {
+	mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
+	mockAdminClient.OnListExecutionsMatch(mock.Anything, mock.MatchedBy(func(o *admin.ResourceListRequest) bool {
 		return execListRequest.SortBy.Key == o.SortBy.Key && execListRequest.SortBy.Direction == o.SortBy.Direction && execListRequest.Filters == o.Filters && execListRequest.Limit == o.Limit
 	})).Return(executionList, nil)
 	err := getExecutionFunc(ctx, args, cmdCtx)
 	assert.Nil(t, err)
-	mockClient.AssertCalled(t, "ListExecutions", ctx, execListRequest)
+	mockAdminClient.AssertCalled(t, "ListExecutions", ctx, execListRequest)
 }
 
 func TestListExecutionFuncWithError(t *testing.T) {
 	ctx := context.Background()
 	getExecutionSetup()
 	var args []string
-	mockClient := new(mocks.AdminServiceClient)
+	mockClient := admin2.InitializeMockClientset()
+	mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
 	mockOutStream := new(io.Writer)
 	cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 	execListRequest := &admin.ResourceListRequest{
@@ -126,19 +130,20 @@ func TestListExecutionFuncWithError(t *testing.T) {
 			Phase: core.WorkflowExecution_SUCCEEDED,
 		},
 	}
-	mockClient.OnListExecutionsMatch(mock.Anything, mock.MatchedBy(func(o *admin.ResourceListRequest) bool {
+	mockAdminClient.OnListExecutionsMatch(mock.Anything, mock.MatchedBy(func(o *admin.ResourceListRequest) bool {
 		return execListRequest.SortBy.Key == o.SortBy.Key && execListRequest.SortBy.Direction == o.SortBy.Direction && execListRequest.Filters == o.Filters && execListRequest.Limit == o.Limit
 	})).Return(nil, errors.New("executions NotFound"))
 	err := getExecutionFunc(ctx, args, cmdCtx)
 	assert.NotNil(t, err)
 	assert.Equal(t, err, errors.New("executions NotFound"))
-	mockClient.AssertCalled(t, "ListExecutions", ctx, execListRequest)
+	mockAdminClient.AssertCalled(t, "ListExecutions", ctx, execListRequest)
 }
 
 func TestGetExecutionFunc(t *testing.T) {
 	ctx := context.Background()
 	getExecutionSetup()
-	mockClient := new(mocks.AdminServiceClient)
+	mockClient := admin2.InitializeMockClientset()
+	mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
 	mockOutStream := new(io.Writer)
 	cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 	execGetRequest := &admin.WorkflowExecutionGetRequest{
@@ -173,11 +178,10 @@ func TestGetExecutionFunc(t *testing.T) {
 		},
 	}
 	args := []string{executionNameValue}
-	mockClient.OnGetExecutionMatch(ctx, execGetRequest).Return(executionResponse, nil)
+	mockAdminClient.OnGetExecutionMatch(ctx, execGetRequest).Return(executionResponse, nil)
 	err := getExecutionFunc(ctx, args, cmdCtx)
 	assert.Nil(t, err)
-	mockClient.AssertCalled(t, "GetExecution", ctx, execGetRequest)
-
+	mockAdminClient.AssertCalled(t, "GetExecution", ctx, execGetRequest)
 }
 
 func TestGetExecutionFuncForDetails(t *testing.T) {

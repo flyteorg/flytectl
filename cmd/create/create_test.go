@@ -2,13 +2,12 @@ package create
 
 import (
 	"context"
+	"github.com/flyteorg/flyteidl/clients/go/admin"
 	"sort"
 	"testing"
 
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/cmd/testutils"
-	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +16,7 @@ const testDataFolder = "../testdata/"
 var (
 	err        error
 	ctx        context.Context
-	mockClient *mocks.AdminServiceClient
+	mockClient *admin.Clientset
 	args       []string
 	cmdCtx     cmdCore.CommandContext
 )

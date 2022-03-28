@@ -8,6 +8,8 @@ import (
 	"strings"
 	"testing"
 
+	admin2 "github.com/flyteorg/flyteidl/clients/go/admin"
+
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/stretchr/testify/assert"
 
@@ -21,7 +23,8 @@ func TestSandboxClusterExec(t *testing.T) {
 	mockDocker := &mocks.Docker{}
 	mockOutStream := new(io.Writer)
 	ctx := context.Background()
-	cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
+	mockClient := admin2.InitializeMockClientset()
+	cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 	reader := bufio.NewReader(strings.NewReader("test"))
 
 	mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{
