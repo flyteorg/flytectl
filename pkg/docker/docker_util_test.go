@@ -17,12 +17,10 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/docker/docker/api/types"
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	cmdCtx     cmdCore.CommandContext
 	containers []types.Container
 	imageName  = "cr.flyte.org/flyteorg/flyte-sandbox"
 )

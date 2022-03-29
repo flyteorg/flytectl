@@ -93,11 +93,12 @@ var projectColumns = []printer.Column{
 func unMarshalContents(ctx context.Context, fileContents []byte, fname string) (proto.Message, error) {
 	workflowSpec := &admin.WorkflowSpec{}
 	errCollection := errors2.ErrorCollection{}
-	if err := proto.Unmarshal(fileContents, workflowSpec); err == nil {
+	err := proto.Unmarshal(fileContents, workflowSpec)
+	if err == nil {
 		return workflowSpec, nil
-	} else {
-		errCollection.Append(fmt.Errorf("as a Workflow: %w", err))
 	}
+
+	errCollection.Append(fmt.Errorf("as a Workflow: %w", err))
 
 	logger.Debugf(ctx, "Failed to unmarshal file %v for workflow type", fname)
 	taskSpec := &admin.TaskSpec{}

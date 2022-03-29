@@ -27,7 +27,6 @@ require (
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/pkg/browser v0.0.0-20210115035449-ce105d075bb4
 	github.com/pkg/errors v0.9.1
-	github.com/savaki/amplitude-go v0.0.0-20160610055645-f62e3b57c0e4
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
@@ -45,6 +44,8 @@ require (
 	k8s.io/client-go v0.21.3
 	sigs.k8s.io/yaml v1.2.0
 )
+
+require golang.org/x/text v0.3.7
 
 require (
 	cloud.google.com/go v0.75.0 // indirect
@@ -135,7 +136,6 @@ require (
 	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
 	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
-	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
 	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect

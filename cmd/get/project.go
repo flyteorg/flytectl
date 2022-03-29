@@ -3,8 +3,6 @@ package get
 import (
 	"context"
 
-	"github.com/flyteorg/flytectl/cmd/config/subcommand/register"
-
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -79,9 +77,6 @@ func ProjectToProtoMessages(l []*admin.Project) []proto.Message {
 }
 
 func getProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	cfg := register.DefaultFilesConfig
-	logger.Warnf(ctx, "Default files config: [%v], [%v]", cfg.OutputLocationPrefix, register.GetConfig().OutputLocationPrefix)
-
 	adminPrinter := printer.Printer{}
 
 	projects, err := cmdCtx.AdminFetcherExt().ListProjects(ctx, project.DefaultConfig.Filter)
