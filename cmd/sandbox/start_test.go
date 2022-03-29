@@ -3,12 +3,13 @@ package sandbox
 import (
 	"context"
 	"fmt"
-	"github.com/flyteorg/flytectl/cmd/testutils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/flyteorg/flytectl/cmd/testutils"
 
 	"github.com/flyteorg/flytectl/pkg/githubutil"
 
