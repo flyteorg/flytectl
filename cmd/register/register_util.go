@@ -102,19 +102,21 @@ func unMarshalContents(ctx context.Context, fileContents []byte, fname string) (
 
 	logger.Debugf(ctx, "Failed to unmarshal file %v for workflow type", fname)
 	taskSpec := &admin.TaskSpec{}
-	if err := proto.Unmarshal(fileContents, taskSpec); err == nil {
+	err = proto.Unmarshal(fileContents, taskSpec)
+	if err == nil {
 		return taskSpec, nil
-	} else {
-		errCollection.Append(fmt.Errorf("as a Task: %w", err))
 	}
+
+	errCollection.Append(fmt.Errorf("as a Task: %w", err))
 
 	logger.Debugf(ctx, "Failed to unmarshal file %v for task type", fname)
 	launchPlan := &admin.LaunchPlan{}
-	if err := proto.Unmarshal(fileContents, launchPlan); err == nil {
+	err = proto.Unmarshal(fileContents, launchPlan)
+	if err == nil {
 		return launchPlan, nil
-	} else {
-		errCollection.Append(fmt.Errorf("as a Launchplan: %w", err))
 	}
+
+	errCollection.Append(fmt.Errorf("as a Launchplan: %w", err))
 
 	logger.Debugf(ctx, "Failed to unmarshal file %v for launch plan type", fname)
 	return nil, fmt.Errorf("failed unmarshalling file %v. Errors: %w", fname, errCollection.ErrorOrDefault())
@@ -675,7 +677,7 @@ func getRemoteStoragePath(ctx context.Context, s *storage.DataStore, remoteLocat
 }
 
 func getTotalSize(reader io.Reader) (size int64, err error) {
-	page := make([]byte, 512, 512)
+	page := make([]byte, 512)
 	size = 0
 
 	n := 0
