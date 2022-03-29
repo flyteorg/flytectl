@@ -2,11 +2,12 @@ package githubutil
 
 import (
 	"fmt"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"runtime"
 	"strings"
 	"testing"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	stdlibversion "github.com/flyteorg/flytestdlib/version"
 

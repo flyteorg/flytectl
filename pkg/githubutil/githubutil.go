@@ -2,13 +2,14 @@ package githubutil
 
 import (
 	"context"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/flyteorg/flytectl/pkg/util"
 

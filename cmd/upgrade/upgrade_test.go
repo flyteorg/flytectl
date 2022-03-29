@@ -1,9 +1,10 @@
 package upgrade
 
 import (
-	"github.com/flyteorg/flytectl/cmd/testutils"
 	"sort"
 	"testing"
+
+	"github.com/flyteorg/flytectl/cmd/testutils"
 
 	"github.com/flyteorg/flytectl/pkg/githubutil"
 	"github.com/flyteorg/flytectl/pkg/util"
