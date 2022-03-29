@@ -3,7 +3,7 @@ package sandbox
 import (
 	"context"
 	"fmt"
-	"io"
+	"github.com/flyteorg/flytectl/cmd/testutils"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -18,7 +18,6 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
@@ -509,9 +508,9 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run sandbox cluster command", func(t *testing.T) {
-		mockOutStream := new(io.Writer)
-		ctx := context.Background()
-		cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
+		s := testutils.Setup()
+		ctx := s.Ctx
+		cmdCtx := s.CmdCtx
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
 		client := testclient.NewSimpleClientset()
@@ -559,9 +558,9 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("Error in running sandbox cluster command", func(t *testing.T) {
-		mockOutStream := new(io.Writer)
-		ctx := context.Background()
-		cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
+		s := testutils.Setup()
+		ctx := s.Ctx
+		cmdCtx := s.CmdCtx
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)

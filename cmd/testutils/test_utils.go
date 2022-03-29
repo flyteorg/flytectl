@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
+
 	"github.com/flyteorg/flyteidl/clients/go/admin"
 
 	"github.com/flyteorg/flytectl/cmd/config"
@@ -22,51 +24,52 @@ const projectValue = "dummyProject"
 const domainValue = "dummyDomain"
 const output = "json"
 
-var (
-	reader        *os.File
-	writer        *os.File
-	Err           error
-	Ctx           context.Context
-	MockClient    *admin.Clientset
-	FetcherExt    *extMocks.AdminFetcherExtInterface
-	UpdaterExt    *extMocks.AdminUpdaterExtInterface
-	DeleterExt    *extMocks.AdminDeleterExtInterface
-	MockOutStream io.Writer
-	CmdCtx        cmdCore.CommandContext
-	stdOut        *os.File
-	stderr        *os.File
-)
+type TestStruct struct {
+	Reader          *os.File
+	Writer          *os.File
+	Err             error
+	Ctx             context.Context
+	MockClient      *admin.Clientset
+	MockAdminClient *mocks.AdminServiceClient
+	FetcherExt      *extMocks.AdminFetcherExtInterface
+	UpdaterExt      *extMocks.AdminUpdaterExtInterface
+	DeleterExt      *extMocks.AdminDeleterExtInterface
+	MockOutStream   io.Writer
+	CmdCtx          cmdCore.CommandContext
+	StdOut          *os.File
+	Stderr          *os.File
+}
 
-func Setup() {
-	Ctx = context.Background()
-	reader, writer, Err = os.Pipe()
-	if Err != nil {
-		panic(Err)
+func Setup() (s TestStruct) {
+	s.Ctx = context.Background()
+	s.Reader, s.Writer, s.Err = os.Pipe()
+	if s.Err != nil {
+		panic(s.Err)
 	}
-	stdOut = os.Stdout
-	stderr = os.Stderr
-	os.Stdout = writer
-	os.Stderr = writer
-	log.SetOutput(writer)
-	MockClient = admin.InitializeMockClientset()
-	FetcherExt = new(extMocks.AdminFetcherExtInterface)
-	UpdaterExt = new(extMocks.AdminUpdaterExtInterface)
-	DeleterExt = new(extMocks.AdminDeleterExtInterface)
-	FetcherExt.OnAdminServiceClient().Return(MockClient.AdminClient())
-	UpdaterExt.OnAdminServiceClient().Return(MockClient.AdminClient())
-	DeleterExt.OnAdminServiceClient().Return(MockClient.AdminClient())
-	MockOutStream = writer
-	CmdCtx = cmdCore.NewCommandContextWithExt(MockClient, FetcherExt, UpdaterExt, DeleterExt, MockOutStream)
+	s.StdOut = os.Stdout
+	s.Stderr = os.Stderr
+	os.Stdout = s.Writer
+	os.Stderr = s.Writer
+	log.SetOutput(s.Writer)
+	s.MockClient = admin.InitializeMockClientset()
+	s.FetcherExt = new(extMocks.AdminFetcherExtInterface)
+	s.UpdaterExt = new(extMocks.AdminUpdaterExtInterface)
+	s.DeleterExt = new(extMocks.AdminDeleterExtInterface)
+	s.FetcherExt.OnAdminServiceClient().Return(s.MockClient.AdminClient())
+	s.UpdaterExt.OnAdminServiceClient().Return(s.MockClient.AdminClient())
+	s.DeleterExt.OnAdminServiceClient().Return(s.MockClient.AdminClient())
+	s.MockOutStream = s.Writer
+	s.CmdCtx = cmdCore.NewCommandContextWithExt(s.MockClient, s.FetcherExt, s.UpdaterExt, s.DeleterExt, s.MockOutStream)
 	config.GetConfig().Project = projectValue
 	config.GetConfig().Domain = domainValue
 	config.GetConfig().Output = output
+
+	s.MockAdminClient = s.MockClient.AdminClient().(*mocks.AdminServiceClient)
+	return s
 }
 
 // TearDownAndVerify TODO: Change this to verify log lines from context
-func TearDownAndVerify(t *testing.T, expectedLog string) {
-	writer.Close()
-	os.Stdout = stdOut
-	os.Stderr = stderr
+func TearDownAndVerify(t *testing.T, reader io.Reader, expectedLog string) {
 	var buf bytes.Buffer
 	if _, err := io.Copy(&buf, reader); err == nil {
 		assert.Equal(t, sanitizeString(expectedLog), sanitizeString(buf.String()))

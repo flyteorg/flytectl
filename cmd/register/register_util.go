@@ -53,9 +53,6 @@ const registrationVersionPattern = "{{ registration.version }}"
 const registrationRemotePackagePattern = "{{ .remote_package_path }}"
 const registrationDestDirPattern = "{{ .dest_dir }}"
 
-type SubexpName = string
-type MatchedString = string
-
 // All supported extensions for compress
 var supportedExtensions = []string{".tar", ".tgz", ".tar.gz"}
 
@@ -121,23 +118,6 @@ func unMarshalContents(ctx context.Context, fileContents []byte, fname string) (
 	logger.Debugf(ctx, "Failed to unmarshal file %v for launch plan type", fname)
 	return nil, fmt.Errorf("failed unmarshalling file %v. Errors: %w", fname, errCollection.ErrorOrDefault())
 
-}
-
-// MatchRegex returns all matches for the sub-expressions within the regex.
-func MatchRegex(reg *regexp.Regexp, input string) map[SubexpName]MatchedString {
-	names := reg.SubexpNames()
-	res := reg.FindAllStringSubmatch(input, -1)
-	if len(res) == 0 {
-		return nil
-	}
-
-	dict := make(map[string]string, len(names))
-	// Start from 1 since names[0] is always empty per docs on reg.SubexpNames()
-	for i := 1; i < len(res[0]); i++ {
-		dict[names[i]] = res[0][i]
-	}
-
-	return dict
 }
 
 func register(ctx context.Context, message proto.Message, cmdCtx cmdCore.CommandContext, dryRun bool) error {
@@ -262,11 +242,11 @@ func hydrateIdentifier(identifier *core.Identifier, version string, force bool) 
 	}
 }
 
-func hydrateTaskSpec(task *admin.TaskSpec, sourceUploadPath storage.DataReference, destinationDir string) error {
+func hydrateTaskSpec(task *admin.TaskSpec, sourceUploadedLocation storage.DataReference, destinationDir string) error {
 	if task.Template.GetContainer() != nil {
 		for k := range task.Template.GetContainer().Args {
 			if task.Template.GetContainer().Args[k] == registrationRemotePackagePattern {
-				task.Template.GetContainer().Args[k] = sourceUploadPath.String()
+				task.Template.GetContainer().Args[k] = sourceUploadedLocation.String()
 			}
 			if task.Template.GetContainer().Args[k] == registrationDestDirPattern {
 				task.Template.GetContainer().Args[k] = "."
@@ -284,7 +264,7 @@ func hydrateTaskSpec(task *admin.TaskSpec, sourceUploadPath storage.DataReferenc
 		for containerIdx, container := range podSpec.Containers {
 			for argIdx, arg := range container.Args {
 				if arg == registrationRemotePackagePattern {
-					podSpec.Containers[containerIdx].Args[argIdx] = sourceUploadPath.String()
+					podSpec.Containers[containerIdx].Args[argIdx] = sourceUploadedLocation.String()
 				}
 				if arg == registrationDestDirPattern {
 					podSpec.Containers[containerIdx].Args[argIdx] = "."

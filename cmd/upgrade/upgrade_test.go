@@ -1,11 +1,9 @@
 package upgrade
 
 import (
-	"io"
+	"github.com/flyteorg/flytectl/cmd/testutils"
 	"sort"
 	"testing"
-
-	admin2 "github.com/flyteorg/flyteidl/clients/go/admin"
 
 	"github.com/flyteorg/flytectl/pkg/githubutil"
 	"github.com/flyteorg/flytectl/pkg/util"
@@ -13,8 +11,6 @@ import (
 	"github.com/flyteorg/flytectl/pkg/platformutil"
 
 	stdlibversion "github.com/flyteorg/flytestdlib/version"
-
-	"context"
 
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/spf13/cobra"
@@ -112,16 +108,12 @@ func TestSelfUpgrade(t *testing.T) {
 	githubutil.FlytectlReleaseConfig.OverrideExecutable = tempExt
 	goos = platformutil.Linux
 	t.Run("Successful upgrade", func(t *testing.T) {
-		ctx := context.Background()
-		var args []string
-		mockClient := admin2.InitializeMockClientset()
-		mockOutStream := new(io.Writer)
-		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+		s := testutils.Setup()
 		stdlibversion.Build = ""
 		stdlibversion.BuildTime = ""
 		stdlibversion.Version = version
 
-		assert.Nil(t, selfUpgrade(ctx, args, cmdCtx))
+		assert.Nil(t, selfUpgrade(s.Ctx, []string{}, s.CmdCtx))
 	})
 }
 
@@ -130,16 +122,12 @@ func TestSelfUpgradeError(t *testing.T) {
 	githubutil.FlytectlReleaseConfig.OverrideExecutable = tempExt
 	goos = platformutil.Linux
 	t.Run("Successful upgrade", func(t *testing.T) {
-		ctx := context.Background()
-		var args []string
-		mockClient := admin2.InitializeMockClientset()
-		mockOutStream := new(io.Writer)
-		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+		s := testutils.Setup()
 		stdlibversion.Build = ""
 		stdlibversion.BuildTime = ""
 		stdlibversion.Version = "v"
 
-		assert.NotNil(t, selfUpgrade(ctx, args, cmdCtx))
+		assert.NotNil(t, selfUpgrade(s.Ctx, []string{}, s.CmdCtx))
 	})
 
 }
@@ -149,53 +137,41 @@ func TestSelfUpgradeRollback(t *testing.T) {
 	githubutil.FlytectlReleaseConfig.OverrideExecutable = tempExt
 	goos = platformutil.Linux
 	t.Run("Successful rollback", func(t *testing.T) {
-		ctx := context.Background()
+		s := testutils.Setup()
 		var args = []string{rollBackSubCommand}
-		mockClient := admin2.InitializeMockClientset()
-		mockOutStream := new(io.Writer)
-		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
 		stdlibversion.BuildTime = ""
 		stdlibversion.Version = version
-		assert.Nil(t, selfUpgrade(ctx, args, cmdCtx))
+		assert.Nil(t, selfUpgrade(s.Ctx, args, s.CmdCtx))
 	})
 
 	t.Run("Successful rollback failed", func(t *testing.T) {
-		ctx := context.Background()
+		s := testutils.Setup()
 		var args = []string{rollBackSubCommand}
-		mockClient := admin2.InitializeMockClientset()
-		mockOutStream := new(io.Writer)
-		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
 		stdlibversion.BuildTime = ""
 		stdlibversion.Version = "v100.0.0"
-		assert.NotNil(t, selfUpgrade(ctx, args, cmdCtx))
+		assert.NotNil(t, selfUpgrade(s.Ctx, args, s.CmdCtx))
 	})
 
 	t.Run("Successful rollback for windows", func(t *testing.T) {
-		ctx := context.Background()
+		s := testutils.Setup()
 		var args = []string{rollBackSubCommand}
-		mockClient := admin2.InitializeMockClientset()
-		mockOutStream := new(io.Writer)
-		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
 		stdlibversion.BuildTime = ""
 		stdlibversion.Version = version
 		goos = platformutil.Windows
-		assert.Nil(t, selfUpgrade(ctx, args, cmdCtx))
+		assert.Nil(t, selfUpgrade(s.Ctx, args, s.CmdCtx))
 	})
 
 	t.Run("Successful rollback for windows", func(t *testing.T) {
-		ctx := context.Background()
+		s := testutils.Setup()
 		var args = []string{rollBackSubCommand}
-		mockClient := admin2.InitializeMockClientset()
-		mockOutStream := new(io.Writer)
-		cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 		stdlibversion.Build = ""
 		stdlibversion.BuildTime = ""
 		stdlibversion.Version = version
 		githubutil.FlytectlReleaseConfig.OverrideExecutable = "/"
-		assert.Nil(t, selfUpgrade(ctx, args, cmdCtx))
+		assert.Nil(t, selfUpgrade(s.Ctx, args, s.CmdCtx))
 	})
 
 }

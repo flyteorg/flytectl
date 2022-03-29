@@ -366,6 +366,8 @@ github.com/fatih/color v1.10.0/go.mod h1:ELkj/draVOlAH/xkhN6mQ50Qd0MPOk5AAr3maGE
 github.com/fatih/structtag v1.2.0/go.mod h1:mBJUNpUnHmRKrKlQQlmCrh5PuhftFbNv8Ys4/aAZl94=
 github.com/flyteorg/flyteidl v0.24.6 h1:n2796X9Sw7mNDtXWwsJr84DLQpz8Cptvb7LptfJLxag=
 github.com/flyteorg/flyteidl v0.24.6/go.mod h1:576W2ViEyjTpT+kEVHAGbrTP3HARNUZ/eCwrNPmdx9U=
+github.com/flyteorg/flyteidl v0.24.8 h1:Uw4CX4mhVDSRmIW+MlmUvgUDLgf7z3SOvvyQpqV/sSg=
+github.com/flyteorg/flyteidl v0.24.8/go.mod h1:vHSugApgS3hRITIafzQDU8DZD/W8wFRfFcgaFU35Dww=
 github.com/flyteorg/flytestdlib v0.3.13/go.mod h1:Tz8JCECAbX6VWGwFT6cmEQ+RJpZ/6L9pswu3fzWs220=
 github.com/flyteorg/flytestdlib v0.4.16 h1:r4dCPUOqoE9xCAhOw9KDB7O6cBoCxyEtepIWYcj93H0=
 github.com/flyteorg/flytestdlib v0.4.16/go.mod h1:WA5Y4hrcgD0ybGOKJVOQ4sP8q7NLRV+S5SWOlH0axgM=

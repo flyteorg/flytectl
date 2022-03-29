@@ -18,8 +18,6 @@ import (
 
 	"github.com/docker/docker/api/types"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	u "github.com/flyteorg/flytectl/cmd/testutils"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,8 +28,6 @@ var (
 )
 
 func setupSandbox() {
-	mockAdminClient := u.MockClient
-	cmdCtx = cmdCore.NewCommandContext(mockAdminClient, u.MockOutStream)
 	err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte"), os.ModePerm)
 	if err != nil {
 		fmt.Println(err)

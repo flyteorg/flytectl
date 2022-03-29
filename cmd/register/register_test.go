@@ -1,25 +1,17 @@
 package register
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"sort"
 	"testing"
 
-	"github.com/flyteorg/flyteidl/clients/go/admin"
-
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	u "github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	ctx             context.Context
-	mockAdminClient *admin.Clientset
-	cmdCtx          cmdCore.CommandContext
-	args            []string
-	GetDoFunc       func(req *http.Request) (*http.Response, error)
+	GetDoFunc func(req *http.Request) (*http.Response, error)
 )
 
 var setup = u.Setup

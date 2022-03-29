@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
-
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/execution"
 	"github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -14,62 +12,50 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func UpdateExecutionSetup() {
-	ctx = testutils.Ctx
-	cmdCtx = testutils.CmdCtx
-	mockClient = testutils.MockClient
-}
-
 func TestExecutionUpdate(t *testing.T) {
-	testutils.Setup()
-	UpdateExecutionSetup()
-	args = []string{"execution1"}
+	s := testutils.Setup()
+	args := []string{"execution1"}
 	// Activate
 	execution.UConfig.Activate = true
-	mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
-	mockAdminClient.OnUpdateExecutionMatch(mock.Anything, mock.Anything).Return(&admin.ExecutionUpdateResponse{}, nil)
-	assert.Nil(t, updateExecutionFunc(ctx, args, cmdCtx))
+	s.MockAdminClient.OnUpdateExecutionMatch(mock.Anything, mock.Anything).Return(&admin.ExecutionUpdateResponse{}, nil)
+	assert.Nil(t, updateExecutionFunc(s.Ctx, args, s.CmdCtx))
 	// Archive
 	execution.UConfig.Activate = false
 	execution.UConfig.Archive = true
-	assert.Nil(t, updateExecutionFunc(ctx, args, cmdCtx))
+	assert.Nil(t, updateExecutionFunc(s.Ctx, args, s.CmdCtx))
 	// Reset
 	execution.UConfig.Activate = false
 	execution.UConfig.Archive = false
 
 	// Dry run
 	execution.UConfig.DryRun = true
-	assert.Nil(t, updateExecutionFunc(ctx, args, cmdCtx))
-	mockAdminClient.AssertNotCalled(t, "UpdateExecution", mock.Anything)
+	assert.Nil(t, updateExecutionFunc(s.Ctx, args, s.CmdCtx))
+	s.MockAdminClient.AssertNotCalled(t, "UpdateExecution", mock.Anything)
 
 	// Reset
 	execution.UConfig.DryRun = false
 }
 
 func TestExecutionUpdateValidationFailure(t *testing.T) {
-	testutils.Setup()
-	UpdateExecutionSetup()
-	args = []string{"execution1"}
+	s := testutils.Setup()
+	args := []string{"execution1"}
 	execution.UConfig.Activate = true
 	execution.UConfig.Archive = true
-	assert.NotNil(t, updateExecutionFunc(ctx, args, cmdCtx))
+	assert.NotNil(t, updateExecutionFunc(s.Ctx, args, s.CmdCtx))
 	// Reset
 	execution.UConfig.Activate = false
 	execution.UConfig.Archive = false
 }
 
 func TestExecutionUpdateFail(t *testing.T) {
-	testutils.Setup()
-	UpdateExecutionSetup()
-	args = []string{"execution1"}
-	mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
-	mockAdminClient.OnUpdateExecutionMatch(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed to update"))
-	assert.NotNil(t, updateExecutionFunc(ctx, args, cmdCtx))
+	s := testutils.Setup()
+	args := []string{"execution1"}
+	s.MockAdminClient.OnUpdateExecutionMatch(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed to update"))
+	assert.NotNil(t, updateExecutionFunc(s.Ctx, args, s.CmdCtx))
 }
 
 func TestExecutionUpdateInvalidArgs(t *testing.T) {
-	testutils.Setup()
-	UpdateExecutionSetup()
-	args = []string{}
-	assert.NotNil(t, updateExecutionFunc(ctx, args, cmdCtx))
+	s := testutils.Setup()
+	args := []string{}
+	assert.NotNil(t, updateExecutionFunc(s.Ctx, args, s.CmdCtx))
 }

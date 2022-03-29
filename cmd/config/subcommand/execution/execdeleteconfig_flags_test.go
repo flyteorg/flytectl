@@ -100,7 +100,6 @@ func TestExecDeleteConfig_SetFlags(t *testing.T) {
 	assert.True(t, cmdFlags.HasFlags())
 
 	t.Run("Test_dryRun", func(t *testing.T) {
-
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 

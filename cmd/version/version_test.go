@@ -8,6 +8,8 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/flyteorg/flytectl/cmd/testutils"
+
 	admin2 "github.com/flyteorg/flyteidl/clients/go/admin"
 
 	"github.com/spf13/cobra"
@@ -55,48 +57,38 @@ func TestVersionCommand(t *testing.T) {
 
 func TestVersionCommandFunc(t *testing.T) {
 	ctx := context.Background()
-	var args []string
-	mockClient := admin2.InitializeMockClientset()
-	mockOutStream := new(io.Writer)
-	cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+	s := testutils.Setup()
 	stdlibversion.Build = ""
 	stdlibversion.BuildTime = ""
 	stdlibversion.Version = testVersion
-	mockClient.AdminClient().(*mocks.AdminServiceClient).OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, nil)
-	err := getVersion(ctx, args, cmdCtx)
+	s.MockClient.AdminClient().(*mocks.AdminServiceClient).OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, nil)
+	err := getVersion(s.Ctx, []string{}, s.CmdCtx)
 	assert.Nil(t, err)
-	mockClient.AdminClient().(*mocks.AdminServiceClient).AssertCalled(t, "GetVersion", ctx, versionRequest)
+	s.MockClient.AdminClient().(*mocks.AdminServiceClient).AssertCalled(t, "GetVersion", ctx, versionRequest)
 }
 
 func TestVersionCommandFuncError(t *testing.T) {
 	ctx := context.Background()
-	var args []string
-	mockClient := admin2.InitializeMockClientset()
-	mockOutStream := new(io.Writer)
-	cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+	s := testutils.Setup()
 	stdlibversion.Build = ""
 	stdlibversion.BuildTime = ""
 	stdlibversion.Version = "v"
-	mockClient.AdminClient().(*mocks.AdminServiceClient).OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, nil)
-	err := getVersion(ctx, args, cmdCtx)
+	s.MockClient.AdminClient().(*mocks.AdminServiceClient).OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, nil)
+	err := getVersion(s.Ctx, []string{}, s.CmdCtx)
 	assert.Nil(t, err)
-	mockClient.AdminClient().(*mocks.AdminServiceClient).AssertCalled(t, "GetVersion", ctx, versionRequest)
+	s.MockClient.AdminClient().(*mocks.AdminServiceClient).AssertCalled(t, "GetVersion", ctx, versionRequest)
 }
 
 func TestVersionCommandFuncErr(t *testing.T) {
 	ctx := context.Background()
-	var args []string
-	mockClient := admin2.InitializeMockClientset()
-	adminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
-	mockOutStream := new(io.Writer)
-	cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
+	s := testutils.Setup()
 	stdlibversion.Build = ""
 	stdlibversion.BuildTime = ""
 	stdlibversion.Version = testVersion
-	adminClient.OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, errors.New("error"))
-	err := getVersion(ctx, args, cmdCtx)
+	s.MockAdminClient.OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, errors.New("error"))
+	err := getVersion(s.Ctx, []string{}, s.CmdCtx)
 	assert.Nil(t, err)
-	adminClient.AssertCalled(t, "GetVersion", ctx, versionRequest)
+	s.MockAdminClient.AssertCalled(t, "GetVersion", ctx, versionRequest)
 }
 
 func TestVersionUtilFunc(t *testing.T) {
