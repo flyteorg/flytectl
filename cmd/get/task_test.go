@@ -2,6 +2,7 @@ package get
 
 import (
 	"fmt"
+	"github.com/flyteorg/flytectl/cmd/testutils"
 	"os"
 	"testing"
 
@@ -213,6 +214,8 @@ func TestGetTaskFuncWithError(t *testing.T) {
 		s.MockAdminClient.OnListTasksMatch(s.Ctx, resourceListRequestTask).Return(nil, fmt.Errorf("error fetching all version"))
 		s.MockAdminClient.OnGetTaskMatch(s.Ctx, objectGetRequestTask).Return(nil, fmt.Errorf("error fetching task"))
 		s.MockAdminClient.OnListTaskIdsMatch(s.Ctx, namedIDRequestTask).Return(nil, fmt.Errorf("error listing task ids"))
+		s.FetcherExt.OnFetchAllVerOfTaskMatch(mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error fetching all version"))
 		err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 		assert.NotNil(t, err)
 	})
@@ -225,21 +228,25 @@ func TestGetTaskFuncWithError(t *testing.T) {
 		s.MockAdminClient.OnListTasksMatch(s.Ctx, resourceListTaskRequest).Return(nil, fmt.Errorf("error fetching all version"))
 		s.MockAdminClient.OnGetTaskMatch(s.Ctx, objectGetRequestTask).Return(nil, fmt.Errorf("error fetching task"))
 		s.MockAdminClient.OnListTaskIdsMatch(s.Ctx, namedIDRequestTask).Return(nil, fmt.Errorf("error listing task ids"))
+		s.FetcherExt.OnFetchAllVerOfTaskMatch(mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error fetching all version"))
 		err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 		assert.NotNil(t, err)
 	})
 }
 
 func TestGetTaskFunc(t *testing.T) {
-	s := setup()
+	s := testutils.SetupWithExt()
 	getTaskSetup()
 	taskConfig.DefaultConfig.Filter = filters.Filters{}
 	s.MockAdminClient.OnListTasksMatch(s.Ctx, resourceListRequestTask).Return(taskListResponse, nil)
 	s.MockAdminClient.OnGetTaskMatch(s.Ctx, objectGetRequestTask).Return(task2, nil)
+	s.FetcherExt.OnFetchAllVerOfTaskMatch(mock.Anything, mock.Anything, mock.Anything,
+		mock.Anything, mock.Anything).Return(taskListResponse.Tasks, nil)
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
-	s.MockAdminClient.AssertCalled(t, "ListTasks", s.Ctx, resourceListRequestTask)
-	tearDownAndVerify(t, s.Reader, `[
+	s.FetcherExt.AssertCalled(t, "FetchAllVerOfTask", s.Ctx, "task1", "dummyProject", "dummyDomain", filters.Filters{})
+	tearDownAndVerify(t, s.Writer, `[
 	{
 		"id": {
 			"name": "task1",
@@ -314,16 +321,17 @@ func TestGetTaskFunc(t *testing.T) {
 }
 
 func TestGetTaskFuncWithTable(t *testing.T) {
-	s := setup()
+	s := testutils.SetupWithExt()
 	getTaskSetup()
 	taskConfig.DefaultConfig.Filter = filters.Filters{}
 	s.MockAdminClient.OnListTasksMatch(s.Ctx, resourceListRequestTask).Return(taskListResponse, nil)
 	s.MockAdminClient.OnGetTaskMatch(s.Ctx, objectGetRequestTask).Return(task2, nil)
+	s.FetcherExt.OnFetchAllVerOfTask(s.Ctx, "task1", "dummyProject", "dummyDomain", filters.Filters{}).Return(taskListResponse.Tasks, nil)
 	config.GetConfig().Output = "table"
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
-	s.MockAdminClient.AssertCalled(t, "ListTasks", s.Ctx, resourceListRequestTask)
-	tearDownAndVerify(t, s.Reader, `
+	s.FetcherExt.AssertCalled(t, "FetchAllVerOfTask", s.Ctx, "task1", "dummyProject", "dummyDomain", filters.Filters{})
+	tearDownAndVerify(t, s.Writer, `
 --------- ------- ------ --------------------------- --------- -------------- ------------------- ---------------------- 
 | VERSION | NAME  | TYPE | INPUTS                    | OUTPUTS | DISCOVERABLE | DISCOVERY VERSION | CREATED AT           | 
 --------- ------- ------ --------------------------- --------- -------------- ------------------- ---------------------- 
@@ -337,17 +345,18 @@ func TestGetTaskFuncWithTable(t *testing.T) {
 }
 
 func TestGetTaskFuncLatest(t *testing.T) {
-	s := setup()
+	s := testutils.SetupWithExt()
 	getTaskSetup()
 	taskConfig.DefaultConfig.Filter = filters.Filters{}
 	s.MockAdminClient.OnListTasksMatch(s.Ctx, resourceListRequestTask).Return(taskListResponse, nil)
 	s.MockAdminClient.OnGetTaskMatch(s.Ctx, objectGetRequestTask).Return(task2, nil)
 	s.MockAdminClient.OnListTaskIdsMatch(s.Ctx, namedIDRequestTask).Return(namedIdentifierListTask, nil)
+	s.FetcherExt.OnFetchTaskLatestVersion(s.Ctx, "task1", "dummyProject", "dummyDomain", filters.Filters{}).Return(task2, nil)
 	taskConfig.DefaultConfig.Latest = true
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
-	s.MockAdminClient.AssertCalled(t, "ListTasks", s.Ctx, resourceListRequestTask)
-	tearDownAndVerify(t, s.Reader, `{
+	s.FetcherExt.AssertCalled(t, "FetchTaskLatestVersion", s.Ctx, "task1", "dummyProject", "dummyDomain", filters.Filters{})
+	tearDownAndVerify(t, s.Writer, `{
 	"id": {
 		"name": "task1",
 		"version": "v2"
@@ -385,18 +394,19 @@ func TestGetTaskFuncLatest(t *testing.T) {
 }
 
 func TestGetTaskWithVersion(t *testing.T) {
-	s := setup()
+	s := testutils.SetupWithExt()
 	getTaskSetup()
 	taskConfig.DefaultConfig.Filter = filters.Filters{}
 	s.MockAdminClient.OnListTasksMatch(s.Ctx, resourceListRequestTask).Return(taskListResponse, nil)
 	s.MockAdminClient.OnGetTaskMatch(s.Ctx, objectGetRequestTask).Return(task2, nil)
 	s.MockAdminClient.OnListTaskIdsMatch(s.Ctx, namedIDRequestTask).Return(namedIdentifierListTask, nil)
+	s.FetcherExt.OnFetchTaskVersion(s.Ctx, "task1", "v2", "dummyProject", "dummyDomain").Return(task2, nil)
 	taskConfig.DefaultConfig.Version = "v2"
 	objectGetRequestTask.Id.ResourceType = core.ResourceType_TASK
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
-	s.MockAdminClient.AssertCalled(t, "GetTask", s.Ctx, objectGetRequestTask)
-	tearDownAndVerify(t, s.Reader, `{
+	s.FetcherExt.AssertCalled(t, "FetchTaskVersion", s.Ctx, "task1", "v2", "dummyProject", "dummyDomain")
+	tearDownAndVerify(t, s.Writer, `{
 	"id": {
 		"name": "task1",
 		"version": "v2"
@@ -434,41 +444,47 @@ func TestGetTaskWithVersion(t *testing.T) {
 }
 
 func TestGetTasks(t *testing.T) {
-	s := setup()
+	s := testutils.SetupWithExt()
 	getTaskSetup()
 	taskConfig.DefaultConfig.Filter = filters.Filters{}
 	s.MockAdminClient.OnListTasksMatch(s.Ctx, resourceListRequestTask).Return(taskListResponse, nil)
 	s.MockAdminClient.OnGetTaskMatch(s.Ctx, objectGetRequestTask).Return(task2, nil)
+	s.FetcherExt.OnFetchAllVerOfTask(s.Ctx, "task1", "dummyProject", "dummyDomain", filters.Filters{}).Return(taskListResponse.Tasks, nil)
+
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
-	tearDownAndVerify(t, s.Reader, `[{"id": {"name": "task1","version": "v2"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:01Z"}},{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:00Z"}}]`)
+	tearDownAndVerify(t, s.Writer, `[{"id": {"name": "task1","version": "v2"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:01Z"}},{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:00Z"}}]`)
 }
 
 func TestGetTasksFilters(t *testing.T) {
-	s := setup()
+	s := testutils.SetupWithExt()
 	getTaskSetup()
 	taskConfig.DefaultConfig.Filter = filters.Filters{
 		FieldSelector: "task.name=task1,task.version=v1",
 	}
 	s.MockAdminClient.OnListTasksMatch(s.Ctx, resourceListFilterRequestTask).Return(taskListFilterResponse, nil)
+	s.FetcherExt.OnFetchAllVerOfTask(s.Ctx, "task1", "dummyProject", "dummyDomain", filters.Filters{
+		FieldSelector: "task.name=task1,task.version=v1",
+	}).Return(taskListResponse.Tasks, nil)
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
-	tearDownAndVerify(t, s.Reader, `{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:00Z"}}`)
+	tearDownAndVerify(t, s.Writer, `{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:00Z"}}`)
 }
 
 func TestGetTaskWithExecFile(t *testing.T) {
-	s := setup()
+	s := testutils.SetupWithExt()
 	getTaskSetup()
 	s.MockAdminClient.OnListTasksMatch(s.Ctx, resourceListRequestTask).Return(taskListResponse, nil)
 	s.MockAdminClient.OnGetTaskMatch(s.Ctx, objectGetRequestTask).Return(task2, nil)
 	s.MockAdminClient.OnListTaskIdsMatch(s.Ctx, namedIDRequestTask).Return(namedIdentifierListTask, nil)
+	s.FetcherExt.OnFetchTaskVersion(s.Ctx, "task1", "v2", "dummyProject", "dummyDomain").Return(task2, nil)
 	taskConfig.DefaultConfig.Version = "v2"
 	taskConfig.DefaultConfig.ExecFile = testDataFolder + "task_exec_file"
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	os.Remove(taskConfig.DefaultConfig.ExecFile)
 	assert.Nil(t, err)
-	s.MockAdminClient.AssertCalled(t, "GetTask", s.Ctx, objectGetRequestTask)
-	tearDownAndVerify(t, s.Reader, `{
+	s.FetcherExt.AssertCalled(t, "FetchTaskVersion", s.Ctx, "task1", "v2", "dummyProject", "dummyDomain")
+	tearDownAndVerify(t, s.Writer, `{
 	"id": {
 		"name": "task1",
 		"version": "v2"

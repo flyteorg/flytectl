@@ -4,9 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/flyteorg/flytectl/cmd/testutils"
 	"testing"
-
-	"github.com/flyteorg/flytectl/pkg/filters"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/execution"
@@ -33,10 +32,16 @@ func TestListExecutionFunc(t *testing.T) {
 	getExecutionSetup()
 	s := setup()
 	ctx := s.Ctx
-	execListRequest := filters.Filters{
-		Limit:  100,
-		SortBy: "created_at",
-		Page:   1,
+	execListRequest := &admin.ResourceListRequest{
+		Limit: 100,
+		SortBy: &admin.Sort{
+			Key:       "created_at",
+			Direction: admin.Sort_DESCENDING,
+		},
+		Id: &admin.NamedEntityIdentifier{
+			Project: projectValue,
+			Domain:  domainValue,
+		},
 	}
 	executionResponse := &admin.Execution{
 		Id: &core.WorkflowExecutionIdentifier{
@@ -66,10 +71,10 @@ func TestListExecutionFunc(t *testing.T) {
 	executionList := &admin.ExecutionList{
 		Executions: executions,
 	}
-	s.FetcherExt.OnListExecutionMatch(s.Ctx, mock.Anything, mock.Anything, mock.Anything).Return(executionList, nil)
+	s.MockAdminClient.OnListExecutionsMatch(mock.Anything, execListRequest).Return(executionList, nil)
 	err := getExecutionFunc(s.Ctx, []string{}, s.CmdCtx)
 	assert.Nil(t, err)
-	s.FetcherExt.AssertCalled(t, "ListExecution", ctx, "dummyProject", "dummyDomain", execListRequest)
+	s.MockAdminClient.AssertCalled(t, "ListExecutions", ctx, execListRequest)
 }
 
 func TestListExecutionFuncWithError(t *testing.T) {
@@ -85,6 +90,7 @@ func TestListExecutionFuncWithError(t *testing.T) {
 			Domain:  domainValue,
 		},
 	}
+
 	_ = &admin.Execution{
 		Id: &core.WorkflowExecutionIdentifier{
 			Project: projectValue,
@@ -110,9 +116,8 @@ func TestListExecutionFuncWithError(t *testing.T) {
 		},
 	}
 	s := setup()
-	s.MockAdminClient.OnListExecutionsMatch(mock.Anything, mock.MatchedBy(func(o *admin.ResourceListRequest) bool {
-		return execListRequest.SortBy.Key == o.SortBy.Key && execListRequest.SortBy.Direction == o.SortBy.Direction && execListRequest.Filters == o.Filters && execListRequest.Limit == o.Limit
-	})).Return(nil, errors.New("executions NotFound"))
+	s.FetcherExt.OnListExecutionMatch(s.Ctx, mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("executions NotFound"))
+	s.MockAdminClient.OnListExecutionsMatch(mock.Anything, execListRequest).Return(nil, errors.New("executions NotFound"))
 	err := getExecutionFunc(s.Ctx, []string{}, s.CmdCtx)
 	assert.NotNil(t, err)
 	assert.Equal(t, err, errors.New("executions NotFound"))
@@ -122,10 +127,6 @@ func TestListExecutionFuncWithError(t *testing.T) {
 func TestGetExecutionFunc(t *testing.T) {
 	ctx := context.Background()
 	getExecutionSetup()
-	//mockClient := admin2.InitializeMockClientset()
-	//mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
-	//mockOutStream := new(io.Writer)
-	//cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
 	execGetRequest := &admin.WorkflowExecutionGetRequest{
 		Id: &core.WorkflowExecutionIdentifier{
 			Project: projectValue,
@@ -157,16 +158,20 @@ func TestGetExecutionFunc(t *testing.T) {
 			Phase: core.WorkflowExecution_SUCCEEDED,
 		},
 	}
-	//args := []string{executionNameValue}
+	args := []string{executionNameValue}
 	s := setup()
+	//executionList := &admin.ExecutionList{
+	//	Executions: []*admin.Execution{executionResponse},
+	//}
 	s.MockAdminClient.OnGetExecutionMatch(ctx, execGetRequest).Return(executionResponse, nil)
-	err := getExecutionFunc(s.Ctx, []string{}, s.CmdCtx)
+
+	err := getExecutionFunc(s.Ctx, args, s.CmdCtx)
 	assert.Nil(t, err)
 	s.MockAdminClient.AssertCalled(t, "GetExecution", ctx, execGetRequest)
 }
 
 func TestGetExecutionFuncForDetails(t *testing.T) {
-	s := setup()
+	s := testutils.SetupWithExt()
 	getExecutionSetup()
 	ctx := s.Ctx
 	mockCmdCtx := s.CmdCtx
@@ -182,7 +187,7 @@ func TestGetExecutionFuncForDetails(t *testing.T) {
 
 func TestGetExecutionFuncWithIOData(t *testing.T) {
 	t.Run("successful inputs outputs", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getExecutionSetup()
 		ctx := s.Ctx
 		mockCmdCtx := s.CmdCtx
@@ -246,7 +251,7 @@ func TestGetExecutionFuncWithIOData(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("fetch data error from admin", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getExecutionSetup()
 		ctx := s.Ctx
 		mockCmdCtx := s.CmdCtx
@@ -286,7 +291,7 @@ func TestGetExecutionFuncWithIOData(t *testing.T) {
 
 		args := []string{dummyExec}
 		for _, tt := range tests {
-			s := setup()
+			s := testutils.SetupWithExt()
 			config.GetConfig().Output = tt.outputFormat
 			execution.DefaultConfig.NodeID = tt.nodeID
 
@@ -359,17 +364,6 @@ func TestGetExecutionFuncWithIOData(t *testing.T) {
 func TestGetExecutionFuncWithError(t *testing.T) {
 	ctx := context.Background()
 	getExecutionSetup()
-	//mockClient := admin2.InitializeMockClientset()
-	//mockAdminClient := mockClient.AdminClient().(*mocks.AdminServiceClient)
-	//mockOutStream := new(io.Writer)
-	//cmdCtx := cmdCore.NewCommandContext(mockClient, *mockOutStream)
-	execGetRequest := &admin.WorkflowExecutionGetRequest{
-		Id: &core.WorkflowExecutionIdentifier{
-			Project: projectValue,
-			Domain:  domainValue,
-			Name:    executionNameValue,
-		},
-	}
 	_ = &admin.Execution{
 		Id: &core.WorkflowExecutionIdentifier{
 			Project: projectValue,
@@ -395,11 +389,11 @@ func TestGetExecutionFuncWithError(t *testing.T) {
 		},
 	}
 
-	//args := []string{executionNameValue}
-	s := setup()
-	s.MockAdminClient.OnGetExecutionMatch(ctx, execGetRequest).Return(nil, errors.New("execution NotFound"))
-	err := getExecutionFunc(s.Ctx, []string{}, s.CmdCtx)
+	args := []string{executionNameValue}
+	s := testutils.SetupWithExt()
+	s.FetcherExt.OnFetchExecutionMatch(s.Ctx, mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.New("execution NotFound"))
+	err := getExecutionFunc(s.Ctx, args, s.CmdCtx)
 	assert.NotNil(t, err)
 	assert.Equal(t, err, errors.New("execution NotFound"))
-	s.MockAdminClient.AssertCalled(t, "GetExecution", ctx, execGetRequest)
+	s.FetcherExt.AssertCalled(t, "FetchExecution", ctx, "e124", "dummyProject", "dummyDomain")
 }

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/flyteorg/flytectl/cmd/testutils"
+
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
@@ -137,7 +139,7 @@ func TestGetWorkflowFuncWithError(t *testing.T) {
 	})
 
 	t.Run("failure fetching ", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getWorkflowSetup()
 		workflow.DefaultConfig.Latest = true
 		args := []string{"workflowName"}
@@ -150,7 +152,7 @@ func TestGetWorkflowFuncWithError(t *testing.T) {
 }
 
 func TestGetWorkflowFuncLatestWithTable(t *testing.T) {
-	s := setup()
+	s := testutils.SetupWithExt()
 	getWorkflowSetup()
 	workflow.DefaultConfig.Latest = true
 	workflow.DefaultConfig.Filter = filters.Filters{}
@@ -158,7 +160,7 @@ func TestGetWorkflowFuncLatestWithTable(t *testing.T) {
 	s.FetcherExt.OnFetchWorkflowLatestVersionMatch(s.Ctx, "workflow1", projectValue, domainValue, filters.Filters{}).Return(workflow1, nil)
 	err := getWorkflowFunc(s.Ctx, argsWf, s.CmdCtx)
 	assert.Nil(t, err)
-	tearDownAndVerify(t, s.Reader, `
+	tearDownAndVerify(t, s.Writer, `
  --------- ----------- --------------------------- --------- ---------------------- 
 | VERSION | NAME      | INPUTS                    | OUTPUTS | CREATED AT           |
  --------- ----------- --------------------------- --------- ---------------------- 
@@ -169,14 +171,14 @@ func TestGetWorkflowFuncLatestWithTable(t *testing.T) {
 }
 
 func TestListWorkflowFuncWithTable(t *testing.T) {
-	s := setup()
+	s := testutils.SetupWithExt()
 	getWorkflowSetup()
 	workflow.DefaultConfig.Filter = filters.Filters{}
 	config.GetConfig().Output = printer.OutputFormatTABLE.String()
 	s.FetcherExt.OnFetchAllVerOfWorkflowMatch(s.Ctx, "workflow1", projectValue, domainValue, filters.Filters{}).Return(workflows, nil)
 	err := getWorkflowFunc(s.Ctx, argsWf, s.CmdCtx)
 	assert.Nil(t, err)
-	tearDownAndVerify(t, s.Reader, `
+	tearDownAndVerify(t, s.Writer, `
  --------- ----------- ---------------------- 
 | VERSION | NAME      | CREATED AT           |
  --------- ----------- ---------------------- 

@@ -3,13 +3,11 @@ package sandbox
 import (
 	"context"
 	"fmt"
-	"io"
+	"github.com/flyteorg/flytectl/cmd/testutils"
 	"testing"
 
 	"github.com/flyteorg/flytectl/pkg/configutil"
 	"github.com/flyteorg/flytectl/pkg/util"
-
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 
 	"github.com/docker/docker/api/types"
 	"github.com/flyteorg/flytectl/pkg/docker"
@@ -52,13 +50,12 @@ func TestTearDownFunc(t *testing.T) {
 func TestTearDownClusterFunc(t *testing.T) {
 	_ = util.SetupFlyteDir()
 	_ = util.WriteIntoFile([]byte("data"), configutil.FlytectlConfig)
-	mockOutStream := new(io.Writer)
-	ctx := context.Background()
-	cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
+	s := testutils.Setup()
+	ctx := s.Ctx
 	mockDocker := &mocks.Docker{}
 	mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return(containers, nil)
 	mockDocker.OnContainerRemove(ctx, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(nil)
 	docker.Client = mockDocker
-	err := teardownSandboxCluster(ctx, []string{}, cmdCtx)
+	err := teardownSandboxCluster(ctx, []string{}, s.CmdCtx)
 	assert.Nil(t, err)
 }

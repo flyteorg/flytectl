@@ -160,7 +160,7 @@ func TestCreateTaskExecutionFunc(t *testing.T) {
 	err := createExecutionCommand(ctx, ts.args, s.CmdCtx)
 	assert.Nil(t, err)
 	s.MockAdminClient.AssertCalled(t, "CreateExecution", ctx, mock.Anything)
-	tearDownAndVerify(t, s.Reader, `execution identifier project:"flytesnacks" domain:"development" name:"ff513c0e44b5b4a35aa5" `)
+	tearDownAndVerify(t, s.Writer, `execution identifier project:"flytesnacks" domain:"development" name:"ff513c0e44b5b4a35aa5" `)
 }
 
 func TestCreateTaskExecutionFuncError(t *testing.T) {
@@ -192,7 +192,7 @@ func TestCreateLaunchPlanExecutionFunc(t *testing.T) {
 	err := createExecutionCommand(ctx, ts.args, s.CmdCtx)
 	assert.Nil(t, err)
 	s.MockAdminClient.AssertCalled(t, "CreateExecution", ctx, mock.Anything)
-	tearDownAndVerify(t, s.Reader, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e" `)
+	tearDownAndVerify(t, s.Writer, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e" `)
 }
 
 func TestCreateRelaunchExecutionFunc(t *testing.T) {
@@ -220,7 +220,7 @@ func TestCreateRelaunchExecutionFunc(t *testing.T) {
 	err := createExecutionCommand(ctx, ts.args, s.CmdCtx)
 	assert.Nil(t, err)
 	s.MockAdminClient.AssertCalled(t, "RelaunchExecution", ctx, relaunchRequest)
-	tearDownAndVerify(t, s.Reader, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e"`)
+	tearDownAndVerify(t, s.Writer, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e"`)
 }
 
 func TestCreateRecoverExecutionFunc(t *testing.T) {
@@ -251,7 +251,7 @@ func TestCreateRecoverExecutionFunc(t *testing.T) {
 	err := createExecutionCommand(ctx, ts.args, s.CmdCtx)
 	assert.Nil(t, err)
 	s.MockAdminClient.AssertCalled(t, "RecoverExecution", ctx, recoverRequest)
-	tearDownAndVerify(t, s.Reader, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e"`)
+	tearDownAndVerify(t, s.Writer, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e"`)
 	ts.executionConfig.Relaunch = ""
 }
 

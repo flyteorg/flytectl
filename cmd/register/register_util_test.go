@@ -12,6 +12,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/service"
+
 	"github.com/flyteorg/flytestdlib/utils"
 
 	v1 "k8s.io/api/core/v1"
@@ -196,12 +199,12 @@ func TestGetSortedArchivedFileThroughValidHttpList(t *testing.T) {
 }
 
 func TestGetSortedArchivedFileThroughValidHttpWithNullContextList(t *testing.T) {
-	s := setup()
+	setup()
 	registerFilesSetup()
 	rconfig.DefaultFilesConfig.Archive = true
 	args := []string{"http://dummyhost:80/testdata/valid-register.tar"}
-	fileList, tmpDir, err := getSerializeOutputFiles(s.Ctx, args, rconfig.DefaultFilesConfig.Archive)
-	assert.Equal(t, len(fileList), 0)
+	fileList, tmpDir, err := getSerializeOutputFiles(nil, args, rconfig.DefaultFilesConfig.Archive)
+	assert.Equal(t, 0, len(fileList))
 	assert.True(t, strings.HasPrefix(tmpDir, "/tmp/register"))
 	assert.NotNil(t, err)
 	assert.Equal(t, errors.New("net/http: nil Context"), err)
@@ -213,7 +216,7 @@ func Test_getTotalSize(t *testing.T) {
 	b := bytes.NewBufferString("hello world")
 	size, err := getTotalSize(b)
 	assert.NoError(t, err)
-	assert.Equal(t, 11, size)
+	assert.Equal(t, int64(11), size)
 }
 
 func TestRegisterFile(t *testing.T) {
@@ -273,6 +276,8 @@ func TestRegisterFile(t *testing.T) {
 			},
 		}
 		s.MockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(wf, nil)
+		s.FetcherExt.OnFetchWorkflowVersion(s.Ctx, "core.scheduled_workflows.lp_schedules.date_formatter_wf", "v0.3.59", "dummyProject", "dummyDomain").Return(wf, nil)
+		s.FetcherExt.OnFetchWorkflowVersion(s.Ctx, "core.scheduled_workflows.lp_schedules.date_formatter_wf", "", "dummyProject", "dummyDomain").Return(wf, nil)
 		args := []string{"testdata/152_my_cron_scheduled_lp_3.pb"}
 		var registerResults []Result
 		results, err := registerFile(s.Ctx, args[0], registerResults, s.CmdCtx, "", *rconfig.DefaultFilesConfig)
@@ -300,7 +305,7 @@ func TestRegisterFile(t *testing.T) {
 		results, err := registerFile(s.Ctx, args[0], registerResults, s.CmdCtx, "", *rconfig.DefaultFilesConfig)
 		assert.Equal(t, 1, len(results))
 		assert.Equal(t, "Failed", results[0].Status)
-		assert.Equal(t, "Error unmarshalling file due to failed unmarshalling file testdata/valid-register.tar", results[0].Info)
+		assert.True(t, strings.HasPrefix(results[0].Info, "Error unmarshalling file due to failed unmarshalling file testdata/valid-register.tar"))
 		assert.NotNil(t, err)
 	})
 	t.Run("AlreadyExists", func(t *testing.T) {
@@ -379,18 +384,29 @@ func TestUploadFastRegisterArtifact(t *testing.T) {
 		}, testScope.NewSubScope("flytectl"))
 		assert.Nil(t, err)
 		Client = store
-		_, err = uploadFastRegisterArtifact(s.Ctx, "flytesnakcs", "development", "testdata/flytesnacks-core.tgz", "", nil, rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
+		s.MockClient.DataProxyClient().(*mocks.DataProxyClient).OnCreateUploadLocationMatch(s.Ctx, &service.CreateUploadLocationRequest{
+			Project: "flytesnacks",
+			Domain:  "development",
+			Suffix:  "/flytesnacks-core.tgz",
+		}).Return(&service.CreateUploadLocationResponse{}, nil)
+		_, err = uploadFastRegisterArtifact(s.Ctx, "flytesnacks", "development", "testdata/flytesnacks-core.tgz", "", s.MockClient.DataProxyClient(), rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
 		assert.Nil(t, err)
 	})
 	t.Run("Failed upload", func(t *testing.T) {
+		s := setup()
 		testScope := promutils.NewTestScope()
 		labeled.SetMetricKeys(contextutils.AppNameKey, contextutils.ProjectKey, contextutils.DomainKey)
-		s, err := storage.NewDataStore(&storage.Config{
+		store, err := storage.NewDataStore(&storage.Config{
 			Type: storage.TypeMemory,
 		}, testScope.NewSubScope("flytectl"))
 		assert.Nil(t, err)
-		Client = s
-		_, err = uploadFastRegisterArtifact(context.Background(), "flytesnacks", "development", "testdata/flytesnacks-core.tgz", "", nil, rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
+		Client = store
+		s.MockClient.DataProxyClient().(*mocks.DataProxyClient).OnCreateUploadLocationMatch(s.Ctx, &service.CreateUploadLocationRequest{
+			Project: "flytesnacks",
+			Domain:  "development",
+			Suffix:  "/flytesnacks-core.tgz",
+		}).Return(&service.CreateUploadLocationResponse{}, nil)
+		_, err = uploadFastRegisterArtifact(context.Background(), "flytesnacks", "development", "testdata/flytesnacks-core.tgz", "", s.MockClient.DataProxyClient(), rconfig.DefaultFilesConfig.DeprecatedSourceUploadPath)
 		assert.Nil(t, err)
 	})
 	t.Run("Failed upload", func(t *testing.T) {

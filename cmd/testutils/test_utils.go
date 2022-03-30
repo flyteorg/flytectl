@@ -10,6 +10,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/flyteorg/flytectl/pkg/ext"
+
 	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
 
 	"github.com/flyteorg/flyteidl/clients/go/admin"
@@ -58,13 +60,44 @@ func Setup() (s TestStruct) {
 	s.FetcherExt.OnAdminServiceClient().Return(s.MockClient.AdminClient())
 	s.UpdaterExt.OnAdminServiceClient().Return(s.MockClient.AdminClient())
 	s.DeleterExt.OnAdminServiceClient().Return(s.MockClient.AdminClient())
+	s.MockAdminClient = s.MockClient.AdminClient().(*mocks.AdminServiceClient)
+	fetcher := &ext.AdminFetcherExtClient{
+		AdminClient: s.MockAdminClient,
+	}
+	s.MockOutStream = s.Writer
+	s.CmdCtx = cmdCore.NewCommandContextWithExt(s.MockClient, fetcher, s.UpdaterExt, s.DeleterExt, s.MockOutStream)
+	config.GetConfig().Project = projectValue
+	config.GetConfig().Domain = domainValue
+	config.GetConfig().Output = output
+
+	return s
+}
+
+func SetupWithExt() (s TestStruct) {
+	s.Ctx = context.Background()
+	s.Reader, s.Writer, s.Err = os.Pipe()
+	if s.Err != nil {
+		panic(s.Err)
+	}
+	s.StdOut = os.Stdout
+	s.Stderr = os.Stderr
+	os.Stdout = s.Writer
+	os.Stderr = s.Writer
+	log.SetOutput(s.Writer)
+	s.MockClient = admin.InitializeMockClientset()
+	s.FetcherExt = new(extMocks.AdminFetcherExtInterface)
+	s.UpdaterExt = new(extMocks.AdminUpdaterExtInterface)
+	s.DeleterExt = new(extMocks.AdminDeleterExtInterface)
+	s.FetcherExt.OnAdminServiceClient().Return(s.MockClient.AdminClient())
+	s.UpdaterExt.OnAdminServiceClient().Return(s.MockClient.AdminClient())
+	s.DeleterExt.OnAdminServiceClient().Return(s.MockClient.AdminClient())
+	s.MockAdminClient = s.MockClient.AdminClient().(*mocks.AdminServiceClient)
 	s.MockOutStream = s.Writer
 	s.CmdCtx = cmdCore.NewCommandContextWithExt(s.MockClient, s.FetcherExt, s.UpdaterExt, s.DeleterExt, s.MockOutStream)
 	config.GetConfig().Project = projectValue
 	config.GetConfig().Domain = domainValue
 	config.GetConfig().Output = output
 
-	s.MockAdminClient = s.MockClient.AdminClient().(*mocks.AdminServiceClient)
 	return s
 }
 

@@ -2,6 +2,7 @@ package get
 
 import (
 	"fmt"
+	"github.com/flyteorg/flytectl/cmd/testutils"
 	"os"
 	"testing"
 
@@ -47,7 +48,7 @@ func TestGetExecutionQueueAttributes(t *testing.T) {
 		},
 	}
 	t.Run("successful get project domain attribute", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getExecutionQueueAttributeSetup()
 		// No args implying project domain attribute deletion
 		s.FetcherExt.OnFetchProjectDomainAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
@@ -56,10 +57,10 @@ func TestGetExecutionQueueAttributes(t *testing.T) {
 		assert.Nil(t, err)
 		s.FetcherExt.AssertCalled(t, "FetchProjectDomainAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, admin.MatchableResource_EXECUTION_QUEUE)
-		tearDownAndVerify(t, s.Reader, `{"project":"dummyProject","domain":"dummyDomain","tags":["foo","bar"]}`)
+		tearDownAndVerify(t, s.Writer, `{"project":"dummyProject","domain":"dummyDomain","tags":["foo","bar"]}`)
 	})
 	t.Run("successful get project domain attribute and write to file", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getExecutionQueueAttributeSetup()
 		executionqueueattribute.DefaultFetchConfig.AttrFile = testDataTempFile
 		// No args implying project domain attribute deletion
@@ -69,10 +70,10 @@ func TestGetExecutionQueueAttributes(t *testing.T) {
 		assert.Nil(t, err)
 		s.FetcherExt.AssertCalled(t, "FetchProjectDomainAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, admin.MatchableResource_EXECUTION_QUEUE)
-		tearDownAndVerify(t, s.Reader, `wrote the config to file temp-output-file`)
+		tearDownAndVerify(t, s.Writer, `wrote the config to file temp-output-file`)
 	})
 	t.Run("successful get project domain attribute and write to file failure", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getExecutionQueueAttributeSetup()
 		executionqueueattribute.DefaultFetchConfig.AttrFile = testDataNotExistentTempFile
 		// No args implying project domain attribute deletion
@@ -83,10 +84,10 @@ func TestGetExecutionQueueAttributes(t *testing.T) {
 		assert.Equal(t, fmt.Errorf("error dumping in file due to open non-existent-dir/temp-output-file: no such file or directory"), err)
 		s.FetcherExt.AssertCalled(t, "FetchProjectDomainAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, admin.MatchableResource_EXECUTION_QUEUE)
-		tearDownAndVerify(t, s.Reader, ``)
+		tearDownAndVerify(t, s.Writer, ``)
 	})
 	t.Run("failed get project domain attribute", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getExecutionQueueAttributeSetup()
 		// No args implying project domain attribute deletion
 		s.FetcherExt.OnFetchProjectDomainAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
@@ -96,10 +97,10 @@ func TestGetExecutionQueueAttributes(t *testing.T) {
 		assert.Equal(t, fmt.Errorf("failed to fetch response"), err)
 		s.FetcherExt.AssertCalled(t, "FetchProjectDomainAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, admin.MatchableResource_EXECUTION_QUEUE)
-		tearDownAndVerify(t, s.Reader, ``)
+		tearDownAndVerify(t, s.Writer, ``)
 	})
 	t.Run("successful get workflow attribute", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getExecutionQueueAttributeSetup()
 		args := []string{"workflow"}
 		s.FetcherExt.OnFetchWorkflowAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
@@ -109,10 +110,10 @@ func TestGetExecutionQueueAttributes(t *testing.T) {
 		s.FetcherExt.AssertCalled(t, "FetchWorkflowAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, "workflow",
 			admin.MatchableResource_EXECUTION_QUEUE)
-		tearDownAndVerify(t, s.Reader, `{"project":"dummyProject","domain":"dummyDomain","workflow":"workflow","tags":["foo","bar"]}`)
+		tearDownAndVerify(t, s.Writer, `{"project":"dummyProject","domain":"dummyDomain","workflow":"workflow","tags":["foo","bar"]}`)
 	})
 	t.Run("failed get workflow attribute", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getExecutionQueueAttributeSetup()
 		args := []string{"workflow"}
 		s.FetcherExt.OnFetchWorkflowAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
@@ -123,6 +124,6 @@ func TestGetExecutionQueueAttributes(t *testing.T) {
 		s.FetcherExt.AssertCalled(t, "FetchWorkflowAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, "workflow",
 			admin.MatchableResource_EXECUTION_QUEUE)
-		tearDownAndVerify(t, s.Reader, ``)
+		tearDownAndVerify(t, s.Writer, ``)
 	})
 }

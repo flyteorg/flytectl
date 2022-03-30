@@ -2,6 +2,7 @@ package get
 
 import (
 	"fmt"
+	"github.com/flyteorg/flytectl/cmd/testutils"
 	"os"
 	"testing"
 
@@ -59,7 +60,7 @@ func TestGetPluginOverride(t *testing.T) {
 		},
 	}
 	t.Run("successful get project domain attribute", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getPluginOverrideSetup()
 		// No args implying project domain attribute deletion
 		s.FetcherExt.OnFetchProjectDomainAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
@@ -68,10 +69,10 @@ func TestGetPluginOverride(t *testing.T) {
 		assert.Nil(t, err)
 		s.FetcherExt.AssertCalled(t, "FetchProjectDomainAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, admin.MatchableResource_PLUGIN_OVERRIDE)
-		tearDownAndVerify(t, s.Reader, `{"project":"dummyProject","domain":"dummyDomain","overrides":[{"task_type":"python_task","plugin_id":["plugin-override1","plugin-override2"]},{"task_type":"java_task","plugin_id":["plugin-override3","plugin-override3"],"missing_plugin_behavior":1}]}`)
+		tearDownAndVerify(t, s.Writer, `{"project":"dummyProject","domain":"dummyDomain","overrides":[{"task_type":"python_task","plugin_id":["plugin-override1","plugin-override2"]},{"task_type":"java_task","plugin_id":["plugin-override3","plugin-override3"],"missing_plugin_behavior":1}]}`)
 	})
 	t.Run("successful get project domain attribute and write to file", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getPluginOverrideSetup()
 		pluginoverride.DefaultFetchConfig.AttrFile = testDataTempFile
 		// No args implying project domain attribute deletion
@@ -81,10 +82,10 @@ func TestGetPluginOverride(t *testing.T) {
 		assert.Nil(t, err)
 		s.FetcherExt.AssertCalled(t, "FetchProjectDomainAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, admin.MatchableResource_PLUGIN_OVERRIDE)
-		tearDownAndVerify(t, s.Reader, `wrote the config to file temp-output-file`)
+		tearDownAndVerify(t, s.Writer, `wrote the config to file temp-output-file`)
 	})
 	t.Run("successful get project domain attribute and write to file failure", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getPluginOverrideSetup()
 		pluginoverride.DefaultFetchConfig.AttrFile = testDataNotExistentTempFile
 		// No args implying project domain attribute deletion
@@ -95,10 +96,10 @@ func TestGetPluginOverride(t *testing.T) {
 		assert.Equal(t, fmt.Errorf("error dumping in file due to open non-existent-dir/temp-output-file: no such file or directory"), err)
 		s.FetcherExt.AssertCalled(t, "FetchProjectDomainAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, admin.MatchableResource_PLUGIN_OVERRIDE)
-		tearDownAndVerify(t, s.Reader, ``)
+		tearDownAndVerify(t, s.Writer, ``)
 	})
 	t.Run("failed get project domain attribute", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getPluginOverrideSetup()
 		// No args implying project domain attribute deletion
 		s.FetcherExt.OnFetchProjectDomainAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
@@ -108,10 +109,10 @@ func TestGetPluginOverride(t *testing.T) {
 		assert.Equal(t, fmt.Errorf("failed to fetch response"), err)
 		s.FetcherExt.AssertCalled(t, "FetchProjectDomainAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, admin.MatchableResource_PLUGIN_OVERRIDE)
-		tearDownAndVerify(t, s.Reader, ``)
+		tearDownAndVerify(t, s.Writer, ``)
 	})
 	t.Run("successful get workflow attribute", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getPluginOverrideSetup()
 		args := []string{"workflow"}
 		s.FetcherExt.OnFetchWorkflowAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
@@ -120,10 +121,10 @@ func TestGetPluginOverride(t *testing.T) {
 		assert.Nil(t, err)
 		s.FetcherExt.AssertCalled(t, "FetchWorkflowAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, "workflow", admin.MatchableResource_PLUGIN_OVERRIDE)
-		tearDownAndVerify(t, s.Reader, `{"project":"dummyProject","domain":"dummyDomain","workflow":"workflow","overrides":[{"task_type":"python_task","plugin_id":["plugin-override1","plugin-override2"]},{"task_type":"java_task","plugin_id":["plugin-override3","plugin-override3"],"missing_plugin_behavior":1}]}`)
+		tearDownAndVerify(t, s.Writer, `{"project":"dummyProject","domain":"dummyDomain","workflow":"workflow","overrides":[{"task_type":"python_task","plugin_id":["plugin-override1","plugin-override2"]},{"task_type":"java_task","plugin_id":["plugin-override3","plugin-override3"],"missing_plugin_behavior":1}]}`)
 	})
 	t.Run("failed get workflow attribute", func(t *testing.T) {
-		s := setup()
+		s := testutils.SetupWithExt()
 		getPluginOverrideSetup()
 		args := []string{"workflow"}
 		s.FetcherExt.OnFetchWorkflowAttributesMatch(mock.Anything, mock.Anything, mock.Anything,
@@ -133,6 +134,6 @@ func TestGetPluginOverride(t *testing.T) {
 		assert.Equal(t, fmt.Errorf("failed to fetch response"), err)
 		s.FetcherExt.AssertCalled(t, "FetchWorkflowAttributes",
 			s.Ctx, config.GetConfig().Project, config.GetConfig().Domain, "workflow", admin.MatchableResource_PLUGIN_OVERRIDE)
-		tearDownAndVerify(t, s.Reader, ``)
+		tearDownAndVerify(t, s.Writer, ``)
 	})
 }

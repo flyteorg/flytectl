@@ -27,6 +27,5 @@ func TestWorkflowUpdateFail(t *testing.T) {
 
 func TestWorkflowUpdateInvalidArgs(t *testing.T) {
 	s := testutils.Setup()
-	args := []string{}
-	assert.NotNil(t, getUpdateWorkflowFunc(&NamedEntityConfig{})(s.Ctx, args, s.CmdCtx))
+	assert.NotNil(t, getUpdateWorkflowFunc(&NamedEntityConfig{})(s.Ctx, []string{}, s.CmdCtx))
 }
