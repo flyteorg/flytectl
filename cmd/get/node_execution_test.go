@@ -2,9 +2,10 @@ package get
 
 import (
 	"fmt"
-	"github.com/flyteorg/flytectl/cmd/testutils"
 	"testing"
 	"time"
+
+	"github.com/flyteorg/flytectl/cmd/testutils"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"

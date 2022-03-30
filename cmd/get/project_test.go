@@ -2,8 +2,9 @@ package get
 
 import (
 	"fmt"
-	"github.com/flyteorg/flytectl/cmd/testutils"
 	"testing"
+
+	"github.com/flyteorg/flytectl/cmd/testutils"
 
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 

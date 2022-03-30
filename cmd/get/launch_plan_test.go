@@ -2,9 +2,10 @@ package get
 
 import (
 	"fmt"
-	"github.com/flyteorg/flytectl/cmd/testutils"
 	"os"
 	"testing"
+
+	"github.com/flyteorg/flytectl/cmd/testutils"
 
 	"github.com/flyteorg/flytectl/pkg/printer"
 
