@@ -203,8 +203,7 @@ func TestGetSortedArchivedFileThroughValidHttpWithNullContextList(t *testing.T) 
 	registerFilesSetup()
 	rconfig.DefaultFilesConfig.Archive = true
 	args := []string{"http://dummyhost:80/testdata/valid-register.tar"}
-	var ctx context.Context
-	ctx = nil
+	var ctx context.Context = nil
 	fileList, tmpDir, err := getSerializeOutputFiles(ctx, args, rconfig.DefaultFilesConfig.Archive)
 	assert.Equal(t, 0, len(fileList))
 	assert.True(t, strings.HasPrefix(tmpDir, "/tmp/register"))
