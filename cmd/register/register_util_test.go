@@ -524,7 +524,7 @@ func TestHydrateTaskSpec(t *testing.T) {
 	err = utils.UnmarshalStructToObj(task.Template.GetK8SPod().PodSpec, &hydratedPodSpec)
 	assert.NoError(t, err)
 	assert.Len(t, hydratedPodSpec.Containers[1].Args, 2)
-	assert.True(t, strings.HasSuffix(hydratedPodSpec.Containers[1].Args[1], "sourcey"))
+	assert.Contains(t, hydratedPodSpec.Containers[1].Args[1], "somewhere")
 }
 
 func TestLeftDiff(t *testing.T) {
