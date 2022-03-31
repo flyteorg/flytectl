@@ -2,21 +2,14 @@ package sandbox
 
 import (
 	"context"
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
+	"github.com/flyteorg/flyteidl/clients/go/admin"
 	"io"
-	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"testing"
-
-	"github.com/flyteorg/flyteidl/clients/go/admin"
-
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 
 	"github.com/flyteorg/flytectl/pkg/githubutil"
 
@@ -26,6 +19,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
@@ -90,11 +84,7 @@ func TestStartSandboxFunc(t *testing.T) {
 	fakePod.SetName("flyte")
 	fakePod.SetName("flyte")
 
-	serial := &sync.Mutex{}
-
 	t.Run("Successfully run sandbox cluster", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		ctx := context.Background()
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
@@ -116,7 +106,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -128,8 +118,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully exit when sandbox cluster exist", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		ctx := context.Background()
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
@@ -157,7 +145,7 @@ func TestStartSandboxFunc(t *testing.T) {
 				},
 			},
 		}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -170,8 +158,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.Nil(t, reader)
 	})
 	t.Run("Successfully run sandbox cluster with source code", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -200,7 +186,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -212,26 +198,12 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run sandbox cluster with abs path of source code", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = "../"
 		sandboxConfig.DefaultConfig.Version = ""
-		if dockerUsername := os.Getenv("DOCKER_USERNAME"); len(dockerUsername) > 0 {
-			authConfig := types.AuthConfig{
-				Username: dockerUsername,
-				Password: os.Getenv("DOCKER_PASSWORD"),
-			}
-			encodedJSON, err := json.Marshal(authConfig)
-			assert.NoError(t, err)
-
-			authStr := base64.URLEncoding.EncodeToString(encodedJSON)
-			sandboxConfig.DefaultConfig.ImagePullOptions.RegistryAuth = authStr
-		}
-
 		absPath, err := filepath.Abs(sandboxConfig.DefaultConfig.Source)
 		assert.Nil(t, err)
 		volumes := docker.Volumes
@@ -256,7 +228,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -268,8 +240,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run sandbox cluster with specific version", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -294,7 +264,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -306,8 +276,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("Failed run sandbox cluster with wrong version", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -331,7 +299,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -343,8 +311,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in pulling image", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -372,7 +338,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, fmt.Errorf("error"))
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, fmt.Errorf("error"))
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -384,8 +350,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in  removing existing cluster", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -420,7 +384,7 @@ func TestStartSandboxFunc(t *testing.T) {
 				},
 			},
 		}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -433,8 +397,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in start container", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -457,7 +419,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, fmt.Errorf("error"))
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(fmt.Errorf("error"))
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -469,8 +431,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in reading logs", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -498,7 +458,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -510,8 +470,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in list container", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		ctx := context.Background()
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -540,7 +498,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, fmt.Errorf("error"))
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -552,8 +510,6 @@ func TestStartSandboxFunc(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run sandbox cluster command", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		mockOutStream := new(io.Writer)
 		ctx := context.Background()
 		cmdCtx := cmdCore.NewCommandContext(admin.InitializeMockClientset(), *mockOutStream)
@@ -573,15 +529,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		image, _, err := githubutil.GetFullyQualifiedImageName("", sandboxImageName, false)
 		assert.Nil(t, err)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
-		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
-		sandboxConfig.DefaultConfig.Version = ""
-		volumes := docker.Volumes
-		volumes = append(volumes, mount.Mount{
-			Type:   mount.TypeBind,
-			Source: sandboxConfig.DefaultConfig.Source,
-			Target: docker.Source,
-		})
-		mockDocker.OnContainerCreateMatch(ctx, &container.Config{
+		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
 			Image:        image,
 			Tty:          false,
@@ -590,12 +538,12 @@ func TestStartSandboxFunc(t *testing.T) {
 			Mounts:       docker.Volumes,
 			PortBindings: p2,
 			Privileged:   true,
-		}, mock.Anything, mock.Anything, mock.Anything).Return(container.ContainerCreateCreatedBody{
+		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
 			ID: "Hello",
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		stringReader := strings.NewReader(docker.SuccessMessage)
 		reader := ioutil.NopCloser(stringReader)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
@@ -608,19 +556,13 @@ func TestStartSandboxFunc(t *testing.T) {
 		docker.Client = mockDocker
 		sandboxConfig.DefaultConfig.Source = ""
 		sandboxConfig.DefaultConfig.Version = ""
-		raw, _ := ioutil.ReadFile("/Users/haythamabuelfutuh/.kube/config")
-		filePath, _ := os.CreateTemp(os.TempDir(), "file")
-		ioutil.WriteFile(filePath.Name(), raw, fs.ModePerm)
-		os.Setenv("KUBECONFIG", filePath.Name())
 		err = startSandboxCluster(ctx, []string{}, cmdCtx)
 		assert.Nil(t, err)
 	})
 	t.Run("Error in running sandbox cluster command", func(t *testing.T) {
-		serial.Lock()
-		defer serial.Unlock()
 		mockOutStream := new(io.Writer)
 		ctx := context.Background()
-		cmdCtx := cmdCore.NewCommandContext(admin.InitializeMockClientset(), *mockOutStream)
+		cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
@@ -640,7 +582,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(fmt.Errorf("error"))
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, fmt.Errorf("error"))
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		stringReader := strings.NewReader(docker.SuccessMessage)
 		reader := ioutil.NopCloser(stringReader)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
