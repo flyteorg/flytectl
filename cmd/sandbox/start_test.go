@@ -563,7 +563,7 @@ func TestStartSandboxFunc(t *testing.T) {
 	t.Run("Error in running sandbox cluster command", func(t *testing.T) {
 		mockOutStream := new(io.Writer)
 		ctx := context.Background()
-		cmdCtx := cmdCore.NewCommandContext(nil, *mockOutStream)
+		cmdCtx := cmdCore.NewCommandContext(admin.InitializeMockClientset(), *mockOutStream)
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
