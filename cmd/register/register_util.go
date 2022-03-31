@@ -693,7 +693,7 @@ func getTotalSize(reader io.Reader) (size int64, err error) {
 }
 
 func uploadFastRegisterArtifact(ctx context.Context, project, domain, sourceCodeFilePath, version string,
-	dataProxyClient service.DataProxyClient, deprecatedSourceUploadPath string) (uploadLocation storage.DataReference, err error) {
+	dataProxyClient service.DataProxyServiceClient, deprecatedSourceUploadPath string) (uploadLocation storage.DataReference, err error) {
 
 	fileHandle, err := os.Open(sourceCodeFilePath)
 	if err != nil {
