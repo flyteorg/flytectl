@@ -2,6 +2,8 @@ package sandbox
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -108,7 +110,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -147,7 +149,7 @@ func TestStartSandboxFunc(t *testing.T) {
 				},
 			},
 		}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -188,7 +190,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -206,6 +208,18 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = "../"
 		sandboxConfig.DefaultConfig.Version = ""
+		if dockerUsername := os.Getenv("DOCKER_USERNAME"); len(dockerUsername) > 0 {
+			authConfig := types.AuthConfig{
+				Username: dockerUsername,
+				Password: os.Getenv("DOCKER_PASSWORD"),
+			}
+			encodedJSON, err := json.Marshal(authConfig)
+			assert.NoError(t, err)
+
+			authStr := base64.URLEncoding.EncodeToString(encodedJSON)
+			sandboxConfig.DefaultConfig.ImagePullOptions.RegistryAuth = authStr
+		}
+
 		absPath, err := filepath.Abs(sandboxConfig.DefaultConfig.Source)
 		assert.Nil(t, err)
 		volumes := docker.Volumes
@@ -230,7 +244,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -266,7 +280,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -301,7 +315,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -340,7 +354,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, fmt.Errorf("error"))
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, fmt.Errorf("error"))
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -386,7 +400,7 @@ func TestStartSandboxFunc(t *testing.T) {
 				},
 			},
 		}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -421,7 +435,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, fmt.Errorf("error"))
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(fmt.Errorf("error"))
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -460,7 +474,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -500,7 +514,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, fmt.Errorf("error"))
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, nil)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
 			ShowStderr: true,
 			ShowStdout: true,
@@ -545,7 +559,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(io.NopCloser(strings.NewReader("hello. image body")), nil)
 		stringReader := strings.NewReader(docker.SuccessMessage)
 		reader := ioutil.NopCloser(stringReader)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
@@ -584,7 +598,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(fmt.Errorf("error"))
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, fmt.Errorf("error"))
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, mock.Anything).Return(os.Stdin, nil)
 		stringReader := strings.NewReader(docker.SuccessMessage)
 		reader := ioutil.NopCloser(stringReader)
 		mockDocker.OnContainerLogsMatch(ctx, mock.Anything, types.ContainerLogsOptions{
