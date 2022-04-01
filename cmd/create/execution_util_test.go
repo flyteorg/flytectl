@@ -82,16 +82,16 @@ func TestCreateExecutionForRecoveryNotFound(t *testing.T) {
 
 func TestCreateExecutionRequestForWorkflow(t *testing.T) {
 	t.Run("successful", func(t *testing.T) {
-		setup()
+		s := setup()
 		createExecutionUtilSetup()
 		launchPlan := &admin.LaunchPlan{}
-		fetcherClient.OnFetchLPVersionMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(launchPlan, nil)
-		execCreateRequest, err := createExecutionRequestForWorkflow(ctx, "wfName", config.GetConfig().Project, config.GetConfig().Domain, cmdCtx, executionConfig)
+		s.FetcherExt.OnFetchLPVersionMatch(s.Ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(launchPlan, nil)
+		execCreateRequest, err := createExecutionRequestForWorkflow(s.Ctx, "wfName", config.GetConfig().Project, config.GetConfig().Domain, s.CmdCtx, executionConfig)
 		assert.Nil(t, err)
 		assert.NotNil(t, execCreateRequest)
 	})
 	t.Run("failed literal conversion", func(t *testing.T) {
-		setup()
+		s := setup()
 		createExecutionUtilSetup()
 		launchPlan := &admin.LaunchPlan{
 			Spec: &admin.LaunchPlanSpec{
@@ -100,29 +100,29 @@ func TestCreateExecutionRequestForWorkflow(t *testing.T) {
 				},
 			},
 		}
-		fetcherClient.OnFetchLPVersionMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(launchPlan, nil)
-		execCreateRequest, err := createExecutionRequestForWorkflow(ctx, "wfName", config.GetConfig().Project, config.GetConfig().Domain, cmdCtx, executionConfig)
+		s.FetcherExt.OnFetchLPVersionMatch(s.Ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(launchPlan, nil)
+		execCreateRequest, err := createExecutionRequestForWorkflow(s.Ctx, "wfName", config.GetConfig().Project, config.GetConfig().Domain, s.CmdCtx, executionConfig)
 		assert.NotNil(t, err)
 		assert.Nil(t, execCreateRequest)
 		assert.Equal(t, fmt.Errorf("parameter [nilparam] has nil Variable"), err)
 	})
 	t.Run("failed fetch", func(t *testing.T) {
-		setup()
+		s := setup()
 		createExecutionUtilSetup()
-		fetcherClient.OnFetchLPVersionMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed"))
-		execCreateRequest, err := createExecutionRequestForWorkflow(ctx, "wfName", config.GetConfig().Project, config.GetConfig().Domain, cmdCtx, executionConfig)
+		s.FetcherExt.OnFetchLPVersionMatch(s.Ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed"))
+		execCreateRequest, err := createExecutionRequestForWorkflow(s.Ctx, "wfName", config.GetConfig().Project, config.GetConfig().Domain, s.CmdCtx, executionConfig)
 		assert.NotNil(t, err)
 		assert.Nil(t, execCreateRequest)
 		assert.Equal(t, err, errors.New("failed"))
 	})
 	t.Run("with security context", func(t *testing.T) {
-		setup()
+		s := setup()
 		createExecutionUtilSetup()
 		executionConfig.KubeServiceAcct = "default"
 		launchPlan := &admin.LaunchPlan{}
-		fetcherClient.OnFetchLPVersionMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(launchPlan, nil)
-		mockClient.OnGetLaunchPlanMatch(ctx, mock.Anything).Return(launchPlan, nil)
-		execCreateRequest, err := createExecutionRequestForWorkflow(ctx, "wfName", config.GetConfig().Project, config.GetConfig().Domain, cmdCtx, executionConfig)
+		s.FetcherExt.OnFetchLPVersionMatch(s.Ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(launchPlan, nil)
+		s.MockAdminClient.OnGetLaunchPlanMatch(s.Ctx, mock.Anything).Return(launchPlan, nil)
+		execCreateRequest, err := createExecutionRequestForWorkflow(s.Ctx, "wfName", config.GetConfig().Project, config.GetConfig().Domain, s.CmdCtx, executionConfig)
 		assert.Nil(t, err)
 		assert.NotNil(t, execCreateRequest)
 		executionConfig.KubeServiceAcct = ""
@@ -131,20 +131,20 @@ func TestCreateExecutionRequestForWorkflow(t *testing.T) {
 
 func TestCreateExecutionRequestForTask(t *testing.T) {
 	t.Run("successful", func(t *testing.T) {
-		setup()
+		s := setup()
 		createExecutionUtilSetup()
 		task := &admin.Task{
 			Id: &core.Identifier{
 				Name: "taskName",
 			},
 		}
-		fetcherClient.OnFetchTaskVersionMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(task, nil)
-		execCreateRequest, err := createExecutionRequestForTask(ctx, "taskName", config.GetConfig().Project, config.GetConfig().Domain, cmdCtx, executionConfig)
+		s.FetcherExt.OnFetchTaskVersionMatch(s.Ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(task, nil)
+		execCreateRequest, err := createExecutionRequestForTask(s.Ctx, "taskName", config.GetConfig().Project, config.GetConfig().Domain, s.CmdCtx, executionConfig)
 		assert.Nil(t, err)
 		assert.NotNil(t, execCreateRequest)
 	})
 	t.Run("failed literal conversion", func(t *testing.T) {
-		setup()
+		s := setup()
 		createExecutionUtilSetup()
 		task := &admin.Task{
 			Closure: &admin.TaskClosure{
@@ -161,23 +161,23 @@ func TestCreateExecutionRequestForTask(t *testing.T) {
 				},
 			},
 		}
-		fetcherClient.OnFetchTaskVersionMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(task, nil)
-		execCreateRequest, err := createExecutionRequestForTask(ctx, "taskName", config.GetConfig().Project, config.GetConfig().Domain, cmdCtx, executionConfig)
+		s.FetcherExt.OnFetchTaskVersionMatch(s.Ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(task, nil)
+		execCreateRequest, err := createExecutionRequestForTask(s.Ctx, "taskName", config.GetConfig().Project, config.GetConfig().Domain, s.CmdCtx, executionConfig)
 		assert.NotNil(t, err)
 		assert.Nil(t, execCreateRequest)
 		assert.Equal(t, fmt.Errorf("variable [nilvar] has nil type"), err)
 	})
 	t.Run("failed fetch", func(t *testing.T) {
-		setup()
+		s := setup()
 		createExecutionUtilSetup()
-		fetcherClient.OnFetchTaskVersionMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed"))
-		execCreateRequest, err := createExecutionRequestForTask(ctx, "taskName", config.GetConfig().Project, config.GetConfig().Domain, cmdCtx, executionConfig)
+		s.FetcherExt.OnFetchTaskVersionMatch(s.Ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed"))
+		execCreateRequest, err := createExecutionRequestForTask(s.Ctx, "taskName", config.GetConfig().Project, config.GetConfig().Domain, s.CmdCtx, executionConfig)
 		assert.NotNil(t, err)
 		assert.Nil(t, execCreateRequest)
 		assert.Equal(t, err, errors.New("failed"))
 	})
 	t.Run("with security context", func(t *testing.T) {
-		setup()
+		s := setup()
 		createExecutionUtilSetup()
 		executionConfig.KubeServiceAcct = "default"
 		task := &admin.Task{
@@ -185,8 +185,8 @@ func TestCreateExecutionRequestForTask(t *testing.T) {
 				Name: "taskName",
 			},
 		}
-		fetcherClient.OnFetchTaskVersionMatch(ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(task, nil)
-		execCreateRequest, err := createExecutionRequestForTask(ctx, "taskName", config.GetConfig().Project, config.GetConfig().Domain, cmdCtx, executionConfig)
+		s.FetcherExt.OnFetchTaskVersionMatch(s.Ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(task, nil)
+		execCreateRequest, err := createExecutionRequestForTask(s.Ctx, "taskName", config.GetConfig().Project, config.GetConfig().Domain, s.CmdCtx, executionConfig)
 		assert.Nil(t, err)
 		assert.NotNil(t, execCreateRequest)
 		executionConfig.KubeServiceAcct = ""

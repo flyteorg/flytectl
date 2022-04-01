@@ -624,7 +624,7 @@ func TestValidateLaunchSpec(t *testing.T) {
 		s := setup()
 		registerFilesSetup()
 
-		s.MockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed"))
+		s.FetcherExt.OnFetchWorkflowVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed"))
 		lpSpec := &admin.LaunchPlanSpec{
 			WorkflowId: &core.Identifier{
 				Project: "projectValue",
@@ -649,7 +649,7 @@ func TestValidateLaunchSpec(t *testing.T) {
 		s := setup()
 		registerFilesSetup()
 
-		s.MockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed"))
+		s.FetcherExt.OnFetchWorkflowVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("failed"))
 		lpSpec := &admin.LaunchPlanSpec{
 			WorkflowId: &core.Identifier{
 				Project: "projectValue",
