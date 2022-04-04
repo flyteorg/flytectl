@@ -711,7 +711,7 @@ func TestValidateLaunchSpec(t *testing.T) {
 				},
 			},
 		}
-		s.MockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(wf, nil)
+		s.FetcherExt.OnFetchWorkflowVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(wf, nil)
 		lpSpec := &admin.LaunchPlanSpec{
 			WorkflowId: &core.Identifier{
 				Project: "projectValue",
@@ -773,7 +773,7 @@ func TestValidateLaunchSpec(t *testing.T) {
 				},
 			},
 		}
-		s.MockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(wf, nil)
+		s.FetcherExt.OnFetchWorkflowVersionMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(wf, nil)
 		lpSpec := &admin.LaunchPlanSpec{
 			WorkflowId: &core.Identifier{
 				Project: "projectValue",
