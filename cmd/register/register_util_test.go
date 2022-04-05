@@ -276,9 +276,7 @@ func TestRegisterFile(t *testing.T) {
 				},
 			},
 		}
-		s.MockAdminClient.OnGetWorkflowMatch(mock.Anything, mock.Anything).Return(wf, nil)
-		s.FetcherExt.OnFetchWorkflowVersion(s.Ctx, "core.scheduled_workflows.lp_schedules.date_formatter_wf", "v0.3.59", "dummyProject", "dummyDomain").Return(wf, nil)
-		s.FetcherExt.OnFetchWorkflowVersion(s.Ctx, "core.scheduled_workflows.lp_schedules.date_formatter_wf", "", "dummyProject", "dummyDomain").Return(wf, nil)
+		s.FetcherExt.OnFetchWorkflowVersionMatch(s.Ctx, "core.scheduled_workflows.lp_schedules.date_formatter_wf", mock.Anything, "dummyProject", "dummyDomain").Return(wf, nil)
 		args := []string{"testdata/152_my_cron_scheduled_lp_3.pb"}
 		var registerResults []Result
 		results, err := registerFile(s.Ctx, args[0], registerResults, s.CmdCtx, "", *rconfig.DefaultFilesConfig)
