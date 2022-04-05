@@ -21,8 +21,8 @@ type ContextOps interface {
 	RemoveContext(ctxName string) error
 }
 
-// K8sContextManager context manager implementing ContextOps
-type K8sContextManager struct {
+// ContextManager context manager implementing ContextOps
+type ContextManager struct {
 	configAccess clientcmd.ConfigAccess
 }
 
@@ -30,7 +30,7 @@ func NewK8sContextManager() ContextOps {
 	if ContextMgr != nil {
 		return ContextMgr
 	}
-	ContextMgr = &K8sContextManager{
+	ContextMgr = &ContextManager{
 		configAccess: clientcmd.NewDefaultPathOptions(),
 	}
 	return ContextMgr
@@ -57,7 +57,7 @@ func GetK8sClient(cfg, master string) (K8s, error) {
 }
 
 // CopyKubeContext copies context srcCtxName part of srcConfigAccess to targetCtxName part of targetConfigAccess.
-func (k *K8sContextManager) CopyContext(srcConfigAccess clientcmd.ConfigAccess, srcCtxName, targetCtxName string) error {
+func (k *ContextManager) CopyContext(srcConfigAccess clientcmd.ConfigAccess, srcCtxName, targetCtxName string) error {
 	_, err := k.configAccess.GetStartingConfig()
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func (k *K8sContextManager) CopyContext(srcConfigAccess clientcmd.ConfigAccess, 
 }
 
 // RemoveKubeContext removes the contextToRemove from the kubeContext pointed to be fromConfigAccess
-func (k *K8sContextManager) RemoveContext(ctxName string) error {
+func (k *ContextManager) RemoveContext(ctxName string) error {
 	fromStartingConfig, err := k.configAccess.GetStartingConfig()
 	if err != nil {
 		return err
