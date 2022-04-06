@@ -102,7 +102,7 @@ Usage
 	taintEffect          = "NoSchedule"
 	sandboxContextName   = "flyte-sandbox"
 	sandboxDockerContext = "default"
-	sandboxImageName     = "cr.flyte.org/flyteorg/flyte-sandbox"
+	sandboxImageName     = "pingsutw/sandbox-lite"
 )
 
 type ExecResult struct {
@@ -191,11 +191,12 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}
 	sandboxImage := sandboxConfig.DefaultConfig.Image
 	if len(sandboxImage) == 0 {
-		image, version, err := githubutil.GetFullyQualifiedImageName(sandboxConfig.DefaultConfig.Version, sandboxImageName, sandboxConfig.DefaultConfig.Prerelease)
+		_, version, err := githubutil.GetFullyQualifiedImageName(sandboxConfig.DefaultConfig.Version, sandboxImageName, sandboxConfig.DefaultConfig.Prerelease)
 		if err != nil {
 			return nil, err
 		}
-		sandboxImage = image
+		// TODO: Publish new sandbox image
+		sandboxImage = "pingsutw/sandbox-lite:latest"
 		fmt.Printf("%v Running Flyte %s release\n", emoji.Whale, version)
 	}
 	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, sandboxImage)

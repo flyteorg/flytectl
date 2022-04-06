@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	progressSuccessMessage = "Flyte is ready! Flyte UI is available at http://localhost:30081/console"
+	progressSuccessMessage = "Flyte is ready! Flyte UI is available at http://localhost:30080/console"
 )
 
 var Ext string
