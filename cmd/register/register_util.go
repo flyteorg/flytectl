@@ -723,13 +723,13 @@ func uploadFastRegisterArtifact(ctx context.Context, project, domain, sourceCode
 		return "", err
 	}
 
-	contentMD5 := base64.StdEncoding.EncodeToString(hash.Sum(nil))
+	h := hash.Sum(nil)
 	remotePath := storage.DataReference(deprecatedSourceUploadPath)
 	_, fileName := filepath.Split(sourceCodeFilePath)
 	resp, err := dataProxyClient.CreateUploadLocation(ctx, &service.CreateUploadLocationRequest{
 		Project:    project,
 		Domain:     domain,
-		ContentMd5: contentMD5,
+		ContentMd5: h,
 		Suffix:     strings.Join([]string{version, fileName}, "/"),
 	})
 
@@ -742,7 +742,7 @@ func uploadFastRegisterArtifact(ctx context.Context, project, domain, sourceCode
 	}
 
 	if resp != nil && len(resp.SignedUrl) > 0 {
-		return storage.DataReference(resp.NativeUrl), DirectUpload(resp.SignedUrl, contentMD5, size, dataRefReaderCloser)
+		return storage.DataReference(resp.NativeUrl), DirectUpload(resp.SignedUrl, h, size, dataRefReaderCloser)
 	}
 
 	dataStore, err := getStorageClient(ctx)
@@ -769,7 +769,7 @@ func uploadFastRegisterArtifact(ctx context.Context, project, domain, sourceCode
 	return remotePath, nil
 }
 
-func DirectUpload(url, contentMD5 string, size int64, data io.Reader) error {
+func DirectUpload(url string, contentMD5 []byte, size int64, data io.Reader) error {
 	req, err := http.NewRequest(http.MethodPut, url, data)
 	if err != nil {
 		return err
@@ -777,7 +777,7 @@ func DirectUpload(url, contentMD5 string, size int64, data io.Reader) error {
 
 	req.ContentLength = size
 	req.Header.Set("Content-Length", strconv.FormatInt(size, 10))
-	req.Header.Set("Content-MD5", contentMD5)
+	req.Header.Set("Content-MD5", base64.StdEncoding.EncodeToString(contentMD5))
 
 	client := &http.Client{}
 	res, err := client.Do(req)
