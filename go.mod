@@ -149,3 +149,5 @@ require (
 	k8s.io/utils v0.0.0-20201110183641-67b214c5f920 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.1.2 // indirect
 )
+
+replace github.com/flyteorg/flyteidl => github.com/flyteorg/flyteidl v0.24.14-0.20220407005549-5f1883072bb5
