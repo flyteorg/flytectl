@@ -4,7 +4,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"context"
-	"crypto/md5"
+	"crypto/md5" //#nosec
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -707,7 +707,9 @@ func uploadFastRegisterArtifact(ctx context.Context, project, domain, sourceCode
 		return "", err
 	}
 
+	/* #nosec */
 	hash := md5.New()
+	/* #nosec */
 	size, err := io.Copy(hash, dataRefReaderCloser)
 	if err != nil {
 		return "", err
