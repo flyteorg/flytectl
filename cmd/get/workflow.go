@@ -23,7 +23,7 @@ Retrieve all the workflows within project and domain (workflow/workflows can be 
 
  flytectl get workflow -p flytesnacks -d development
 
-Retrieve workflow by name within project and domain:
+Retrieve all versions of a workflow by name within project and domain:
 
 ::
 
