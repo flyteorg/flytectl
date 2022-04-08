@@ -731,8 +731,8 @@ func uploadFastRegisterArtifact(ctx context.Context, project, domain, sourceCode
 	resp, err := dataProxyClient.CreateUploadLocation(ctx, &service.CreateUploadLocationRequest{
 		Project:    project,
 		Domain:     domain,
+		Filename:   fileName,
 		ContentMd5: h,
-		Suffix:     strings.Join([]string{version, fileName}, "/"),
 	})
 
 	if err != nil {
