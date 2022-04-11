@@ -117,7 +117,7 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		return err
 	}
 
-	reader, err := startSandbox(ctx, cli, os.Stdin, sandboxImageName)
+	reader, err := startSandbox(ctx, cli, os.Stdin)
 	if err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func updateLocalKubeContext() error {
 	return k8sCtxMgr.CopyContext(srcConfigAccess, sandboxDockerContext, sandboxContextName)
 }
 
-func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader, imageName string) (*bufio.Scanner, error) {
+func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
 
 	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
@@ -191,7 +191,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader, imag
 	}
 	sandboxImage := sandboxConfig.DefaultConfig.Image
 	if len(sandboxImage) == 0 {
-		image, version, err := githubutil.GetFullyQualifiedImageName(sandboxConfig.DefaultConfig.Version, imageName, sandboxConfig.DefaultConfig.Prerelease)
+		image, version, err := githubutil.GetFullyQualifiedImageName(sandboxConfig.DefaultConfig.Version, sandboxImage, sandboxConfig.DefaultConfig.Prerelease)
 		if err != nil {
 			return nil, err
 		}
