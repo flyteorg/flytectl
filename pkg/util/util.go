@@ -18,7 +18,8 @@ import (
 )
 
 const (
-	progressSuccessMessage = "Flyte is ready! Flyte UI is available at http://localhost:30080/console"
+	ProgressSuccessMessage    = "Flyte is ready! Flyte UI is available at http://localhost:30081/console"
+	DemoClusterSuccessMessage = "Flyte is ready! Flyte UI is available at http://localhost:30080/console"
 )
 
 var Ext string
@@ -51,7 +52,7 @@ func SetupFlyteDir() error {
 }
 
 // PrintSandboxMessage will print sandbox success message
-func PrintSandboxMessage() {
+func PrintSandboxMessage(progressSuccessMessage string) {
 	kubeconfig := strings.Join([]string{
 		"$KUBECONFIG",
 		f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),
