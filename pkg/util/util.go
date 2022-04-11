@@ -18,8 +18,9 @@ import (
 )
 
 const (
-	ProgressSuccessMessage    = "Flyte is ready! Flyte UI is available at http://localhost:30081/console"
-	DemoClusterSuccessMessage = "Flyte is ready! Flyte UI is available at http://localhost:30080/console"
+	ProgressSuccessMessage = "Flyte is ready! Flyte UI is available at"
+	SandBoxConsolePort     = 30081
+	DemoConsolePort        = 30080
 )
 
 var Ext string
@@ -52,14 +53,14 @@ func SetupFlyteDir() error {
 }
 
 // PrintSandboxMessage will print sandbox success message
-func PrintSandboxMessage(progressSuccessMessage string) {
+func PrintSandboxMessage(flyteConsolePort int) {
 	kubeconfig := strings.Join([]string{
 		"$KUBECONFIG",
 		f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),
 		docker.Kubeconfig,
 	}, ":")
-
-	fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, progressSuccessMessage, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
+	successMsg := fmt.Sprintf("%v http://localhost:%v/console", ProgressSuccessMessage, flyteConsolePort)
+	fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, successMsg, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
 	fmt.Printf("Add KUBECONFIG and FLYTECTL_CONFIG to your environment variable \n")
 	fmt.Printf("export KUBECONFIG=%v \n", kubeconfig)
 	fmt.Printf("export FLYTECTL_CONFIG=%v \n", configutil.FlytectlConfig)

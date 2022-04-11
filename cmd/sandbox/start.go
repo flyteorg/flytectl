@@ -144,7 +144,7 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		if err := watchFlyteDeployment(ctx, k8sClient.CoreV1()); err != nil {
 			return err
 		}
-		util.PrintSandboxMessage(util.ProgressSuccessMessage)
+		util.PrintSandboxMessage(util.SandBoxConsolePort)
 	}
 	return nil
 }
@@ -166,7 +166,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 			return nil, err
 		}
 		fmt.Printf("Existing details of your sandbox")
-		util.PrintSandboxMessage(util.ProgressSuccessMessage)
+		util.PrintSandboxMessage(util.SandBoxConsolePort)
 		return nil, nil
 	}
 
@@ -191,7 +191,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}
 	sandboxImage := sandboxConfig.DefaultConfig.Image
 	if len(sandboxImage) == 0 {
-		image, version, err := githubutil.GetFullyQualifiedImageName(sandboxConfig.DefaultConfig.Version, sandboxImage, sandboxConfig.DefaultConfig.Prerelease)
+		image, version, err := githubutil.GetFullyQualifiedImageName(sandboxConfig.DefaultConfig.Version, sandboxImageName, sandboxConfig.DefaultConfig.Prerelease)
 		if err != nil {
 			return nil, err
 		}

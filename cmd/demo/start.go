@@ -129,7 +129,7 @@ func startDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.Command
 		if err := watchFlyteDeployment(ctx, k8sClient.CoreV1()); err != nil {
 			return err
 		}
-		util.PrintSandboxMessage(util.DemoClusterSuccessMessage)
+		util.PrintSandboxMessage(util.DemoConsolePort)
 	}
 	return nil
 }
@@ -151,7 +151,7 @@ func startDemo(ctx context.Context, cli docker.Docker, reader io.Reader) (*bufio
 			return nil, err
 		}
 		fmt.Printf("Existing details of your demo cluster")
-		util.PrintSandboxMessage(util.DemoClusterSuccessMessage)
+		util.PrintSandboxMessage(util.DemoConsolePort)
 		return nil, nil
 	}
 
