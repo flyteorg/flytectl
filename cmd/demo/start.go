@@ -40,11 +40,11 @@ Starts the demo cluster without any source code:
 ::
 
  flytectl demo start
-	
+
 Mounts your source code repository inside the demo cluster:
 ::
 
- flytectl demo start --source=$HOME/flyteorg/flytesnacks 
+ flytectl demo start --source=$HOME/flyteorg/flytesnacks
 
 Specify a Flyte demo compliant image with the registry. This is useful in case you want to use an image from your registry.
 ::
@@ -52,7 +52,7 @@ Specify a Flyte demo compliant image with the registry. This is useful in case y
   flytectl demo start --image docker.io/my-override:latest
 
 Note: If image flag is passed then Flytectl will ignore version and pre flags.
-	
+
 Specify a Flyte demo image pull policy. Possible pull policy values are Always, IfNotPresent, or Never:
 ::
 
@@ -199,7 +199,7 @@ func startDemo(ctx context.Context, cli docker.Docker, reader io.Reader) (*bufio
 	}
 	demoImage := sandboxConfig.DefaultConfig.Image
 	if len(demoImage) == 0 {
-		image, version, err := githubutil.GetFullyQualifiedImageName(sandboxConfig.DefaultConfig.Version, demoImageName, sandboxConfig.DefaultConfig.Prerelease)
+		image, version, err := githubutil.GetFullyQualifiedImageName("sha", sandboxConfig.DefaultConfig.Version, demoImageName, sandboxConfig.DefaultConfig.Prerelease)
 		if err != nil {
 			return nil, err
 		}
