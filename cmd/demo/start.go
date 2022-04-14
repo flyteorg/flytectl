@@ -56,20 +56,20 @@ Note: If image flag is passed then Flytectl will ignore version and pre flags.
 Specify a Flyte demo image pull policy. Possible pull policy values are Always, IfNotPresent, or Never:
 ::
 
- flytectl demo start  --image docker.io/my-override:latest --imagePullPolicy Always
+ flytectl demo start --image docker.io/my-override:latest --imagePullPolicy Always
 
-Runs a specific version of Flyte. Flytectl sandbox only supports Flyte version available in the Github release, https://github.com/flyteorg/flyte/tags.
+Runs a specific version of Flyte. Flytectl demo only supports Flyte version available in the Github release, https://github.com/flyteorg/flyte/tags.
 ::
 
- flytectl sandbox start  --version=v0.14.0
+ flytectl demo start --version=v0.14.0
 
 .. note::
-	  Flytectl Sandbox is only supported for Flyte versions > v1.0.0
+	  Flytectl demo is only supported for Flyte versions >= v1.0.0
 
 Runs the latest pre release of  Flyte.
 ::
 
- flytectl sandbox start  --pre
+ flytectl demo start --pre
 
 Start demo cluster passing environment variables. This can be used to pass docker specific env variables or flyte specific env variables.
 eg : for passing timeout value in secs for the demo container use the following.
