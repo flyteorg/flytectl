@@ -38,3 +38,7 @@ test_unit_without_flag:
 	cat coverage.temp.txt  | grep -v "_flags.go" > coverage.txt
 	rm coverage.temp.txt
 	curl -s https://codecov.io/bash > codecov_bash.sh && bash codecov_bash.sh
+
+.PHONY: integration
+integration:
+	CGO_ENABLED=0 GOFLAGS="-count=1" go test -v -tags=integration ./tests/...
