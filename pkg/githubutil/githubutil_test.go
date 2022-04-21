@@ -1,3 +1,4 @@
+//go:build integration
 // +build integration
 
 package githubutil
@@ -19,6 +20,7 @@ import (
 )
 
 var sandboxImageName = "cr.flyte.org/flyteorg/flyte-sandbox"
+var sandboxManifest = "flyte_sandbox_manifest.yaml"
 
 func TestGetLatestVersion(t *testing.T) {
 	t.Run("Get latest release with wrong url", func(t *testing.T) {

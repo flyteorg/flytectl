@@ -30,7 +30,6 @@ import (
 const (
 	owner                   = "flyteorg"
 	flyte                   = "flyte"
-	sandboxManifest         = "flyte_sandbox_manifest.yaml"
 	flytectl                = "flytectl"
 	sandboxSupportedVersion = "v0.10.0"
 	flytectlRepository      = "github.com/flyteorg/flytectl"
