@@ -199,7 +199,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GithubRepoSer
 	}
 	sandboxImage := sandboxConfig.DefaultConfig.Image
 	if len(sandboxImage) == 0 {
-		image, version, err := github.GetFullyQualifiedImageName("dind", sandboxConfig.DefaultConfig.Version, sandboxImageName, sandboxConfig.DefaultConfig.Prerelease)
+		image, version, err := github.GetFullyQualifiedImageName("dind", sandboxConfig.DefaultConfig.Version, sandboxImageName, sandboxConfig.DefaultConfig.Prerelease, g)
 		if err != nil {
 			return nil, err
 		}
