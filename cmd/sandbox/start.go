@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/flyteorg/flytectl/clierrors"
-	"github.com/flyteorg/flytectl/pkg/githubutil"
+	"github.com/flyteorg/flytectl/pkg/github"
 
 	"github.com/avast/retry-go"
 	"github.com/olekukonko/tablewriter"
@@ -44,9 +44,15 @@ Starts the sandbox cluster without any source code:
 Mounts your source code repository inside the sandbox:
 ::
 
+<<<<<<< HEAD
  flytectl sandbox start --source=$HOME/flyteorg/flytesnacks
 
 Runs a specific version of Flyte. Flytectl sandbox only supports Flyte version available in the Github release, https://github.com/flyteorg/flyte/tags.
+=======
+ flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
+	
+Runs a specific version of Flyte. Flytectl sandbox only supports Flyte version available in the GithubRepoService release, https://github.com/flyteorg/flyte/tags.
+>>>>>>> Mocking github repo service and refactoring
 ::
 
  flytectl sandbox start  --version=v0.14.0
@@ -117,7 +123,9 @@ func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 		return err
 	}
 
-	reader, err := startSandbox(ctx, cli, os.Stdin)
+	ghRepo := github.GetGHRepoService()
+
+	reader, err := startSandbox(ctx, cli, ghRepo, os.Stdin)
 	if err != nil {
 		return err
 	}
@@ -158,7 +166,7 @@ func updateLocalKubeContext() error {
 	return k8sCtxMgr.CopyContext(srcConfigAccess, sandboxDockerContext, sandboxContextName)
 }
 
-func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bufio.Scanner, error) {
+func startSandbox(ctx context.Context, cli docker.Docker, g github.GithubRepoService, reader io.Reader) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
 
 	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
@@ -191,7 +199,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, reader io.Reader) (*bu
 	}
 	sandboxImage := sandboxConfig.DefaultConfig.Image
 	if len(sandboxImage) == 0 {
-		image, version, err := githubutil.GetFullyQualifiedImageName("dind", sandboxConfig.DefaultConfig.Version, sandboxImageName, sandboxConfig.DefaultConfig.Prerelease)
+		image, version, err := github.GetFullyQualifiedImageName("dind", sandboxConfig.DefaultConfig.Version, sandboxImageName, sandboxConfig.DefaultConfig.Prerelease)
 		if err != nil {
 			return nil, err
 		}

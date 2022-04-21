@@ -12,7 +12,7 @@ import (
 
 	"github.com/flyteorg/flyteidl/clients/go/admin"
 
-	"github.com/flyteorg/flytectl/pkg/githubutil"
+	"github.com/flyteorg/flytectl/pkg/github"
 
 	"github.com/flyteorg/flytectl/pkg/k8s"
 
@@ -24,6 +24,7 @@ import (
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
+	ghMocks "github.com/flyteorg/flytectl/pkg/github/mocks"
 	k8sMocks "github.com/flyteorg/flytectl/pkg/k8s/mocks"
 	"github.com/flyteorg/flytectl/pkg/util"
 	"github.com/stretchr/testify/assert"
@@ -92,7 +93,8 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		sandboxConfig.DefaultConfig.Version = "v0.19.1"
 		bodyStatus := make(chan container.ContainerWaitOKBody)
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", sandboxConfig.DefaultConfig.Version, sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", sandboxConfig.DefaultConfig.Version, sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -116,14 +118,15 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, githubMock, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully exit when sandbox cluster exist", func(t *testing.T) {
 		ctx := context.Background()
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -155,7 +158,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		reader, err := startSandbox(ctx, mockDocker, strings.NewReader("n"))
+		reader, err := startSandbox(ctx, mockDocker, githubMock, strings.NewReader("n"))
 		assert.Nil(t, err)
 		assert.Nil(t, reader)
 	})
@@ -172,7 +175,8 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -196,7 +200,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, githubMock, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run sandbox cluster with abs path of source code", func(t *testing.T) {
@@ -214,7 +218,8 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: absPath,
 			Target: docker.Source,
 		})
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -238,7 +243,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, githubMock, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run sandbox cluster with specific version", func(t *testing.T) {
@@ -248,8 +253,9 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Version = "v0.18.0"
 		sandboxConfig.DefaultConfig.Source = ""
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", sandboxConfig.DefaultConfig.Version, sandboxImageName, false, githubMock)
 
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", sandboxConfig.DefaultConfig.Version, sandboxImageName, false)
 		assert.Nil(t, err)
 		volumes := docker.Volumes
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -274,7 +280,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, githubMock, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Failed run sandbox cluster with wrong version", func(t *testing.T) {
@@ -284,7 +290,8 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Version = "v0.1444.0"
 		sandboxConfig.DefaultConfig.Source = ""
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		volumes := docker.Volumes
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -309,7 +316,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, githubMock, os.Stdin)
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in pulling image", func(t *testing.T) {
@@ -317,7 +324,8 @@ func TestStartSandboxFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
 		volumes := docker.Volumes
@@ -348,7 +356,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, githubMock, os.Stdin)
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in  removing existing cluster", func(t *testing.T) {
@@ -363,7 +371,8 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -395,7 +404,7 @@ func TestStartSandboxFunc(t *testing.T) {
 		}).Return(nil, nil)
 		mockDocker.OnContainerRemove(ctx, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(fmt.Errorf("error"))
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startSandbox(ctx, mockDocker, strings.NewReader("y"))
+		_, err = startSandbox(ctx, mockDocker, githubMock, strings.NewReader("y"))
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in start container", func(t *testing.T) {
@@ -405,7 +414,8 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = ""
 		sandboxConfig.DefaultConfig.Version = ""
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -429,7 +439,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, githubMock, os.Stdin)
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in reading logs", func(t *testing.T) {
@@ -444,7 +454,8 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -468,7 +479,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, fmt.Errorf("error"))
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, githubMock, os.Stdin)
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in list container", func(t *testing.T) {
@@ -484,7 +495,8 @@ func TestStartSandboxFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -508,7 +520,7 @@ func TestStartSandboxFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startSandbox(ctx, mockDocker, os.Stdin)
+		_, err = startSandbox(ctx, mockDocker, githubMock, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run sandbox cluster command", func(t *testing.T) {
@@ -528,7 +540,8 @@ func TestStartSandboxFunc(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -571,7 +584,8 @@ func TestStartSandboxFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -706,26 +720,31 @@ func TestGetNodeTaintStatus(t *testing.T) {
 
 func TestGetSandboxImage(t *testing.T) {
 	t.Run("Get Latest sandbox", func(t *testing.T) {
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		assert.Equal(t, true, strings.HasPrefix(image, "cr.flyte.org/flyteorg/flyte-sandbox:dind-"))
 	})
 
 	t.Run("Get sandbox image with version ", func(t *testing.T) {
-		image, _, err := githubutil.GetFullyQualifiedImageName("dind", "v0.14.0", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("dind", "v0.14.0", sandboxImageName, false, githubMock)
 		assert.Nil(t, err)
 		assert.Equal(t, true, strings.HasPrefix(image, sandboxImageName))
 	})
 	t.Run("Get sandbox image with wrong version ", func(t *testing.T) {
-		_, _, err := githubutil.GetFullyQualifiedImageName("dind", "v100.1.0", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		_, _, err := github.GetFullyQualifiedImageName("dind", "v100.1.0", sandboxImageName, false, githubMock)
 		assert.NotNil(t, err)
 	})
 	t.Run("Get sandbox image with wrong version ", func(t *testing.T) {
-		_, _, err := githubutil.GetFullyQualifiedImageName("dind", "aaaaaa", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		_, _, err := github.GetFullyQualifiedImageName("dind", "aaaaaa", sandboxImageName, false, githubMock)
 		assert.NotNil(t, err)
 	})
 	t.Run("Get sandbox image with version that is not supported", func(t *testing.T) {
-		_, _, err := githubutil.GetFullyQualifiedImageName("dind", "v0.10.0", sandboxImageName, false)
+		githubMock := &ghMocks.Github{}
+		_, _, err := github.GetFullyQualifiedImageName("dind", "v0.10.0", sandboxImageName, false, githubMock)
 		assert.NotNil(t, err)
 	})
 

@@ -3,6 +3,7 @@ package register
 import (
 	"context"
 	"fmt"
+	g "github.com/flyteorg/flytectl/pkg/github"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 
@@ -44,7 +45,8 @@ func registerExamplesFunc(ctx context.Context, args []string, cmdCtx cmdCore.Com
 	// Deprecated checks for --k8Service
 	deprecatedCheck(ctx, &rconfig.DefaultFilesConfig.K8sServiceAccount, rconfig.DefaultFilesConfig.K8ServiceAccount)
 
-	examples, tag, err := getAllExample(flytesnacks, rconfig.DefaultFilesConfig.Version)
+	ghRepo := g.GetGHRepoService()
+	examples, tag, err := getAllExample(flytesnacks, rconfig.DefaultFilesConfig.Version, ghRepo)
 	if err != nil {
 		return err
 	}

@@ -12,7 +12,7 @@ import (
 
 	"github.com/flyteorg/flyteidl/clients/go/admin"
 
-	"github.com/flyteorg/flytectl/pkg/githubutil"
+	"github.com/flyteorg/flytectl/pkg/github"
 
 	"github.com/flyteorg/flytectl/pkg/k8s"
 
@@ -24,6 +24,7 @@ import (
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
+	ghMocks "github.com/flyteorg/flytectl/pkg/github/mocks"
 	k8sMocks "github.com/flyteorg/flytectl/pkg/k8s/mocks"
 	"github.com/flyteorg/flytectl/pkg/util"
 	"github.com/stretchr/testify/assert"
@@ -91,7 +92,8 @@ func TestStartDemoFunc(t *testing.T) {
 		errCh := make(chan error)
 		sandboxConfig.DefaultConfig.Version = "v0.19.1"
 		bodyStatus := make(chan container.ContainerWaitOKBody)
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", sandboxConfig.DefaultConfig.Version, demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", sandboxConfig.DefaultConfig.Version, demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -115,14 +117,15 @@ func TestStartDemoFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startDemo(ctx, mockDocker, os.Stdin)
+		_, err = startDemo(ctx, mockDocker, githubMock, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully exit when demo cluster exist", func(t *testing.T) {
 		ctx := context.Background()
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -154,7 +157,7 @@ func TestStartDemoFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		reader, err := startDemo(ctx, mockDocker, strings.NewReader("n"))
+		reader, err := startDemo(ctx, mockDocker, githubMock, strings.NewReader("n"))
 		assert.Nil(t, err)
 		assert.Nil(t, reader)
 	})
@@ -171,7 +174,8 @@ func TestStartDemoFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -195,7 +199,7 @@ func TestStartDemoFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startDemo(ctx, mockDocker, os.Stdin)
+		_, err = startDemo(ctx, mockDocker, githubMock, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run demo cluster with abs path of source code", func(t *testing.T) {
@@ -213,7 +217,8 @@ func TestStartDemoFunc(t *testing.T) {
 			Source: absPath,
 			Target: docker.Source,
 		})
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -237,7 +242,7 @@ func TestStartDemoFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startDemo(ctx, mockDocker, os.Stdin)
+		_, err = startDemo(ctx, mockDocker, githubMock, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run demo cluster with specific version", func(t *testing.T) {
@@ -247,8 +252,8 @@ func TestStartDemoFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Version = "v0.18.0"
 		sandboxConfig.DefaultConfig.Source = ""
-
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", sandboxConfig.DefaultConfig.Version, demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", sandboxConfig.DefaultConfig.Version, demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		volumes := docker.Volumes
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -273,7 +278,7 @@ func TestStartDemoFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startDemo(ctx, mockDocker, os.Stdin)
+		_, err = startDemo(ctx, mockDocker, githubMock, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Failed run demo cluster with wrong version", func(t *testing.T) {
@@ -283,7 +288,8 @@ func TestStartDemoFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Version = "v0.1444.0"
 		sandboxConfig.DefaultConfig.Source = ""
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		volumes := docker.Volumes
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -308,7 +314,7 @@ func TestStartDemoFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startDemo(ctx, mockDocker, os.Stdin)
+		_, err = startDemo(ctx, mockDocker, githubMock, os.Stdin)
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in pulling image", func(t *testing.T) {
@@ -316,7 +322,8 @@ func TestStartDemoFunc(t *testing.T) {
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker := &mocks.Docker{}
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		sandboxConfig.DefaultConfig.Source = f.UserHomeDir()
 		volumes := docker.Volumes
@@ -347,7 +354,7 @@ func TestStartDemoFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startDemo(ctx, mockDocker, os.Stdin)
+		_, err = startDemo(ctx, mockDocker, githubMock, os.Stdin)
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in  removing existing cluster", func(t *testing.T) {
@@ -362,7 +369,8 @@ func TestStartDemoFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -394,7 +402,7 @@ func TestStartDemoFunc(t *testing.T) {
 		}).Return(nil, nil)
 		mockDocker.OnContainerRemove(ctx, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(fmt.Errorf("error"))
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startDemo(ctx, mockDocker, strings.NewReader("y"))
+		_, err = startDemo(ctx, mockDocker, githubMock, strings.NewReader("y"))
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in start container", func(t *testing.T) {
@@ -404,7 +412,8 @@ func TestStartDemoFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		sandboxConfig.DefaultConfig.Source = ""
 		sandboxConfig.DefaultConfig.Version = ""
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -428,7 +437,7 @@ func TestStartDemoFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startDemo(ctx, mockDocker, os.Stdin)
+		_, err = startDemo(ctx, mockDocker, githubMock, os.Stdin)
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in reading logs", func(t *testing.T) {
@@ -443,7 +452,8 @@ func TestStartDemoFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -467,7 +477,7 @@ func TestStartDemoFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, fmt.Errorf("error"))
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startDemo(ctx, mockDocker, os.Stdin)
+		_, err = startDemo(ctx, mockDocker, githubMock, os.Stdin)
 		assert.NotNil(t, err)
 	})
 	t.Run("Error in list container", func(t *testing.T) {
@@ -483,7 +493,8 @@ func TestStartDemoFunc(t *testing.T) {
 			Source: sandboxConfig.DefaultConfig.Source,
 			Target: docker.Source,
 		})
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -507,7 +518,7 @@ func TestStartDemoFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 		mockDocker.OnContainerWaitMatch(ctx, mock.Anything, container.WaitConditionNotRunning).Return(bodyStatus, errCh)
-		_, err = startDemo(ctx, mockDocker, os.Stdin)
+		_, err = startDemo(ctx, mockDocker, githubMock, os.Stdin)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run demo cluster command", func(t *testing.T) {
@@ -527,7 +538,9 @@ func TestStartDemoFunc(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
@@ -570,7 +583,8 @@ func TestStartDemoFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		errCh := make(chan error)
 		bodyStatus := make(chan container.ContainerWaitOKBody)
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		mockDocker.OnContainerCreate(ctx, &container.Config{
 			Env:          docker.Environment,
@@ -705,26 +719,31 @@ func TestGetNodeTaintStatus(t *testing.T) {
 
 func TestGetDemoImage(t *testing.T) {
 	t.Run("Get Latest demo cluster", func(t *testing.T) {
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		assert.Equal(t, true, strings.HasPrefix(image, "cr.flyte.org/flyteorg/flyte-sandbox-lite:sha-"))
 	})
 
 	t.Run("Get demo image with version ", func(t *testing.T) {
-		image, _, err := githubutil.GetFullyQualifiedImageName("sha", "v0.14.0", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		image, _, err := github.GetFullyQualifiedImageName("sha", "v0.14.0", demoImageName, false, githubMock)
 		assert.Nil(t, err)
 		assert.Equal(t, true, strings.HasPrefix(image, demoImageName))
 	})
 	t.Run("Get demo image with wrong version ", func(t *testing.T) {
-		_, _, err := githubutil.GetFullyQualifiedImageName("sha", "v100.1.0", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		_, _, err := github.GetFullyQualifiedImageName("sha", "v100.1.0", demoImageName, false, githubMock)
 		assert.NotNil(t, err)
 	})
 	t.Run("Get demo image with wrong version ", func(t *testing.T) {
-		_, _, err := githubutil.GetFullyQualifiedImageName("sha", "aaaaaa", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		_, _, err := github.GetFullyQualifiedImageName("sha", "aaaaaa", demoImageName, false, githubMock)
 		assert.NotNil(t, err)
 	})
 	t.Run("Get demo image with version that is not supported", func(t *testing.T) {
-		_, _, err := githubutil.GetFullyQualifiedImageName("sha", "v0.10.0", demoImageName, false)
+		githubMock := &ghMocks.Github{}
+		_, _, err := github.GetFullyQualifiedImageName("sha", "v0.10.0", demoImageName, false, githubMock)
 		assert.NotNil(t, err)
 	})
 
