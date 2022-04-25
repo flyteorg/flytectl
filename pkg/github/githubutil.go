@@ -2,34 +2,29 @@ package github
 
 import (
 	"context"
-	"golang.org/x/oauth2"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
 
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
-
-	"github.com/flyteorg/flytectl/pkg/util"
-
-	"github.com/flyteorg/flytestdlib/logger"
-
 	"github.com/flyteorg/flytectl/pkg/platformutil"
+	"github.com/flyteorg/flytectl/pkg/util"
+	"github.com/flyteorg/flytestdlib/logger"
 	stdlibversion "github.com/flyteorg/flytestdlib/version"
-	"github.com/mouuff/go-rocket-update/pkg/provider"
-	"github.com/mouuff/go-rocket-update/pkg/updater"
-
-	"fmt"
 
 	"github.com/google/go-github/v42/github"
+	"github.com/mouuff/go-rocket-update/pkg/provider"
+	"github.com/mouuff/go-rocket-update/pkg/updater"
+	"golang.org/x/oauth2"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 const (
 	owner                   = "flyteorg"
 	flyte                   = "flyte"
-	sandboxManifest         = "flyte_sandbox_manifest.yaml"
 	flytectl                = "flytectl"
 	sandboxSupportedVersion = "v0.10.0"
 	flytectlRepository      = "github.com/flyteorg/flytectl"
@@ -41,7 +36,7 @@ const (
 	brewInstallDirectory    = "/Cellar/flytectl"
 )
 
-var Client GithubRepoService
+var Client GHRepoService
 
 // FlytectlReleaseConfig represent the updater config for flytectl binary
 var FlytectlReleaseConfig = &updater.Updater{
@@ -59,7 +54,7 @@ var (
 
 //go:generate mockery -name=GithubRepoService -case=underscore
 
-type GithubRepoService interface {
+type GHRepoService interface {
 	GetLatestRelease(ctx context.Context, owner, repo string) (*github.RepositoryRelease, *github.Response, error)
 	ListReleases(ctx context.Context, owner, repo string, opts *github.ListOptions) ([]*github.RepositoryRelease, *github.Response, error)
 	GetReleaseByTag(ctx context.Context, owner, repo, tag string) (*github.RepositoryRelease, *github.Response, error)
@@ -68,7 +63,7 @@ type GithubRepoService interface {
 
 // GetLatestRelease returns the latest non-prerelease version of provided repoName, as
 // described in https://docs.github.com/en/rest/reference/releases#get-the-latest-release
-func GetLatestRelease(repoName string, g GithubRepoService) (*github.RepositoryRelease, error) {
+func GetLatestRelease(repoName string, g GHRepoService) (*github.RepositoryRelease, error) {
 	release, _, err := g.GetLatestRelease(context.Background(), owner, repoName)
 	if err != nil {
 		return nil, err
@@ -77,7 +72,7 @@ func GetLatestRelease(repoName string, g GithubRepoService) (*github.RepositoryR
 }
 
 // ListReleases returns the list of release of provided repoName
-func ListReleases(repoName string, g GithubRepoService) ([]*github.RepositoryRelease, error) {
+func ListReleases(repoName string, g GHRepoService) ([]*github.RepositoryRelease, error) {
 	releases, _, err := g.ListReleases(context.Background(), owner, repoName, &github.ListOptions{
 		PerPage: 100,
 	})
@@ -88,7 +83,7 @@ func ListReleases(repoName string, g GithubRepoService) ([]*github.RepositoryRel
 }
 
 // GetReleaseByTag returns the provided tag release if tag exist in repository
-func GetReleaseByTag(repoName, tag string, g GithubRepoService) (*github.RepositoryRelease, error) {
+func GetReleaseByTag(repoName, tag string, g GHRepoService) (*github.RepositoryRelease, error) {
 	release, _, err := g.GetReleaseByTag(context.Background(), owner, repoName, tag)
 	if err != nil {
 		return nil, err
@@ -97,7 +92,7 @@ func GetReleaseByTag(repoName, tag string, g GithubRepoService) (*github.Reposit
 }
 
 // GetCommitSHA1 returns sha hash against the version
-func GetCommitSHA1(repoName, version string, g GithubRepoService) (string, error) {
+func GetCommitSHA1(repoName, version string, g GHRepoService) (string, error) {
 	sha, _, err := g.GetCommitSHA1(context.Background(), owner, repoName, version, "")
 	if err != nil {
 		return "", err
@@ -106,7 +101,7 @@ func GetCommitSHA1(repoName, version string, g GithubRepoService) (string, error
 }
 
 // GetAssetFromRelease returns the asset using assetName from github release with tag
-func GetAssetFromRelease(tag, assetName, repoName string, g GithubRepoService) (*github.ReleaseAsset, error) {
+func GetAssetFromRelease(tag, assetName, repoName string, g GHRepoService) (*github.ReleaseAsset, error) {
 	release, _, err := g.GetReleaseByTag(context.Background(), owner, repoName, tag)
 	if err != nil {
 		return nil, err
@@ -120,7 +115,7 @@ func GetAssetFromRelease(tag, assetName, repoName string, g GithubRepoService) (
 }
 
 // GetSandboxImageSha returns the sha as per input
-func GetSandboxImageSha(tag string, pre bool, g GithubRepoService) (string, string, error) {
+func GetSandboxImageSha(tag string, pre bool, g GHRepoService) (string, string, error) {
 	var release *github.RepositoryRelease
 	if len(tag) == 0 {
 		releases, err := ListReleases(flyte, g)
@@ -215,7 +210,7 @@ func CheckBrewInstall(goos platformutil.Platform) (string, error) {
 // else cr.flyte.org/flyteorg/flyte-sandbox:dind-{SHA}, where sha is derived from the version.
 // If pre release is true then use latest pre release of Flyte, In that case User don't need to pass version
 
-func GetFullyQualifiedImageName(prefix, version, image string, pre bool, g GithubRepoService) (string, string, error) {
+func GetFullyQualifiedImageName(prefix, version, image string, pre bool, g GHRepoService) (string, string, error) {
 	sha, version, err := GetSandboxImageSha(version, pre, g)
 	if err != nil {
 		return "", version, err
@@ -225,15 +220,16 @@ func GetFullyQualifiedImageName(prefix, version, image string, pre bool, g Githu
 }
 
 // GetGHRepoService returns the initialized github repo service client.
-func GetGHRepoService() GithubRepoService {
+func GetGHRepoService() GHRepoService {
 	if Client == nil {
 		var gh *github.Client
 		if len(os.Getenv("GITHUB_TOKEN")) > 0 {
 			gh = github.NewClient(oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
 				&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
 			)))
+		} else {
+			gh = github.NewClient(&http.Client{})
 		}
-		gh = github.NewClient(&http.Client{})
 		return gh.Repositories
 	}
 	return Client

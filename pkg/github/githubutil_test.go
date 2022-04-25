@@ -54,7 +54,7 @@ func TestCheckVersionExist(t *testing.T) {
 	})
 	t.Run("Valid Tag", func(t *testing.T) {
 		mockGh := &mocks.Github{}
-		tag := "v0.15.0"
+		tag := "v1.0.0"
 		mockGh.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&github.RepositoryRelease{
 			TagName: &tag,
 		}, nil, nil)
@@ -80,9 +80,9 @@ func TestGetFullyQualifiedImageName(t *testing.T) {
 		assert.Equal(t, true, strings.HasPrefix(tag, "v"))
 		assert.Equal(t, true, strings.HasPrefix(image, sandboxImageName))
 	})
-	t.Run("Get tFully Qualified Image Name with pre release", func(t *testing.T) {
+	t.Run("Get Fully Qualified Image Name with pre release", func(t *testing.T) {
 		mockGh := &mocks.Github{}
-		tag := "v0.15.0"
+		tag := "v0.15.0-pre"
 		isPreRelease := true
 		releases := []*github.RepositoryRelease{{
 			TagName:    &tag,
