@@ -21,13 +21,13 @@ var sandboxImageName = "cr.flyte.org/flyteorg/flyte-sandbox"
 
 func TestGetLatestVersion(t *testing.T) {
 	t.Run("Get latest release with wrong url", func(t *testing.T) {
-		mockGh := &mocks.Github{}
+		mockGh := &mocks.GHRepoService{}
 		mockGh.OnGetLatestReleaseMatch(mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, fmt.Errorf("failed"))
 		_, err := GetLatestRelease("fl", mockGh)
 		assert.NotNil(t, err)
 	})
 	t.Run("Get latest release", func(t *testing.T) {
-		mockGh := &mocks.Github{}
+		mockGh := &mocks.GHRepoService{}
 		mockGh.OnGetLatestReleaseMatch(mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, nil)
 		_, err := GetLatestRelease("flytectl", mockGh)
 		assert.Nil(t, err)
@@ -35,7 +35,7 @@ func TestGetLatestVersion(t *testing.T) {
 }
 
 func TestGetLatestRelease(t *testing.T) {
-	mockGh := &mocks.Github{}
+	mockGh := &mocks.GHRepoService{}
 	tag := "v1.0.0"
 	mockGh.OnGetLatestReleaseMatch(mock.Anything, mock.Anything, mock.Anything).Return(&github.RepositoryRelease{
 		TagName: &tag,
@@ -47,13 +47,13 @@ func TestGetLatestRelease(t *testing.T) {
 
 func TestCheckVersionExist(t *testing.T) {
 	t.Run("Invalid Tag", func(t *testing.T) {
-		mockGh := &mocks.Github{}
+		mockGh := &mocks.GHRepoService{}
 		mockGh.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, fmt.Errorf("failed"))
 		_, err := GetReleaseByTag("v100.0.0", "flyte", mockGh)
 		assert.NotNil(t, err)
 	})
 	t.Run("Valid Tag", func(t *testing.T) {
-		mockGh := &mocks.Github{}
+		mockGh := &mocks.GHRepoService{}
 		tag := "v1.0.0"
 		mockGh.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&github.RepositoryRelease{
 			TagName: &tag,
@@ -66,7 +66,7 @@ func TestCheckVersionExist(t *testing.T) {
 
 func TestGetFullyQualifiedImageName(t *testing.T) {
 	t.Run("Get tFully Qualified Image Name ", func(t *testing.T) {
-		mockGh := &mocks.Github{}
+		mockGh := &mocks.GHRepoService{}
 		tag := "v0.15.0"
 		isPreRelease := false
 		releases := []*github.RepositoryRelease{{
@@ -81,7 +81,7 @@ func TestGetFullyQualifiedImageName(t *testing.T) {
 		assert.Equal(t, true, strings.HasPrefix(image, sandboxImageName))
 	})
 	t.Run("Get Fully Qualified Image Name with pre release", func(t *testing.T) {
-		mockGh := &mocks.Github{}
+		mockGh := &mocks.GHRepoService{}
 		tag := "v0.15.0-pre"
 		isPreRelease := true
 		releases := []*github.RepositoryRelease{{
@@ -96,7 +96,7 @@ func TestGetFullyQualifiedImageName(t *testing.T) {
 		assert.Equal(t, true, strings.HasPrefix(image, sandboxImageName))
 	})
 	t.Run("Get Fully Qualified Image Name with specific version", func(t *testing.T) {
-		mockGh := &mocks.Github{}
+		mockGh := &mocks.GHRepoService{}
 		tag := "v0.19.0"
 		isPreRelease := true
 		release := &github.RepositoryRelease{
@@ -114,13 +114,13 @@ func TestGetFullyQualifiedImageName(t *testing.T) {
 
 func TestGetSHAFromVersion(t *testing.T) {
 	t.Run("Invalid Tag", func(t *testing.T) {
-		mockGh := &mocks.Github{}
+		mockGh := &mocks.GHRepoService{}
 		mockGh.OnGetCommitSHA1Match(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("", nil, fmt.Errorf("failed"))
 		_, err := GetCommitSHA1("v100.0.0", "flyte", mockGh)
 		assert.NotNil(t, err)
 	})
 	t.Run("Valid Tag", func(t *testing.T) {
-		mockGh := &mocks.Github{}
+		mockGh := &mocks.GHRepoService{}
 		mockGh.OnGetCommitSHA1Match(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("v1.15.0", nil, nil)
 		release, err := GetCommitSHA1("v0.15.0", "flyte", mockGh)
 		assert.Nil(t, err)
@@ -130,7 +130,7 @@ func TestGetSHAFromVersion(t *testing.T) {
 
 func TestGetAssetsFromRelease(t *testing.T) {
 	t.Run("Successful get assets", func(t *testing.T) {
-		mockGh := &mocks.Github{}
+		mockGh := &mocks.GHRepoService{}
 		tag := "v0.15.0"
 		sandboxManifest := "flyte_sandbox_manifest.yaml"
 		mockGh.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&github.RepositoryRelease{
@@ -147,7 +147,7 @@ func TestGetAssetsFromRelease(t *testing.T) {
 	})
 
 	t.Run("Failed get assets with wrong name", func(t *testing.T) {
-		mockGh := &mocks.Github{}
+		mockGh := &mocks.GHRepoService{}
 		mockGh.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, fmt.Errorf("failed"))
 		assets, err := GetAssetFromRelease("v0.15.0", "test", flyte, mockGh)
 		assert.NotNil(t, err)

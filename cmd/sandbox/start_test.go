@@ -76,7 +76,7 @@ var fakePod = corev1.Pod{
 }
 
 var (
-	githubMock *ghMocks.Github
+	githubMock *ghMocks.GHRepoService
 	ctx        context.Context
 	mockDocker *mocks.Docker
 )
@@ -87,7 +87,7 @@ func sandboxSetup() {
 	errCh := make(chan error)
 	sandboxConfig.DefaultConfig.Version = "v0.19.1"
 	bodyStatus := make(chan container.ContainerWaitOKBody)
-	githubMock = &ghMocks.Github{}
+	githubMock = &ghMocks.GHRepoService{}
 	sandboxConfig.DefaultConfig.Image = "dummyimage"
 	mockDocker.OnContainerCreateMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(container.ContainerCreateCreatedBody{
 		ID: "Hello",

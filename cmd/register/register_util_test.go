@@ -436,13 +436,13 @@ func TestGetStorageClient(t *testing.T) {
 
 func TestGetAllFlytesnacksExample(t *testing.T) {
 	t.Run("Failed to get manifest with wrong name", func(t *testing.T) {
-		mockGh := &ghMocks.Github{}
+		mockGh := &ghMocks.GHRepoService{}
 		mockGh.OnGetLatestReleaseMatch(mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, fmt.Errorf("failed"))
 		_, _, err := getAllExample("no////ne", "", mockGh)
 		assert.NotNil(t, err)
 	})
 	t.Run("Failed to get release", func(t *testing.T) {
-		mockGh := &ghMocks.Github{}
+		mockGh := &ghMocks.GHRepoService{}
 		tag := "v0.15.0"
 		sandboxManifest := "flyte_sandbox_manifest.tgz"
 		mockGh.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&github.RepositoryRelease{
@@ -455,7 +455,7 @@ func TestGetAllFlytesnacksExample(t *testing.T) {
 		assert.NotNil(t, err)
 	})
 	t.Run("Successfully get examples", func(t *testing.T) {
-		mockGh := &ghMocks.Github{}
+		mockGh := &ghMocks.GHRepoService{}
 		tag := "v0.15.0"
 		sandboxManifest := "flyte_sandbox_manifest.tgz"
 		mockGh.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&github.RepositoryRelease{
