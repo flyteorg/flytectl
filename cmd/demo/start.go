@@ -180,7 +180,7 @@ func updateLocalKubeContext() error {
 	return k8sCtxMgr.CopyContext(srcConfigAccess, demoDockerContext, demoContextName)
 }
 
-func startDemo(ctx context.Context, cli docker.Docker, g github.GithubRepoService, reader io.Reader) (*bufio.Scanner, error) {
+func startDemo(ctx context.Context, cli docker.Docker, g github.GHRepoService, reader io.Reader) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
 
 	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {

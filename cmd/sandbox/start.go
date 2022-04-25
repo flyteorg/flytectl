@@ -42,17 +42,13 @@ Starts the sandbox cluster without any source code:
  flytectl sandbox start
 
 Mounts your source code repository inside the sandbox:
+
 ::
 
-<<<<<<< HEAD
  flytectl sandbox start --source=$HOME/flyteorg/flytesnacks
 
 Runs a specific version of Flyte. Flytectl sandbox only supports Flyte version available in the Github release, https://github.com/flyteorg/flyte/tags.
-=======
- flytectl sandbox start --source=$HOME/flyteorg/flytesnacks 
-	
-Runs a specific version of Flyte. Flytectl sandbox only supports Flyte version available in the GithubRepoService release, https://github.com/flyteorg/flyte/tags.
->>>>>>> Mocking github repo service and refactoring
+
 ::
 
  flytectl sandbox start  --version=v0.14.0
@@ -166,7 +162,7 @@ func updateLocalKubeContext() error {
 	return k8sCtxMgr.CopyContext(srcConfigAccess, sandboxDockerContext, sandboxContextName)
 }
 
-func startSandbox(ctx context.Context, cli docker.Docker, g github.GithubRepoService, reader io.Reader) (*bufio.Scanner, error) {
+func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService, reader io.Reader) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
 
 	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
