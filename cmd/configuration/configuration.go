@@ -17,7 +17,6 @@ import (
 	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
 	"github.com/flyteorg/flytestdlib/config/viper"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
-	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
@@ -56,11 +55,6 @@ Generate Flytectl config with a storage provider:
 `
 )
 
-var prompt = promptui.Select{
-	Label: "Select Storage Provider",
-	Items: []string{"S3", "GCS"},
-}
-
 var endpointPrefix = [3]string{"dns:///", "http://", "https://"}
 
 // CreateConfigCommand will return configuration command
@@ -78,10 +72,10 @@ func CreateConfigCommand() *cobra.Command {
 }
 
 func configInitFunc(ctx context.Context, args []string, cmdCtx cmdcore.CommandContext) error {
-	return initFlytectlConfig(ctx, os.Stdin)
+	return initFlytectlConfig(os.Stdin)
 }
 
-func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
+func initFlytectlConfig(reader io.Reader) error {
 
 	if err := util.SetupFlyteDir(); err != nil {
 		return err
