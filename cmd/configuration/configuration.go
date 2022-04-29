@@ -8,8 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/flyteorg/flytestdlib/logger"
-
 	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/flyteorg/flytectl/pkg/configutil"
@@ -93,7 +91,7 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 		Host:     "dns:///localhost:30081",
 		Insecure: true,
 	}
-	templateStr := configutil.GetSandboxTemplate()
+	templateStr := configutil.GetTemplate()
 
 	if len(initConfig.DefaultConfig.Host) > 0 {
 		trimHost := trimEndpoint(initConfig.DefaultConfig.Host)
@@ -102,19 +100,6 @@ func initFlytectlConfig(ctx context.Context, reader io.Reader) error {
 		}
 		templateValues.Host = fmt.Sprintf("dns:///%s", trimHost)
 		templateValues.Insecure = initConfig.DefaultConfig.Insecure
-		templateStr = configutil.AdminConfigTemplate
-		if initConfig.DefaultConfig.Storage {
-			templateStr = configutil.GetAWSCloudTemplate()
-			_, result, err := prompt.Run()
-			if err != nil {
-				return err
-			}
-			if strings.ToUpper(result) == "GCS" {
-				templateStr = configutil.GetGoogleCloudTemplate()
-			}
-		} else {
-			logger.Infof(ctx, "Init flytectl config for remote cluster, Please update your storage config in %s. Learn more about the config here https://docs.flyte.org/projects/flytectl/en/latest/index.html#configure", configutil.ConfigFile)
-		}
 	}
 	var _err error
 	if _, err := os.Stat(configutil.ConfigFile); os.IsNotExist(err) {
