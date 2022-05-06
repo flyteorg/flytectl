@@ -466,7 +466,7 @@ Get serialize output file list from the args list.
 If the archive flag is on then download the archives to temp directory and extract it. In case of fast register it will also return the compressed source code
 The o/p of this function would be sorted list of the file locations.
 */
-func getSerializeOutputFiles(ctx context.Context, args []string, archive bool) ([]string, string, error) {
+func GetSerializeOutputFiles(ctx context.Context, args []string, archive bool) ([]string, string, error) {
 	if !archive {
 		/*
 		 * Sorting is required for non-archived case since its possible for the user to pass in a list of unordered
