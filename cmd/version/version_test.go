@@ -64,7 +64,7 @@ func TestVersionCommandFunc(t *testing.T) {
 	s.MockClient.AdminClient().(*mocks.AdminServiceClient).OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, nil)
 	err := getVersion(s.Ctx, []string{}, s.CmdCtx)
 	assert.Nil(t, err)
-	s.MockClient.AdminClient().(*mocks.AdminServiceClient).AssertNotCalled(t, "GetVersion", ctx, versionRequest)
+	s.MockClient.AdminClient().(*mocks.AdminServiceClient).AssertCalled(t, "GetVersion", ctx, versionRequest)
 }
 
 func TestVersionCommandFuncError(t *testing.T) {
@@ -76,7 +76,7 @@ func TestVersionCommandFuncError(t *testing.T) {
 	s.MockClient.AdminClient().(*mocks.AdminServiceClient).OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, nil)
 	err := getVersion(s.Ctx, []string{}, s.CmdCtx)
 	assert.Nil(t, err)
-	s.MockClient.AdminClient().(*mocks.AdminServiceClient).AssertNotCalled(t, "GetVersion", ctx, versionRequest)
+	s.MockClient.AdminClient().(*mocks.AdminServiceClient).AssertCalled(t, "GetVersion", ctx, versionRequest)
 }
 
 func TestVersionCommandFuncErr(t *testing.T) {
@@ -88,7 +88,7 @@ func TestVersionCommandFuncErr(t *testing.T) {
 	s.MockAdminClient.OnGetVersionMatch(ctx, versionRequest).Return(versionResponse, errors.New("error"))
 	err := getVersion(s.Ctx, []string{}, s.CmdCtx)
 	assert.Nil(t, err)
-	s.MockAdminClient.AssertNotCalled(t, "GetVersion", ctx, versionRequest)
+	s.MockAdminClient.AssertCalled(t, "GetVersion", ctx, versionRequest)
 }
 
 func TestVersionUtilFunc(t *testing.T) {

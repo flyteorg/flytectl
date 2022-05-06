@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"runtime"
 
-	adminClient "github.com/flyteorg/flyteidl/clients/go/admin"
-
 	"github.com/flyteorg/flytectl/pkg/github"
 
 	"github.com/flyteorg/flytectl/pkg/platformutil"
@@ -78,10 +76,6 @@ func getVersion(ctx context.Context, args []string, cmdCtx cmdCore.CommandContex
 		return err
 	}
 
-	if len(adminClient.GetConfig(ctx).Endpoint.String()) == 0 {
-		return nil
-	}
-
 	// Print Flyteadmin version if available
 	if err := getControlPlaneVersion(ctx, cmdCtx); err != nil {
 		logger.Debug(ctx, err)
@@ -99,6 +93,11 @@ func printVersion(response versionOutput) error {
 }
 
 func getControlPlaneVersion(ctx context.Context, cmdCtx cmdCore.CommandContext) error {
+	if cmdCtx.ClientSet() == nil {
+		logger.Debug(ctx, "Ignore talking to admin if host is not configured")
+		return nil
+	}
+
 	v, err := cmdCtx.AdminClient().GetVersion(ctx, &admin.GetVersionRequest{})
 	if err != nil || v == nil {
 		logger.Debugf(ctx, "Failed to get version of control plane %v: \n", err)
