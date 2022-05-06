@@ -104,7 +104,7 @@ func compileFromPackage(packagePath string) error {
 		taskTemplates = append(taskTemplates, task.Template)
 	}
 
-	fmt.Println("Compiling tasks...")
+	fmt.Println("\nCompiling tasks...")
 	compiledTasks, err := compileTasks(taskTemplates)
 	if err != nil {
 		fmt.Println("Error while compiling tasks...")
@@ -114,7 +114,7 @@ func compileFromPackage(packagePath string) error {
 	// compile workflows
 	for wfName, workflow := range workflows {
 
-		fmt.Println("Compiling workflow:", wfName)
+		fmt.Println("\nCompiling workflow:", wfName)
 		plan := plans[wfName]
 
 		_, err := compiler.CompileWorkflow(workflow.Template,
@@ -129,13 +129,10 @@ func compileFromPackage(packagePath string) error {
 	}
 
 	fmt.Println("All Workflows compiled successfully!")
-	fmt.Println("Summary:")
-	fmt.Println("X workflows found in package")
-	fmt.Println("X Tasks found in package")
-	fmt.Println("X Launch plans found in package")
-
-	fmt.Println("Workflows:")
-	fmt.Println("Tasks:")
+	fmt.Println("\nSummary:")
+	fmt.Println(len(workflows), " workflows found in package")
+	fmt.Println(len(tasks), " Tasks found in package")
+	fmt.Println(len(plans), " Launch plans found in package")
 	return nil
 }
 
