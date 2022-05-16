@@ -41,7 +41,7 @@ func compileFromPackage(packagePath string) error {
 		fmt.Println("Error found while extracting package..")
 		return err
 	}
-	fmt.Println("Successfuly extracted package...")
+	fmt.Println("Successfully extracted package...")
 	fmt.Println("Processing Protobuff files...")
 	workflows := make(map[string]admin.WorkflowSpec)
 	plans := make(map[string]admin.LaunchPlan)
@@ -65,6 +65,9 @@ func compileFromPackage(packagePath string) error {
 				return err
 			}
 			err = proto.Unmarshal(rawTsk, &task)
+			if err != nil {
+				return err
+			}
 			tasks = append(tasks, task)
 		}
 
@@ -153,6 +156,9 @@ func CreateCompileCommand() *cobra.Command {
 		},
 	}
 	compile.Flags().StringVarP(&file, "file", "f", "", "path to file with packaged workflow..")
-	compile.MarkFlagRequired("file")
+	err := compile.MarkFlagRequired("file")
+	if err != nil {
+		panic(err)
+	}
 	return compile
 }
