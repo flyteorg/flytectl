@@ -6,10 +6,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCompileCommand(t *testing.T) {
+	compileCommand := CreateCompileCommand()
+	assert.Equal(t, compileCommand.Use, "compile")
+	assert.Equal(t, compileCommand.Flags().Lookup("file").Shorthand, "f")
+}
+
 func TestCompilePackage(t *testing.T) {
 	// valid package contains two workflows
 	// with three tasks
 	err := compileFromPackage("testdata/valid-package.tgz")
+	assert.Nil(t, err, "unable to compile a valid package")
+
+	// compiling via cobra command
+	compileCommand := CreateCompileCommand()
+	err = compileCommand.Flags().Set("file", "testdata/valid-package.tgz")
+	assert.Nil(t, err, "unable to set file flag")
+
+	err = compileCommand.RunE(compileCommand, []string{})
 	assert.Nil(t, err, "unable to compile a valid package")
 
 	// invalid gzip header
@@ -19,4 +33,16 @@ func TestCompilePackage(t *testing.T) {
 	// invalid workflow, types do not match
 	err = compileFromPackage("testdata/bad-workflow-package.tgz")
 	assert.NotNil(t, err, "compilin an invalid workflow returns no error")
+
+	// testing badly serialized task
+	err = compileFromPackage("testdata/invalidtask.tgz")
+	assert.NotNil(t, err, "unable to handle invalid task")
+
+	// testing badly serialized launchplan
+	err = compileFromPackage("testdata/invalidlaunchplan.tgz")
+	assert.NotNil(t, err, "unable to handle invalid launchplan")
+
+	// testing badly serialized workflow
+	err = compileFromPackage("testdata/invalidworkflow.tgz")
+	assert.NotNil(t, err, "unable to handle invalid workflow")
 }
