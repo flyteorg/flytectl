@@ -7,7 +7,8 @@ import (
 )
 
 func TestCompileCommand(t *testing.T) {
-	compileCommand := CreateCompileCommand()
+	compileCommand, err := CreateCompileCommand()
+	assert.Nil(t, err)
 	assert.Equal(t, compileCommand.Use, "compile")
 	assert.Equal(t, compileCommand.Flags().Lookup("file").Shorthand, "f")
 }
@@ -19,7 +20,8 @@ func TestCompilePackage(t *testing.T) {
 	assert.Nil(t, err, "unable to compile a valid package")
 
 	// compiling via cobra command
-	compileCommand := CreateCompileCommand()
+	compileCommand, err := CreateCompileCommand()
+	assert.Nil(t, err)
 	err = compileCommand.Flags().Set("file", "testdata/valid-package.tgz")
 	assert.Nil(t, err, "unable to set file flag")
 
