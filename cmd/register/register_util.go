@@ -92,7 +92,7 @@ var projectColumns = []printer.Column{
 	{Header: "Additional Info", JSONPath: "$.Info"},
 }
 
-func unMarshalContents(ctx context.Context, fileContents []byte, fname string) (proto.Message, error) {
+func UnMarshalContents(ctx context.Context, fileContents []byte, fname string) (proto.Message, error) {
 	workflowSpec := &admin.WorkflowSpec{}
 	errCollection := errors2.ErrorCollection{}
 	err := proto.Unmarshal(fileContents, workflowSpec)
@@ -562,7 +562,7 @@ func registerFile(ctx context.Context, fileName string, registerResults []Result
 		registerResults = append(registerResults, Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error reading file due to %v", err)})
 		return registerResults, err
 	}
-	spec, err := unMarshalContents(ctx, fileContents, fileName)
+	spec, err := UnMarshalContents(ctx, fileContents, fileName)
 	if err != nil {
 		registerResult = Result{Name: fileName, Status: "Failed", Info: fmt.Sprintf("Error unmarshalling file due to %v", err)}
 		registerResults = append(registerResults, registerResult)
