@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 
 	"github.com/flyteorg/flytectl/cmd/register"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/flyteorg/flytepropeller/pkg/compiler"
 	"github.com/flyteorg/flytepropeller/pkg/compiler/common"
-	"github.com/golang/protobuf/proto"
 	"github.com/spf13/cobra"
 )
 
@@ -42,62 +40,29 @@ func compileFromPackage(packagePath string) error {
 		return err
 	}
 	fmt.Println("Successfully extracted package...")
-	fmt.Println("Processing Protobuff files...")
-	workflows := make(map[string]admin.WorkflowSpec)
-	plans := make(map[string]admin.LaunchPlan)
-	tasks := []admin.TaskSpec{}
+	fmt.Println("Processing Protobuf files...")
+	workflows := make(map[string]*admin.WorkflowSpec)
+	plans := make(map[string]*admin.LaunchPlan)
+	tasks := []*admin.TaskSpec{}
 
 	for _, pbFilePath := range fileList {
-		// deserializing packaged protocolbuffers
-		// based on filename as defined in flytekit
-		// https://github.com/flyteorg/flytekit/blob/master/flytekit/tools/serialize_helpers.py#L102
-		// filename suffix tell us how to deserialize file
-		// _1.pb : are Tasks protobufs
-		// _2.pb : are workflows protobufs
-		// _3.pb are Launchplans protobufs
-
-		if strings.HasSuffix(pbFilePath, "_1.pb") {
-			fmt.Println("Task:", pbFilePath)
-			task := admin.TaskSpec{}
-			rawTsk, err := ioutil.ReadFile(pbFilePath)
-			if err != nil {
-				fmt.Printf("error unmarshalling task..")
-				return err
-			}
-			err = proto.Unmarshal(rawTsk, &task)
-			if err != nil {
-				return err
-			}
-			tasks = append(tasks, task)
+		rawTsk, err := ioutil.ReadFile(pbFilePath)
+		if err != nil {
+			fmt.Printf("error unmarshalling task..")
+			return err
+		}
+		spec, err := register.UnMarshalContents(context.Background(), rawTsk, pbFilePath)
+		if err != nil {
+			return err
 		}
 
-		if strings.HasSuffix(pbFilePath, "_2.pb") {
-			fmt.Println("Workflow:", pbFilePath)
-			wfSpec := admin.WorkflowSpec{}
-			rawWf, err := ioutil.ReadFile(pbFilePath)
-			if err != nil {
-				return err
-			}
-			err = proto.Unmarshal(rawWf, &wfSpec)
-			if err != nil {
-				fmt.Println("error unmarshalling workflow: ", pbFilePath)
-				return err
-			}
-			workflows[wfSpec.Template.Id.Name] = wfSpec
-		}
-		if strings.HasSuffix(pbFilePath, "_3.pb") {
-			fmt.Println("Launch Plan:", pbFilePath)
-			var launchPlan admin.LaunchPlan
-			rawLp, err := ioutil.ReadFile(pbFilePath)
-			if err != nil {
-				return err
-			}
-			err = proto.Unmarshal(rawLp, &launchPlan)
-			if err != nil {
-				fmt.Println("error unmarshalling Launch Plan: ", pbFilePath)
-				return err
-			}
-			plans[launchPlan.Id.Name] = launchPlan
+		switch v := spec.(type) {
+		case *admin.TaskSpec:
+			tasks = append(tasks, v)
+		case *admin.WorkflowSpec:
+			workflows[v.Template.Id.Name] = v
+		case *admin.LaunchPlan:
+			plans[v.Id.Name] = v
 		}
 	}
 
@@ -123,7 +88,7 @@ func compileFromPackage(packagePath string) error {
 		_, err := compiler.CompileWorkflow(workflow.Template,
 			workflow.SubWorkflows,
 			compiledTasks,
-			[]common.InterfaceProvider{compiler.NewLaunchPlanInterfaceProvider(plan)})
+			[]common.InterfaceProvider{compiler.NewLaunchPlanInterfaceProvider(*plan)})
 		if err != nil {
 			fmt.Println(":( Error Compiling workflow:", wfName)
 			return err
