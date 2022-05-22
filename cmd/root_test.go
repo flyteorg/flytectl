@@ -7,7 +7,6 @@ import (
 )
 
 func TestRootCmdIntegration(t *testing.T) {
-	rootCmd, err := newRootCmd()
-	assert.Nil(t, err)
+	rootCmd := newRootCmd()
 	assert.NotNil(t, rootCmd)
 }

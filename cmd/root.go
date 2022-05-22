@@ -38,7 +38,7 @@ const (
 	configFileName = "config.yaml"
 )
 
-func newRootCmd() (*cobra.Command, error) {
+func newRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		PersistentPreRunE: initConfig,
 		Long:              "Flytectl is a CLI tool written in Go to interact with the FlyteAdmin service.",
@@ -58,11 +58,8 @@ func newRootCmd() (*cobra.Command, error) {
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Output), "output", "o", printer.OutputFormatTABLE.String(), fmt.Sprintf("Specifies the output type - supported formats %s. NOTE: dot, doturl are only supported for Workflow", printer.OutputFormats()))
 
 	rootCmd.AddCommand(get.CreateGetCommand())
-	compileCmd, err := compile.CreateCompileCommand()
-	if err != nil {
-		return nil, err
-	}
-	rootCmd.AddCommand(compileCmd)
+	compileCmd := compile.CreateCompileCommand()
+	cmdCore.AddCommands(rootCmd, compileCmd)
 	rootCmd.AddCommand(create.RemoteCreateCommand())
 	rootCmd.AddCommand(update.CreateUpdateCommand())
 	rootCmd.AddCommand(register.RemoteRegisterCommand())
@@ -81,7 +78,7 @@ func newRootCmd() (*cobra.Command, error) {
 
 	config.GetConfig()
 
-	return rootCmd, nil
+	return rootCmd
 }
 
 func initConfig(cmd *cobra.Command, _ []string) error {
@@ -118,12 +115,8 @@ func initConfig(cmd *cobra.Command, _ []string) error {
 }
 
 func GenerateDocs() error {
-	rootCmd, err := newRootCmd()
-	if err != nil {
-		logrus.Fatal(err)
-		return err
-	}
-	err = GenReSTTree(rootCmd, "gen")
+	rootCmd := newRootCmd()
+	err := GenReSTTree(rootCmd, "gen")
 	if err != nil {
 		logrus.Fatal(err)
 		return err
@@ -141,9 +134,6 @@ func GenReSTTree(cmd *cobra.Command, dir string) error {
 }
 
 func ExecuteCmd() error {
-	cmd, err := newRootCmd()
-	if err != nil {
-		return err
-	}
+	cmd := newRootCmd()
 	return cmd.Execute()
 }
