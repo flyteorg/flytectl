@@ -38,13 +38,11 @@ func TestCompileCommand(t *testing.T) {
 	// calling command with empty file flag
 	compileCfg = config.DefaultCompileConfig
 	compileCfg.File = ""
-	s = setup()
 	err = compileCmd.CmdFunc(context.Background(), []string{}, s.CmdCtx)
 	assert.NotNil(t, err, "calling compile with Empty file flag does not error")
 }
 
 func TestCompilePackage(t *testing.T) {
-	//ctx := context.Background()
 	// valid package contains two workflows
 	// with three tasks
 	err := compileFromPackage("testdata/valid-package.tgz")

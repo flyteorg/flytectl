@@ -134,6 +134,5 @@ func GenReSTTree(cmd *cobra.Command, dir string) error {
 }
 
 func ExecuteCmd() error {
-	cmd := newRootCmd()
-	return cmd.Execute()
+	return newRootCmd().Execute()
 }
