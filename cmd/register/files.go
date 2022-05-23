@@ -102,6 +102,12 @@ Override Destination dir of source code in container during registration:
 ::
 
  flytectl register file  _pb_output/* -d development  -p flytesnacks --continueOnError --version v2 --destinationDirectory "/root" 
+
+Enable schedule for the launchplans part of the serialized protobuf files:
+
+::
+
+ flytectl register file  _pb_output/* -d development  -p flytesnacks --version v2 --enableSchedule
 	
 Usage
 `
@@ -120,7 +126,7 @@ func Register(ctx context.Context, args []string, cfg *config.Config, cmdCtx cmd
 	deprecatedCheck(ctx, &rconfig.DefaultFilesConfig.K8sServiceAccount, rconfig.DefaultFilesConfig.K8ServiceAccount)
 
 	// getSerializeOutputFiles will return you all proto and  source code compress file in sorted order
-	dataRefs, tmpDir, err := getSerializeOutputFiles(ctx, args, rconfig.DefaultFilesConfig.Archive)
+	dataRefs, tmpDir, err := GetSerializeOutputFiles(ctx, args, rconfig.DefaultFilesConfig.Archive)
 	if err != nil {
 		logger.Errorf(ctx, "error while un-archiving files in tmp dir due to %v", err)
 		return err
