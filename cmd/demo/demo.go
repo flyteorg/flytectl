@@ -1,8 +1,8 @@
 package demo
 
 import (
-	sandboxConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	cmdcore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/pkg/sandbox"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +46,7 @@ func CreateDemoCommand() *cobra.Command {
 	demoResourcesFuncs := map[string]cmdcore.CommandEntry{
 		"start": {CmdFunc: startDemoCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
 			Short: startShort,
-			Long:  startLong, PFlagProvider: sandboxConfig.DefaultConfig},
+			Long:  startLong, PFlagProvider: sandbox.DefaultConfig},
 		"teardown": {CmdFunc: teardownDemoCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
 			Short: teardownShort,
 			Long:  teardownLong},
