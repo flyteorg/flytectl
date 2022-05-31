@@ -172,9 +172,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 	}
 
 	volumes := docker.Volumes
-	// get rid of this config
-	sandboxDefaultConfig := sandboxConfig
-	if vol, err := MountVolume(sandboxDefaultConfig.Source, docker.Source); err != nil {
+	if vol, err := MountVolume(sandboxConfig.Source, docker.Source); err != nil {
 		return nil, err
 	} else if vol != nil {
 		volumes = append(volumes, *vol)
@@ -198,7 +196,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
 	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName,
-		sandboxImage, sandboxDefaultConfig.Env)
+		sandboxImage, sandboxConfig.Env)
 
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)

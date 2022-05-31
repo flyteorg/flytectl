@@ -76,6 +76,6 @@ Usage
 
 func startDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	sandboxDefaultConfig := sandbox.DefaultConfig
-	return sandbox.StartSandboxCluster(ctx, args, sandboxDefaultConfig)
+	return sandbox.StartDemoCluster(ctx, args, sandboxDefaultConfig)
 
 }
