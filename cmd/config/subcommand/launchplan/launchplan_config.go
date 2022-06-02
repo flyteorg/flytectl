@@ -6,8 +6,12 @@ import (
 
 //go:generate pflags Config --default-var DefaultConfig --bind-default-var
 var (
+	lpDefaultFilter = filters.Filters{
+		Limit: filters.DefaultLimit,
+		Page:  1,
+	}
 	DefaultConfig = &Config{
-		Filter: filters.DefaultFilter,
+		Filter: lpDefaultFilter,
 	}
 )
 

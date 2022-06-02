@@ -232,9 +232,6 @@ func TestGetLaunchPlanFuncWithError(t *testing.T) {
 		s := setup()
 		getLaunchPlanSetup()
 		s.FetcherExt.OnFetchAllVerOfLP(s.Ctx, "launchplan1", "dummyProject", "dummyDomain", filters.Filters{}).Return(nil, fmt.Errorf("error fetching all version"))
-		s.MockAdminClient.OnListLaunchPlansMatch(s.Ctx, resourceGetRequest).Return(nil, fmt.Errorf("error fetching all version"))
-		s.MockAdminClient.OnGetLaunchPlanMatch(s.Ctx, objectGetRequest).Return(nil, fmt.Errorf("error fetching lanuch plan"))
-		s.MockAdminClient.OnListLaunchPlanIdsMatch(s.Ctx, namedIDRequest).Return(nil, fmt.Errorf("error listing lanuch plan ids"))
 		err := getLaunchPlanFunc(s.Ctx, argsLp, s.CmdCtx)
 		assert.NotNil(t, err)
 	})
@@ -243,8 +240,7 @@ func TestGetLaunchPlanFuncWithError(t *testing.T) {
 		s := setup()
 		getLaunchPlanSetup()
 		argsLp = []string{}
-		s.FetcherExt.OnFetchAllVerOfLP(s.Ctx, "", "dummyProject", "dummyDomain", filters.Filters{}).Return(nil, fmt.Errorf("error fetching all version"))
-		s.MockAdminClient.OnListLaunchPlansMatch(s.Ctx, resourceListRequest).Return(nil, fmt.Errorf("error fetching all version"))
+		s.FetcherExt.OnFetchAllLPsMatch(s.Ctx, "dummyProject", "dummyDomain", filters.Filters{}).Return(nil, fmt.Errorf("error fetching all version"))
 		err := getLaunchPlanFunc(s.Ctx, argsLp, s.CmdCtx)
 		assert.NotNil(t, err)
 	})
@@ -287,7 +283,8 @@ func TestGetLaunchPlans(t *testing.T) {
 	t.Run("no workflow filter", func(t *testing.T) {
 		s := setup()
 		getLaunchPlanSetup()
-		s.FetcherExt.OnFetchAllVerOfLP(s.Ctx, "", "dummyProject", "dummyDomain", filters.Filters{}).Return(launchPlanListResponse.LaunchPlans, nil)
+		var namedEntityList []*admin.NamedEntity
+		s.FetcherExt.OnFetchAllLPsMatch(s.Ctx, "dummyProject", "dummyDomain", filters.Filters{}).Return(namedEntityList, nil)
 		argsLp = []string{}
 		err := getLaunchPlanFunc(s.Ctx, argsLp, s.CmdCtx)
 		assert.Nil(t, err)

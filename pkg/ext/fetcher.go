@@ -34,6 +34,9 @@ type AdminFetcherExtInterface interface {
 	// FetchAllVerOfLP fetches all versions of launch plan in a  project, domain
 	FetchAllVerOfLP(ctx context.Context, lpName, project, domain string, filter filters.Filters) ([]*admin.LaunchPlan, error)
 
+	// FetchAllLPs fetches all unique launch plans in a  project, domain
+	FetchAllLPs(ctx context.Context, project, domain string, filter filters.Filters) ([]*admin.NamedEntity, error)
+
 	// FetchLPLatestVersion fetches latest version of launch plan in a  project, domain
 	FetchLPLatestVersion(ctx context.Context, name, project, domain string, filter filters.Filters) (*admin.LaunchPlan, error)
 

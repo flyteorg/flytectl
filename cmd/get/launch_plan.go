@@ -121,14 +121,6 @@ var launchplanColumns = []printer.Column{
 	{Header: "Outputs", JSONPath: "$.closure.expectedOutputs.variables." + printer.DefaultFormattedDescriptionsKey + ".description"},
 }
 
-// Column structure for get all launchplans
-var launchplansColumns = []printer.Column{
-	{Header: "Version", JSONPath: "$.id.version"},
-	{Header: "Name", JSONPath: "$.id.name"},
-	{Header: "Type", JSONPath: "$.id.resourceType"},
-	{Header: "CreatedAt", JSONPath: "$.closure.createdAt"},
-}
-
 func LaunchplanToProtoMessages(l []*admin.LaunchPlan) []proto.Message {
 	messages := make([]proto.Message, 0, len(l))
 	for _, m := range l {
@@ -186,18 +178,18 @@ func getLaunchPlanFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		launchplan.DefaultConfig.Filter.FieldSelector = fmt.Sprintf("workflow.name=%s", launchplan.DefaultConfig.Workflow)
 	}
 
-	launchPlans, err := cmdCtx.AdminFetcherExt().FetchAllVerOfLP(ctx, "", config.GetConfig().Project, config.GetConfig().Domain, launchplan.DefaultConfig.Filter)
+	nameEntities, err := cmdCtx.AdminFetcherExt().FetchAllLPs(ctx, config.GetConfig().Project, config.GetConfig().Domain, launchplan.DefaultConfig.Filter)
 	if err != nil {
 		return err
 	}
 
-	logger.Debugf(ctx, "Retrieved %v launch plans", len(launchPlans))
+	logger.Debugf(ctx, "Retrieved %v launch plans", len(nameEntities))
 	if config.GetConfig().MustOutputFormat() == printer.OutputFormatTABLE {
-		return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplansColumns,
-			LaunchplanToTableProtoMessages(launchPlans)...)
+		return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), namedEntityColumns,
+			NamedEntityToProtoMessages(nameEntities)...)
 	}
-	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), launchplansColumns,
-		LaunchplanToProtoMessages(launchPlans)...)
+	return launchPlanPrinter.Print(config.GetConfig().MustOutputFormat(), namedEntityColumns,
+		NamedEntityToProtoMessages(nameEntities)...)
 
 }
 

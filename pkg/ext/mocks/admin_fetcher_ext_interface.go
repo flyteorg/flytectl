@@ -53,6 +53,47 @@ func (_m *AdminFetcherExtInterface) AdminServiceClient() service.AdminServiceCli
 	return r0
 }
 
+type AdminFetcherExtInterface_FetchAllLPs struct {
+	*mock.Call
+}
+
+func (_m AdminFetcherExtInterface_FetchAllLPs) Return(_a0 []*admin.NamedEntity, _a1 error) *AdminFetcherExtInterface_FetchAllLPs {
+	return &AdminFetcherExtInterface_FetchAllLPs{Call: _m.Call.Return(_a0, _a1)}
+}
+
+func (_m *AdminFetcherExtInterface) OnFetchAllLPs(ctx context.Context, project string, domain string, filter filters.Filters) *AdminFetcherExtInterface_FetchAllLPs {
+	c_call := _m.On("FetchAllLPs", ctx, project, domain, filter)
+	return &AdminFetcherExtInterface_FetchAllLPs{Call: c_call}
+}
+
+func (_m *AdminFetcherExtInterface) OnFetchAllLPsMatch(matchers ...interface{}) *AdminFetcherExtInterface_FetchAllLPs {
+	c_call := _m.On("FetchAllLPs", matchers...)
+	return &AdminFetcherExtInterface_FetchAllLPs{Call: c_call}
+}
+
+// FetchAllLPs provides a mock function with given fields: ctx, project, domain, filter
+func (_m *AdminFetcherExtInterface) FetchAllLPs(ctx context.Context, project string, domain string, filter filters.Filters) ([]*admin.NamedEntity, error) {
+	ret := _m.Called(ctx, project, domain, filter)
+
+	var r0 []*admin.NamedEntity
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, filters.Filters) []*admin.NamedEntity); ok {
+		r0 = rf(ctx, project, domain, filter)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*admin.NamedEntity)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, filters.Filters) error); ok {
+		r1 = rf(ctx, project, domain, filter)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 type AdminFetcherExtInterface_FetchAllVerOfLP struct {
 	*mock.Call
 }

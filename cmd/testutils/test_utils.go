@@ -99,9 +99,11 @@ func SetupWithExt() (s TestStruct) {
 // TearDownAndVerify TODO: Change this to verify log lines from context
 func TearDownAndVerify(t *testing.T, reader io.Reader, expectedLog string) {
 	var buf bytes.Buffer
-	if _, err := io.Copy(&buf, reader); err == nil {
+	var err error
+	if _, err = io.Copy(&buf, reader); err == nil {
 		assert.Equal(t, sanitizeString(expectedLog), sanitizeString(buf.String()))
 	}
+	assert.Nil(t, err)
 }
 
 func sanitizeString(str string) string {

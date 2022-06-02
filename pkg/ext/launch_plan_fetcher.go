@@ -26,6 +26,22 @@ func (a *AdminFetcherExtClient) FetchAllVerOfLP(ctx context.Context, lpName, pro
 	return tList.LaunchPlans, nil
 }
 
+// FetchAllLPs fetches all launchplans in project domain
+func (a *AdminFetcherExtClient) FetchAllLPs(ctx context.Context, project, domain string, filter filters.Filters) ([]*admin.NamedEntity, error) {
+	tranformFilters, err := filters.BuildNamedEntityListRequest(filter, project, domain, core.ResourceType_LAUNCH_PLAN)
+	if err != nil {
+		return nil, err
+	}
+	wList, err := a.AdminServiceClient().ListNamedEntities(ctx, tranformFilters)
+	if err != nil {
+		return nil, err
+	}
+	if len(wList.Entities) == 0 {
+		return nil, fmt.Errorf("no launchplan retrieved for %v project %v domain", project, domain)
+	}
+	return wList.Entities, nil
+}
+
 // FetchLPLatestVersion fetches latest version for give launch plan name
 func (a *AdminFetcherExtClient) FetchLPLatestVersion(ctx context.Context, name, project, domain string, filter filters.Filters) (*admin.LaunchPlan, error) {
 	// Fetch the latest version of the task.
