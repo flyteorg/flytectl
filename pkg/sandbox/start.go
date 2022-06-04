@@ -148,7 +148,7 @@ func UpdateLocalKubeContext(dockerCtx string, contextName string) error {
 	return k8sCtxMgr.CopyContext(srcConfigAccess, dockerCtx, contextName)
 }
 
-func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService, reader io.Reader, sandboxConfig *sandboxCmdConfig.Config, defaultImageName string) (*bufio.Scanner, error) {
+func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService, reader io.Reader, sandboxConfig *sandboxCmdConfig.Config, defaultImageName string, defaultImagePrefix string) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
 
 	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
@@ -180,12 +180,11 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 	}
 	sandboxImage := sandboxConfig.Image
 	if len(sandboxImage) == 0 {
-		image, version, err := github.GetFullyQualifiedImageName("dind", sandboxConfig.Version, defaultImageName, sandboxConfig.Prerelease, g)
+		image, version, err := github.GetFullyQualifiedImageName(defaultImagePrefix, sandboxConfig.Version, defaultImageName, sandboxConfig.Prerelease, g)
 		if err != nil {
 			return nil, err
 		}
 		sandboxImage = image
-		// cr.flyte.org/flyteorg/flyte-sandbox:dind-5570eff6bd636e07e40b22c79319e46f927519a3
 		fmt.Printf("%s Fully Qualified image\n", image)
 		fmt.Printf("%v Running Flyte %s release\n", emoji.Whale, version)
 	}
@@ -235,7 +234,7 @@ func primeFlytekitPod(ctx context.Context, podService corev1.PodInterface) {
 	}
 }
 
-func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config, primePod bool, defaultImageName string) error {
+func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config, primePod bool, defaultImageName string, defaultImagePrefix string) error {
 	cli, err := docker.GetDockerClient()
 	if err != nil {
 		return err
@@ -243,7 +242,7 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 
 	ghRepo := github.GetGHRepoService()
 
-	reader, err := startSandbox(ctx, cli, ghRepo, os.Stdin, sandboxConfig, defaultImageName)
+	reader, err := startSandbox(ctx, cli, ghRepo, os.Stdin, sandboxConfig, defaultImageName, defaultImagePrefix)
 	if err != nil {
 		return err
 	}
@@ -280,10 +279,12 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 
 func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
 	primePod := true
-	return StartCluster(ctx, args, sandboxConfig, primePod, demoImageName)
+	defaultImagePrefix := "sha"
+	return StartCluster(ctx, args, sandboxConfig, primePod, demoImageName, defaultImagePrefix)
 }
 
 func StartSandboxCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
 	primePod := false
-	return StartCluster(ctx, args, sandboxConfig, primePod, sandboxImageName)
+	defaultImagePrefix := "dind"
+	return StartCluster(ctx, args, sandboxConfig, primePod, sandboxImageName, defaultImagePrefix)
 }

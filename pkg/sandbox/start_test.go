@@ -94,6 +94,7 @@ func sandboxSetup() {
 }
 
 func TestStartFunc(t *testing.T) {
+	defaultImagePrefix := "dind"
 	config := sandboxCmdConfig.DefaultConfig
 	config.Image = "dummyimage"
 	config.ImagePullOptions = docker.ImagePullOptions{
@@ -118,7 +119,7 @@ func TestStartFunc(t *testing.T) {
 			Follow:     true,
 		}).Return(nil, nil)
 
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, config, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, config, sandboxImageName, defaultImagePrefix)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully exit when demo cluster exist", func(t *testing.T) {
@@ -139,7 +140,7 @@ func TestStartFunc(t *testing.T) {
 			Timestamps: true,
 			Follow:     true,
 		}).Return(nil, nil)
-		reader, err := startSandbox(ctx, mockDocker, githubMock, strings.NewReader("n"), config, sandboxImageName)
+		reader, err := startSandbox(ctx, mockDocker, githubMock, strings.NewReader("n"), config, sandboxImageName, "dind")
 		assert.Nil(t, err)
 		assert.Nil(t, reader)
 	})
@@ -156,7 +157,7 @@ func TestStartFunc(t *testing.T) {
 			Timestamps: true,
 			Follow:     true,
 		}).Return(nil, nil)
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, config, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, config, sandboxImageName, defaultImagePrefix)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run demo cluster with abs path of source code", func(t *testing.T) {
@@ -172,7 +173,7 @@ func TestStartFunc(t *testing.T) {
 			Timestamps: true,
 			Follow:     true,
 		}).Return(nil, nil)
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, config, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, config, sandboxImageName, defaultImagePrefix)
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run demo cluster with specific version", func(t *testing.T) {
@@ -193,7 +194,7 @@ func TestStartFunc(t *testing.T) {
 		}, nil, nil)
 
 		githubMock.OnGetCommitSHA1Match(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("dummySha", nil, nil)
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, config, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, config, sandboxImageName, defaultImagePrefix)
 		assert.Nil(t, err)
 	})
 	t.Run("Failed run demo cluster with wrong version", func(t *testing.T) {
@@ -201,7 +202,7 @@ func TestStartFunc(t *testing.T) {
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		sandboxCmdConfig.DefaultConfig.Image = ""
 		githubMock.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, fmt.Errorf("non-existent-tag"))
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName, defaultImagePrefix)
 		assert.NotNil(t, err)
 		assert.Equal(t, "non-existent-tag", err.Error())
 	})
@@ -216,7 +217,7 @@ func TestStartFunc(t *testing.T) {
 		}, nil, nil)
 
 		githubMock.OnGetCommitSHA1Match(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("dummySha", nil, nil)
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName, defaultImagePrefix)
 		assert.NotNil(t, err)
 		assert.Equal(t, "failed to pull", err.Error())
 	})
@@ -232,7 +233,7 @@ func TestStartFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerRemove(ctx, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(fmt.Errorf("failed to remove container"))
-		_, err := startSandbox(ctx, mockDocker, githubMock, strings.NewReader("y"), sandboxCmdConfig.DefaultConfig, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, strings.NewReader("y"), sandboxCmdConfig.DefaultConfig, sandboxImageName, defaultImagePrefix)
 		assert.NotNil(t, err)
 		assert.Equal(t, "failed to remove container", err.Error())
 	})
@@ -241,7 +242,7 @@ func TestStartFunc(t *testing.T) {
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(fmt.Errorf("failed to run container"))
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName, defaultImagePrefix)
 		assert.NotNil(t, err)
 		assert.Equal(t, "failed to run container", err.Error())
 	})
@@ -256,7 +257,7 @@ func TestStartFunc(t *testing.T) {
 			Timestamps: true,
 			Follow:     true,
 		}).Return(nil, fmt.Errorf("failed to get container logs"))
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName, "dind")
 		assert.NotNil(t, err)
 		assert.Equal(t, "failed to get container logs", err.Error())
 	})
@@ -271,7 +272,7 @@ func TestStartFunc(t *testing.T) {
 			Timestamps: true,
 			Follow:     true,
 		}).Return(nil, nil)
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, config, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, config, sandboxImageName, "dind")
 		assert.NotNil(t, err)
 		assert.Equal(t, "failed to list containers", err.Error())
 	})
