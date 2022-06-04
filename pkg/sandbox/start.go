@@ -13,6 +13,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 	"github.com/enescakir/emoji"
 	"github.com/flyteorg/flytectl/clierrors"
+	sandboxCmdConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	"github.com/flyteorg/flytectl/pkg/configutil"
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/github"
@@ -147,7 +148,7 @@ func UpdateLocalKubeContext(dockerCtx string, contextName string) error {
 	return k8sCtxMgr.CopyContext(srcConfigAccess, dockerCtx, contextName)
 }
 
-func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService, reader io.Reader, sandboxConfig *Config, defaultImageName string) (*bufio.Scanner, error) {
+func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService, reader io.Reader, sandboxConfig *sandboxCmdConfig.Config, defaultImageName string) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
 
 	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
@@ -234,7 +235,7 @@ func primeFlytekitPod(ctx context.Context, podService corev1.PodInterface) {
 	}
 }
 
-func StartCluster(ctx context.Context, args []string, sandboxConfig *Config, primePod bool, defaultImageName string) error {
+func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config, primePod bool, defaultImageName string) error {
 	cli, err := docker.GetDockerClient()
 	if err != nil {
 		return err
@@ -277,12 +278,12 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *Config, pri
 	return nil
 }
 
-func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *Config) error {
+func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
 	primePod := true
 	return StartCluster(ctx, args, sandboxConfig, primePod, demoImageName)
 }
 
-func StartSandboxCluster(ctx context.Context, args []string, sandboxConfig *Config) error {
+func StartSandboxCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
 	primePod := false
 	return StartCluster(ctx, args, sandboxConfig, primePod, sandboxImageName)
 }

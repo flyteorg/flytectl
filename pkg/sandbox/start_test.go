@@ -19,6 +19,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	sandboxCmdConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	"github.com/google/go-github/v42/github"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -81,10 +82,10 @@ func sandboxSetup() {
 	ctx = context.Background()
 	mockDocker = &mocks.Docker{}
 	errCh := make(chan error)
-	DefaultConfig.Version = "v0.19.1"
+	sandboxCmdConfig.DefaultConfig.Version = "v0.19.1"
 	bodyStatus := make(chan container.ContainerWaitOKBody)
 	githubMock = &ghMocks.GHRepoService{}
-	DefaultConfig.Image = "dummyimage"
+	sandboxCmdConfig.DefaultConfig.Image = "dummyimage"
 	mockDocker.OnContainerCreateMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(container.ContainerCreateCreatedBody{
 		ID: "Hello",
 	}, nil)
@@ -93,7 +94,7 @@ func sandboxSetup() {
 }
 
 func TestStartFunc(t *testing.T) {
-	config := DefaultConfig
+	config := sandboxCmdConfig.DefaultConfig
 	config.Image = "dummyimage"
 	config.ImagePullOptions = docker.ImagePullOptions{
 		RegistryAuth: "",
@@ -143,8 +144,8 @@ func TestStartFunc(t *testing.T) {
 		assert.Nil(t, reader)
 	})
 	t.Run("Successfully run demo cluster with source code", func(t *testing.T) {
-		DefaultConfig.Source = f.UserHomeDir()
-		DefaultConfig.Version = ""
+		sandboxCmdConfig.DefaultConfig.Source = f.UserHomeDir()
+		sandboxCmdConfig.DefaultConfig.Version = ""
 		sandboxSetup()
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
@@ -159,8 +160,8 @@ func TestStartFunc(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run demo cluster with abs path of source code", func(t *testing.T) {
-		DefaultConfig.Source = "../"
-		DefaultConfig.Version = ""
+		sandboxCmdConfig.DefaultConfig.Source = "../"
+		sandboxCmdConfig.DefaultConfig.Version = ""
 		sandboxSetup()
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
@@ -185,7 +186,7 @@ func TestStartFunc(t *testing.T) {
 			Timestamps: true,
 			Follow:     true,
 		}).Return(nil, nil)
-		DefaultConfig.Image = ""
+		sandboxCmdConfig.DefaultConfig.Image = ""
 		tag := "v0.15.0"
 		githubMock.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&github.RepositoryRelease{
 			TagName: &tag,
@@ -198,9 +199,9 @@ func TestStartFunc(t *testing.T) {
 	t.Run("Failed run demo cluster with wrong version", func(t *testing.T) {
 		sandboxSetup()
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		DefaultConfig.Image = ""
+		sandboxCmdConfig.DefaultConfig.Image = ""
 		githubMock.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, nil, fmt.Errorf("non-existent-tag"))
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, DefaultConfig, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName)
 		assert.NotNil(t, err)
 		assert.Equal(t, "non-existent-tag", err.Error())
 	})
@@ -208,14 +209,14 @@ func TestStartFunc(t *testing.T) {
 		sandboxSetup()
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, fmt.Errorf("failed to pull"))
-		DefaultConfig.Image = ""
+		sandboxCmdConfig.DefaultConfig.Image = ""
 		tag := "v0.15.0"
 		githubMock.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&github.RepositoryRelease{
 			TagName: &tag,
 		}, nil, nil)
 
 		githubMock.OnGetCommitSHA1Match(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("dummySha", nil, nil)
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, DefaultConfig, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName)
 		assert.NotNil(t, err)
 		assert.Equal(t, "failed to pull", err.Error())
 	})
@@ -231,7 +232,7 @@ func TestStartFunc(t *testing.T) {
 		}, nil)
 		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerRemove(ctx, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(fmt.Errorf("failed to remove container"))
-		_, err := startSandbox(ctx, mockDocker, githubMock, strings.NewReader("y"), DefaultConfig, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, strings.NewReader("y"), sandboxCmdConfig.DefaultConfig, sandboxImageName)
 		assert.NotNil(t, err)
 		assert.Equal(t, "failed to remove container", err.Error())
 	})
@@ -240,7 +241,7 @@ func TestStartFunc(t *testing.T) {
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(fmt.Errorf("failed to run container"))
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, DefaultConfig, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName)
 		assert.NotNil(t, err)
 		assert.Equal(t, "failed to run container", err.Error())
 	})
@@ -255,7 +256,7 @@ func TestStartFunc(t *testing.T) {
 			Timestamps: true,
 			Follow:     true,
 		}).Return(nil, fmt.Errorf("failed to get container logs"))
-		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, DefaultConfig, sandboxImageName)
+		_, err := startSandbox(ctx, mockDocker, githubMock, os.Stdin, sandboxCmdConfig.DefaultConfig, sandboxImageName)
 		assert.NotNil(t, err)
 		assert.Equal(t, "failed to get container logs", err.Error())
 	})
@@ -303,8 +304,8 @@ func TestStartFunc(t *testing.T) {
 		}).Return(reader, nil)
 		mockK8sContextMgr := &k8sMocks.ContextOps{}
 		docker.Client = mockDocker
-		DefaultConfig.Source = ""
-		DefaultConfig.Version = ""
+		sandboxCmdConfig.DefaultConfig.Source = ""
+		sandboxCmdConfig.DefaultConfig.Version = ""
 		k8s.ContextMgr = mockK8sContextMgr
 		ghutil.Client = githubMock
 		mockK8sContextMgr.OnCopyContextMatch(mock.Anything, mock.Anything, mock.Anything).Return(nil)

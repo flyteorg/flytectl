@@ -3,6 +3,7 @@ package sandbox
 import (
 	"context"
 
+	sandboxCmdConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/sandbox"
 )
@@ -79,6 +80,6 @@ Usage
 )
 
 func startSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	sandboxDefaultConfig := sandbox.DefaultConfig
+	sandboxDefaultConfig := sandboxCmdConfig.DefaultConfig
 	return sandbox.StartSandboxCluster(ctx, args, sandboxDefaultConfig)
 }

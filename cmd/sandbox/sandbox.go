@@ -1,8 +1,8 @@
 package sandbox
 
 import (
+	sandboxCmdConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	cmdcore "github.com/flyteorg/flytectl/cmd/core"
-	sandboxPkg "github.com/flyteorg/flytectl/pkg/sandbox"
 	"github.com/spf13/cobra"
 )
 
@@ -46,7 +46,7 @@ func CreateSandboxCommand() *cobra.Command {
 	sandboxResourcesFuncs := map[string]cmdcore.CommandEntry{
 		"start": {CmdFunc: startSandboxCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
 			Short: startShort,
-			Long:  startLong, PFlagProvider: sandboxPkg.DefaultConfig},
+			Long:  startLong, PFlagProvider: sandboxCmdConfig.DefaultConfig},
 		"teardown": {CmdFunc: teardownSandboxCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
 			Short: teardownShort,
 			Long:  teardownLong},
