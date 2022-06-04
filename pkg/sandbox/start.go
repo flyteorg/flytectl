@@ -11,6 +11,7 @@ import (
 
 	"github.com/avast/retry-go"
 	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/go-connections/nat"
 	"github.com/enescakir/emoji"
 	"github.com/flyteorg/flytectl/clierrors"
 	sandboxCmdConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
@@ -148,7 +149,7 @@ func UpdateLocalKubeContext(dockerCtx string, contextName string) error {
 	return k8sCtxMgr.CopyContext(srcConfigAccess, dockerCtx, contextName)
 }
 
-func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService, reader io.Reader, sandboxConfig *sandboxCmdConfig.Config, defaultImageName string, defaultImagePrefix string) (*bufio.Scanner, error) {
+func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService, reader io.Reader, sandboxConfig *sandboxCmdConfig.Config, defaultImageName string, defaultImagePrefix string, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, consolePort int) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
 
 	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
@@ -156,7 +157,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 			return nil, err
 		}
 		fmt.Printf("Existing details of your sandbox")
-		util.PrintSandboxMessage(util.SandBoxConsolePort)
+		util.PrintSandboxMessage(consolePort)
 		return nil, nil
 	}
 
@@ -194,7 +195,6 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 	}
 
 	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
-	exposedPorts, portBindings, _ := docker.GetSandboxPorts()
 	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName,
 		sandboxImage, sandboxConfig.Env)
 
@@ -234,7 +234,7 @@ func primeFlytekitPod(ctx context.Context, podService corev1.PodInterface) {
 	}
 }
 
-func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config, primePod bool, defaultImageName string, defaultImagePrefix string) error {
+func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config, primePod bool, defaultImageName string, defaultImagePrefix string, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, consolePort int) error {
 	cli, err := docker.GetDockerClient()
 	if err != nil {
 		return err
@@ -242,7 +242,7 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 
 	ghRepo := github.GetGHRepoService()
 
-	reader, err := startSandbox(ctx, cli, ghRepo, os.Stdin, sandboxConfig, defaultImageName, defaultImagePrefix)
+	reader, err := startSandbox(ctx, cli, ghRepo, os.Stdin, sandboxConfig, defaultImageName, defaultImagePrefix, exposedPorts, portBindings, consolePort)
 	if err != nil {
 		return err
 	}
@@ -272,19 +272,37 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 		if primePod {
 			primeFlytekitPod(ctx, k8sClient.CoreV1().Pods("default"))
 		}
-		util.PrintSandboxMessage(util.SandBoxConsolePort)
+
 	}
 	return nil
 }
 
 func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
 	primePod := true
-	defaultImagePrefix := "sha"
-	return StartCluster(ctx, args, sandboxConfig, primePod, demoImageName, defaultImagePrefix)
+	sandboxImagePrefix := "sha"
+	exposedPorts, portBindings, err := docker.GetDemoPorts()
+	if err != nil {
+		return err
+	}
+	err = StartCluster(ctx, args, sandboxConfig, primePod, demoImageName, sandboxImagePrefix, exposedPorts, portBindings, util.DemoConsolePort)
+	if err != nil {
+		return err
+	}
+	util.PrintDemoMessage(util.DemoConsolePort)
+	return nil
 }
 
 func StartSandboxCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
 	primePod := false
-	defaultImagePrefix := "dind"
-	return StartCluster(ctx, args, sandboxConfig, primePod, sandboxImageName, defaultImagePrefix)
+	demoImagePrefix := "dind"
+	exposedPorts, portBindings, err := docker.GetSandboxPorts()
+	if err != nil {
+		return err
+	}
+	err = StartCluster(ctx, args, sandboxConfig, primePod, sandboxImageName, demoImagePrefix, exposedPorts, portBindings, util.SandBoxConsolePort)
+	if err != nil {
+		return err
+	}
+	util.PrintSandboxMessage(util.SandBoxConsolePort)
+	return nil
 }
