@@ -55,12 +55,12 @@ Retrieve all the launch plans with filters:
 
   flytectl get launchplan -p flytesnacks -d development --filter.fieldSelector="name=core.basic.lp.go_greet"
 
-Retrieve all active launch plans with filters:
+Retrieve all active launch plans:
 ::
 
   flytectl get launchplan -p flytesnacks -d development -o yaml  --filter.fieldSelector "state=1"
 
-Retrieve all archived launch plans with filters:
+Retrieve all archived launch plans:
 ::
 
   flytectl get launchplan -p flytesnacks -d development -o yaml  --filter.fieldSelector "state=0"
