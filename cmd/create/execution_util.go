@@ -50,8 +50,22 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName, projec
 			},
 		}
 	}
+	clusterAssignmentLabels := executionConfig.ClusterAssignmentLabels
+	selectors := make([]*admin.Selector, 0, len(clusterAssignmentLabels))
+	for key, val := range clusterAssignmentLabels {
+		selectors = append(selectors, &admin.Selector{
+			Key: key,
+			Value: []string{val},
+			Operator: admin.Selector_EQUALS,
+		})
+	}
+	clusterAssignment := &admin.ClusterAssignment{
+		Affinity: &admin.Affinity{
+			Selectors: selectors,
+		},
+	}
 
-	return createExecutionRequest(lp.Id, inputs, securityContext, authRole), nil
+	return createExecutionRequest(lp.Id, inputs, securityContext, authRole, clusterAssignment), nil
 }
 
 func createExecutionRequestForTask(ctx context.Context, taskName string, project string, domain string,
@@ -97,7 +111,7 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 		Version:      task.Id.Version,
 	}
 
-	return createExecutionRequest(id, inputs, securityContext, authRole), nil
+	return createExecutionRequest(id, inputs, securityContext, authRole, nil), nil
 }
 
 func relaunchExecution(ctx context.Context, executionName string, project string, domain string,
@@ -141,7 +155,7 @@ func recoverExecution(ctx context.Context, executionName string, project string,
 }
 
 func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, securityContext *core.SecurityContext,
-	authRole *admin.AuthRole) *admin.ExecutionCreateRequest {
+	authRole *admin.AuthRole, clusterAssignment *admin.ClusterAssignment) *admin.ExecutionCreateRequest {
 
 	return &admin.ExecutionCreateRequest{
 		Project: executionConfig.TargetProject,
@@ -156,6 +170,7 @@ func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, securi
 			},
 			AuthRole:        authRole,
 			SecurityContext: securityContext,
+			ClusterAssignment: clusterAssignment,
 		},
 		Inputs: inputs,
 	}
