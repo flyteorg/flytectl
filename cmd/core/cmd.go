@@ -3,6 +3,9 @@ package cmdcore
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/pkg/pkce"
@@ -73,6 +76,16 @@ func generateCommandFunc(cmdEntry CommandEntry) func(cmd *cobra.Command, args []
 		if err != nil {
 			return err
 		}
-		return cmdEntry.CmdFunc(ctx, args, NewCommandContext(clientSet, cmd.OutOrStdout()))
+		err = cmdEntry.CmdFunc(ctx, args, NewCommandContext(clientSet, cmd.OutOrStdout()))
+		if err != nil {
+			if s, ok := status.FromError(err); ok {
+				if s.Code() == codes.Unavailable || s.Code() == codes.Unauthenticated || s.Code() == codes.Unknown {
+					return errors.WithMessage(err,
+						fmt.Sprintf("Connection Info: [Endpoint: %s, InsecureConnection?: %v, AuthMode: %v]", adminCfg.Endpoint.String(), adminCfg.UseInsecureConnection, adminCfg.AuthType))
+				}
+			}
+			return err
+		}
+		return nil
 	}
 }
