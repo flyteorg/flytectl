@@ -99,8 +99,6 @@ func RemoveSandbox(ctx context.Context, cli Docker, reader io.Reader) error {
 // GetDevPorts will return dev cluster (minio + postgres) ports
 func GetDevPorts() (map[nat.Port]struct{}, map[nat.Port][]nat.PortBinding, error) {
 	return nat.ParsePortSpecs([]string{
-		// Notice that two host ports are mapped to the same container port in the case of Flyteconsole, this is done to
-		// support the generated URLs produced by pyflyte run
 		"0.0.0.0:30082:30082", // K8s Dashboard Port
 		"0.0.0.0:30084:30084", // Minio API Port
 		"0.0.0.0:30086:30086", // K8s cluster
