@@ -27,6 +27,9 @@ type Config struct {
 	ImagePullPolicy docker.ImagePullPolicy `json:"imagePullPolicy" pflag:",Optional. Defines the image pull behavior [Always/IfNotPresent/Never]"`
 
 	ImagePullOptions docker.ImagePullOptions `json:"imagePullOptions" pflag:",Optional. Defines image pull options (e.g. auth)"`
+
+	// It's used for development. Users are able to start flyte in single binary locally and save the data to the minio or postgres in the sandbox.
+	Dev bool `json:"dev" pflag:",Optional. Only start minio and postgres in the sandbox."`
 }
 
 //go:generate pflags Config --default-var DefaultConfig --bind-default-var
