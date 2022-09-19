@@ -2,7 +2,7 @@ package sandbox
 
 import "github.com/flyteorg/flytectl/pkg/docker"
 
-//Config holds configuration flags for sandbox command.
+// Config holds configuration flags for sandbox command.
 type Config struct {
 	Source string `json:"source" pflag:",Path of your source code"`
 
