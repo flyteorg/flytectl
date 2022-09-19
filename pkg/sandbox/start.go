@@ -194,7 +194,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 		return nil, err
 	}
 	sandboxEnv := sandboxConfig.Env
-	if sandboxConfig.Dev == true {
+	if sandboxConfig.Dev {
 		sandboxEnv = append(sandboxEnv, "FLYTE_DEV=True")
 	}
 
@@ -285,7 +285,7 @@ func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandbox
 	primePod := true
 	sandboxImagePrefix := "sha"
 	exposedPorts, portBindings, err := docker.GetDemoPorts()
-	if sandboxConfig.Dev == true {
+	if sandboxConfig.Dev {
 		exposedPorts, portBindings, err = docker.GetDevPorts()
 	}
 	if err != nil {
