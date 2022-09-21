@@ -516,7 +516,7 @@ func GetSerializeOutputFiles(ctx context.Context, args []string, archive bool) (
     var err error
     if os == "windows" {
         fmt.Println("Windows Operating System Detected")
-        tempDir, err = ioutil.TempDir("\tmp", "register")
+        tempDir, err = ioutil.TempDir("\\tmp", "register")
     } else {
         tempDir, err = ioutil.TempDir("/tmp", "register")
     }
