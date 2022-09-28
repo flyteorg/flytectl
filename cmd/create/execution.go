@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/flyteorg/flytectl/cmd/config"
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytestdlib/logger"
+
+	"github.com/flyteorg/flytectl/cmd/config"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 )
 
 const (
@@ -177,9 +178,7 @@ type ExecutionParams struct {
 	execType ExecutionType
 }
 
-var (
-	executionConfig = &ExecutionConfig{}
-)
+var executionConfig = &ExecutionConfig{}
 
 func createExecutionCommand(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	sourceProject := config.GetConfig().Project
