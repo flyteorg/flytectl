@@ -214,11 +214,7 @@ func createExecutionCommand(ctx context.Context, args []string, cmdCtx cmdCore.C
 	}
 
 	if executionConfig.ClusterPool != "" {
-		if executionRequest.Spec.ClusterAssignment == nil {
-			executionRequest.Spec.ClusterAssignment = &admin.ClusterAssignment{ClusterPoolName: executionConfig.ClusterPool}
-		} else {
-			executionRequest.Spec.ClusterAssignment.ClusterPoolName = executionConfig.ClusterPool
-		}
+		executionRequest.Spec.ClusterAssignment = &admin.ClusterAssignment{ClusterPoolName: executionConfig.ClusterPool}
 	}
 	if executionConfig.DryRun {
 		logger.Debugf(ctx, "skipping CreateExecution request (DryRun)")

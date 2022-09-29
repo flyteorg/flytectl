@@ -299,6 +299,16 @@ func (s *createSuite) TestCreateExecutionFuncInvalid() {
 	s.EqualError(err, "either task or workflow name should be specified to launch an execution")
 }
 
+func (s *createSuite) Test_CreateTaskExecution_DryRun() {
+	s.onGetTask()
+	executionConfig.DryRun = true
+	executionConfig.ExecFile = testDataFolder + "task_execution_spec_with_iamrole.yaml"
+
+	err := createExecutionCommand(s.Ctx, nil, s.CmdCtx)
+
+	s.NoError(err)
+}
+
 func TestCreateSuite(t *testing.T) {
 	suite.Run(t, &createSuite{originalExecConfig: *executionConfig})
 }
