@@ -213,10 +213,12 @@ func createExecutionCommand(ctx context.Context, args []string, cmdCtx cmdCore.C
 		return fmt.Errorf("invalid execution type %v", execParams.execType)
 	}
 
-	if executionRequest.Spec.ClusterAssignment == nil {
-		executionRequest.Spec.ClusterAssignment = &admin.ClusterAssignment{ClusterPoolName: executionConfig.ClusterPool}
-	} else {
-		executionRequest.Spec.ClusterAssignment.ClusterPoolName = executionConfig.ClusterPool
+	if executionConfig.ClusterPool != "" {
+		if executionRequest.Spec.ClusterAssignment == nil {
+			executionRequest.Spec.ClusterAssignment = &admin.ClusterAssignment{ClusterPoolName: executionConfig.ClusterPool}
+		} else {
+			executionRequest.Spec.ClusterAssignment.ClusterPoolName = executionConfig.ClusterPool
+		}
 	}
 	if executionConfig.DryRun {
 		logger.Debugf(ctx, "skipping CreateExecution request (DryRun)")
