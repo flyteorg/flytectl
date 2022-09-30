@@ -133,7 +133,8 @@ The generated file would look similar to this. Here, empty values have been dump
   task: core.type_system.custom_objects.add
   version: v3
 
-9. When creating a new execution, you can assign it to a specific cluster pool:
+9. If you have configured a plugin that implements github.com/flyteorg/flyteadmin/pkg/workflowengine/interfaces/WorkflowExecutor 
+   that supports cluster pools, then when creating a new execution, you can assign it to a specific cluster pool:
 
 ::
 
@@ -213,9 +214,6 @@ func createExecutionCommand(ctx context.Context, args []string, cmdCtx cmdCore.C
 		return fmt.Errorf("invalid execution type %v", execParams.execType)
 	}
 
-	if executionConfig.ClusterPool != "" {
-		executionRequest.Spec.ClusterAssignment = &admin.ClusterAssignment{ClusterPoolName: executionConfig.ClusterPool}
-	}
 	if executionConfig.DryRun {
 		logger.Debugf(ctx, "skipping CreateExecution request (DryRun)")
 	} else {
