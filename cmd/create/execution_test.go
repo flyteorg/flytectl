@@ -152,7 +152,7 @@ func (s *createSuite) onGetLaunchPlan() {
 	s.MockAdminClient.OnGetLaunchPlanMatch(s.Ctx, objectGetRequest).Return(launchPlan1, nil).Once()
 }
 
-func (s *createSuite) Test_CreateTaskExecutionFunc() {
+func (s *createSuite) Test_CreateTaskExecution() {
 	s.onGetTask()
 	executionCreateResponseTask := &admin.ExecutionCreateResponse{
 		Id: &core.WorkflowExecutionIdentifier{
@@ -204,7 +204,17 @@ func (s *createSuite) Test_CreateTaskExecutionFunc() {
 	tearDownAndVerify(s.T(), s.Writer, `execution identifier project:"flytesnacks" domain:"development" name:"ff513c0e44b5b4a35aa5" `)
 }
 
-func (s *createSuite) Test_CreateTaskExecutionFuncError() {
+func (s *createSuite) Test_CreateTaskExecution_GetTaskError() {
+	expected := fmt.Errorf("error")
+	s.MockAdminClient.OnGetTaskMatch(s.Ctx, mock.Anything).Return(nil, expected).Once()
+	executionConfig.ExecFile = testDataFolder + "task_execution_spec.yaml"
+
+	err := createExecutionCommand(s.Ctx, nil, s.CmdCtx)
+
+	s.Equal(expected, err)
+}
+
+func (s *createSuite) Test_CreateTaskExecution_CreateExecutionError() {
 	s.onGetTask()
 	s.MockAdminClient.
 		OnCreateExecutionMatch(s.Ctx, mock.Anything).
@@ -217,7 +227,7 @@ func (s *createSuite) Test_CreateTaskExecutionFuncError() {
 	s.EqualError(err, "error launching task")
 }
 
-func (s *createSuite) Test_CreateLaunchPlanExecutionFunc() {
+func (s *createSuite) Test_CreateLaunchPlanExecution() {
 	executionCreateResponseLP := &admin.ExecutionCreateResponse{
 		Id: &core.WorkflowExecutionIdentifier{
 			Project: "flytesnacks",
@@ -235,7 +245,17 @@ func (s *createSuite) Test_CreateLaunchPlanExecutionFunc() {
 	tearDownAndVerify(s.T(), s.Writer, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e" `)
 }
 
-func (s *createSuite) Test_CreateRelaunchExecutionFunc() {
+func (s *createSuite) Test_CreateLaunchPlan_GetLaunchPlanError() {
+	expected := fmt.Errorf("error")
+	s.MockAdminClient.OnGetLaunchPlanMatch(s.Ctx, mock.Anything).Return(nil, expected).Once()
+	executionConfig.ExecFile = testDataFolder + "launchplan_execution_spec.yaml"
+
+	err := createExecutionCommand(s.Ctx, nil, s.CmdCtx)
+
+	s.Equal(expected, err)
+}
+
+func (s *createSuite) Test_CreateRelaunchExecution() {
 	relaunchExecResponse := &admin.ExecutionCreateResponse{
 		Id: &core.WorkflowExecutionIdentifier{
 			Project: "flytesnacks",
@@ -259,7 +279,7 @@ func (s *createSuite) Test_CreateRelaunchExecutionFunc() {
 	tearDownAndVerify(s.T(), s.Writer, `execution identifier project:"flytesnacks" domain:"development" name:"f652ea3596e7f4d80a0e"`)
 }
 
-func (s *createSuite) Test_CreateRecoverExecutionFunc() {
+func (s *createSuite) Test_CreateRecoverExecution() {
 	originalExecutionName := "abc123"
 	recoverExecResponse := &admin.ExecutionCreateResponse{
 		Id: &core.WorkflowExecutionIdentifier{
@@ -304,7 +324,7 @@ func (s *createSuite) Test_CreateTaskExecution_DryRun() {
 	executionConfig.DryRun = true
 	executionConfig.ExecFile = testDataFolder + "task_execution_spec_with_iamrole.yaml"
 
-	err := createExecutionCommand(s.Ctx, nil, s.CmdCtx)
+	err := createExecutionCommand(s.Ctx, []string{"target"}, s.CmdCtx)
 
 	s.NoError(err)
 }
