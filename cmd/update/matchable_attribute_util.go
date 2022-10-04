@@ -27,9 +27,16 @@ func DecorateAndUpdateMatchableAttr(ctx context.Context, project, domain, workfl
 		if dryRun {
 			fmt.Printf("skipping UpdateProjectDomainAttributes request (dryRun)\n")
 		} else {
-			err := updater.UpdateProjectDomainAttributes(ctx, project, domain, matchingAttr)
-			if err != nil {
-				return err
+			if len(domain) == 0 {
+				err := updater.UpdateProjectAttributes(ctx, project, matchingAttr)
+				if err != nil {
+					return err
+				}
+			} else {
+				err := updater.UpdateProjectDomainAttributes(ctx, project, domain, matchingAttr)
+				if err != nil {
+					return err
+				}
 			}
 		}
 		fmt.Printf("Updated attributes from %v project and domain %v\n", project, domain)
