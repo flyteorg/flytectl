@@ -49,7 +49,7 @@ func CreateDemoCommand() *cobra.Command {
 			Long:  startLong, PFlagProvider: sandboxCmdConfig.DefaultConfig, DisableFlyteClient: true},
 		"teardown": {CmdFunc: teardownDemoCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
 			Short: teardownShort,
-			Long:  teardownLong, DisableFlyteClient: true},
+			Long:  teardownLong, PFlagProvider: sandboxCmdConfig.DefaultConfig, DisableFlyteClient: true},
 		"status": {CmdFunc: demoClusterStatus, Aliases: []string{}, ProjectDomainNotRequired: true,
 			Short: statusShort,
 			Long:  statusLong},

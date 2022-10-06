@@ -80,7 +80,7 @@ func getEventLogs(ctx context.Context, client corev1.CoreV1Interface) error {
 	}
 	if len(events.Items) > 0 {
 		for _, event := range events.Items {
-			table.Append([]string{event.Type, event.Reason, event.Message})
+			table.Append([]string{event.InvolvedObject.Name, event.Reason, event.Message})
 		}
 		table.Render()
 	} else {
