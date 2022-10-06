@@ -7,6 +7,8 @@ import (
 
 	container "github.com/docker/docker/api/types/container"
 
+    events "github.com/docker/docker/api/types/events"
+
 	io "io"
 
 	mock "github.com/stretchr/testify/mock"
@@ -445,6 +447,31 @@ func (_m *Docker) ImagePull(ctx context.Context, refStr string, options types.Im
 		r1 = rf(ctx, refStr, options)
 	} else {
 		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Events provides a mock function with given fields: ctx, options
+func (_m *Docker) Events(ctx context.Context, options types.EventsOptions) (<-chan events.Message, <-chan error) {
+	ret := _m.Called(ctx, options)
+
+	var r0 <-chan events.Message
+	if rf, ok := ret.Get(0).(func(context.Context, types.EventsOptions) <-chan events.Message); ok {
+		r0 = rf(ctx, options)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(<-chan events.Message)
+		}
+	}
+
+	var r1 <-chan error
+	if rf, ok := ret.Get(1).(func(context.Context, types.EventsOptions) <-chan error); ok {
+		r1 = rf(ctx, options)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(<-chan error)
+		}
 	}
 
 	return r0, r1
