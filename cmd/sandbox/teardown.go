@@ -6,6 +6,7 @@ import (
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/sandbox"
 
+	sandboxCmdConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 )
 
@@ -23,9 +24,10 @@ Usage
 )
 
 func teardownSandboxCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
+	sandboxDefaultConfig := sandboxCmdConfig.DefaultConfig
 	cli, err := docker.GetDockerClient()
 	if err != nil {
 		return err
 	}
-	return sandbox.Teardown(ctx, cli)
+	return sandbox.Teardown(ctx, cli, sandboxDefaultConfig.Verbose)
 }
