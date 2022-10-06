@@ -27,7 +27,7 @@ func Teardown(ctx context.Context, cli docker.Docker, verbose bool) error {
 					case <-ctx.Done():
 						return
 					default:
-						printTeardownLogs(ctx, cli, c)
+						printTeardownLogs(ctx, cli)
 					}
 
 				}
@@ -51,7 +51,7 @@ func Teardown(ctx context.Context, cli docker.Docker, verbose bool) error {
 	return nil
 }
 
-func printTeardownLogs(ctx context.Context, cli docker.Docker, c *types.Container) {
+func printTeardownLogs(ctx context.Context, cli docker.Docker) {
 	fmt.Print("\n---- Verbose Logs ----\n")
 	var data = os.Stdout
 	table := tablewriter.NewWriter(data)
