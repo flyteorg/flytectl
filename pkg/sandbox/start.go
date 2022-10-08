@@ -64,6 +64,31 @@ func isPodReady(v corev1api.Pod) bool {
 	return false
 }
 
+func getEventLogs(ctx context.Context, client corev1.CoreV1Interface) error {
+	fmt.Printf("\n---- Verbose Logs ----\n")
+	var data = os.Stdout
+	table := tablewriter.NewWriter(data)
+	table.SetHeader([]string{"Type", "Reason", "Message"})
+	table.SetRowLine(true)
+	table.ClearRows()
+	table.SetAutoWrapText(false)
+	table.SetAutoFormatHeaders(true)
+
+	events, err := client.Events(flyteNamespace).List(ctx, v1.ListOptions{})
+	if err != nil {
+		return fmt.Errorf("cannot get verbose logs for the deployment")
+	}
+	if len(events.Items) > 0 {
+		for _, event := range events.Items {
+			table.Append([]string{event.InvolvedObject.Name, event.Reason, event.Message})
+		}
+		table.Render()
+	} else {
+		return fmt.Errorf("No logs are present for this deployment")
+	}
+	return nil
+}
+
 func getFlyteDeployment(ctx context.Context, client corev1.CoreV1Interface) (*corev1api.PodList, error) {
 	pods, err := client.Pods(flyteNamespace).List(ctx, v1.ListOptions{})
 	if err != nil {
@@ -269,6 +294,13 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 		if err := WatchFlyteDeployment(ctx, k8sClient.CoreV1()); err != nil {
 			return err
 		}
+
+		if sandboxConfig.Verbose {
+			if err = getEventLogs(ctx, k8sClient.CoreV1()); err != nil {
+				return err
+			}
+		}
+
 		if primePod {
 			primeFlytekitPod(ctx, k8sClient.CoreV1().Pods("default"))
 		}

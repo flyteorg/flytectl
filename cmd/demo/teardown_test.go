@@ -37,7 +37,7 @@ func TestTearDownFunc(t *testing.T) {
 		mockK8sContextMgr := &k8sMocks.ContextOps{}
 		k8s.ContextMgr = mockK8sContextMgr
 		mockK8sContextMgr.OnRemoveContextMatch(mock.Anything).Return(nil)
-		err := sandbox.Teardown(ctx, mockDocker)
+		err := sandbox.Teardown(ctx, mockDocker, false)
 		assert.Nil(t, err)
 	})
 	t.Run("Error", func(t *testing.T) {
@@ -45,7 +45,7 @@ func TestTearDownFunc(t *testing.T) {
 		mockDocker := &mocks.Docker{}
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return(containers, nil)
 		mockDocker.OnContainerRemove(ctx, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(fmt.Errorf("err"))
-		err := sandbox.Teardown(ctx, mockDocker)
+		err := sandbox.Teardown(ctx, mockDocker, false)
 		assert.NotNil(t, err)
 	})
 
@@ -53,7 +53,7 @@ func TestTearDownFunc(t *testing.T) {
 		ctx := context.Background()
 		mockDocker := &mocks.Docker{}
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return(nil, fmt.Errorf("err"))
-		err := sandbox.Teardown(ctx, mockDocker)
+		err := sandbox.Teardown(ctx, mockDocker, false)
 		assert.NotNil(t, err)
 	})
 

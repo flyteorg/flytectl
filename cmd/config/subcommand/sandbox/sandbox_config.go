@@ -27,6 +27,9 @@ type Config struct {
 	ImagePullPolicy docker.ImagePullPolicy `json:"imagePullPolicy" pflag:",Optional. Defines the image pull behavior [Always/IfNotPresent/Never]"`
 
 	ImagePullOptions docker.ImagePullOptions `json:"imagePullOptions" pflag:",Optional. Defines image pull options (e.g. auth)"`
+
+	// Optionally prints the logs of kubernetes pods while deploying
+	Verbose bool `json:"verbose" pflag:",Optional. Prints logs of pods while deploying."`
 }
 
 //go:generate pflags Config --default-var DefaultConfig --bind-default-var

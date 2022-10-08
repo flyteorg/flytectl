@@ -49,7 +49,7 @@ func CreateSandboxCommand() *cobra.Command {
 			Long:  startLong, PFlagProvider: sandboxCmdConfig.DefaultConfig, DisableFlyteClient: true},
 		"teardown": {CmdFunc: teardownSandboxCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
 			Short: teardownShort,
-			Long:  teardownLong, DisableFlyteClient: true},
+			Long:  teardownLong, PFlagProvider: sandboxCmdConfig.DefaultConfig, DisableFlyteClient: true},
 		"status": {CmdFunc: sandboxClusterStatus, Aliases: []string{}, ProjectDomainNotRequired: true,
 			Short: statusShort,
 			Long:  statusLong},

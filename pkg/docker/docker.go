@@ -6,6 +6,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/events"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/docker/client"
 	specs "github.com/opencontainers/image-spec/specs-go/v1"
@@ -25,6 +26,7 @@ type Docker interface {
 	ContainerExecAttach(ctx context.Context, execID string, config types.ExecStartCheck) (types.HijackedResponse, error)
 	ContainerExecInspect(ctx context.Context, execID string) (types.ContainerExecInspect, error)
 	ImageList(ctx context.Context, listOption types.ImageListOptions) ([]types.ImageSummary, error)
+	Events(ctx context.Context, options types.EventsOptions) (<-chan events.Message, <-chan error)
 }
 
 type FlyteDocker struct {
