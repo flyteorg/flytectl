@@ -93,7 +93,7 @@ func initFlytectlConfig(reader io.Reader) error {
 	if len(initConfig.DefaultConfig.Host) > 0 {
 		trimHost := trimEndpoint(initConfig.DefaultConfig.Host)
 		if !validateEndpointName(trimHost) {
-			return errors.New("please use a valid admin endpoint")
+			return fmt.Errorf("%s invalid, please use a valid admin endpoint", trimHost)
 		}
 		templateValues.Host = fmt.Sprintf("dns:///%s", trimHost)
 		templateValues.Insecure = initConfig.DefaultConfig.Insecure
@@ -101,7 +101,7 @@ func initFlytectlConfig(reader io.Reader) error {
 	if len(initConfig.DefaultConfig.Console) > 0 {
 		trimConsole := trimEndpoint(initConfig.DefaultConfig.Console)
 		if !validateEndpointName(trimConsole) {
-			return errors.New("please use a valid console endpoint")
+			return fmt.Errorf("%s invalid, please use a valid console endpoint", trimConsole)
 		}
 		templateValues.Console = initConfig.DefaultConfig.Console
 	}
