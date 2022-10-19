@@ -35,14 +35,15 @@ func WriteIntoFile(data []byte, file string) error {
 
 // SetupFlyteDir will create .flyte dir if not exist
 func SetupFlyteDir() error {
-	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "state"), os.ModePerm); err != nil {
 		return err
 	}
 
 	// Created a empty file with right permission
+	// TODO: Praful - can this be deleted
 	if _, err := os.Stat(docker.Kubeconfig); err != nil {
 		if os.IsNotExist(err) {
-			if err := ioutil.WriteFile(docker.Kubeconfig, []byte(""), os.ModePerm); err != nil {
+			if err := os.WriteFile(docker.Kubeconfig, []byte(""), os.ModePerm); err != nil {
 				return err
 			}
 		}
@@ -53,6 +54,7 @@ func SetupFlyteDir() error {
 
 // PrintSandboxMessage will print sandbox success message
 func PrintSandboxMessage(flyteConsolePort int) {
+	// TODO: revisit this print message
 	kubeconfig := strings.Join([]string{
 		"$KUBECONFIG",
 		f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),

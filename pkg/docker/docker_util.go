@@ -24,11 +24,13 @@ import (
 )
 
 var (
-	Kubeconfig              = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
+	FlyteStateDir           = f.FilePathJoin(f.UserHomeDir(), ".flyte", "state")
+	Kubeconfig              = f.FilePathJoin(FlyteStateDir, "kubeconfig")
 	SuccessMessage          = "Deploying Flyte..."
 	FlyteSandboxClusterName = "flyte-sandbox"
 	Environment             = []string{"SANDBOX=1", "KUBERNETES_API_PORT=30086", "FLYTE_HOST=localhost:30081", "FLYTE_AWS_ENDPOINT=http://localhost:30084"}
 	Source                  = "/root"
+	StateDirMountDest       = "/srv/flyte"
 	K3sDir                  = "/etc/rancher/"
 	Client                  Docker
 	Volumes                 = []mount.Mount{
@@ -125,14 +127,11 @@ func GetSandboxPorts() (map[nat.Port]struct{}, map[nat.Port][]nat.PortBinding, e
 // GetDemoPorts will return demo ports
 func GetDemoPorts() (map[nat.Port]struct{}, map[nat.Port][]nat.PortBinding, error) {
 	return nat.ParsePortSpecs([]string{
-		"0.0.0.0:30080:30080", // Flyteconsole Port
-		"0.0.0.0:30081:30081", // Flyteadmin Port
-		"0.0.0.0:30082:30082", // K8s Dashboard Port
-		"0.0.0.0:30084:30084", // Minio API Port
-		"0.0.0.0:30086:30086", // K8s cluster
-		"0.0.0.0:30088:30088", // Minio Console Port
-		"0.0.0.0:30089:30089", // Postgres Port
-		"0.0.0.0:30090:30090", // Webhook service
+		"0.0.0.0:6443:6443",   // K3s API Port
+		"0.0.0.0:30080:30080", // HTTP Port
+		"0.0.0.0:30000:30000", // Registry Port
+		"0.0.0.0:30001:30001", // Postgres Port
+		"0.0.0.0:30002:30002", // Minio API Port (use HTTP port for minio console)
 	})
 }
 
@@ -169,7 +168,7 @@ func PullDockerImage(ctx context.Context, cli Docker, image string, pullPolicy I
 	return nil
 }
 
-//StartContainer will create and start docker container
+// StartContainer will create and start docker container
 func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, exposedPorts map[nat.Port]struct{},
 	portBindings map[nat.Port][]nat.PortBinding, name, image string, additionalEnvVars []string) (string, error) {
 	// Append the additional env variables to the default list of env

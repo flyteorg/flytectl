@@ -4,11 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"io"
-	"os"
-	"path/filepath"
-	"time"
-
 	"github.com/avast/retry-go"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
@@ -21,10 +16,14 @@ import (
 	"github.com/flyteorg/flytectl/pkg/k8s"
 	"github.com/flyteorg/flytectl/pkg/util"
 	"github.com/kataras/tablewriter"
+	"io"
 	corev1api "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
+	"os"
+	"path/filepath"
+	"time"
 )
 
 const (
@@ -33,9 +32,9 @@ const (
 	taintEffect          = "NoSchedule"
 	sandboxContextName   = "flyte-sandbox"
 	sandboxDockerContext = "default"
-	k8sEndpoint          = "https://127.0.0.1:30086"
+	k8sEndpoint          = "https://127.0.0.1:6443"
 	sandboxImageName     = "cr.flyte.org/flyteorg/flyte-sandbox"
-	demoImageName        = "cr.flyte.org/flyteorg/flyte-sandbox-lite"
+	demoImageName        = "cr.flyte.org/flyteorg/flyte-sandbox-bundle"
 )
 
 func isNodeTainted(ctx context.Context, client corev1.CoreV1Interface) (bool, error) {
@@ -166,7 +165,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 	}
 
 	templateValues := configutil.ConfigTemplateSpec{
-		Host:     "localhost:30081",
+		Host:     "localhost:30080",
 		Insecure: true,
 		Console:  fmt.Sprintf("http://localhost:%d", consolePort),
 	}
@@ -175,11 +174,20 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 	}
 
 	volumes := docker.Volumes
-	if vol, err := MountVolume(sandboxConfig.Source, docker.Source); err != nil {
+	// Mount this even though it should no longer be necessary. This is for user code
+	if vol, err := MountVolume(sandboxConfig.DeprecatedSource, docker.Source); err != nil {
 		return nil, err
 	} else if vol != nil {
 		volumes = append(volumes, *vol)
 	}
+
+	// This is the state directory mount, where flyte sandbox will write postgres/blobs, configs
+	if vol, err := MountVolume(docker.FlyteStateDir, docker.StateDirMountDest); err != nil {
+		return nil, err
+	} else if vol != nil {
+		volumes = append(volumes, *vol)
+	}
+
 	sandboxImage := sandboxConfig.Image
 	if len(sandboxImage) == 0 {
 		image, version, err := github.GetFullyQualifiedImageName(defaultImagePrefix, sandboxConfig.Version, defaultImageName, sandboxConfig.Prerelease, g)
@@ -282,16 +290,36 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 	return nil
 }
 
-func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
+func DemoClusterInit(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
 	primePod := true
 	sandboxImagePrefix := "sha"
 	exposedPorts, portBindings, err := docker.GetDemoPorts()
-	if sandboxConfig.Dev {
-		exposedPorts, portBindings, err = docker.GetDevPorts()
-	}
 	if err != nil {
 		return err
 	}
+	err = StartCluster(ctx, args, sandboxConfig, primePod, demoImageName, sandboxImagePrefix, exposedPorts, portBindings, util.DemoConsolePort)
+	if err != nil {
+		return err
+	}
+	util.PrintSandboxMessage(util.DemoConsolePort)
+	return nil
+}
+
+func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
+	return runDemoCluster(ctx, args, sandboxConfig)
+}
+
+func runDemoCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
+	primePod := true
+	sandboxImagePrefix := "sha"
+	exposedPorts, portBindings, err := docker.GetDemoPorts()
+	if err != nil {
+		return err
+	}
+	// TODO: Bring back dev later
+	//if sandboxConfig.Dev {
+	//	exposedPorts, portBindings, err = docker.GetDevPorts()
+	//}
 	err = StartCluster(ctx, args, sandboxConfig, primePod, demoImageName, sandboxImagePrefix, exposedPorts, portBindings, util.DemoConsolePort)
 	if err != nil {
 		return err
