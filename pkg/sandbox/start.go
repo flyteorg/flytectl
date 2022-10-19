@@ -247,6 +247,60 @@ func primeFlytekitPod(ctx context.Context, podService corev1.PodInterface) {
 	}
 }
 
+//func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config, primePod bool, defaultImageName string, defaultImagePrefix string, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, consolePort int) error {
+//	cli, err := docker.GetDockerClient()
+//	if err != nil {
+//		return err
+//	}
+//
+//	ghRepo := github.GetGHRepoService()
+//
+//	reader, err := startSandbox(ctx, cli, ghRepo, os.Stdin, sandboxConfig, defaultImageName, defaultImagePrefix, exposedPorts, portBindings, consolePort)
+//	if err != nil {
+//		return err
+//	}
+//	fmt.Printf("Reader: %v\n", reader)
+//	//if reader != nil {
+//	// TODO: Figure out proper wait!
+//	//docker.WaitForSandbox(reader, docker.SuccessMessage)
+//	//time.Sleep(12 * time.Second)
+//	//}
+//
+//	if reader != nil {
+//		var k8sClient k8s.K8s
+//
+//		// wait for kubeconfig file
+//		// get client
+//		// wait for checks
+//
+//		err = retry.Do(
+//			func() error {
+//				fmt.Println("Retrying ")
+//				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
+//				return err
+//			},
+//			retry.Attempts(10),
+//		)
+//		if err != nil {
+//			return err
+//		}
+//		k8sClient.CoreV1()
+//		// This will copy the kubeconfig from where k3s writes it () to
+//		if err = UpdateLocalKubeContext(sandboxDockerContext, sandboxContextName); err != nil {
+//			return err
+//		}
+//
+//		if err := WatchFlyteDeployment(ctx, k8sClient.CoreV1()); err != nil {
+//			return err
+//		}
+//		if primePod {
+//			primeFlytekitPod(ctx, k8sClient.CoreV1().Pods("default"))
+//		}
+//
+//	}
+//	return nil
+//}
+
 func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config, primePod bool, defaultImageName string, defaultImagePrefix string, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, consolePort int) error {
 	cli, err := docker.GetDockerClient()
 	if err != nil {
@@ -259,14 +313,12 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 	if err != nil {
 		return err
 	}
-	if reader != nil {
-		docker.WaitForSandbox(reader, docker.SuccessMessage)
-	}
 
 	if reader != nil {
 		var k8sClient k8s.K8s
 		err = retry.Do(
 			func() error {
+				// This should wait for the kubeconfig file being there.
 				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
 				return err
 			},
@@ -275,17 +327,51 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 		if err != nil {
 			return err
 		}
+
+		// This will copy the kubeconfig from where k3s writes it () to the main file.
 		if err = UpdateLocalKubeContext(sandboxDockerContext, sandboxContextName); err != nil {
 			return err
 		}
 
+		// Liveness check
+		err = retry.Do(
+			func() error {
+				// Have to get a new client every time because you run into x509 errors if not
+				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
+				req := k8sClient.CoreV1().RESTClient().Get()
+				req = req.RequestURI("livez")
+				res := req.Do(ctx)
+				return res.Error()
+			},
+			retry.Attempts(15),
+		)
+		if err != nil {
+			return err
+		}
+
+		// Readiness check
+		err = retry.Do(
+			func() error {
+				// No need to refresh client here
+				req := k8sClient.CoreV1().RESTClient().Get()
+				req = req.RequestURI("readyz")
+				res := req.Do(ctx)
+				return res.Error()
+			},
+			retry.Attempts(15),
+		)
+		if err != nil {
+			return err
+		}
+		fmt.Println("done now sleeping")
+		time.Sleep(400 * time.Second)
+		// Watch for Flyte Deployment
 		if err := WatchFlyteDeployment(ctx, k8sClient.CoreV1()); err != nil {
 			return err
 		}
 		if primePod {
 			primeFlytekitPod(ctx, k8sClient.CoreV1().Pods("default"))
 		}
-
 	}
 	return nil
 }
@@ -320,6 +406,8 @@ func runDemoCluster(ctx context.Context, args []string, sandboxConfig *sandboxCm
 	//if sandboxConfig.Dev {
 	//	exposedPorts, portBindings, err = docker.GetDevPorts()
 	//}
+	// K3s will automatically write the file specified by this var, which is mounted from user's local state dir.
+	sandboxConfig.Env = append(sandboxConfig.Env, "K3S_KUBECONFIG_OUTPUT=/srv/flyte/kubeconfig")
 	err = StartCluster(ctx, args, sandboxConfig, primePod, demoImageName, sandboxImagePrefix, exposedPorts, portBindings, util.DemoConsolePort)
 	if err != nil {
 		return err
