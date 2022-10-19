@@ -26,6 +26,7 @@ import (
 var (
 	FlyteStateDir           = f.FilePathJoin(f.UserHomeDir(), ".flyte", "state")
 	Kubeconfig              = f.FilePathJoin(FlyteStateDir, "kubeconfig")
+	SandboxKubeconfig       = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
 	SuccessMessage          = "Deploying Flyte..."
 	FlyteSandboxClusterName = "flyte-sandbox"
 	Environment             = []string{"SANDBOX=1", "KUBERNETES_API_PORT=30086", "FLYTE_HOST=localhost:30081", "FLYTE_AWS_ENDPOINT=http://localhost:30084"}
