@@ -4,6 +4,11 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"time"
+
 	"github.com/avast/retry-go"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/go-connections/nat"
@@ -16,14 +21,10 @@ import (
 	"github.com/flyteorg/flytectl/pkg/k8s"
 	"github.com/flyteorg/flytectl/pkg/util"
 	"github.com/kataras/tablewriter"
-	"io"
 	corev1api "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
-	"os"
-	"path/filepath"
-	"time"
 )
 
 const (
@@ -324,8 +325,8 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 	return nil
 }
 
-// This is the code for the original multi deploy version of sandbox, should be removed once we document
-// the new development experience for plugins.
+// StartClusterForSandbox is the code for the original multi deploy version of sandbox, should be removed once we
+// document the new development experience for plugins.
 func StartClusterForSandbox(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config, primePod bool, defaultImageName string, defaultImagePrefix string, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, consolePort int) error {
 	cli, err := docker.GetDockerClient()
 	if err != nil {
@@ -358,6 +359,7 @@ func StartClusterForSandbox(ctx context.Context, args []string, sandboxConfig *s
 			return err
 		}
 
+		// TODO: This doesn't appear to correctly watch for the Flyte deployment but doesn't do so on master either.
 		if err := WatchFlyteDeployment(ctx, k8sClient.CoreV1()); err != nil {
 			return err
 		}
