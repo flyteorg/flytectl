@@ -5,12 +5,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/docker/docker/client"
+	"github.com/enescakir/emoji"
 	"io"
 	"os"
 	"strings"
-
-	"github.com/docker/docker/client"
-	"github.com/enescakir/emoji"
 
 	"github.com/flyteorg/flytectl/clierrors"
 
@@ -26,6 +25,7 @@ import (
 var (
 	FlyteStateDir           = f.FilePathJoin(f.UserHomeDir(), ".flyte", "state")
 	Kubeconfig              = f.FilePathJoin(FlyteStateDir, "kubeconfig")
+	FlyteBinaryConfig       = f.FilePathJoin(FlyteStateDir, "flyte.yaml")
 	SandboxKubeconfig       = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
 	SuccessMessage          = "Deploying Flyte..."
 	FlyteSandboxClusterName = "flyte-sandbox"
@@ -194,6 +194,37 @@ func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, expo
 		return "", err
 	}
 	return resp.ID, nil
+}
+
+// CopyContainerFile try to create the container, see if the source file is there, copy it to the destination
+func CopyContainerFile(ctx context.Context, cli Docker, source, destination, name, image string) error {
+	resp, err := cli.ContainerCreate(ctx, &container.Config{Image: image}, &container.HostConfig{}, nil, nil, name)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		cli.ContainerRemove(context.Background(), resp.ID, types.ContainerRemoveOptions{
+			Force: true,
+		})
+	}()
+	_, err = cli.ContainerStatPath(ctx, resp.ID, source)
+	if err != nil {
+		return err
+	}
+	reader, _, err := cli.CopyFromContainer(ctx, resp.ID, source)
+	if err != nil {
+		return err
+	}
+	outFile, err := os.Create(destination)
+	if err != nil {
+		return err
+	}
+	defer outFile.Close()
+	_, err = io.Copy(outFile, reader)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // ReadLogs will return io scanner for reading the logs of a container

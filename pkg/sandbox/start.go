@@ -162,11 +162,6 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 		return nil, nil
 	}
 
-	// TODO: ensure this works for both
-	if err := util.SetupFlyteDir(); err != nil {
-		return nil, err
-	}
-
 	templateValues := configutil.ConfigTemplateSpec{
 		Host:     "localhost:30080",
 		Insecure: true,
@@ -257,6 +252,9 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 	}
 
 	ghRepo := github.GetGHRepoService()
+	if err := util.CreatePathAndFile(docker.Kubeconfig); err != nil {
+		return err
+	}
 
 	reader, err := startSandbox(ctx, cli, ghRepo, os.Stdin, sandboxConfig, defaultImageName, defaultImagePrefix, exposedPorts, portBindings, consolePort)
 	if err != nil {
@@ -286,11 +284,11 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 		err = retry.Do(
 			func() error {
 				// Have to get a new client every time because you run into x509 errors if not
+				fmt.Println("Waiting for cluster to come up...")
 				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
 				req := k8sClient.CoreV1().RESTClient().Get()
 				req = req.RequestURI("livez")
 				res := req.Do(ctx)
-				fmt.Printf("Waiting for cluster to come up Err: %s\n", res.Error())
 				return res.Error()
 			},
 			retry.Attempts(15),
@@ -308,7 +306,7 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 				res := req.Do(ctx)
 				return res.Error()
 			},
-			retry.Attempts(15),
+			retry.Attempts(10),
 		)
 		if err != nil {
 			return err
@@ -334,6 +332,10 @@ func StartClusterForSandbox(ctx context.Context, args []string, sandboxConfig *s
 	}
 
 	ghRepo := github.GetGHRepoService()
+
+	if err := util.CreatePathAndFile(docker.SandboxKubeconfig); err != nil {
+		return err
+	}
 
 	reader, err := startSandbox(ctx, cli, ghRepo, os.Stdin, sandboxConfig, defaultImageName, defaultImagePrefix, exposedPorts, portBindings, consolePort)
 	if err != nil {
@@ -372,21 +374,36 @@ func StartClusterForSandbox(ctx context.Context, args []string, sandboxConfig *s
 }
 
 func DemoClusterInit(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
-	//sandboxImagePrefix := "sha"
-	//// Add env var
-	//
-	//cli, err := docker.GetDockerClient()
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//ghRepo := github.GetGHRepoService()
-	//cli.ContainerCreate()
-	// get image
-	// create container
-	// watch
-	// delete container
+	sandboxImagePrefix := "sha"
 
+	// TODO: Add check and warning if the file already exists
+	// TODO: Make sure the state folder is created
+
+	cli, err := docker.GetDockerClient()
+	if err != nil {
+		return err
+	}
+	ghRepo := github.GetGHRepoService()
+
+	// Determine and pull the image
+	sandboxImage := sandboxConfig.Image
+	if len(sandboxImage) == 0 {
+		image, _, err := github.GetFullyQualifiedImageName(sandboxImagePrefix, sandboxConfig.Version, demoImageName, sandboxConfig.Prerelease, ghRepo)
+		if err != nil {
+			return err
+		}
+		sandboxImage = image
+	}
+	fmt.Printf("%v Fetching image %s\n", emoji.Whale, sandboxImage)
+	err = docker.PullDockerImage(ctx, cli, sandboxImage, docker.ImagePullPolicyIfNotPresent, docker.ImagePullOptions{})
+	if err != nil {
+		return err
+	}
+
+	err = docker.CopyContainerFile(ctx, cli, "/opt/flyte/defaults.flyte.yaml", docker.FlyteBinaryConfig, "demo-init", sandboxImage)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
