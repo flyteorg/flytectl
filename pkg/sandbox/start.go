@@ -33,9 +33,10 @@ const (
 	taintEffect          = "NoSchedule"
 	sandboxContextName   = "flyte-sandbox"
 	sandboxDockerContext = "default"
-	k8sEndpoint          = "https://127.0.0.1:30086"
+	k8sEndpoint          = "https://127.0.0.1:6443"
+	sandboxK8sEndpoint   = "https://127.0.0.1:30086"
 	sandboxImageName     = "cr.flyte.org/flyteorg/flyte-sandbox"
-	demoImageName        = "cr.flyte.org/flyteorg/flyte-sandbox-lite"
+	demoImageName        = "cr.flyte.org/flyteorg/flyte-sandbox-bundle"
 )
 
 func isNodeTainted(ctx context.Context, client corev1.CoreV1Interface) (bool, error) {
@@ -140,9 +141,9 @@ func MountVolume(file, destination string) (*mount.Mount, error) {
 	return nil, nil
 }
 
-func UpdateLocalKubeContext(dockerCtx string, contextName string) error {
+func UpdateLocalKubeContext(dockerCtx string, contextName string, kubeConfigPath string) error {
 	srcConfigAccess := &clientcmd.PathOptions{
-		GlobalFile:   docker.Kubeconfig,
+		GlobalFile:   kubeConfigPath,
 		LoadingRules: clientcmd.NewDefaultClientConfigLoadingRules(),
 	}
 	k8sCtxMgr := k8s.NewK8sContextManager()
@@ -161,12 +162,8 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 		return nil, nil
 	}
 
-	if err := util.SetupFlyteDir(); err != nil {
-		return nil, err
-	}
-
 	templateValues := configutil.ConfigTemplateSpec{
-		Host:     "localhost:30081",
+		Host:     "localhost:30080",
 		Insecure: true,
 		Console:  fmt.Sprintf("http://localhost:%d", consolePort),
 	}
@@ -175,11 +172,20 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 	}
 
 	volumes := docker.Volumes
-	if vol, err := MountVolume(sandboxConfig.Source, docker.Source); err != nil {
+	// Mount this even though it should no longer be necessary. This is for user code
+	if vol, err := MountVolume(sandboxConfig.DeprecatedSource, docker.Source); err != nil {
 		return nil, err
 	} else if vol != nil {
 		volumes = append(volumes, *vol)
 	}
+
+	// This is the state directory mount, where flyte sandbox will write postgres/blobs, configs
+	if vol, err := MountVolume(docker.FlyteStateDir, docker.StateDirMountDest); err != nil {
+		return nil, err
+	} else if vol != nil {
+		volumes = append(volumes, *vol)
+	}
+
 	sandboxImage := sandboxConfig.Image
 	if len(sandboxImage) == 0 {
 		image, version, err := github.GetFullyQualifiedImageName(defaultImagePrefix, sandboxConfig.Version, defaultImageName, sandboxConfig.Prerelease, g)
@@ -246,6 +252,90 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 	}
 
 	ghRepo := github.GetGHRepoService()
+	if err := util.CreatePathAndFile(docker.Kubeconfig); err != nil {
+		return err
+	}
+
+	reader, err := startSandbox(ctx, cli, ghRepo, os.Stdin, sandboxConfig, defaultImageName, defaultImagePrefix, exposedPorts, portBindings, consolePort)
+	if err != nil {
+		return err
+	}
+
+	if reader != nil {
+		var k8sClient k8s.K8s
+		err = retry.Do(
+			func() error {
+				// This should wait for the kubeconfig file being there.
+				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
+				return err
+			},
+			retry.Attempts(10),
+		)
+		if err != nil {
+			return err
+		}
+
+		// This will copy the kubeconfig from where k3s writes it () to the main file.
+		if err = UpdateLocalKubeContext(sandboxDockerContext, sandboxContextName, docker.Kubeconfig); err != nil {
+			return err
+		}
+
+		// Live-ness check
+		err = retry.Do(
+			func() error {
+				// Have to get a new client every time because you run into x509 errors if not
+				fmt.Println("Waiting for cluster to come up...")
+				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
+				req := k8sClient.CoreV1().RESTClient().Get()
+				req = req.RequestURI("livez")
+				res := req.Do(ctx)
+				return res.Error()
+			},
+			retry.Attempts(15),
+		)
+		if err != nil {
+			return err
+		}
+
+		// Readiness check
+		err = retry.Do(
+			func() error {
+				// No need to refresh client here
+				req := k8sClient.CoreV1().RESTClient().Get()
+				req = req.RequestURI("readyz")
+				res := req.Do(ctx)
+				return res.Error()
+			},
+			retry.Attempts(10),
+		)
+		if err != nil {
+			return err
+		}
+
+		// Watch for Flyte Deployment
+		if err := WatchFlyteDeployment(ctx, k8sClient.CoreV1()); err != nil {
+			return err
+		}
+		if primePod {
+			primeFlytekitPod(ctx, k8sClient.CoreV1().Pods("default"))
+		}
+	}
+	return nil
+}
+
+// StartClusterForSandbox is the code for the original multi deploy version of sandbox, should be removed once we
+// document the new development experience for plugins.
+func StartClusterForSandbox(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config, primePod bool, defaultImageName string, defaultImagePrefix string, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, consolePort int) error {
+	cli, err := docker.GetDockerClient()
+	if err != nil {
+		return err
+	}
+
+	ghRepo := github.GetGHRepoService()
+
+	if err := util.CreatePathAndFile(docker.SandboxKubeconfig); err != nil {
+		return err
+	}
 
 	reader, err := startSandbox(ctx, cli, ghRepo, os.Stdin, sandboxConfig, defaultImageName, defaultImagePrefix, exposedPorts, portBindings, consolePort)
 	if err != nil {
@@ -259,7 +349,7 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 		var k8sClient k8s.K8s
 		err = retry.Do(
 			func() error {
-				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
+				k8sClient, err = k8s.GetK8sClient(docker.SandboxKubeconfig, sandboxK8sEndpoint)
 				return err
 			},
 			retry.Attempts(10),
@@ -267,10 +357,11 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 		if err != nil {
 			return err
 		}
-		if err = UpdateLocalKubeContext(sandboxDockerContext, sandboxContextName); err != nil {
+		if err = UpdateLocalKubeContext(sandboxDockerContext, sandboxContextName, docker.SandboxKubeconfig); err != nil {
 			return err
 		}
 
+		// TODO: This doesn't appear to correctly watch for the Flyte deployment but doesn't do so on master either.
 		if err := WatchFlyteDeployment(ctx, k8sClient.CoreV1()); err != nil {
 			return err
 		}
@@ -282,16 +373,50 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 	return nil
 }
 
+func DemoClusterInit(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
+	sandboxImagePrefix := "sha"
+
+	// TODO: Add check and warning if the file already exists
+	// TODO: Make sure the state folder is created
+
+	cli, err := docker.GetDockerClient()
+	if err != nil {
+		return err
+	}
+	ghRepo := github.GetGHRepoService()
+
+	// Determine and pull the image
+	sandboxImage := sandboxConfig.Image
+	if len(sandboxImage) == 0 {
+		image, _, err := github.GetFullyQualifiedImageName(sandboxImagePrefix, sandboxConfig.Version, demoImageName, sandboxConfig.Prerelease, ghRepo)
+		if err != nil {
+			return err
+		}
+		sandboxImage = image
+	}
+	fmt.Printf("%v Fetching image %s\n", emoji.Whale, sandboxImage)
+	err = docker.PullDockerImage(ctx, cli, sandboxImage, docker.ImagePullPolicyIfNotPresent, docker.ImagePullOptions{})
+	if err != nil {
+		return err
+	}
+
+	err = docker.CopyContainerFile(ctx, cli, "/opt/flyte/defaults.flyte.yaml", docker.FlyteBinaryConfig, "demo-init", sandboxImage)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
 	primePod := true
 	sandboxImagePrefix := "sha"
 	exposedPorts, portBindings, err := docker.GetDemoPorts()
-	if sandboxConfig.Dev {
-		exposedPorts, portBindings, err = docker.GetDevPorts()
-	}
 	if err != nil {
 		return err
 	}
+	// TODO: Bring back dev later
+	// K3s will automatically write the file specified by this var, which is mounted from user's local state dir.
+	sandboxConfig.Env = append(sandboxConfig.Env, "K3S_KUBECONFIG_OUTPUT=/srv/flyte/kubeconfig")
 	err = StartCluster(ctx, args, sandboxConfig, primePod, demoImageName, sandboxImagePrefix, exposedPorts, portBindings, util.DemoConsolePort)
 	if err != nil {
 		return err
@@ -307,7 +432,7 @@ func StartSandboxCluster(ctx context.Context, args []string, sandboxConfig *sand
 	if err != nil {
 		return err
 	}
-	err = StartCluster(ctx, args, sandboxConfig, primePod, sandboxImageName, demoImagePrefix, exposedPorts, portBindings, util.SandBoxConsolePort)
+	err = StartClusterForSandbox(ctx, args, sandboxConfig, primePod, sandboxImageName, demoImagePrefix, exposedPorts, portBindings, util.SandBoxConsolePort)
 	if err != nil {
 		return err
 	}

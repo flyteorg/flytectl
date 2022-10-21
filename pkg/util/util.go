@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/flyteorg/flytectl/pkg/configutil"
@@ -33,16 +34,36 @@ func WriteIntoFile(data []byte, file string) error {
 	return nil
 }
 
+func CreatePathAndFile(pathToConfig string) error {
+	p, err := filepath.Abs(pathToConfig)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(p), os.ModePerm); err != nil {
+		return err
+	}
+
+	// Created a empty file with right permission
+	if _, err := os.Stat(p); err != nil {
+		if os.IsNotExist(err) {
+			if err := os.WriteFile(p, []byte(""), os.ModePerm); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 // SetupFlyteDir will create .flyte dir if not exist
 func SetupFlyteDir() error {
-	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s"), os.ModePerm); err != nil {
+	if err := os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "state"), os.ModePerm); err != nil {
 		return err
 	}
 
 	// Created a empty file with right permission
 	if _, err := os.Stat(docker.Kubeconfig); err != nil {
 		if os.IsNotExist(err) {
-			if err := ioutil.WriteFile(docker.Kubeconfig, []byte(""), os.ModePerm); err != nil {
+			if err := os.WriteFile(docker.Kubeconfig, []byte(""), os.ModePerm); err != nil {
 				return err
 			}
 		}
@@ -53,6 +74,7 @@ func SetupFlyteDir() error {
 
 // PrintSandboxMessage will print sandbox success message
 func PrintSandboxMessage(flyteConsolePort int) {
+	// TODO: revisit this print message
 	kubeconfig := strings.Join([]string{
 		"$KUBECONFIG",
 		f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),

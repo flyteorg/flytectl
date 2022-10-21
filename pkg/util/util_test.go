@@ -1,6 +1,8 @@
 package util
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -79,4 +81,15 @@ func TestIsVersionGreaterThan(t *testing.T) {
 		_, err := IsVersionGreaterThan(testVersion, "vvvvvvvv")
 		assert.NotNil(t, err)
 	})
+}
+
+func TestCreatePathAndFile(t *testing.T) {
+	dir, err := os.MkdirTemp("", "flytectl")
+	assert.NoError(t, err)
+	defer os.RemoveAll(dir)
+
+	testFile := filepath.Join(dir, "testfile.yaml")
+	CreatePathAndFile(testFile)
+	_, err = os.Stat(testFile)
+	assert.NoError(t, err)
 }

@@ -146,7 +146,7 @@ func TestStartFunc(t *testing.T) {
 		assert.Nil(t, reader)
 	})
 	t.Run("Successfully run demo cluster with source code", func(t *testing.T) {
-		sandboxCmdConfig.DefaultConfig.Source = f.UserHomeDir()
+		sandboxCmdConfig.DefaultConfig.DeprecatedSource = f.UserHomeDir()
 		sandboxCmdConfig.DefaultConfig.Version = ""
 		sandboxSetup()
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
@@ -162,7 +162,7 @@ func TestStartFunc(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("Successfully run demo cluster with abs path of source code", func(t *testing.T) {
-		sandboxCmdConfig.DefaultConfig.Source = "../"
+		sandboxCmdConfig.DefaultConfig.DeprecatedSource = "../"
 		sandboxCmdConfig.DefaultConfig.Version = ""
 		sandboxSetup()
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
@@ -306,7 +306,7 @@ func TestStartFunc(t *testing.T) {
 		}).Return(reader, nil)
 		mockK8sContextMgr := &k8sMocks.ContextOps{}
 		docker.Client = mockDocker
-		sandboxCmdConfig.DefaultConfig.Source = ""
+		sandboxCmdConfig.DefaultConfig.DeprecatedSource = ""
 		sandboxCmdConfig.DefaultConfig.Version = ""
 		k8s.ContextMgr = mockK8sContextMgr
 		ghutil.Client = githubMock
