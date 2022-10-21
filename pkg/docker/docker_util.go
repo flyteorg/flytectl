@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"archive/tar"
 	"bufio"
 	"context"
 	"errors"
@@ -195,6 +196,45 @@ func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, expo
 	}
 	return resp.ID, nil
 }
+func ExtractTar(ss io.Reader, destination string) error {
+	tarReader := tar.NewReader(ss)
+
+	for true {
+		header, err := tarReader.Next()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+
+		switch header.Typeflag {
+		case tar.TypeDir:
+			if err := os.Mkdir(header.Name, 0755); err != nil {
+				return err
+			}
+		case tar.TypeReg:
+			fmt.Printf("Creating %s\n", destination)
+			outFile, err := os.Create(destination)
+			if err != nil {
+				return err
+			}
+			if _, err := io.Copy(outFile, tarReader); err != nil {
+				return err
+			}
+			outFile.Close()
+
+		default:
+			return errors.New(
+				fmt.Sprintf("ExtractTarGz: uknown type: %s in %s",
+					header.Typeflag,
+					header.Name))
+		}
+	}
+	return nil
+}
 
 // CopyContainerFile try to create the container, see if the source file is there, copy it to the destination
 func CopyContainerFile(ctx context.Context, cli Docker, source, destination, name, image string) error {
@@ -216,16 +256,20 @@ func CopyContainerFile(ctx context.Context, cli Docker, source, destination, nam
 	if err != nil {
 		return err
 	}
-	outFile, err := os.Create(destination)
+	tarFile := destination + ".tar"
+	outFile, err := os.Create(tarFile)
 	if err != nil {
 		return err
 	}
 	defer outFile.Close()
+	defer reader.Close()
 	_, err = io.Copy(outFile, reader)
 	if err != nil {
 		return err
 	}
-	return nil
+	r, _ := os.Open(tarFile)
+	err = ExtractTar(r, destination)
+	return err
 }
 
 // ReadLogs will return io scanner for reading the logs of a container
