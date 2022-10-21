@@ -81,9 +81,10 @@ flytectl demo start
 Bring up the new container
 * Mount state dir into the top-level container as /srv/flyte and run container
 * Run init logic
-* Run 
+* Run
 
 flytectl demo reload-config
-Re-read from the current path by killing the pod, nothing more. 
+Re-read from the current path by killing the pod, nothing more.
 
 flytectl demo status
+Update the existing command to provide more details.

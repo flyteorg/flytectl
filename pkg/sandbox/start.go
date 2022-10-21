@@ -36,7 +36,7 @@ const (
 	k8sEndpoint          = "https://127.0.0.1:6443"
 	sandboxK8sEndpoint   = "https://127.0.0.1:30086"
 	sandboxImageName     = "cr.flyte.org/flyteorg/flyte-sandbox"
-	demoImageName        = "cr.flyte.org/flyteorg/flyte-sandbox-bundle"
+	demoImageName        = "cr.flyte.org/flyteorg/flyte-sandbox-ultra"
 )
 
 func isNodeTainted(ctx context.Context, client corev1.CoreV1Interface) (bool, error) {
