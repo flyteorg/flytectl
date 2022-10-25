@@ -197,6 +197,7 @@ func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, expo
 	}
 	return resp.ID, nil
 }
+
 func ExtractTar(ss io.Reader, destination string) error {
 	tarReader := tar.NewReader(ss)
 
@@ -217,14 +218,19 @@ func ExtractTar(ss io.Reader, destination string) error {
 				return err
 			}
 		case tar.TypeReg:
-			fmt.Printf("Creating %s\n", destination)
+			fmt.Printf("Creating Flyte configuration file at: %s\n", destination)
 			outFile, err := os.Create(destination)
 			if err != nil {
 				return err
 			}
-			// TODO: fix gosec
-			if _, err := io.Copy(outFile, tarReader); err != nil {
-				return err
+			for {
+				// Read one 1MB at a time.
+				if _, err := io.CopyN(outFile, tarReader, 1024*1024); err != nil {
+					if err == io.EOF {
+						break
+					}
+					return err
+				}
 			}
 			outFile.Close()
 
