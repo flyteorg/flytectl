@@ -33,7 +33,7 @@ const (
 	taintEffect          = "NoSchedule"
 	sandboxContextName   = "flyte-sandbox"
 	sandboxDockerContext = "default"
-	k8sEndpoint          = "https://127.0.0.1:6443"
+	K8sEndpoint          = "https://127.0.0.1:6443"
 	sandboxK8sEndpoint   = "https://127.0.0.1:30086"
 	sandboxImageName     = "cr.flyte.org/flyteorg/flyte-sandbox"
 	demoImageName        = "cr.flyte.org/flyteorg/flyte-sandbox-ultra"
@@ -266,7 +266,7 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 		err = retry.Do(
 			func() error {
 				// This should wait for the kubeconfig file being there.
-				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
+				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, K8sEndpoint)
 				return err
 			},
 			retry.Attempts(10),
@@ -285,7 +285,7 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 			func() error {
 				// Have to get a new client every time because you run into x509 errors if not
 				fmt.Println("Waiting for cluster to come up...")
-				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, k8sEndpoint)
+				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, K8sEndpoint)
 				req := k8sClient.CoreV1().RESTClient().Get()
 				req = req.RequestURI("livez")
 				res := req.Do(ctx)

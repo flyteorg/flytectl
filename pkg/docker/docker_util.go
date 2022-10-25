@@ -6,11 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/docker/docker/client"
-	"github.com/enescakir/emoji"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/docker/docker/client"
+	"github.com/enescakir/emoji"
 
 	"github.com/flyteorg/flytectl/clierrors"
 
@@ -199,7 +200,7 @@ func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, expo
 func ExtractTar(ss io.Reader, destination string) error {
 	tarReader := tar.NewReader(ss)
 
-	for true {
+	for {
 		header, err := tarReader.Next()
 
 		if err == io.EOF {
@@ -221,16 +222,16 @@ func ExtractTar(ss io.Reader, destination string) error {
 			if err != nil {
 				return err
 			}
+			// TODO: fix gosec
 			if _, err := io.Copy(outFile, tarReader); err != nil {
 				return err
 			}
 			outFile.Close()
 
 		default:
-			return errors.New(
-				fmt.Sprintf("ExtractTarGz: uknown type: %s in %s",
-					header.Typeflag,
-					header.Name))
+			return fmt.Errorf("ExtractTarGz: uknown type: %v in %s",
+				header.Typeflag,
+				header.Name)
 		}
 	}
 	return nil
@@ -243,8 +244,9 @@ func CopyContainerFile(ctx context.Context, cli Docker, source, destination, nam
 	if err != nil {
 		return err
 	}
+	var removeErr error
 	defer func() {
-		cli.ContainerRemove(context.Background(), resp.ID, types.ContainerRemoveOptions{
+		removeErr = cli.ContainerRemove(context.Background(), resp.ID, types.ContainerRemoveOptions{
 			Force: true,
 		})
 	}()
@@ -269,7 +271,10 @@ func CopyContainerFile(ctx context.Context, cli Docker, source, destination, nam
 	}
 	r, _ := os.Open(tarFile)
 	err = ExtractTar(r, destination)
-	return err
+	if err != nil {
+		return err
+	}
+	return removeErr
 }
 
 // ReadLogs will return io scanner for reading the logs of a container

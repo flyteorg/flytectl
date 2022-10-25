@@ -89,7 +89,8 @@ func TestCreatePathAndFile(t *testing.T) {
 	defer os.RemoveAll(dir)
 
 	testFile := filepath.Join(dir, "testfile.yaml")
-	CreatePathAndFile(testFile)
+	err = CreatePathAndFile(testFile)
+	assert.NoError(t, err)
 	_, err = os.Stat(testFile)
 	assert.NoError(t, err)
 }
