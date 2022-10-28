@@ -143,12 +143,11 @@ func MountVolume(file, destination string) (*mount.Mount, error) {
 	return nil, nil
 }
 
-func UpdateLocalKubeContext(dockerCtx string, contextName string, kubeConfigPath string) error {
+func UpdateLocalKubeContext(k8sCtxMgr k8s.ContextOps, dockerCtx string, contextName string, kubeConfigPath string) error {
 	srcConfigAccess := &clientcmd.PathOptions{
 		GlobalFile:   kubeConfigPath,
 		LoadingRules: clientcmd.NewDefaultClientConfigLoadingRules(),
 	}
-	k8sCtxMgr := k8s.NewK8sContextManager()
 	return k8sCtxMgr.CopyContext(srcConfigAccess, dockerCtx, contextName)
 }
 
@@ -247,6 +246,12 @@ func primeFlytekitPod(ctx context.Context, podService corev1.PodInterface) {
 }
 
 func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config, primePod bool, defaultImageName string, defaultImagePrefix string, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, consolePort int) error {
+	k8sCtxMgr := k8s.NewK8sContextManager()
+	err := k8sCtxMgr.CheckConfig()
+	if err != nil {
+		return err
+	}
+
 	cli, err := docker.GetDockerClient()
 	if err != nil {
 		return err
@@ -277,7 +282,7 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 		}
 
 		// This will copy the kubeconfig from where k3s writes it () to the main file.
-		if err = UpdateLocalKubeContext(sandboxDockerContext, sandboxContextName, docker.Kubeconfig); err != nil {
+		if err = UpdateLocalKubeContext(k8sCtxMgr, sandboxDockerContext, sandboxContextName, docker.Kubeconfig); err != nil {
 			return err
 		}
 
@@ -324,10 +329,6 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 		if primePod {
 			primeFlytekitPod(ctx, k8sClient.CoreV1().Pods("default"))
 		}
-
-		if err = UpdateLocalKubeContext(sandboxDockerContext, sandboxContextName, docker.Kubeconfig); err != nil {
-			return err
-		}
 	}
 	return nil
 }
@@ -335,6 +336,11 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 // StartClusterForSandbox is the code for the original multi deploy version of sandbox, should be removed once we
 // document the new development experience for plugins.
 func StartClusterForSandbox(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config, primePod bool, defaultImageName string, defaultImagePrefix string, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, consolePort int) error {
+	k8sCtxMgr := k8s.NewK8sContextManager()
+	err := k8sCtxMgr.CheckConfig()
+	if err != nil {
+		return err
+	}
 	cli, err := docker.GetDockerClient()
 	if err != nil {
 		return err
@@ -366,7 +372,7 @@ func StartClusterForSandbox(ctx context.Context, args []string, sandboxConfig *s
 		if err != nil {
 			return err
 		}
-		if err = UpdateLocalKubeContext(sandboxDockerContext, sandboxContextName, docker.SandboxKubeconfig); err != nil {
+		if err = UpdateLocalKubeContext(k8sCtxMgr, sandboxDockerContext, sandboxContextName, docker.SandboxKubeconfig); err != nil {
 			return err
 		}
 
