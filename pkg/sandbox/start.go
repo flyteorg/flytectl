@@ -180,10 +180,15 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 	}
 
 	// This is the state directory mount, where flyte sandbox will write postgres/blobs, configs
-	if vol, err := MountVolume(docker.FlyteStateDir, docker.StateDirMountDest); err != nil {
-		return nil, err
-	} else if vol != nil {
-		volumes = append(volumes, *vol)
+	// To be interoperable with the old sandbox, only mount if the directory exists, should've created by StartCluster
+	if fileInfo, err := os.Stat(docker.FlyteStateDir); err == nil {
+		if fileInfo.IsDir() {
+			if vol, err := MountVolume(docker.FlyteStateDir, docker.StateDirMountDest); err != nil {
+				return nil, err
+			} else if vol != nil {
+				volumes = append(volumes, *vol)
+			}
+		}
 	}
 
 	sandboxImage := sandboxConfig.Image
