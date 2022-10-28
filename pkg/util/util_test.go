@@ -1,10 +1,11 @@
 package util
 
 import (
-	"github.com/flyteorg/flytectl/pkg/docker"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/flyteorg/flytectl/pkg/docker"
 
 	"github.com/stretchr/testify/assert"
 )
