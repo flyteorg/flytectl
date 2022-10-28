@@ -69,22 +69,3 @@ You can find the detailed contribution guide [here](docs/source/contribute.rst).
 
 Refer to the [issues](https://docs.flyte.org/en/latest/community/contribute.html#file-an-issue) section in the contribution
 guide if you'd like to file an issue.
-
-
-## Work For New Behavior
-Following commands need to work:
-flytectl demo init
-* Create the host level state directory ~/.flyte/state if not exists
-* Copy the default config in there if not exists
-
-flytectl demo start
-Bring up the new container
-* Mount state dir into the top-level container as /srv/flyte and run container
-* Run init logic
-* Run
-
-flytectl demo reload-config
-Re-read from the current path by killing the pod, nothing more.
-
-flytectl demo status
-Update the existing command to provide more details.

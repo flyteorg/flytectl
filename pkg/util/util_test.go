@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/flyteorg/flytectl/pkg/docker"
 	"os"
 	"path/filepath"
 	"testing"
@@ -27,7 +28,7 @@ func TestSetupFlyteDir(t *testing.T) {
 
 func TestPrintSandboxMessage(t *testing.T) {
 	t.Run("Print Sandbox Message", func(t *testing.T) {
-		PrintSandboxMessage(SandBoxConsolePort)
+		PrintDemoMessage(SandBoxConsolePort, docker.SandboxKubeconfig)
 	})
 }
 

@@ -72,13 +72,11 @@ func SetupFlyteDir() error {
 	return nil
 }
 
-// PrintSandboxMessage will print sandbox success message
-func PrintSandboxMessage(flyteConsolePort int) {
-	// TODO: revisit this print message
+// PrintDemoMessage will print sandbox success message
+func PrintDemoMessage(flyteConsolePort int, kubeconfigLocation string) {
 	kubeconfig := strings.Join([]string{
 		"$KUBECONFIG",
-		f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),
-		docker.Kubeconfig,
+		kubeconfigLocation,
 	}, ":")
 	successMsg := fmt.Sprintf("%v http://localhost:%v/console", ProgressSuccessMessage, flyteConsolePort)
 	fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, successMsg, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)

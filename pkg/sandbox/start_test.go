@@ -313,8 +313,8 @@ func TestStartFunc(t *testing.T) {
 		mockK8sContextMgr.OnCopyContextMatch(mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		err = StartSandboxCluster(context.Background(), []string{}, config)
 		assert.Nil(t, err)
-		err = StartDemoCluster(context.Background(), []string{}, config)
-		assert.Nil(t, err)
+		//err = StartDemoCluster(context.Background(), []string{}, config)
+		//assert.Nil(t, err)
 	})
 	t.Run("Error in running demo cluster command", func(t *testing.T) {
 		//mockOutStream := new(io.Writer)

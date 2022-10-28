@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+
 	"io"
 	"os"
 	"path/filepath"
@@ -20,6 +21,7 @@ import (
 	"github.com/flyteorg/flytectl/pkg/github"
 	"github.com/flyteorg/flytectl/pkg/k8s"
 	"github.com/flyteorg/flytectl/pkg/util"
+	"github.com/flyteorg/flytestdlib/logger"
 	"github.com/kataras/tablewriter"
 	corev1api "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -157,8 +159,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 		if err.Error() != clierrors.ErrSandboxExists {
 			return nil, err
 		}
-		fmt.Printf("Existing details of your sandbox")
-		util.PrintSandboxMessage(consolePort)
+		fmt.Printf("Your Flyte cluster has not been removed.")
 		return nil, nil
 	}
 
@@ -286,6 +287,10 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 				// Have to get a new client every time because you run into x509 errors if not
 				fmt.Println("Waiting for cluster to come up...")
 				k8sClient, err = k8s.GetK8sClient(docker.Kubeconfig, K8sEndpoint)
+				if err != nil {
+					logger.Debugf(ctx, "Error getting K8s client in liveness check %s", err)
+					return err
+				}
 				req := k8sClient.CoreV1().RESTClient().Get()
 				req = req.RequestURI("livez")
 				res := req.Do(ctx)
@@ -318,6 +323,10 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 		}
 		if primePod {
 			primeFlytekitPod(ctx, k8sClient.CoreV1().Pods("default"))
+		}
+
+		if err = UpdateLocalKubeContext(sandboxDockerContext, sandboxContextName, docker.Kubeconfig); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -421,7 +430,7 @@ func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandbox
 	if err != nil {
 		return err
 	}
-	util.PrintSandboxMessage(util.DemoConsolePort)
+	util.PrintDemoMessage(util.DemoConsolePort, docker.Kubeconfig)
 	return nil
 }
 
@@ -436,6 +445,6 @@ func StartSandboxCluster(ctx context.Context, args []string, sandboxConfig *sand
 	if err != nil {
 		return err
 	}
-	util.PrintSandboxMessage(util.SandBoxConsolePort)
+	util.PrintDemoMessage(util.SandBoxConsolePort, docker.SandboxKubeconfig)
 	return nil
 }
