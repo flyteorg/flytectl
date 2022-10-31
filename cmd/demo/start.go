@@ -2,6 +2,7 @@ package demo
 
 import (
 	"context"
+	"os"
 
 	"github.com/flyteorg/flytectl/pkg/sandbox"
 
@@ -86,5 +87,5 @@ func startDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.Command
 
 func initDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	sandboxDefaultConfig := sandboxCmdConfig.DefaultConfig
-	return sandbox.DemoClusterInit(ctx, sandboxDefaultConfig)
+	return sandbox.DemoClusterInit(ctx, sandboxDefaultConfig, os.Stdin)
 }

@@ -395,12 +395,12 @@ func StartClusterForSandbox(ctx context.Context, args []string, sandboxConfig *s
 	return nil
 }
 
-func confirmAndRemoveIfExists(fname string) error {
+func confirmAndRemoveIfExists(fname string, userInput io.Reader) error {
 	if _, err := os.Stat(fname); os.IsNotExist(err) {
 		return nil
 	} else {
 		msg := fmt.Sprintf("This will overwrite the existing Flyte config file at [%s]. Do you want to continue?", fname)
-		if cmdUtil.AskForConfirmation(msg, os.Stdin) {
+		if cmdUtil.AskForConfirmation(msg, userInput) {
 			if err := os.Remove(fname); err != nil {
 				return err
 			}
@@ -412,10 +412,10 @@ func confirmAndRemoveIfExists(fname string) error {
 	return nil
 }
 
-func DemoClusterInit(ctx context.Context, sandboxConfig *sandboxCmdConfig.Config) error {
+func DemoClusterInit(ctx context.Context, sandboxConfig *sandboxCmdConfig.Config, userInput io.Reader) error {
 	sandboxImagePrefix := "sha"
 
-	if err := confirmAndRemoveIfExists(docker.FlyteBinaryConfig); err != nil {
+	if err := confirmAndRemoveIfExists(docker.FlyteBinaryConfig, userInput); err != nil {
 		fmt.Printf("Leaving init file %s in place and skipping rest of initialization", docker.FlyteBinaryConfig)
 		return nil
 	}
