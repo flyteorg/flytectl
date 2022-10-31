@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
 
 	"io"
 	"os"
@@ -394,11 +395,34 @@ func StartClusterForSandbox(ctx context.Context, args []string, sandboxConfig *s
 	return nil
 }
 
+func confirmAndRemoveIfExists(fname string) error {
+	if _, err := os.Stat(fname); os.IsNotExist(err) {
+		return nil
+	} else {
+		msg := fmt.Sprintf("This will overwrite the existing Flyte config file at [%s]. Do you want to continue?", fname)
+		if cmdUtil.AskForConfirmation(msg, os.Stdin) {
+			if err := os.Remove(fname); err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("leaving %s in place, not removing", fname)
+		}
+
+	}
+	return nil
+}
+
 func DemoClusterInit(ctx context.Context, sandboxConfig *sandboxCmdConfig.Config) error {
 	sandboxImagePrefix := "sha"
 
-	// TODO: Add check and warning if the file already exists
-	// TODO: Make sure the state folder is created
+	if err := confirmAndRemoveIfExists(docker.FlyteBinaryConfig); err != nil {
+		fmt.Printf("Leaving init file %s in place and skipping rest of initialization", docker.FlyteBinaryConfig)
+		return nil
+	}
+
+	if err := util.SetupFlyteDir(); err != nil {
+		return err
+	}
 
 	cli, err := docker.GetDockerClient()
 	if err != nil {

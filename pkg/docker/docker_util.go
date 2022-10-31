@@ -235,7 +235,7 @@ func ExtractTar(ss io.Reader, destination string) error {
 			outFile.Close()
 
 		default:
-			return fmt.Errorf("ExtractTarGz: uknown type: %v in %s",
+			return fmt.Errorf("ExtractTarGz: unknown type: %v in %s",
 				header.Typeflag,
 				header.Name)
 		}
