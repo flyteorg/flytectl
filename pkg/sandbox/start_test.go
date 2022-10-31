@@ -1,12 +1,14 @@
 package sandbox
 
 import (
+	"archive/tar"
 	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
@@ -314,8 +316,6 @@ func TestStartFunc(t *testing.T) {
 		mockK8sContextMgr.OnCopyContextMatch(mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		err = StartSandboxCluster(context.Background(), []string{}, config)
 		assert.Nil(t, err)
-		//err = StartDemoCluster(context.Background(), []string{}, config)
-		//assert.Nil(t, err)
 	})
 	t.Run("Error in running demo cluster command", func(t *testing.T) {
 		//mockOutStream := new(io.Writer)
@@ -435,5 +435,66 @@ func TestGetNodeTaintStatus(t *testing.T) {
 		c, err := isNodeTainted(ctx, client.CoreV1())
 		assert.Nil(t, err)
 		assert.Equal(t, true, c)
+	})
+}
+
+func TestDemo(t *testing.T) {
+	// Create a fake tar file in tmp.
+	fo, err := os.CreateTemp("", "sampledata")
+	assert.NoError(t, err)
+	tarWriter := tar.NewWriter(fo)
+	err = tarWriter.WriteHeader(&tar.Header{
+		Typeflag: tar.TypeReg,
+		Name:     "flyte.yaml",
+		Size:     4,
+		Mode:     0640,
+		ModTime:  time.Unix(1245206587, 0),
+	})
+	assert.NoError(t, err)
+	cnt, err := tarWriter.Write([]byte("a: b"))
+	assert.NoError(t, err)
+	assert.Equal(t, 4, cnt)
+	tarWriter.Close()
+	fo.Close()
+
+	t.Run("No errors", func(t *testing.T) {
+		sandboxSetup()
+		reader, err := os.Open(fo.Name())
+		assert.NoError(t, err)
+		cfg := sandboxCmdConfig.DefaultConfig
+		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
+		mockDocker.OnImageListMatch(ctx, mock.Anything).Return([]types.ImageSummary{}, nil)
+		mockDocker.OnContainerRemove(ctx, "Hello", types.ContainerRemoveOptions{Force: true}).Return(nil)
+		mockDocker.OnContainerStatPath(ctx, "Hello", "/opt/flyte/defaults.flyte.yaml").Return(types.ContainerPathStat{}, nil)
+		mockDocker.OnCopyFromContainer(ctx, "Hello", "/opt/flyte/defaults.flyte.yaml").Return(reader, types.ContainerPathStat{}, nil)
+		docker.Client = mockDocker
+		err = DemoClusterInit(ctx, cfg)
+		assert.Nil(t, err)
+	})
+	t.Run("Erroring on image pull", func(t *testing.T) {
+		sandboxSetup()
+		myErr := fmt.Errorf("test image list error")
+		assert.NoError(t, err)
+		cfg := sandboxCmdConfig.DefaultConfig
+		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
+		mockDocker.OnImageListMatch(ctx, mock.Anything).Return([]types.ImageSummary{}, myErr)
+		//mockDocker.OnContainerRemove(ctx, "Hello", types.ContainerRemoveOptions{Force: true}).Return(nil)
+		docker.Client = mockDocker
+		err = DemoClusterInit(ctx, cfg)
+		assert.Equal(t, myErr, err)
+	})
+	t.Run("Successfully run demo cluster with source code", func(t *testing.T) {
+		sandboxSetup()
+		myErr := fmt.Errorf("test imagepull error")
+		assert.NoError(t, err)
+		cfg := sandboxCmdConfig.DefaultConfig
+		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
+		mockDocker.OnImageListMatch(ctx, mock.Anything).Return([]types.ImageSummary{}, nil)
+		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, myErr)
+		//mockDocker.OnContainerRemove(ctx, "Hello", types.ContainerRemoveOptions{Force: true}).Return(nil)
+		docker.Client = mockDocker
+		err = DemoClusterInit(ctx, cfg)
+		assert.Equal(t, myErr, err)
 	})
 }

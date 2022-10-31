@@ -366,3 +366,8 @@ func TestInspectExecResp(t *testing.T) {
 	})
 
 }
+
+func TestDemoPorts(t *testing.T) {
+	_, ports, _ := GetDemoPorts()
+	assert.Equal(t, 5, len(ports))
+}

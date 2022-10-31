@@ -39,6 +39,7 @@ const (
 	sandboxK8sEndpoint   = "https://127.0.0.1:30086"
 	sandboxImageName     = "cr.flyte.org/flyteorg/flyte-sandbox"
 	demoImageName        = "cr.flyte.org/flyteorg/flyte-sandbox-bundled"
+	DefaultFlyteConfig   = "/opt/flyte/defaults.flyte.yaml"
 )
 
 func isNodeTainted(ctx context.Context, client corev1.CoreV1Interface) (bool, error) {
@@ -393,7 +394,7 @@ func StartClusterForSandbox(ctx context.Context, args []string, sandboxConfig *s
 	return nil
 }
 
-func DemoClusterInit(ctx context.Context, args []string, sandboxConfig *sandboxCmdConfig.Config) error {
+func DemoClusterInit(ctx context.Context, sandboxConfig *sandboxCmdConfig.Config) error {
 	sandboxImagePrefix := "sha"
 
 	// TODO: Add check and warning if the file already exists
@@ -420,7 +421,7 @@ func DemoClusterInit(ctx context.Context, args []string, sandboxConfig *sandboxC
 		return err
 	}
 
-	err = docker.CopyContainerFile(ctx, cli, "/opt/flyte/defaults.flyte.yaml", docker.FlyteBinaryConfig, "demo-init", sandboxImage)
+	err = docker.CopyContainerFile(ctx, cli, DefaultFlyteConfig, docker.FlyteBinaryConfig, "demo-init", sandboxImage)
 	if err != nil {
 		return err
 	}
@@ -434,7 +435,6 @@ func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandbox
 	if err != nil {
 		return err
 	}
-	// TODO: Bring back dev later
 	// K3s will automatically write the file specified by this var, which is mounted from user's local state dir.
 	sandboxConfig.Env = append(sandboxConfig.Env, "K3S_KUBECONFIG_OUTPUT=/srv/flyte/kubeconfig")
 	err = StartCluster(ctx, args, sandboxConfig, primePod, demoImageName, sandboxImagePrefix, exposedPorts, portBindings, util.DemoConsolePort)
