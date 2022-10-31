@@ -28,7 +28,7 @@ Usage
 `
 )
 
-// reloadDemoCluster will
+// reloadDemoCluster will kill the flyte binary pod so the new one can pick up a new config file
 func reloadDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	k8sClient, err := k8s.GetK8sClient(docker.Kubeconfig, K8sEndpoint)
 	if err != nil {

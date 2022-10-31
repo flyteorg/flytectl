@@ -475,7 +475,6 @@ func TestDemo(t *testing.T) {
 	t.Run("Erroring on image pull", func(t *testing.T) {
 		sandboxSetup()
 		myErr := fmt.Errorf("test image list error")
-		assert.NoError(t, err)
 		cfg := sandboxCmdConfig.DefaultConfig
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		mockDocker.OnImageListMatch(ctx, mock.Anything).Return([]types.ImageSummary{}, myErr)
@@ -487,7 +486,6 @@ func TestDemo(t *testing.T) {
 	t.Run("Successfully run demo cluster with source code", func(t *testing.T) {
 		sandboxSetup()
 		myErr := fmt.Errorf("test imagepull error")
-		assert.NoError(t, err)
 		cfg := sandboxCmdConfig.DefaultConfig
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		mockDocker.OnImageListMatch(ctx, mock.Anything).Return([]types.ImageSummary{}, nil)
