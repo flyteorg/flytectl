@@ -398,6 +398,7 @@ func TestTaring(t *testing.T) {
 		destFile, err := os.CreateTemp("", "sampledata")
 		assert.NoError(t, err)
 		reader, err := os.Open(fo.Name())
+		assert.NoError(t, err)
 		err = ExtractTar(reader, destFile.Name())
 		assert.NoError(t, err)
 		fileBytes, err := os.ReadFile(destFile.Name())
@@ -407,6 +408,7 @@ func TestTaring(t *testing.T) {
 
 		// Try to extract the file we just extracted again. It's not a tar file obviously so it should error
 		reader, err = os.Open(destFile.Name())
+		assert.NoError(t, err)
 		err = ExtractTar(reader, destFile.Name())
 		assert.Errorf(t, err, "unexpected EOF")
 	})
@@ -433,6 +435,7 @@ func TestTarBadHeader(t *testing.T) {
 		destFile, err := os.CreateTemp("", "sampledata")
 		assert.NoError(t, err)
 		reader, err := os.Open(fo.Name())
+		assert.NoError(t, err)
 		err = ExtractTar(reader, destFile.Name())
 		assert.Errorf(t, err, "ExtractTarGz: unknown type")
 	})
