@@ -4,12 +4,12 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
-
 	"io"
 	"os"
 	"path/filepath"
 	"time"
+
+	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
 
 	"github.com/avast/retry-go"
 	"github.com/docker/docker/api/types/mount"
@@ -398,16 +398,14 @@ func StartClusterForSandbox(ctx context.Context, args []string, sandboxConfig *s
 func confirmAndRemoveIfExists(fname string, userInput io.Reader) error {
 	if _, err := os.Stat(fname); os.IsNotExist(err) {
 		return nil
-	} else {
-		msg := fmt.Sprintf("This will overwrite the existing Flyte config file at [%s]. Do you want to continue?", fname)
-		if cmdUtil.AskForConfirmation(msg, userInput) {
-			if err := os.Remove(fname); err != nil {
-				return err
-			}
-		} else {
-			return fmt.Errorf("leaving %s in place, not removing", fname)
+	}
+	msg := fmt.Sprintf("This will overwrite the existing Flyte config file at [%s]. Do you want to continue?", fname)
+	if cmdUtil.AskForConfirmation(msg, userInput) {
+		if err := os.Remove(fname); err != nil {
+			return err
 		}
-
+	} else {
+		return fmt.Errorf("leaving %s in place, not removing", fname)
 	}
 	return nil
 }
