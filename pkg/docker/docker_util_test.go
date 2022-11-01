@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
+
 	"github.com/stretchr/testify/mock"
 
 	"github.com/docker/docker/api/types"
@@ -438,5 +440,75 @@ func TestTarBadHeader(t *testing.T) {
 		assert.NoError(t, err)
 		err = ExtractTar(reader, destFile.Name())
 		assert.Errorf(t, err, "ExtractTarGz: unknown type")
+	})
+}
+
+func TestCopyFile(t *testing.T) {
+	ctx := context.Background()
+	// Create a fake tar file in tmp.
+	fo, err := os.CreateTemp("", "sampledata")
+	assert.NoError(t, err)
+	tarWriter := tar.NewWriter(fo)
+	err = tarWriter.WriteHeader(&tar.Header{
+		Typeflag: tar.TypeReg,
+		Name:     "flyte.yaml",
+		Size:     4,
+		Mode:     0640,
+		ModTime:  time.Unix(1245206587, 0),
+	})
+	assert.NoError(t, err)
+	cnt, err := tarWriter.Write([]byte("a: b"))
+	assert.NoError(t, err)
+	assert.Equal(t, 4, cnt)
+	tarWriter.Close()
+	fo.Close()
+
+	image := "some:image"
+	containerName := "my-container"
+
+	t.Run("No errors", func(t *testing.T) {
+		// Create reader of the tar file
+		reader, err := os.Open(fo.Name())
+		assert.NoError(t, err)
+		// Create destination file name
+		destDir, err := os.MkdirTemp("", "dest")
+		assert.NoError(t, err)
+		destination := filepath.Join(destDir, "destfile")
+
+		// Mocks
+		mockDocker := &mocks.Docker{}
+		mockDocker.OnContainerCreate(
+			ctx, &container.Config{Image: image}, &container.HostConfig{}, nil, nil, containerName).Return(
+			container.ContainerCreateCreatedBody{ID: containerName}, nil)
+		mockDocker.OnContainerStatPath(ctx, containerName, "some source").Return(types.ContainerPathStat{}, nil)
+		mockDocker.OnCopyFromContainer(ctx, containerName, "some source").Return(reader, types.ContainerPathStat{}, nil)
+		mockDocker.OnContainerRemove(ctx, containerName, types.ContainerRemoveOptions{Force: true}).Return(nil)
+		assert.Nil(t, err)
+
+		// Run
+		err = CopyContainerFile(ctx, mockDocker, "some source", destination, containerName, image)
+		assert.NoError(t, err)
+
+		// Read the file and make sure it's correct
+		strBytes, err := os.ReadFile(destination)
+		assert.NoError(t, err)
+		assert.Equal(t, "a: b", string(strBytes))
+	})
+
+	t.Run("Erroring on stat", func(t *testing.T) {
+		myErr := fmt.Errorf("erroring on stat")
+
+		// Mocks
+		mockDocker := &mocks.Docker{}
+		mockDocker.OnContainerCreate(
+			ctx, &container.Config{Image: image}, &container.HostConfig{}, nil, nil, containerName).Return(
+			container.ContainerCreateCreatedBody{ID: containerName}, nil)
+		mockDocker.OnContainerStatPath(ctx, containerName, "some source").Return(types.ContainerPathStat{}, myErr)
+		mockDocker.OnContainerRemove(ctx, containerName, types.ContainerRemoveOptions{Force: true}).Return(nil)
+		assert.Nil(t, err)
+
+		// Run
+		err = CopyContainerFile(ctx, mockDocker, "some source", "", containerName, image)
+		assert.Equal(t, myErr, err)
 	})
 }
