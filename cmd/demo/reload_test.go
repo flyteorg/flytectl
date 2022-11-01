@@ -2,6 +2,8 @@ package demo
 
 import (
 	"context"
+	"testing"
+
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/k8s"
 	"github.com/stretchr/testify/assert"
@@ -9,7 +11,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	testclient "k8s.io/client-go/kubernetes/fake"
-	"testing"
 )
 
 var fakePod = corev1.Pod{
