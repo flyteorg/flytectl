@@ -50,7 +50,7 @@ func reloadDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		GracePeriodSeconds: &grace,
 	})
 	if err != nil {
-		fmt.Printf("Could not restart Flyte pod %s\n", err)
+		fmt.Printf("Could not delete Flyte pod, old configuration may still be in effect. Err: %s\n", err)
 		return err
 	}
 

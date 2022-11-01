@@ -481,7 +481,6 @@ func TestDemoInit(t *testing.T) {
 		cfg := sandboxCmdConfig.DefaultConfig
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, myErr)
-		//mockDocker.OnContainerRemove(ctx, "Hello", types.ContainerRemoveOptions{Force: true}).Return(nil)
 		docker.Client = mockDocker
 		err = DemoClusterInit(ctx, cfg, yes)
 		assert.Equal(t, myErr, err)
@@ -494,7 +493,6 @@ func TestDemoInit(t *testing.T) {
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		mockDocker.OnImageListMatch(ctx, mock.Anything).Return([]types.ImageSummary{}, nil)
 		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, myErr)
-		//mockDocker.OnContainerRemove(ctx, "Hello", types.ContainerRemoveOptions{Force: true}).Return(nil)
 		docker.Client = mockDocker
 		err = DemoClusterInit(ctx, cfg, yes)
 		assert.Equal(t, myErr, err)
