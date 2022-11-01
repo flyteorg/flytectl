@@ -30,6 +30,7 @@ func TestDemoReload(t *testing.T) {
 	t.Run("No errors", func(t *testing.T) {
 		client := testclient.NewSimpleClientset()
 		_, err := client.CoreV1().Pods("flyte").Create(ctx, &fakePod, v1.CreateOptions{})
+		assert.NoError(t, err)
 		k8s.Client = client
 		err = reloadDemoCluster(ctx, []string{}, commandCtx)
 		assert.NoError(t, err)
@@ -38,8 +39,10 @@ func TestDemoReload(t *testing.T) {
 	t.Run("Multiple pods will error", func(t *testing.T) {
 		client := testclient.NewSimpleClientset()
 		_, err := client.CoreV1().Pods("flyte").Create(ctx, &fakePod, v1.CreateOptions{})
+		assert.NoError(t, err)
 		fakePod.SetName("othername")
 		_, err = client.CoreV1().Pods("flyte").Create(ctx, &fakePod, v1.CreateOptions{})
+		assert.NoError(t, err)
 		k8s.Client = client
 		err = reloadDemoCluster(ctx, []string{}, commandCtx)
 		assert.Errorf(t, err, "should only have one pod")
