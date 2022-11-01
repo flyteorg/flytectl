@@ -15,7 +15,7 @@ const (
 	labelSelector = "app=flyte"
 )
 const (
-	reloadShort = "Power cycle the Flyte executable pod, effectively picking up the "
+	reloadShort = "Power cycle the Flyte executable pod, effectively picking up an updated config."
 	reloadLong  = `
 If you've changed the ~/.flyte/state/flyte.yaml file, run this command to restart the Flyte binary pod, effectively
 picking up the new settings:

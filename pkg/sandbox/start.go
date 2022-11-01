@@ -41,6 +41,7 @@ const (
 	sandboxImageName     = "cr.flyte.org/flyteorg/flyte-sandbox"
 	demoImageName        = "cr.flyte.org/flyteorg/flyte-sandbox-bundled"
 	DefaultFlyteConfig   = "/opt/flyte/defaults.flyte.yaml"
+	k3sKubeConfigEnvVar  = "K3S_KUBECONFIG_OUTPUT=/srv/flyte/kubeconfig"
 )
 
 func isNodeTainted(ctx context.Context, client corev1.CoreV1Interface) (bool, error) {
@@ -438,7 +439,7 @@ func DemoClusterInit(ctx context.Context, sandboxConfig *sandboxCmdConfig.Config
 		sandboxImage = image
 	}
 	fmt.Printf("%v Fetching image %s\n", emoji.Whale, sandboxImage)
-	err = docker.PullDockerImage(ctx, cli, sandboxImage, docker.ImagePullPolicyIfNotPresent, docker.ImagePullOptions{})
+	err = docker.PullDockerImage(ctx, cli, sandboxImage, sandboxConfig.ImagePullPolicy, sandboxConfig.ImagePullOptions)
 	if err != nil {
 		return err
 	}
@@ -458,7 +459,7 @@ func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandbox
 		return err
 	}
 	// K3s will automatically write the file specified by this var, which is mounted from user's local state dir.
-	sandboxConfig.Env = append(sandboxConfig.Env, "K3S_KUBECONFIG_OUTPUT=/srv/flyte/kubeconfig")
+	sandboxConfig.Env = append(sandboxConfig.Env, k3sKubeConfigEnvVar)
 	err = StartCluster(ctx, args, sandboxConfig, primePod, demoImageName, sandboxImagePrefix, exposedPorts, portBindings, util.DemoConsolePort)
 	if err != nil {
 		return err
