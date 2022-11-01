@@ -245,7 +245,6 @@ func ExtractTar(ss io.Reader, destination string) error {
 
 // CopyContainerFile try to create the container, see if the source file is there, copy it to the destination
 func CopyContainerFile(ctx context.Context, cli Docker, source, destination, name, image string) error {
-	// TODO: Remove container if exists in case of crashes.
 	resp, err := cli.ContainerCreate(ctx, &container.Config{Image: image}, &container.HostConfig{}, nil, nil, name)
 	if err != nil {
 		return err

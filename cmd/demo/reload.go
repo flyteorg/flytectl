@@ -42,14 +42,12 @@ func reloadDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		return err
 	}
 	if len(podList.Items) != 1 {
-		fmt.Printf("Should only have one pod running, %d found, %v", len(podList.Items), podList.Items)
-		return err
+		return fmt.Errorf("should only have one pod running, %d found, %v", len(podList.Items), podList.Items)
 	}
 	logger.Debugf(ctx, "Found %d pods\n", len(podList.Items))
 	var grace = int64(0)
 	err = pi.Delete(ctx, podList.Items[0].Name, v1.DeleteOptions{
 		GracePeriodSeconds: &grace,
-		//DryRun:             []string{"All"},
 	})
 	if err != nil {
 		fmt.Printf("Could not restart Flyte pod %s\n", err)
