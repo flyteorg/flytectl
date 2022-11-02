@@ -289,11 +289,6 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 			return err
 		}
 
-		// This will copy the kubeconfig from where k3s writes it () to the main file.
-		if err = UpdateLocalKubeContext(k8sCtxMgr, sandboxDockerContext, sandboxContextName, docker.Kubeconfig); err != nil {
-			return err
-		}
-
 		// Live-ness check
 		err = retry.Do(
 			func() error {
@@ -327,6 +322,13 @@ func StartCluster(ctx context.Context, args []string, sandboxConfig *sandboxCmdC
 			retry.Attempts(10),
 		)
 		if err != nil {
+			return err
+		}
+
+		// This will copy the kubeconfig from where k3s writes it () to the main file.
+		// This code is located after the waits above since it appears that k3s goes through at least a couple versions
+		// of the config keys/certs. If this copy is done too early, the copied credentials won't work.
+		if err = UpdateLocalKubeContext(k8sCtxMgr, sandboxDockerContext, sandboxContextName, docker.Kubeconfig); err != nil {
 			return err
 		}
 
