@@ -75,6 +75,13 @@ eg : for passing multiple environment variables
  flytectl demo start --env USER=foo --env PASSWORD=bar
 
 
+eg : for just printing the docker commands for bringingup the sandbox container
+::
+
+ flytectl demo start --printCommand
+
+
+
 Usage
 `
 )

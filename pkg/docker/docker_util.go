@@ -169,11 +169,49 @@ func PullDockerImage(ctx context.Context, cli Docker, image string, pullPolicy I
 	return nil
 }
 
-//StartContainer will create and start docker container
+// PrintRemoveContainer helper function to remove sandbox container
+func PrintRemoveContainer(name string) {
+	fmt.Printf("Run the following command to remove the existing sandbox\n")
+	fmt.Printf("	docker container rm %v --force\n", name)
+}
+
+// PrintCreateContainer helper function to print the docker command to run
+func PrintCreateContainer(volumes []mount.Mount, portBindings map[nat.Port][]nat.PortBinding, name, image string, environment []string) {
+	var sb strings.Builder
+	fmt.Printf("Run the following command to create new sandbox container\n")
+	sb.WriteString("	docker create --privileged ")
+	for portProto, bindings := range portBindings {
+		srcPort := portProto.Port()
+		for _, binding := range bindings {
+			sb.WriteString(fmt.Sprintf("-p %v:%v:%v ", binding.HostIP, srcPort, binding.HostPort))
+		}
+	}
+	for _, env := range environment {
+		sb.WriteString(fmt.Sprintf("--env %v ", env))
+	}
+
+	for _, volume := range volumes {
+		sb.WriteString(fmt.Sprintf("--mount type=%v,source=%v,target=%v ", volume.Type, volume.Source, volume.Target))
+	}
+	sb.WriteString(fmt.Sprintf("--name %v ", name))
+	sb.WriteString(fmt.Sprintf("%v", image))
+	fmt.Printf("%v\n", sb.String())
+	fmt.Printf("Run the following command to start the sandbox container\n")
+	fmt.Printf("	docker start %v\n", name)
+	fmt.Printf("Run the following command to check the logs and monitor the sandbox container and make sure there are no error during startup and then visit flyteconsole\n")
+	fmt.Printf("	docker logs -f %v\n", name)
+}
+
+// StartContainer will create and start docker container
 func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, exposedPorts map[nat.Port]struct{},
-	portBindings map[nat.Port][]nat.PortBinding, name, image string, additionalEnvVars []string) (string, error) {
+	portBindings map[nat.Port][]nat.PortBinding, name, image string, additionalEnvVars []string, printCommand bool) (string, error) {
 	// Append the additional env variables to the default list of env
 	Environment = append(Environment, additionalEnvVars...)
+	if printCommand {
+		PrintCreateContainer(volumes, portBindings, name, image, Environment)
+		return "", nil
+	}
+	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		Env:          Environment,
 		Image:        image,

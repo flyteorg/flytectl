@@ -29,7 +29,8 @@ type Config struct {
 	ImagePullOptions docker.ImagePullOptions `json:"imagePullOptions" pflag:",Optional. Defines image pull options (e.g. auth)"`
 
 	// It's used for development. Users are able to start flyte locally via single binary and save the data to the minio or postgres in the sandbox.
-	Dev bool `json:"dev" pflag:",Optional. Only start minio and postgres in the sandbox."`
+	Dev          bool `json:"dev" pflag:",Optional. Only start minio and postgres in the sandbox."`
+	PrintCommand bool `json:"printCommand" pflag:",Optional. Only print the command to start the docker container."`
 }
 
 //go:generate pflags Config --default-var DefaultConfig --bind-default-var

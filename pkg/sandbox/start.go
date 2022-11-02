@@ -151,15 +151,18 @@ func UpdateLocalKubeContext(k8sCtxMgr k8s.ContextOps, dockerCtx string, contextN
 func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService, reader io.Reader, sandboxConfig *sandboxCmdConfig.Config, defaultImageName string, defaultImagePrefix string, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, consolePort int) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
 
-	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
-		if err.Error() != clierrors.ErrSandboxExists {
-			return nil, err
+	if sandboxConfig.PrintCommand {
+		docker.PrintRemoveContainer(docker.FlyteSandboxClusterName)
+	} else {
+		if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
+			if err.Error() != clierrors.ErrSandboxExists {
+				return nil, err
+			}
+			fmt.Printf("Existing details of your sandbox")
+			util.PrintSandboxMessage(consolePort, sandboxConfig.PrintCommand)
+			return nil, nil
 		}
-		fmt.Printf("Existing details of your sandbox")
-		util.PrintSandboxMessage(consolePort)
-		return nil, nil
 	}
-
 	if err := util.SetupFlyteDir(); err != nil {
 		return nil, err
 	}
@@ -198,18 +201,20 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 		sandboxEnv = append(sandboxEnv, "FLYTE_DEV=True")
 	}
 
-	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName,
-		sandboxImage, sandboxEnv)
+		sandboxImage, sandboxEnv, sandboxConfig.PrintCommand)
 
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)
 		return nil, err
 	}
 
-	logReader, err := docker.ReadLogs(ctx, cli, ID)
-	if err != nil {
-		return nil, err
+	var logReader *bufio.Scanner
+	if !sandboxConfig.PrintCommand {
+		logReader, err = docker.ReadLogs(ctx, cli, ID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return logReader, nil
@@ -301,7 +306,7 @@ func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandbox
 	if err != nil {
 		return err
 	}
-	util.PrintSandboxMessage(util.DemoConsolePort)
+	util.PrintSandboxMessage(util.DemoConsolePort, sandboxConfig.PrintCommand)
 	return nil
 }
 
@@ -316,6 +321,6 @@ func StartSandboxCluster(ctx context.Context, args []string, sandboxConfig *sand
 	if err != nil {
 		return err
 	}
-	util.PrintSandboxMessage(util.SandBoxConsolePort)
+	util.PrintSandboxMessage(util.SandBoxConsolePort, sandboxConfig.PrintCommand)
 	return nil
 }
