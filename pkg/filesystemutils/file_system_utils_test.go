@@ -3,10 +3,11 @@ package filesystemutils
 import (
 	"archive/tar"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var (
