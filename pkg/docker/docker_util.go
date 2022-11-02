@@ -1,7 +1,6 @@
 package docker
 
 import (
-	"archive/tar"
 	"bufio"
 	"context"
 	"errors"
@@ -198,51 +197,6 @@ func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, expo
 	return resp.ID, nil
 }
 
-func ExtractTar(ss io.Reader, destination string) error {
-	tarReader := tar.NewReader(ss)
-
-	for {
-		header, err := tarReader.Next()
-
-		if err == io.EOF {
-			break
-		}
-
-		if err != nil {
-			return err
-		}
-
-		switch header.Typeflag {
-		case tar.TypeDir:
-			if err := os.Mkdir(header.Name, 0755); err != nil {
-				return err
-			}
-		case tar.TypeReg:
-			fmt.Printf("Creating Flyte configuration file at: %s\n", destination)
-			outFile, err := os.Create(destination)
-			if err != nil {
-				return err
-			}
-			for {
-				// Read one 1MB at a time.
-				if _, err := io.CopyN(outFile, tarReader, 1024*1024); err != nil {
-					if err == io.EOF {
-						break
-					}
-					return err
-				}
-			}
-			outFile.Close()
-
-		default:
-			return fmt.Errorf("ExtractTarGz: unknown type: %v in %s",
-				header.Typeflag,
-				header.Name)
-		}
-	}
-	return nil
-}
-
 // CopyContainerFile try to create the container, see if the source file is there, copy it to the destination
 func CopyContainerFile(ctx context.Context, cli Docker, source, destination, name, image string) error {
 	resp, err := cli.ContainerCreate(ctx, &container.Config{Image: image}, &container.HostConfig{}, nil, nil, name)
@@ -275,7 +229,7 @@ func CopyContainerFile(ctx context.Context, cli Docker, source, destination, nam
 		return err
 	}
 	r, _ := os.Open(tarFile)
-	err = ExtractTar(r, destination)
+	err = f.ExtractTar(r, destination)
 	if err != nil {
 		return err
 	}
