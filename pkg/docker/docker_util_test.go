@@ -160,7 +160,7 @@ func TestStartContainer(t *testing.T) {
 			ID: "Hello",
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
-		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil)
+		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil, false)
 		assert.Nil(t, err)
 		assert.Greater(t, len(id), 0)
 		assert.Equal(t, id, "Hello")
@@ -189,7 +189,7 @@ func TestStartContainer(t *testing.T) {
 			ID: "Hello",
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
-		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, additionalEnv)
+		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, additionalEnv, false)
 		assert.Nil(t, err)
 		assert.Greater(t, len(id), 0)
 		assert.Equal(t, id, "Hello")
@@ -215,7 +215,7 @@ func TestStartContainer(t *testing.T) {
 			ID: "",
 		}, fmt.Errorf("error"))
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
-		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil)
+		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil, false)
 		assert.NotNil(t, err)
 		assert.Equal(t, len(id), 0)
 		assert.Equal(t, id, "")
@@ -240,7 +240,7 @@ func TestStartContainer(t *testing.T) {
 			ID: "Hello",
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(fmt.Errorf("error"))
-		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil)
+		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil, false)
 		assert.NotNil(t, err)
 		assert.Equal(t, len(id), 0)
 		assert.Equal(t, id, "")
