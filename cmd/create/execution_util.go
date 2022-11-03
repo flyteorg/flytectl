@@ -52,7 +52,7 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName, projec
 		}
 	}
 
-	return createExecutionRequest(lp.Id, inputs, securityContext, authRole, targetExecName, executionConfig.SkipCache), nil
+	return createExecutionRequest(lp.Id, inputs, securityContext, authRole, targetExecName, executionConfig.OverwriteCache), nil
 }
 
 func createExecutionRequestForTask(ctx context.Context, taskName string, project string, domain string,
@@ -98,7 +98,7 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 		Version:      task.Id.Version,
 	}
 
-	return createExecutionRequest(id, inputs, securityContext, authRole, targetExecName, executionConfig.SkipCache), nil
+	return createExecutionRequest(id, inputs, securityContext, authRole, targetExecName, executionConfig.OverwriteCache), nil
 }
 
 func relaunchExecution(ctx context.Context, executionName string, project string, domain string,
@@ -113,8 +113,8 @@ func relaunchExecution(ctx context.Context, executionName string, project string
 			Project: project,
 			Domain:  domain,
 		},
-		Name:      targetExecutionName,
-		SkipCache: executionConfig.SkipCache,
+		Name:           targetExecutionName,
+		OverwriteCache: executionConfig.OverwriteCache,
 	})
 	if err != nil {
 		return err
@@ -145,7 +145,7 @@ func recoverExecution(ctx context.Context, executionName string, project string,
 }
 
 func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, securityContext *core.SecurityContext,
-	authRole *admin.AuthRole, targetExecName string, skipCache bool) *admin.ExecutionCreateRequest {
+	authRole *admin.AuthRole, targetExecName string, overwriteCache bool) *admin.ExecutionCreateRequest {
 
 	if len(targetExecName) == 0 {
 		targetExecName = "f" + strings.ReplaceAll(uuid.New().String(), "-", "")[:19]
@@ -168,7 +168,7 @@ func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, securi
 			AuthRole:          authRole,
 			SecurityContext:   securityContext,
 			ClusterAssignment: clusterAssignment,
-			SkipCache:         skipCache,
+			OverwriteCache:    overwriteCache,
 		},
 		Inputs: inputs,
 	}

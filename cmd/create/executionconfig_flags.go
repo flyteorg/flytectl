@@ -60,7 +60,7 @@ func (cfg ExecutionConfig) GetPFlagSet(prefix string) *pflag.FlagSet {
 	cmdFlags.BoolVar(&executionConfig.DryRun, fmt.Sprintf("%v%v", prefix, "dryRun"), executionConfig.DryRun, "execute command without making any modifications.")
 	cmdFlags.StringVar(&executionConfig.Version, fmt.Sprintf("%v%v", prefix, "version"), executionConfig.Version, "specify version of execution workflow/task.")
 	cmdFlags.StringVar(&executionConfig.ClusterPool, fmt.Sprintf("%v%v", prefix, "clusterPool"), executionConfig.ClusterPool, "specify which cluster pool to assign execution to.")
-	cmdFlags.BoolVar(&executionConfig.SkipCache, fmt.Sprintf("%v%v", prefix, "skipCache"), executionConfig.SkipCache, "skip cached results when performing execution, causing all outputs to be re-calculated. Does not work for recovered executions.")
+	cmdFlags.BoolVar(&executionConfig.OverwriteCache, fmt.Sprintf("%v%v", prefix, "overwriteCache"), executionConfig.OverwriteCache, "skip cached results when performing execution, causing all outputs to be re-calculated and stored data to be overwritten. Does not work for recovered executions.")
 	cmdFlags.StringVar(&executionConfig.Workflow, fmt.Sprintf("%v%v", prefix, "workflow"), executionConfig.Workflow, "")
 	cmdFlags.StringVar(&executionConfig.Task, fmt.Sprintf("%v%v", prefix, "task"), executionConfig.Task, "")
 	return cmdFlags

@@ -2,10 +2,7 @@ module github.com/flyteorg/flytectl
 
 go 1.18
 
-replace (
-	github.com/flyteorg/flyteidl => github.com/blackshark-ai/flyteidl v0.24.22-0.20221005103053-1172311340ca
-	github.com/flyteorg/flytestdlib => github.com/blackshark-ai/flytestdlib v1.0.1-0.20220927112514-285faf0b16b4
-)
+replace github.com/flyteorg/flytestdlib => github.com/blackshark-ai/flytestdlib v1.0.1-0.20220927112514-285faf0b16b4
 
 require (
 	github.com/avast/retry-go v3.0.0+incompatible
@@ -14,7 +11,7 @@ require (
 	github.com/docker/docker v20.10.7+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/enescakir/emoji v1.0.0
-	github.com/flyteorg/flyteidl v1.1.19
+	github.com/flyteorg/flyteidl v1.2.3
 	github.com/flyteorg/flytestdlib v1.0.0
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
