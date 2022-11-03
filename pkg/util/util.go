@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/flyteorg/flytectl/pkg/configutil"
 	"github.com/flyteorg/flytectl/pkg/docker"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 
@@ -17,9 +16,10 @@ import (
 )
 
 const (
-	ProgressSuccessMessage = "Flyte is ready! Flyte UI is available at"
-	SandBoxConsolePort     = 30081
-	DemoConsolePort        = 30080
+	ProgressSuccessMessage        = "Flyte is ready! Flyte UI is available at"
+	ProgressSuccessMessagePending = "Flyte would be ready after this! Flyte UI would be available at"
+	SandBoxConsolePort            = 30081
+	DemoConsolePort               = 30080
 )
 
 var Ext string
@@ -58,13 +58,21 @@ func PrintSandboxMessage(flyteConsolePort int, printCommand bool) {
 		f.FilePathJoin(f.UserHomeDir(), ".kube", "config"),
 		docker.Kubeconfig,
 	}, ":")
-	successMsg := fmt.Sprintf("%v http://localhost:%v/console", ProgressSuccessMessage, flyteConsolePort)
-	if !printCommand {
-		fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, successMsg, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
+
+	var successMsg string
+	if printCommand {
+		successMsg = fmt.Sprintf("%v http://localhost:%v/console", ProgressSuccessMessagePending, flyteConsolePort)
+	} else {
+		successMsg = fmt.Sprintf("%v http://localhost:%v/console", ProgressSuccessMessage, flyteConsolePort)
+
 	}
-	fmt.Printf("Add KUBECONFIG and FLYTECTL_CONFIG to your environment variable \n")
-	fmt.Printf("export KUBECONFIG=%v \n", kubeconfig)
-	fmt.Printf("export FLYTECTL_CONFIG=%v \n", configutil.FlytectlConfig)
+	fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, successMsg, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
+	fmt.Printf("%v Run the following command to export sandbox environment variables for accessing flytectl\n", emoji.Sparkle)
+	fmt.Printf("	Add FLYTECTL_CONFIG to your environment variable \n")
+	if printCommand {
+		fmt.Printf("%v Run the following command to export kubeconfig variables for accessing flyte pods locally\n", emoji.Sparkle)
+		fmt.Printf("	export KUBECONFIG=%v \n", kubeconfig)
+	}
 }
 
 // SendRequest will create request and return the response
