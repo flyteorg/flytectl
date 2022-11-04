@@ -223,14 +223,14 @@ func TestConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
-	t.Run("Test_printCommand", func(t *testing.T) {
+	t.Run("Test_dryRun", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("printCommand", testValue)
-			if vBool, err := cmdFlags.GetBool("printCommand"); err == nil {
-				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.PrintCommand)
+			cmdFlags.Set("dryRun", testValue)
+			if vBool, err := cmdFlags.GetBool("dryRun"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.DryRun)
 
 			} else {
 				assert.FailNow(t, err.Error())

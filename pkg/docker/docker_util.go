@@ -138,8 +138,8 @@ func GetDemoPorts() (map[nat.Port]struct{}, map[nat.Port][]nat.PortBinding, erro
 
 // PullDockerImage will Pull docker image
 func PullDockerImage(ctx context.Context, cli Docker, image string, pullPolicy ImagePullPolicy,
-	imagePullOptions ImagePullOptions, printCommand bool) error {
-	if printCommand {
+	imagePullOptions ImagePullOptions, dryRun bool) error {
+	if dryRun {
 		PrintPullImage(image, imagePullOptions)
 		return nil
 	}
@@ -220,10 +220,10 @@ func PrintCreateContainer(volumes []mount.Mount, portBindings map[nat.Port][]nat
 
 // StartContainer will create and start docker container
 func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, exposedPorts map[nat.Port]struct{},
-	portBindings map[nat.Port][]nat.PortBinding, name, image string, additionalEnvVars []string, printCommand bool) (string, error) {
+	portBindings map[nat.Port][]nat.PortBinding, name, image string, additionalEnvVars []string, dryRun bool) (string, error) {
 	// Append the additional env variables to the default list of env
 	Environment = append(Environment, additionalEnvVars...)
-	if printCommand {
+	if dryRun {
 		PrintCreateContainer(volumes, portBindings, name, image, Environment)
 		return "", nil
 	}
