@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/flyteorg/flytectl/pkg/configutil"
 	"github.com/flyteorg/flytectl/pkg/docker"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 
@@ -68,7 +69,7 @@ func PrintSandboxMessage(flyteConsolePort int, dryRun bool) {
 	}
 	fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, successMsg, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
 	fmt.Printf("%v Run the following command to export sandbox environment variables for accessing flytectl\n", emoji.Sparkle)
-	fmt.Printf("	Add FLYTECTL_CONFIG to your environment variable \n")
+	fmt.Printf("	export FLYTECTL_CONFIG=%v \n", configutil.FlytectlConfig)
 	if dryRun {
 		fmt.Printf("%v Run the following command to export kubeconfig variables for accessing flyte pods locally\n", emoji.Sparkle)
 		fmt.Printf("	export KUBECONFIG=%v \n", kubeconfig)
