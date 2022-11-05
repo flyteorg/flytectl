@@ -169,7 +169,7 @@ func PullDockerImage(ctx context.Context, cli Docker, image string, pullPolicy I
 	return nil
 }
 
-//StartContainer will create and start docker container
+// StartContainer will create and start docker container
 func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, exposedPorts map[nat.Port]struct{},
 	portBindings map[nat.Port][]nat.PortBinding, name, image string, additionalEnvVars []string) (string, error) {
 	// Append the additional env variables to the default list of env
@@ -183,6 +183,7 @@ func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, expo
 		Mounts:       volumes,
 		PortBindings: portBindings,
 		Privileged:   true,
+		ExtraHosts:   []string{"host.docker.internal:127.0.0.1"}, // add it because linux machine doesn't have this host name by default
 	}, nil,
 		nil, name)
 
