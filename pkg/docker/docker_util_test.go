@@ -156,6 +156,7 @@ func TestStartContainer(t *testing.T) {
 			Mounts:       Volumes,
 			PortBindings: p2,
 			Privileged:   true,
+			ExtraHosts:   []string{"host.docker.internal:127.0.0.1"},
 		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
 			ID: "Hello",
 		}, nil)
@@ -212,6 +213,7 @@ func TestStartContainer(t *testing.T) {
 			Mounts:       Volumes,
 			PortBindings: p2,
 			Privileged:   true,
+			ExtraHosts:   []string{"host.docker.internal:127.0.0.1"},
 		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
 			ID: "",
 		}, fmt.Errorf("error"))
@@ -237,6 +239,7 @@ func TestStartContainer(t *testing.T) {
 			Mounts:       Volumes,
 			PortBindings: p2,
 			Privileged:   true,
+			ExtraHosts:   []string{"host.docker.internal:127.0.0.1"},
 		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
 			ID: "Hello",
 		}, nil)
