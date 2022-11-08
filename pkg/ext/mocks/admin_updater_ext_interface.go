@@ -59,7 +59,7 @@ func (_m AdminUpdaterExtInterface_UpdateProjectAttributes) Return(_a0 error) *Ad
 	return &AdminUpdaterExtInterface_UpdateProjectAttributes{Call: _m.Call.Return(_a0)}
 }
 
-func (_m *AdminUpdaterExtInterface) OnUpdateProjectAttributes(ctx context.Context, project *admin.MatchingAttributes, matchingAttr *admin.MatchingAttributes) *AdminUpdaterExtInterface_UpdateProjectAttributes {
+func (_m *AdminUpdaterExtInterface) OnUpdateProjectAttributes(ctx context.Context, project string, matchingAttr *admin.MatchingAttributes) *AdminUpdaterExtInterface_UpdateProjectAttributes {
 	c_call := _m.On("UpdateProjectAttributes", ctx, project, matchingAttr)
 	return &AdminUpdaterExtInterface_UpdateProjectAttributes{Call: c_call}
 }
@@ -70,11 +70,11 @@ func (_m *AdminUpdaterExtInterface) OnUpdateProjectAttributesMatch(matchers ...i
 }
 
 // UpdateProjectAttributes provides a mock function with given fields: ctx, project, matchingAttr
-func (_m *AdminUpdaterExtInterface) UpdateProjectAttributes(ctx context.Context, project *admin.MatchingAttributes, matchingAttr *admin.MatchingAttributes) error {
+func (_m *AdminUpdaterExtInterface) UpdateProjectAttributes(ctx context.Context, project string, matchingAttr *admin.MatchingAttributes) error {
 	ret := _m.Called(ctx, project, matchingAttr)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, *admin.MatchingAttributes, *admin.MatchingAttributes) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, *admin.MatchingAttributes) error); ok {
 		r0 = rf(ctx, project, matchingAttr)
 	} else {
 		r0 = ret.Error(0)

@@ -32,14 +32,16 @@ func DecorateAndUpdateMatchableAttr(ctx context.Context, project, domain, workfl
 				if err != nil {
 					return err
 				}
+				fmt.Printf("Updated attributes from %v project\n", project)
 			} else {
 				err := updater.UpdateProjectDomainAttributes(ctx, project, domain, matchingAttr)
 				if err != nil {
 					return err
 				}
+				fmt.Printf("Updated attributes from %v project and domain %v\n", project, domain)
 			}
 		}
-		fmt.Printf("Updated attributes from %v project and domain %v\n", project, domain)
+
 	}
 	return nil
 }
