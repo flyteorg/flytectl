@@ -6,6 +6,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	flyteNs     = "flyte"
+	K8sEndpoint = "https://127.0.0.1:6443"
+)
+
 // Long descriptions are whitespace sensitive when generating docs using sphinx.
 const (
 	demoShort = `Helps with demo interactions like start, teardown, status, and exec.`
@@ -35,6 +40,26 @@ To execute commands inside the demo container, use exec:
 `
 )
 
+// Long descriptions are whitespace sensitive when generating docs using sphinx.
+const (
+	initShort = `Download the Flyte sandbox image, create local state folder and place a default config file in it`
+	initLong  = `
+Flyte Demo	
+When you run::
+::
+
+ flytectl demo init  
+
+flytectl will ensure you have the latest run time image, create a local state directory for you if not present,
+and place a default configuration file for the Flyte binary in it. The Flyte demo environment needs a local version of
+a Postgres database and a blob store - these are provided by a Postgres container and a Minio container - these
+containers will store their information into this local state directory as well.
+
+You may update the flyte binary configuration file after the demo cluster has been started, but this command is useful
+in cases where you know you will want to modify the config before creating the cluster.
+`
+)
+
 // CreateDemoCommand will return demo command
 func CreateDemoCommand() *cobra.Command {
 	demo := &cobra.Command{
@@ -44,9 +69,15 @@ func CreateDemoCommand() *cobra.Command {
 	}
 
 	demoResourcesFuncs := map[string]cmdcore.CommandEntry{
+		"init": {CmdFunc: initDemoCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
+			Short: initShort,
+			Long:  initLong, PFlagProvider: sandboxCmdConfig.DefaultConfig, DisableFlyteClient: true},
 		"start": {CmdFunc: startDemoCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
 			Short: startShort,
 			Long:  startLong, PFlagProvider: sandboxCmdConfig.DefaultConfig, DisableFlyteClient: true},
+		"reload": {CmdFunc: reloadDemoCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
+			Short: reloadShort,
+			Long:  reloadLong, PFlagProvider: sandboxCmdConfig.DefaultConfig, DisableFlyteClient: true},
 		"teardown": {CmdFunc: teardownDemoCluster, Aliases: []string{}, ProjectDomainNotRequired: true,
 			Short: teardownShort,
 			Long:  teardownLong, DisableFlyteClient: true},
