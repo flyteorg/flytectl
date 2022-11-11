@@ -105,7 +105,7 @@ func TestStartFunc(t *testing.T) {
 		Platform:     "",
 	}
 	assert.Nil(t, util.SetupFlyteDir())
-	assert.Nil(t, os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s"), os.ModePerm))
+	assert.Nil(t, os.MkdirAll(f.FilePathJoin(f.UserHomeDir(), ".flyte", "state"), os.ModePerm))
 	assert.Nil(t, ioutil.WriteFile(docker.Kubeconfig, []byte(content), os.ModePerm))
 
 	fakePod.SetName("flyte")
@@ -486,13 +486,14 @@ func TestDemoInit(t *testing.T) {
 		assert.Equal(t, myErr, err)
 	})
 
-	t.Run("Successfully run demo cluster with source code", func(t *testing.T) {
+	t.Run("Erroring on image list", func(t *testing.T) {
 		sandboxSetup()
 		myErr := fmt.Errorf("test imagepull error")
-		cfg := sandboxCmdConfig.DefaultConfig
+		cfg := &sandboxCmdConfig.Config{
+			ImagePullPolicy: docker.ImagePullPolicyIfNotPresent,
+		}
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
-		mockDocker.OnImageListMatch(ctx, mock.Anything).Return([]types.ImageSummary{}, nil)
-		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, myErr)
+		mockDocker.OnImageListMatch(ctx, mock.Anything).Return([]types.ImageSummary{}, myErr)
 		docker.Client = mockDocker
 		err = DemoClusterInit(ctx, cfg, yes)
 		assert.Equal(t, myErr, err)

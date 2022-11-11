@@ -167,8 +167,6 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 			util.PrintSandboxMessage(consolePort, docker.Kubeconfig, sandboxConfig.DryRun)
 			return nil, nil
 		}
-		fmt.Printf("Your Flyte cluster has not been removed.")
-		return nil, nil
 	}
 
 	templateValues := configutil.ConfigTemplateSpec{
