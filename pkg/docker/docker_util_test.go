@@ -108,7 +108,7 @@ func TestPullDockerImage(t *testing.T) {
 		ctx := context.Background()
 		// Verify the attributes
 		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
-		err := PullDockerImage(ctx, mockDocker, "nginx:latest", ImagePullPolicyAlways, ImagePullOptions{})
+		err := PullDockerImage(ctx, mockDocker, "nginx:latest", ImagePullPolicyAlways, ImagePullOptions{}, false)
 		assert.Nil(t, err)
 	})
 
@@ -118,7 +118,7 @@ func TestPullDockerImage(t *testing.T) {
 		ctx := context.Background()
 		// Verify the attributes
 		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, fmt.Errorf("error"))
-		err := PullDockerImage(ctx, mockDocker, "nginx:latest", ImagePullPolicyAlways, ImagePullOptions{})
+		err := PullDockerImage(ctx, mockDocker, "nginx:latest", ImagePullPolicyAlways, ImagePullOptions{}, false)
 		assert.NotNil(t, err)
 	})
 
@@ -129,7 +129,7 @@ func TestPullDockerImage(t *testing.T) {
 		// Verify the attributes
 		mockDocker.OnImagePullMatch(ctx, mock.Anything, types.ImagePullOptions{}).Return(os.Stdin, nil)
 		mockDocker.OnImageListMatch(ctx, types.ImageListOptions{}).Return([]types.ImageSummary{}, nil)
-		err := PullDockerImage(ctx, mockDocker, "nginx:latest", ImagePullPolicyIfNotPresent, ImagePullOptions{})
+		err := PullDockerImage(ctx, mockDocker, "nginx:latest", ImagePullPolicyIfNotPresent, ImagePullOptions{}, false)
 		assert.Nil(t, err)
 	})
 
@@ -137,7 +137,7 @@ func TestPullDockerImage(t *testing.T) {
 		setupSandbox()
 		mockDocker := &mocks.Docker{}
 		ctx := context.Background()
-		err := PullDockerImage(ctx, mockDocker, "nginx:latest", ImagePullPolicyNever, ImagePullOptions{})
+		err := PullDockerImage(ctx, mockDocker, "nginx:latest", ImagePullPolicyNever, ImagePullOptions{}, false)
 		assert.Nil(t, err)
 	})
 }
@@ -160,11 +160,12 @@ func TestStartContainer(t *testing.T) {
 			Mounts:       Volumes,
 			PortBindings: p2,
 			Privileged:   true,
+			ExtraHosts:   ExtraHosts,
 		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
 			ID: "Hello",
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
-		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil)
+		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil, false)
 		assert.Nil(t, err)
 		assert.Greater(t, len(id), 0)
 		assert.Equal(t, id, "Hello")
@@ -189,11 +190,12 @@ func TestStartContainer(t *testing.T) {
 			Mounts:       Volumes,
 			PortBindings: p2,
 			Privileged:   true,
+			ExtraHosts:   ExtraHosts,
 		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
 			ID: "Hello",
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
-		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, additionalEnv)
+		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, additionalEnv, false)
 		assert.Nil(t, err)
 		assert.Greater(t, len(id), 0)
 		assert.Equal(t, id, "Hello")
@@ -215,11 +217,12 @@ func TestStartContainer(t *testing.T) {
 			Mounts:       Volumes,
 			PortBindings: p2,
 			Privileged:   true,
+			ExtraHosts:   ExtraHosts,
 		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
 			ID: "",
 		}, fmt.Errorf("error"))
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(nil)
-		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil)
+		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil, false)
 		assert.NotNil(t, err)
 		assert.Equal(t, len(id), 0)
 		assert.Equal(t, id, "")
@@ -240,11 +243,12 @@ func TestStartContainer(t *testing.T) {
 			Mounts:       Volumes,
 			PortBindings: p2,
 			Privileged:   true,
+			ExtraHosts:   ExtraHosts,
 		}, nil, nil, mock.Anything).Return(container.ContainerCreateCreatedBody{
 			ID: "Hello",
 		}, nil)
 		mockDocker.OnContainerStart(ctx, "Hello", types.ContainerStartOptions{}).Return(fmt.Errorf("error"))
-		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil)
+		id, err := StartContainer(ctx, mockDocker, Volumes, p1, p2, "nginx", imageName, nil, false)
 		assert.NotNil(t, err)
 		assert.Equal(t, len(id), 0)
 		assert.Equal(t, id, "")

@@ -29,7 +29,7 @@ func TestSetupFlyteDir(t *testing.T) {
 
 func TestPrintSandboxMessage(t *testing.T) {
 	t.Run("Print Sandbox Message", func(t *testing.T) {
-		PrintDemoMessage(SandBoxConsolePort, docker.SandboxKubeconfig)
+		PrintSandboxMessage(SandBoxConsolePort, docker.SandboxKubeconfig, false)
 	})
 }
 

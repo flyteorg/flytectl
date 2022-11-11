@@ -156,10 +156,16 @@ func UpdateLocalKubeContext(k8sCtxMgr k8s.ContextOps, dockerCtx string, contextN
 
 func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService, reader io.Reader, sandboxConfig *sandboxCmdConfig.Config, defaultImageName string, defaultImagePrefix string, exposedPorts map[nat.Port]struct{}, portBindings map[nat.Port][]nat.PortBinding, consolePort int) (*bufio.Scanner, error) {
 	fmt.Printf("%v Bootstrapping a brand new flyte cluster... %v %v\n", emoji.FactoryWorker, emoji.Hammer, emoji.Wrench)
-
-	if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
-		if err.Error() != clierrors.ErrSandboxExists {
-			return nil, err
+	if sandboxConfig.DryRun {
+		docker.PrintRemoveContainer(docker.FlyteSandboxClusterName)
+	} else {
+		if err := docker.RemoveSandbox(ctx, cli, reader); err != nil {
+			if err.Error() != clierrors.ErrSandboxExists {
+				return nil, err
+			}
+			fmt.Printf("Existing details of your sandbox")
+			util.PrintSandboxMessage(consolePort, docker.Kubeconfig, sandboxConfig.DryRun)
+			return nil, nil
 		}
 		fmt.Printf("Your Flyte cluster has not been removed.")
 		return nil, nil
@@ -201,11 +207,9 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 			return nil, err
 		}
 		sandboxImage = image
-		fmt.Printf("%s Fully Qualified image\n", image)
-		fmt.Printf("%v Running Flyte %s release\n", emoji.Whale, version)
+		fmt.Printf("%v Going to use Flyte %s release with image %s \n", emoji.Whale, version, image)
 	}
-	fmt.Printf("%v pulling docker image for release %s\n", emoji.Whale, sandboxImage)
-	if err := docker.PullDockerImage(ctx, cli, sandboxImage, sandboxConfig.ImagePullPolicy, sandboxConfig.ImagePullOptions); err != nil {
+	if err := docker.PullDockerImage(ctx, cli, sandboxImage, sandboxConfig.ImagePullPolicy, sandboxConfig.ImagePullOptions, sandboxConfig.DryRun); err != nil {
 		return nil, err
 	}
 	sandboxEnv := sandboxConfig.Env
@@ -213,18 +217,20 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 		sandboxEnv = append(sandboxEnv, "FLYTE_DEV=True")
 	}
 
-	fmt.Printf("%v booting Flyte-sandbox container\n", emoji.FactoryWorker)
 	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName,
-		sandboxImage, sandboxEnv)
+		sandboxImage, sandboxEnv, sandboxConfig.DryRun)
 
 	if err != nil {
 		fmt.Printf("%v Something went wrong: Failed to start Sandbox container %v, Please check your docker client and try again. \n", emoji.GrimacingFace, emoji.Whale)
 		return nil, err
 	}
 
-	logReader, err := docker.ReadLogs(ctx, cli, ID)
-	if err != nil {
-		return nil, err
+	var logReader *bufio.Scanner
+	if !sandboxConfig.DryRun {
+		logReader, err = docker.ReadLogs(ctx, cli, ID)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return logReader, nil
@@ -441,7 +447,7 @@ func DemoClusterInit(ctx context.Context, sandboxConfig *sandboxCmdConfig.Config
 		sandboxImage = image
 	}
 	fmt.Printf("%v Fetching image %s\n", emoji.Whale, sandboxImage)
-	err = docker.PullDockerImage(ctx, cli, sandboxImage, sandboxConfig.ImagePullPolicy, sandboxConfig.ImagePullOptions)
+	err = docker.PullDockerImage(ctx, cli, sandboxImage, sandboxConfig.ImagePullPolicy, sandboxConfig.ImagePullOptions, false)
 	if err != nil {
 		return err
 	}
@@ -466,7 +472,7 @@ func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandbox
 	if err != nil {
 		return err
 	}
-	util.PrintDemoMessage(util.DemoConsolePort, docker.Kubeconfig)
+	util.PrintSandboxMessage(util.DemoConsolePort, docker.Kubeconfig, sandboxConfig.DryRun)
 	return nil
 }
 
@@ -481,6 +487,6 @@ func StartSandboxCluster(ctx context.Context, args []string, sandboxConfig *sand
 	if err != nil {
 		return err
 	}
-	util.PrintDemoMessage(util.SandBoxConsolePort, docker.SandboxKubeconfig)
+	util.PrintSandboxMessage(util.SandBoxConsolePort, docker.SandboxKubeconfig, sandboxConfig.DryRun)
 	return nil
 }
