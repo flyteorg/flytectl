@@ -488,12 +488,19 @@ func TestDemoInit(t *testing.T) {
 
 	t.Run("Erroring on image list", func(t *testing.T) {
 		sandboxSetup()
+		tag := "v1.0.0"
 		myErr := fmt.Errorf("test imagepull error")
 		cfg := &sandboxCmdConfig.Config{
 			ImagePullPolicy: docker.ImagePullPolicyIfNotPresent,
+			Version:         tag,
 		}
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{}, nil)
 		mockDocker.OnImageListMatch(ctx, mock.Anything).Return([]types.ImageSummary{}, myErr)
+		githubMock.OnGetReleaseByTagMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&github.RepositoryRelease{
+			TagName: &tag,
+		}, nil, nil)
+		githubMock.OnGetCommitSHA1Match(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return("dummySha", nil, nil)
+		ghutil.Client = githubMock
 		docker.Client = mockDocker
 		err = DemoClusterInit(ctx, cfg, yes)
 		assert.Equal(t, myErr, err)
