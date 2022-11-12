@@ -186,7 +186,7 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 		volumes = append(volumes, *vol)
 	}
 
-	// This is the state directory mount, where flyte sandbox will write postgres/blobs, configs
+	// This is the state directory mount, flyte will write the kubeconfig here. May hold more in future releases
 	// To be interoperable with the old sandbox, only mount if the directory exists, should've created by StartCluster
 	if fileInfo, err := os.Stat(docker.FlyteStateDir); err == nil {
 		if fileInfo.IsDir() {
@@ -413,46 +413,6 @@ func confirmAndRemoveIfExists(fname string, userInput io.Reader) error {
 		}
 	} else {
 		return fmt.Errorf("leaving %s in place, not removing", fname)
-	}
-	return nil
-}
-
-func DemoClusterInit(ctx context.Context, sandboxConfig *sandboxCmdConfig.Config, userInput io.Reader) error {
-	sandboxImagePrefix := "sha"
-
-	if err := confirmAndRemoveIfExists(docker.FlyteBinaryConfig, userInput); err != nil {
-		fmt.Printf("Leaving init file %s in place and skipping rest of initialization", docker.FlyteBinaryConfig)
-		return nil
-	}
-
-	if err := util.SetupFlyteDir(); err != nil {
-		return err
-	}
-
-	cli, err := docker.GetDockerClient()
-	if err != nil {
-		return err
-	}
-	ghRepo := github.GetGHRepoService()
-
-	// Determine and pull the image
-	sandboxImage := sandboxConfig.Image
-	if len(sandboxImage) == 0 {
-		image, _, err := github.GetFullyQualifiedImageName(sandboxImagePrefix, sandboxConfig.Version, demoImageName, sandboxConfig.Prerelease, ghRepo)
-		if err != nil {
-			return err
-		}
-		sandboxImage = image
-	}
-	fmt.Printf("%v Fetching image %s\n", emoji.Whale, sandboxImage)
-	err = docker.PullDockerImage(ctx, cli, sandboxImage, sandboxConfig.ImagePullPolicy, sandboxConfig.ImagePullOptions, false)
-	if err != nil {
-		return err
-	}
-
-	err = docker.CopyContainerFile(ctx, cli, DefaultFlyteConfig, docker.FlyteBinaryConfig, "demo-init", sandboxImage)
-	if err != nil {
-		return err
 	}
 	return nil
 }

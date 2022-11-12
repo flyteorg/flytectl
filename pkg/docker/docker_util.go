@@ -26,7 +26,6 @@ import (
 var (
 	FlyteStateDir           = f.FilePathJoin(f.UserHomeDir(), ".flyte", "state")
 	Kubeconfig              = f.FilePathJoin(FlyteStateDir, "kubeconfig")
-	FlyteBinaryConfig       = f.FilePathJoin(FlyteStateDir, "flyte.yaml")
 	SandboxKubeconfig       = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
 	SuccessMessage          = "Deploying Flyte..."
 	FlyteSandboxClusterName = "flyte-sandbox"
