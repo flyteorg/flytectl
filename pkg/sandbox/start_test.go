@@ -3,6 +3,11 @@ package sandbox
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+	"testing"
+
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
@@ -11,10 +16,6 @@ import (
 	"github.com/flyteorg/flytectl/pkg/k8s"
 	k8sMocks "github.com/flyteorg/flytectl/pkg/k8s/mocks"
 	"github.com/flyteorg/flytectl/pkg/util"
-	"io/ioutil"
-	"os"
-	"strings"
-	"testing"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -278,7 +279,7 @@ func TestStartFunc(t *testing.T) {
 	})
 	t.Run("Successfully run demo cluster command", func(t *testing.T) {
 		//	mockOutStream := new(io.Writer)
-		//cmdCtx := cmdCore.NewCommandContext(admin.InitializeMockClientset(), *mockOutStream)
+		// cmdCtx := cmdCore.NewCommandContext(admin.InitializeMockClientset(), *mockOutStream)
 		client := testclient.NewSimpleClientset()
 		k8s.Client = client
 		_, err := client.CoreV1().Pods("flyte").Create(ctx, &fakePod, v1.CreateOptions{})
@@ -315,8 +316,8 @@ func TestStartFunc(t *testing.T) {
 		assert.Nil(t, err)
 	})
 	t.Run("Error in running demo cluster command", func(t *testing.T) {
-		//mockOutStream := new(io.Writer)
-		//cmdCtx := cmdCore.NewCommandContext(admin.InitializeMockClientset(), *mockOutStream)
+		// mockOutStream := new(io.Writer)
+		// cmdCtx := cmdCore.NewCommandContext(admin.InitializeMockClientset(), *mockOutStream)
 		sandboxSetup()
 		docker.Client = mockDocker
 		mockDocker.OnContainerListMatch(mock.Anything, mock.Anything).Return([]types.Container{}, fmt.Errorf("failed to list containers"))
@@ -359,7 +360,6 @@ func TestMonitorFlyteDeployment(t *testing.T) {
 
 		err = WatchFlyteDeployment(ctx, client.CoreV1())
 		assert.NotNil(t, err)
-
 	})
 
 	t.Run("Monitor k8s deployment success", func(t *testing.T) {
@@ -382,13 +382,10 @@ func TestMonitorFlyteDeployment(t *testing.T) {
 
 		err = WatchFlyteDeployment(ctx, client.CoreV1())
 		assert.Nil(t, err)
-
 	})
-
 }
 
 func TestGetFlyteDeploymentCount(t *testing.T) {
-
 	ctx := context.Background()
 	client := testclient.NewSimpleClientset()
 	c, err := getFlyteDeployment(ctx, client.CoreV1())
