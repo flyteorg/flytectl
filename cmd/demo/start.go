@@ -3,6 +3,8 @@ package demo
 import (
 	"context"
 
+	"github.com/flyteorg/flytectl/pkg/docker"
+
 	"github.com/flyteorg/flytectl/pkg/sandbox"
 
 	sandboxCmdConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/sandbox"
@@ -80,12 +82,13 @@ For just printing the docker commands for bringing up the demo container
 
  flytectl demo start --dryRun
 
-
 Usage
 `
 )
 
 func startDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	sandboxDefaultConfig := sandboxCmdConfig.DefaultConfig
-	return sandbox.StartDemoCluster(ctx, args, sandboxDefaultConfig)
+	config := sandboxCmdConfig.Config{
+		ImagePullPolicy: docker.ImagePullPolicyIfNotPresent,
+	}
+	return sandbox.StartDemoCluster(ctx, args, config)
 }
