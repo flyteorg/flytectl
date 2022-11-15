@@ -90,5 +90,5 @@ func startDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.Command
 	config := sandboxCmdConfig.Config{
 		ImagePullPolicy: docker.ImagePullPolicyIfNotPresent,
 	}
-	return sandbox.StartDemoCluster(ctx, args, config)
+	return sandbox.StartDemoCluster(ctx, args, &config)
 }
