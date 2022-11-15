@@ -87,8 +87,8 @@ Usage
 )
 
 func startDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	config := sandboxCmdConfig.Config{
-		ImagePullPolicy: docker.ImagePullPolicyIfNotPresent,
-	}
-	return sandbox.StartDemoCluster(ctx, args, &config)
+	cfg := sandboxCmdConfig.DefaultConfig
+	cfg.ImagePullPolicy.Set(docker.ImagePullPolicyIfNotPresent.String())
+
+	return sandbox.StartDemoCluster(ctx, args, cfg)
 }
