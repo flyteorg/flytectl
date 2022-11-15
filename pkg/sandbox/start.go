@@ -413,7 +413,7 @@ func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandbox
 	if err != nil {
 		return err
 	}
-	util.PrintSandboxMessage(util.DemoConsolePort, docker.Kubeconfig, sandboxConfig.DryRun)
+	util.PrintDemoMessage(util.DemoConsolePort, docker.Kubeconfig, sandboxConfig.DryRun)
 	return nil
 }
 

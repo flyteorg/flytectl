@@ -73,6 +73,31 @@ func SetupFlyteDir() error {
 	return nil
 }
 
+// PrintDemoMessage will print sandbox success message
+func PrintDemoMessage(flyteConsolePort int, kubeconfigLocation string, dryRun bool) {
+	kubeconfig := strings.Join([]string{
+		"$KUBECONFIG",
+		kubeconfigLocation,
+	}, ":")
+
+	var successMsg string
+	if dryRun {
+		successMsg = fmt.Sprintf("%v http://localhost:%v/console", ProgressSuccessMessagePending, flyteConsolePort)
+	} else {
+		successMsg = fmt.Sprintf("%v http://localhost:%v/console", ProgressSuccessMessage, flyteConsolePort)
+
+	}
+	fmt.Printf("%v %v %v %v %v \n", emoji.ManTechnologist, successMsg, emoji.Rocket, emoji.Rocket, emoji.PartyPopper)
+	fmt.Printf("%v Run the following command to export sandbox environment variables for accessing flytectl\n", emoji.Sparkle)
+	fmt.Printf("	export FLYTECTL_CONFIG=%v \n", configutil.FlytectlConfig)
+	if dryRun {
+		fmt.Printf("%v Run the following command to export kubeconfig variables for accessing flyte pods locally\n", emoji.Sparkle)
+		fmt.Printf("	export KUBECONFIG=%v \n", kubeconfig)
+	}
+	fmt.Printf("%s Flyte sandbox ships with a Docker registry. Tag and push custom workflow images to localhost:30000\n", emoji.Whale)
+	fmt.Printf("%s The Minio API is hosted on localhost:30002. Use http://localhost:30080/minio/login for Minio console\n", emoji.OpenFileFolder)
+}
+
 // PrintSandboxMessage will print sandbox success message
 func PrintSandboxMessage(flyteConsolePort int, kubeconfigLocation string, dryRun bool) {
 	kubeconfig := strings.Join([]string{
