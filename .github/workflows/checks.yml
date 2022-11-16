@@ -24,7 +24,7 @@ jobs:
 
   tests:
     name: Unit Tests
-    uses: flyteorg/flytetools/.github/workflows/tests.yml@master
+    uses: flyteorg/flytetools/.github/workflows/tests.yml@code-cov-3.1
     secrets:
       FLYTE_BOT_PAT: ${{ secrets.FLYTE_BOT_PAT }}
     with:
