@@ -24,11 +24,12 @@ jobs:
 
   tests:
     name: Unit Tests
-    uses: flyteorg/flytetools/.github/workflows/tests.yml@code-cov-3.1
+    uses: flyteorg/flytetools/.github/workflows/tests.yml@master
     secrets:
       FLYTE_BOT_PAT: ${{ secrets.FLYTE_BOT_PAT }}
     with:
       go-version: 1.18
+      fail_ci_if_error: false
 
   generate:
     name: Check Go Gennerate
