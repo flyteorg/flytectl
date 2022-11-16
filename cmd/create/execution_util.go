@@ -52,7 +52,7 @@ func createExecutionRequestForWorkflow(ctx context.Context, workflowName, projec
 		}
 	}
 
-	return createExecutionRequest(lp.Id, inputs, securityContext, authRole, targetExecName, executionConfig.OverwriteCache), nil
+	return createExecutionRequest(lp.Id, inputs, securityContext, authRole, targetExecName), nil
 }
 
 func createExecutionRequestForTask(ctx context.Context, taskName string, project string, domain string,
@@ -98,7 +98,7 @@ func createExecutionRequestForTask(ctx context.Context, taskName string, project
 		Version:      task.Id.Version,
 	}
 
-	return createExecutionRequest(id, inputs, securityContext, authRole, targetExecName, executionConfig.OverwriteCache), nil
+	return createExecutionRequest(id, inputs, securityContext, authRole, targetExecName), nil
 }
 
 func relaunchExecution(ctx context.Context, executionName string, project string, domain string,
@@ -145,7 +145,7 @@ func recoverExecution(ctx context.Context, executionName string, project string,
 }
 
 func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, securityContext *core.SecurityContext,
-	authRole *admin.AuthRole, targetExecName string, overwriteCache bool) *admin.ExecutionCreateRequest {
+	authRole *admin.AuthRole, targetExecName string) *admin.ExecutionCreateRequest {
 
 	if len(targetExecName) == 0 {
 		targetExecName = "f" + strings.ReplaceAll(uuid.New().String(), "-", "")[:19]
@@ -168,7 +168,7 @@ func createExecutionRequest(ID *core.Identifier, inputs *core.LiteralMap, securi
 			AuthRole:          authRole,
 			SecurityContext:   securityContext,
 			ClusterAssignment: clusterAssignment,
-			OverwriteCache:    overwriteCache,
+			OverwriteCache:    executionConfig.OverwriteCache,
 		},
 		Inputs: inputs,
 	}
