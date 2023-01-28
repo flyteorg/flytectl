@@ -29,6 +29,8 @@ var (
 	SandboxKubeconfig       = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
 	SuccessMessage          = "Deploying Flyte..."
 	FlyteSandboxClusterName = "flyte-sandbox"
+	FlyteSandboxVolumeName  = "flyte-sandbox"
+	FlyteSandboxInternalDir = "/var/lib/flyte"
 	Environment             = []string{"SANDBOX=1", "KUBERNETES_API_PORT=30086", "FLYTE_HOST=localhost:30081", "FLYTE_AWS_ENDPOINT=http://localhost:30084"}
 	Source                  = "/root"
 	StateDirMountDest       = "/srv/flyte"
@@ -75,7 +77,7 @@ func GetSandbox(ctx context.Context, cli Docker) (*types.Container, error) {
 		return nil, err
 	}
 	for _, v := range containers {
-		if strings.Contains(v.Names[0], FlyteSandboxClusterName) {
+		if v.Names[0] == fmt.Sprintf("/%s", FlyteSandboxClusterName) {
 			return &v, nil
 		}
 	}
