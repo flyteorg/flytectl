@@ -24,19 +24,20 @@ import (
 )
 
 var (
-	FlyteStateDir           = f.FilePathJoin(f.UserHomeDir(), ".flyte", "state")
-	Kubeconfig              = f.FilePathJoin(FlyteStateDir, "kubeconfig")
-	SandboxKubeconfig       = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
-	SuccessMessage          = "Deploying Flyte..."
-	FlyteSandboxClusterName = "flyte-sandbox"
-	FlyteSandboxVolumeName  = "flyte-sandbox"
-	FlyteSandboxInternalDir = "/var/lib/flyte"
-	Environment             = []string{"SANDBOX=1", "KUBERNETES_API_PORT=30086", "FLYTE_HOST=localhost:30081", "FLYTE_AWS_ENDPOINT=http://localhost:30084"}
-	Source                  = "/root"
-	StateDirMountDest       = "/srv/flyte"
-	K3sDir                  = "/etc/rancher/"
-	Client                  Docker
-	Volumes                 = []mount.Mount{
+	FlyteSandboxConfigDir          = f.FilePathJoin(f.UserHomeDir(), ".flyte", "sandbox")
+	Kubeconfig                     = f.FilePathJoin(FlyteSandboxConfigDir, "kubeconfig")
+	SandboxKubeconfig              = f.FilePathJoin(f.UserHomeDir(), ".flyte", "k3s", "k3s.yaml")
+	SuccessMessage                 = "Deploying Flyte..."
+	FlyteSandboxClusterName        = "flyte-sandbox"
+	FlyteSandboxVolumeName         = "flyte-sandbox"
+	FlyteSandboxInternalDir        = "/var/lib/flyte"
+	FlyteSandboxInternalConfigDir  = f.FilePathJoin(FlyteSandboxInternalDir, "config")
+	FlyteSandboxInternalStorageDir = f.FilePathJoin(FlyteSandboxInternalDir, "storage")
+	Environment                    = []string{"SANDBOX=1", "KUBERNETES_API_PORT=30086", "FLYTE_HOST=localhost:30081", "FLYTE_AWS_ENDPOINT=http://localhost:30084"}
+	Source                         = "/root"
+	K3sDir                         = "/etc/rancher/"
+	Client                         Docker
+	Volumes                        = []mount.Mount{
 		{
 			Type:   mount.TypeBind,
 			Source: f.FilePathJoin(f.UserHomeDir(), ".flyte"),
