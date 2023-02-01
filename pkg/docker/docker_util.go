@@ -34,7 +34,7 @@ var (
 	FlyteSandboxInternalConfigDir  = f.FilePathJoin(FlyteSandboxInternalDir, "config")
 	FlyteSandboxInternalStorageDir = f.FilePathJoin(FlyteSandboxInternalDir, "storage")
 	Environment                    = []string{"SANDBOX=1", "KUBERNETES_API_PORT=30086", "FLYTE_HOST=localhost:30081", "FLYTE_AWS_ENDPOINT=http://localhost:30084"}
-	Source                         = "/root"
+	Source                         = "/"
 	K3sDir                         = "/etc/rancher/"
 	Client                         Docker
 	Volumes                        = []mount.Mount{

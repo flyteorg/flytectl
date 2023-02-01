@@ -20,7 +20,7 @@ var fakePod = corev1.Pod{
 	},
 	ObjectMeta: metav1.ObjectMeta{
 		Name:   "dummyflytepod",
-		Labels: map[string]string{"app": "flyte"},
+		Labels: map[string]string{"app.kubernetes.io/name": "flyte-binary"},
 	},
 }
 
