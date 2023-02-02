@@ -2,8 +2,8 @@ package demo
 
 import (
 	"bufio"
+	"bytes"
 	"context"
-	"strings"
 	"testing"
 
 	"github.com/docker/docker/api/types"
@@ -12,7 +12,6 @@ import (
 	"github.com/flyteorg/flytectl/pkg/docker/mocks"
 	"github.com/flyteorg/flytectl/pkg/k8s"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,12 +29,9 @@ var fakePod = corev1.Pod{
 	},
 }
 
-func TestDemoReloadLegacy(t *testing.T) {
-	ctx := context.Background()
-	commandCtx := cmdCore.CommandContext{}
+func sandboxSetup(ctx context.Context, legacy bool) {
 	mockDocker := &mocks.Docker{}
-	reader := bufio.NewReader(strings.NewReader("test"))
-
+	docker.Client = mockDocker
 	mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{
 		{
 			ID: docker.FlyteSandboxClusterName,
@@ -44,13 +40,61 @@ func TestDemoReloadLegacy(t *testing.T) {
 			},
 		},
 	}, nil)
-	mockDocker.OnContainerExecCreateMatch(ctx, mock.Anything, mock.Anything).Return(types.IDResponse{}, nil)
-	mockDocker.OnContainerExecInspectMatch(ctx, mock.Anything).Return(types.ContainerExecInspect{ExitCode: 1}, nil)
-	mockDocker.OnContainerExecAttachMatch(ctx, mock.Anything, types.ExecStartCheck{}).Return(types.HijackedResponse{
-		Reader: reader,
-	}, nil)
-	docker.Client = mockDocker
 
+	// This first set of mocks is for the check for the bootstrap agent. This is
+	// Expected to fail in legacy sandboxes
+	var checkLegacySandboxExecExitCode int
+	if legacy {
+		checkLegacySandboxExecExitCode = 1
+	}
+	mockDocker.OnContainerExecCreateMatch(
+		ctx,
+		docker.FlyteSandboxClusterName,
+		types.ExecConfig{
+			AttachStderr: true,
+			Tty:          true,
+			WorkingDir:   "/",
+			AttachStdout: true,
+			Cmd:          []string{"which", internalBootstrapAgent},
+		},
+	).Return(types.IDResponse{ID: "0"}, nil)
+	mockDocker.OnContainerExecAttachMatch(ctx, "0", types.ExecStartCheck{}).Return(types.HijackedResponse{
+		Reader: bufio.NewReader(bytes.NewReader([]byte{})),
+	}, nil)
+	mockDocker.OnContainerExecInspectMatch(ctx, "0").Return(types.ContainerExecInspect{ExitCode: checkLegacySandboxExecExitCode}, nil)
+
+	// Register additional mocks for the actual execution of the bootstrap agent
+	// in non-legacy sandboxes
+	if !legacy {
+		mockDocker.OnContainerExecCreateMatch(
+			ctx,
+			docker.FlyteSandboxClusterName,
+			types.ExecConfig{
+				AttachStderr: true,
+				Tty:          true,
+				WorkingDir:   "/",
+				AttachStdout: true,
+				Cmd:          []string{internalBootstrapAgent},
+			},
+		).Return(types.IDResponse{ID: "1"}, nil)
+		mockDocker.OnContainerExecAttachMatch(ctx, "1", types.ExecStartCheck{}).Return(types.HijackedResponse{
+			Reader: bufio.NewReader(bytes.NewReader([]byte{})),
+		}, nil)
+	}
+}
+
+func TestReloadLegacy(t *testing.T) {
+	ctx := context.Background()
+	commandCtx := cmdCore.CommandContext{}
+	sandboxSetup(ctx, false)
+	err := reloadDemoCluster(ctx, []string{}, commandCtx)
+	assert.Nil(t, err)
+}
+
+func TestDemoReloadLegacy(t *testing.T) {
+	ctx := context.Background()
+	commandCtx := cmdCore.CommandContext{}
+	sandboxSetup(ctx, true)
 	t.Run("No errors", func(t *testing.T) {
 		client := testclient.NewSimpleClientset()
 		_, err := client.CoreV1().Pods("flyte").Create(ctx, &fakePod, v1.CreateOptions{})
