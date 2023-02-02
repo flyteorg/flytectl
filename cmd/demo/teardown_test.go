@@ -30,7 +30,7 @@ func TestTearDownFunc(t *testing.T) {
 	}
 	containers = append(containers, container1)
 
-	t.Run("Success", func(t *testing.T) {
+	t.Run("SuccessKeepVolume", func(t *testing.T) {
 		ctx := context.Background()
 		mockDocker := &mocks.Docker{}
 		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return(containers, nil)
@@ -39,6 +39,22 @@ func TestTearDownFunc(t *testing.T) {
 		k8s.ContextMgr = mockK8sContextMgr
 		mockK8sContextMgr.OnRemoveContextMatch(mock.Anything).Return(nil)
 		err := sandbox.Teardown(ctx, mockDocker, sandboxCmdConfig.DefaultTeardownFlags)
+		assert.Nil(t, err)
+	})
+	t.Run("SuccessRemoveVolume", func(t *testing.T) {
+		ctx := context.Background()
+		mockDocker := &mocks.Docker{}
+		mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return(containers, nil)
+		mockDocker.OnContainerRemove(ctx, mock.Anything, types.ContainerRemoveOptions{Force: true}).Return(nil)
+		mockDocker.OnVolumeRemove(ctx, docker.FlyteSandboxVolumeName, true).Return(nil)
+		mockK8sContextMgr := &k8sMocks.ContextOps{}
+		k8s.ContextMgr = mockK8sContextMgr
+		mockK8sContextMgr.OnRemoveContextMatch(mock.Anything).Return(nil)
+		err := sandbox.Teardown(
+			ctx,
+			mockDocker,
+			&sandboxCmdConfig.TeardownFlags{Volume: true},
+		)
 		assert.Nil(t, err)
 	})
 	t.Run("ErrorOnContainerRemove", func(t *testing.T) {
