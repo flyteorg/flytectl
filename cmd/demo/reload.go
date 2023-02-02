@@ -2,7 +2,6 @@ package demo
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
@@ -65,7 +64,7 @@ func reloadDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		return err
 	}
 	if c == nil {
-		return errors.New("reload failed - could not find an active sandbox")
+		return fmt.Errorf("reload failed - could not find an active sandbox")
 	}
 
 	// Working with a legacy sandbox - fallback to legacy reload mechanism
