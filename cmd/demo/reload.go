@@ -14,7 +14,7 @@ import (
 
 const (
 	internalBootstrapAgent = "flyte-sandbox-bootstrap"
-	labelSelector = "app.kubernetes.io/name=flyte-binary"
+	labelSelector          = "app.kubernetes.io/name=flyte-binary"
 )
 const (
 	reloadShort = "Power cycle the Flyte executable pod, effectively picking up an updated config."

@@ -1,12 +1,18 @@
 package demo
 
 import (
+	"bufio"
 	"context"
+	"strings"
 	"testing"
 
+	"github.com/docker/docker/api/types"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/pkg/docker"
+	"github.com/flyteorg/flytectl/pkg/docker/mocks"
 	"github.com/flyteorg/flytectl/pkg/k8s"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,9 +30,26 @@ var fakePod = corev1.Pod{
 	},
 }
 
-func TestDemoReload(t *testing.T) {
+func TestDemoReloadLegacy(t *testing.T) {
 	ctx := context.Background()
 	commandCtx := cmdCore.CommandContext{}
+	mockDocker := &mocks.Docker{}
+	reader := bufio.NewReader(strings.NewReader("test"))
+
+	mockDocker.OnContainerList(ctx, types.ContainerListOptions{All: true}).Return([]types.Container{
+		{
+			ID: docker.FlyteSandboxClusterName,
+			Names: []string{
+				docker.FlyteSandboxClusterName,
+			},
+		},
+	}, nil)
+	mockDocker.OnContainerExecCreateMatch(ctx, mock.Anything, mock.Anything).Return(types.IDResponse{}, nil)
+	mockDocker.OnContainerExecInspectMatch(ctx, mock.Anything).Return(types.ContainerExecInspect{ExitCode: 1}, nil)
+	mockDocker.OnContainerExecAttachMatch(ctx, mock.Anything, types.ExecStartCheck{}).Return(types.HijackedResponse{
+		Reader: reader,
+	}, nil)
+	docker.Client = mockDocker
 
 	t.Run("No errors", func(t *testing.T) {
 		client := testclient.NewSimpleClientset()

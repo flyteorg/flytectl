@@ -78,7 +78,7 @@ func GetSandbox(ctx context.Context, cli Docker) (*types.Container, error) {
 		return nil, err
 	}
 	for _, v := range containers {
-		if v.Names[0] == fmt.Sprintf("/%s", FlyteSandboxClusterName) {
+		if strings.TrimLeft(v.Names[0], "/") == FlyteSandboxClusterName {
 			return &v, nil
 		}
 	}
