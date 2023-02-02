@@ -73,7 +73,7 @@ func reloadDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 		return err
 	}
 	if useLegacyMethod {
-		return legacyReloadDemoCluster(ctx, args, cmdCtx)
+		return legacyReloadDemoCluster(ctx)
 	}
 
 	// At this point we know that we are on a modern sandbox, and we can use the
@@ -90,7 +90,7 @@ func reloadDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.Comman
 }
 
 // legacyReloadDemoCluster will kill the flyte binary pod so the new one can pick up a new config file
-func legacyReloadDemoCluster(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
+func legacyReloadDemoCluster(ctx context.Context) error {
 	k8sClient, err := k8s.GetK8sClient(docker.Kubeconfig, K8sEndpoint)
 	if err != nil {
 		fmt.Println("Could not get K8s client")
