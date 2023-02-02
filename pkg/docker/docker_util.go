@@ -16,7 +16,9 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/go-connections/nat"
 	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
@@ -341,4 +343,38 @@ func InspectExecResp(ctx context.Context, cli Docker, containerID string) error 
 		return err
 	}
 	return nil
+}
+
+func PrintCreateVolume(name string) {
+	fmt.Printf("%v Run the following command to create a volume\n", emoji.Sparkle)
+	fmt.Printf("	docker volume create %v\n", name)
+}
+
+func GetOrCreateVolume(
+	ctx context.Context, cli Docker, volumeName string, dryRun bool,
+) (*types.Volume, error) {
+	if dryRun {
+		PrintCreateVolume(volumeName)
+		return nil, nil
+	}
+
+	resp, err := cli.VolumeList(ctx, filters.NewArgs(
+		filters.KeyValuePair{Key: "name", Value: fmt.Sprintf("^%s$", volumeName)},
+	))
+	if err != nil {
+		return nil, err
+	}
+	switch len(resp.Volumes) {
+	case 0:
+		v, err := cli.VolumeCreate(ctx, volume.VolumeCreateBody{Name: volumeName})
+		if err != nil {
+			return nil, err
+		}
+		return &v, nil
+	case 1:
+		return resp.Volumes[0], nil
+	default:
+		// We don't expect to ever arrive at this point
+		return nil, fmt.Errorf("unexpected error - found multiple volumes with name: %s", volumeName)
+	}
 }

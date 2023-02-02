@@ -10,9 +10,7 @@ import (
 	"time"
 
 	"github.com/avast/retry-go"
-	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/mount"
-	"github.com/docker/docker/api/types/volume"
 	"github.com/docker/go-connections/nat"
 	"github.com/enescakir/emoji"
 	"github.com/flyteorg/flytectl/clierrors"
@@ -200,22 +198,13 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 
 	// Create and mount a docker volume that will be used to persist data
 	// across sandbox clusters
-	result, err := cli.VolumeList(ctx, filters.NewArgs(filters.KeyValuePair{Key: "name", Value: fmt.Sprintf("^%s$", docker.FlyteSandboxVolumeName)}))
-	if err != nil {
+	if _, err := docker.GetOrCreateVolume(
+		ctx,
+		cli,
+		docker.FlyteSandboxVolumeName,
+		sandboxConfig.DryRun,
+	); err != nil {
 		return nil, err
-	}
-	switch len(result.Volumes) {
-	case 0:
-		_, err := cli.VolumeCreate(ctx, volume.VolumeCreateBody{
-			Name: docker.FlyteSandboxVolumeName,
-		})
-		if err != nil {
-			return nil, err
-		}
-	case 1:
-		break
-	default:
-		return nil, fmt.Errorf("Unexpected error while discovering existing Docker volume")
 	}
 	volumes = append(volumes, mount.Mount{
 		Type:   mount.TypeVolume,
