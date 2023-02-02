@@ -88,7 +88,8 @@ func sandboxSetup() {
 	bodyStatus := make(chan container.ContainerWaitOKBody)
 	githubMock = &ghMocks.GHRepoService{}
 	sandboxCmdConfig.DefaultConfig.Image = "dummyimage"
-	mockDocker.OnVolumeList(ctx, filters.NewArgs(filters.KeyValuePair{Key: "name", Value: fmt.Sprintf("^%s$", docker.FlyteSandboxVolumeName)})).Return(volume.VolumeListOKBody{Volumes: []*types.Volume{{Name: "flyte-sandbox"}}}, nil)
+	mockDocker.OnVolumeList(ctx, filters.NewArgs(filters.KeyValuePair{Key: "name", Value: fmt.Sprintf("^%s$", docker.FlyteSandboxVolumeName)})).Return(volume.VolumeListOKBody{Volumes: []*types.Volume{}}, nil)
+	mockDocker.OnVolumeCreate(ctx, volume.VolumeCreateBody{Name: docker.FlyteSandboxVolumeName}).Return(types.Volume{Name: docker.FlyteSandboxVolumeName}, nil)
 	mockDocker.OnContainerCreateMatch(mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(container.ContainerCreateCreatedBody{
 		ID: "Hello",
 	}, nil)
