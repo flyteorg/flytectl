@@ -19,7 +19,6 @@ import (
 
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/platformutil"
-	"github.com/spf13/cobra"
 )
 
 type Goos string
@@ -52,7 +51,7 @@ var (
 )
 
 // SelfUpgrade will return self upgrade command
-func SelfUpgrade(rootCmd *cobra.Command) map[string]cmdCore.CommandEntry {
+func SelfUpgrade() map[string]cmdCore.CommandEntry {
 	getResourcesFuncs := map[string]cmdCore.CommandEntry{
 		"upgrade": {
 			CmdFunc:                  selfUpgrade,

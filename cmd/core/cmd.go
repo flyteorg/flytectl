@@ -30,22 +30,26 @@ type CommandEntry struct {
 	DisableFlyteClient       bool
 }
 
+func ToCobraCommand(resource string, cmdEntry CommandEntry) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:          resource,
+		Short:        cmdEntry.Short,
+		Long:         cmdEntry.Long,
+		Aliases:      cmdEntry.Aliases,
+		RunE:         generateCommandFunc(cmdEntry),
+		SilenceUsage: true,
+	}
+
+	if cmdEntry.PFlagProvider != nil {
+		cmd.Flags().AddFlagSet(cmdEntry.PFlagProvider.GetPFlagSet(""))
+	}
+
+	return cmd
+}
+
 func AddCommands(rootCmd *cobra.Command, cmdFuncs map[string]CommandEntry) {
 	for resource, cmdEntry := range cmdFuncs {
-		cmd := &cobra.Command{
-			Use:          resource,
-			Short:        cmdEntry.Short,
-			Long:         cmdEntry.Long,
-			Aliases:      cmdEntry.Aliases,
-			RunE:         generateCommandFunc(cmdEntry),
-			SilenceUsage: true,
-		}
-
-		if cmdEntry.PFlagProvider != nil {
-			cmd.Flags().AddFlagSet(cmdEntry.PFlagProvider.GetPFlagSet(""))
-		}
-
-		rootCmd.AddCommand(cmd)
+		rootCmd.AddCommand(ToCobraCommand(resource, cmdEntry))
 	}
 }
 
