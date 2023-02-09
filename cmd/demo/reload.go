@@ -37,7 +37,7 @@ func isLegacySandbox(ctx context.Context, cli docker.Docker, containerID string)
 		ctx,
 		cli,
 		containerID,
-		[]string{"which", internalBootstrapAgent},
+		[]string{"sh", "-c", fmt.Sprintf("which %s > /dev/null", internalBootstrapAgent)},
 	)
 	if err != nil {
 		return result, err

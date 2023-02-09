@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/docker/docker/api/types"
@@ -55,7 +56,7 @@ func sandboxSetup(ctx context.Context, legacy bool) {
 			Tty:          true,
 			WorkingDir:   "/",
 			AttachStdout: true,
-			Cmd:          []string{"which", internalBootstrapAgent},
+			Cmd:          []string{"sh", "-c", fmt.Sprintf("which %s > /dev/null", internalBootstrapAgent)},
 		},
 	).Return(types.IDResponse{ID: "0"}, nil)
 	mockDocker.OnContainerExecAttachMatch(ctx, "0", types.ExecStartCheck{}).Return(types.HijackedResponse{
