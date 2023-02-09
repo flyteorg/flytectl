@@ -30,7 +30,7 @@ func TestUpgradeCommand(t *testing.T) {
 		Use:               "flytectl",
 		DisableAutoGenTag: true,
 	}
-	upgradeCmd := SelfUpgrade(rootCmd)
+	upgradeCmd := SelfUpgrade()
 	cmdCore.AddCommands(rootCmd, upgradeCmd)
 	assert.Equal(t, len(rootCmd.Commands()), 1)
 	cmdNouns := rootCmd.Commands()
