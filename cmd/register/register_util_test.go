@@ -509,9 +509,9 @@ func TestHydrateGateNode(t *testing.T) {
 		node := &core.Node{
 			Target: &core.Node_GateNode{
 				GateNode: &core.GateNode{
-					Condition: &core.GateNode_Sleep {
+					Condition: &core.GateNode_Sleep{
 						Sleep: &core.SleepCondition{
-							Duration: &durationpb.Duration {
+							Duration: &durationpb.Duration{
 								Seconds: 10,
 							},
 						},
