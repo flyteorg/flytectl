@@ -30,7 +30,7 @@ For example, here's the config file wec.yaml:
     domain: development
     project: flytesnacks
     max_parallelism: 5
-	security_context:
+    security_context:
       run_as:
         k8s_service_account: demo
 
