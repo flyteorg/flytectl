@@ -88,7 +88,6 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	if err != nil {
 		return err
 	}
-	logger.Infof(ctx, "projectSpec from file: [%+v]", projectSpec)
 	if projectSpec.Id == "" {
 		return fmt.Errorf(clierrors.ErrProjectNotPassed)
 	}
