@@ -3,6 +3,7 @@ package sandbox
 import (
 	"context"
 	"fmt"
+	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/docker/docker/api/types"
 	"github.com/enescakir/emoji"
@@ -38,6 +39,7 @@ func Teardown(ctx context.Context, cli docker.Docker, teardownFlags *sandboxCmdC
 	}
 
 	fmt.Printf("%v %v Sandbox cluster is removed successfully.\n", emoji.Broom, emoji.Broom)
+	util.PrintSandboxTeardownMessage(util.SandBoxConsolePort, docker.SandboxKubeconfig)
 	return nil
 }
 
