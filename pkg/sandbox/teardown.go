@@ -3,7 +3,6 @@ package sandbox
 import (
 	"context"
 	"fmt"
-	"github.com/flyteorg/flytectl/pkg/util"
 
 	"github.com/docker/docker/api/types"
 	"github.com/enescakir/emoji"
@@ -11,6 +10,7 @@ import (
 	"github.com/flyteorg/flytectl/pkg/configutil"
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/k8s"
+	"github.com/flyteorg/flytectl/pkg/util"
 )
 
 func Teardown(ctx context.Context, cli docker.Docker, teardownFlags *sandboxCmdConfig.TeardownFlags) error {
