@@ -72,12 +72,6 @@ func SetupFlyteDir() error {
 	return nil
 }
 
-// PrintDemoMessage will print demo start success message
-// Deprecated: use PrintDemoStartMessage
-func PrintDemoMessage(flyteConsolePort int, kubeconfigLocation string, dryRun bool) {
-	PrintDemoStartMessage(flyteConsolePort, kubeconfigLocation, dryRun)
-}
-
 // PrintDemoStartMessage will print demo start success message
 func PrintDemoStartMessage(flyteConsolePort int, kubeconfigLocation string, dryRun bool) {
 	kubeconfig := strings.Join([]string{
@@ -100,12 +94,6 @@ func PrintDemoStartMessage(flyteConsolePort int, kubeconfigLocation string, dryR
 	}
 	fmt.Printf("%s Flyte sandbox ships with a Docker registry. Tag and push custom workflow images to localhost:30000\n", emoji.Whale)
 	fmt.Printf("%s The Minio API is hosted on localhost:30002. Use http://localhost:30080/minio/login for Minio console\n", emoji.OpenFileFolder)
-}
-
-// PrintSandboxMessage will print sandbox start success message
-// Deprecated: use PrintSandboxStartMessage
-func PrintSandboxMessage(flyteConsolePort int, kubeconfigLocation string, dryRun bool) {
-	PrintSandboxStartMessage(flyteConsolePort, kubeconfigLocation, dryRun)
 }
 
 // PrintSandboxStartMessage will print sandbox start success message
