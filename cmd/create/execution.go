@@ -162,6 +162,7 @@ type ExecutionConfig struct {
 	Workflow string                 `json:"workflow,omitempty"`
 	Task     string                 `json:"task,omitempty"`
 	Inputs   map[string]interface{} `json:"inputs" pflag:"-"`
+	Envs     map[string]string      `json:"envs" pflag:"-"`
 }
 
 type ExecutionType int
