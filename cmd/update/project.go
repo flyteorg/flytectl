@@ -54,7 +54,7 @@ Update projects.(project/projects can be used interchangeably in these commands)
 Update a project by definition file. Note: The name shouldn't contain any whitespace characters.
 ::
 
- flytectl update project --file project.yaml 
+ flytectl update project --file project.yaml
 
 .. code-block:: yaml
 
@@ -88,8 +88,9 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	if err != nil {
 		return err
 	}
-	if projectSpec.Id == "" {
-		return fmt.Errorf(clierrors.ErrProjectNotPassed)
+
+	if projectSpec.Name == "" {
+		return fmt.Errorf(clierrors.ErrProjectNameNotPassed)
 	}
 
 	if project.DefaultProjectConfig.DryRun {
