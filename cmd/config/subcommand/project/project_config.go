@@ -78,7 +78,7 @@ func (c *ConfigProject) GetProjectSpec() (*admin.Project, error) {
 
 	// Get projectId from file, if not provided, fall back to project
 	if len(projectSpec.Id) == 0 {
-		projectSpec.Id = config.GetConfig().Project
+		projectSpec.Id = id
 	}
 	return &projectSpec, nil
 }
