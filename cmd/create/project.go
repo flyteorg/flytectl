@@ -45,7 +45,7 @@ Create a project by definition file.
 )
 
 func createProjectsCommand(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	projectSpec, err := project.DefaultProjectConfig.GetProjectSpec(project.DefaultProjectConfig.ID)
+	projectSpec, err := project.DefaultProjectConfig.GetProjectSpec()
 	if err != nil {
 		return err
 	}
