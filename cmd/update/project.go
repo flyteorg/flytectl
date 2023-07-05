@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/flyteorg/flytectl/cmd/config"
-
 	"github.com/flyteorg/flytectl/clierrors"
+	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytestdlib/logger"
@@ -85,12 +84,17 @@ Usage
 
 func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	projectSpec, err := project.DefaultProjectConfig.GetProjectSpec(config.GetConfig().Project)
+
 	if err != nil {
 		return err
 	}
 
-	if projectSpec.Name == "" {
-		return fmt.Errorf(clierrors.ErrProjectNameNotPassed)
+	if project.DefaultProjectConfig.ID != "" {
+		return fmt.Errorf("Project `id` can't be updated. Hint: did you mean `-p` instead of `--id` to specify the project?")
+	}
+
+	if projectSpec.Id == "" {
+		return fmt.Errorf(clierrors.ErrProjectNotPassed)
 	}
 
 	if project.DefaultProjectConfig.DryRun {
