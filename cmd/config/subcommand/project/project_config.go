@@ -48,7 +48,7 @@ var DefaultProjectConfig = &ConfigProject{
 // GetProjectSpec return project spec from a file/flags
 func (c *ConfigProject) GetProjectSpec() (*admin.Project, error) {
 	projectSpec := admin.Project{}
-	id := config.GetConfig().Project
+
 	if len(c.File) > 0 {
 		yamlFile, err := ioutil.ReadFile(c.File)
 		if err != nil {
@@ -71,6 +71,8 @@ func (c *ConfigProject) GetProjectSpec() (*admin.Project, error) {
 		}
 		projectSpec.State = projectState
 	}
+
+	id := config.GetConfig().Project
 	if len(projectSpec.Id) == 0 && len(id) == 0 {
 		err := fmt.Errorf(clierrors.ErrProjectNameNotPassed)
 		return nil, err

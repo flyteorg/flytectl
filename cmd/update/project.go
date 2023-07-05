@@ -83,13 +83,8 @@ Usage
 
 func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	projectSpec, err := project.DefaultProjectConfig.GetProjectSpec()
-
 	if err != nil {
 		return err
-	}
-
-	if project.DefaultProjectConfig.ID != "" {
-		return fmt.Errorf("Project `id` can't be updated. Hint: did you mean `-p` instead of `--id` to specify the project?")
 	}
 
 	if projectSpec.Id == "" {

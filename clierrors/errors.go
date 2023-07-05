@@ -4,7 +4,7 @@ var (
 	ErrInvalidStateUpdate = "invalid state passed. Specify either activate or archive\n"
 
 	ErrProjectNotPassed     = "project id wasn't passed\n" // #nosec
-	ErrProjectNameNotPassed = "project name is a required flag"
+	ErrProjectNameNotPassed = "project name is a required flag\n"
 	ErrFailedProjectUpdate  = "Project %v failed to update due to %v\n"
 
 	ErrLPNotPassed        = "launch plan name wasn't passed\n"
