@@ -5,7 +5,7 @@ var (
 
 	ErrProjectNotPassed     = "project id wasn't passed\n" // #nosec
 	ErrProjectIDBothPassed  = "both project and id are passed\n"
-	ErrProjectNameNotPassed = "project name is a required flag\n"
+	ErrProjectNameNotPassed = "project name is a required flag"
 	ErrFailedProjectUpdate  = "Project %v failed to update due to %v\n"
 
 	ErrLPNotPassed        = "launch plan name wasn't passed\n"
