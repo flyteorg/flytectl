@@ -74,12 +74,12 @@ func (c *ConfigProject) GetProjectSpec(cf *config.Config) (*admin.Project, error
 
 	project := cf.Project
 	if len(projectSpec.Id) == 0 && len(project) == 0 {
-		err := fmt.Errorf(clierrors.ErrProjectNameNotPassed)
+		err := fmt.Errorf(clierrors.ErrProjectNotPassed)
 		return nil, err
 	}
 
 	if len(projectSpec.Id) > 0 && len(project) > 0 {
-		err := fmt.Errorf(clierrors.ErrProjectIdBothPassed)
+		err := fmt.Errorf(clierrors.ErrProjectIDBothPassed)
 		return nil, err
 	}
 
