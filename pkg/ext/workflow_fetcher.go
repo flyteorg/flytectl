@@ -49,7 +49,7 @@ func (a *AdminFetcherExtClient) FetchWorkflowLatestVersion(ctx context.Context, 
 	if err != nil {
 		return nil, err
 	}
-	return a.FetchWorkflowVersion(ctx, name, wVersions[0].Id.Version, project, domain)
+	return a.FetchWorkflowVersion(ctx, name, wVersions[len(wVersions)-1].Id.Version, project, domain)
 }
 
 // FetchWorkflowVersion fetches particular version of workflow
