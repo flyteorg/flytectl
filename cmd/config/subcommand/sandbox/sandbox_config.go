@@ -19,6 +19,9 @@ type Config struct {
 	// Default value false represents that Flytectl will not use the latest pre-release if it exists.
 	Prerelease bool `json:"pre" pflag:",Optional. Pre release Version of flyte will be used for sandbox."`
 
+	// Agent Service
+	EnableAgent bool `json:"enable-agent" pflag:",Optional. Enable the agent feature."`
+
 	// Optionally it is possible to pass in environment variables to sandbox container.
 	Env []string `json:"env" pflag:",Optional. Provide Env variable in key=value format which can be passed to sandbox container."`
 
