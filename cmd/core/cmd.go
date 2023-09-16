@@ -76,6 +76,10 @@ func generateCommandFunc(cmdEntry CommandEntry) func(cmd *cobra.Command, args []
 				WithTokenCache(pkce.TokenCacheKeyringProvider{
 					ServiceUser: fmt.Sprintf("%s:%s", adminCfg.Endpoint.String(), pkce.KeyRingServiceUser),
 					ServiceName: pkce.KeyRingServiceName,
+				}).
+				WithProxyTokenCache(pkce.TokenCacheKeyringProvider{
+					ServiceUser: fmt.Sprintf("%s:%s-proxy", adminCfg.Endpoint.String(), pkce.KeyRingServiceUser),
+					ServiceName: pkce.KeyRingServiceName,
 				}).Build(ctx)
 			if err != nil {
 				return err
