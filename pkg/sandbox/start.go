@@ -399,7 +399,6 @@ func StartDemoCluster(ctx context.Context, args []string, sandboxConfig *sandbox
 	// K3s will automatically write the file specified by this var, which is mounted from user's local state dir.
 
 	sandboxConfig.Env = append(sandboxConfig.Env, k3sKubeConfigEnvVar)
-	fmt.Println("@@@ sandboxConfig.Env", sandboxConfig.Env)
 	err = StartCluster(ctx, args, sandboxConfig, demoImageName, sandboxImagePrefix, exposedPorts, portBindings, util.DemoConsolePort)
 	if err != nil {
 		return err
