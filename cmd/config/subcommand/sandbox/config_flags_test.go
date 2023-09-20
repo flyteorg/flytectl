@@ -155,6 +155,20 @@ func TestConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
+	t.Run("Test_enable-agent", func(t *testing.T) {
+
+		t.Run("Override", func(t *testing.T) {
+			testValue := "1"
+
+			cmdFlags.Set("enable-agent", testValue)
+			if vBool, err := cmdFlags.GetBool("enable-agent"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.EnableAgent)
+
+			} else {
+				assert.FailNow(t, err.Error())
+			}
+		})
+	})
 	t.Run("Test_env", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
@@ -203,20 +217,6 @@ func TestConfig_SetFlags(t *testing.T) {
 			cmdFlags.Set("imagePullOptions.platform", testValue)
 			if vString, err := cmdFlags.GetString("imagePullOptions.platform"); err == nil {
 				testDecodeJson_Config(t, fmt.Sprintf("%v", vString), &actual.ImagePullOptions.Platform)
-
-			} else {
-				assert.FailNow(t, err.Error())
-			}
-		})
-	})
-	t.Run("Test_enable-agent", func(t *testing.T) {
-
-		t.Run("Override", func(t *testing.T) {
-			testValue := "1"
-
-			cmdFlags.Set("enable-agent", testValue)
-			if vBool, err := cmdFlags.GetBool("enable-agent"); err == nil {
-				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.EnableAgent)
 
 			} else {
 				assert.FailNow(t, err.Error())
