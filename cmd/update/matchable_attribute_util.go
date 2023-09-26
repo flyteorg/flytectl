@@ -2,11 +2,12 @@ package update
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
+	"os"
 
 	sconfig "github.com/flyteorg/flytectl/cmd/config/subcommand"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
 	"github.com/flyteorg/flytectl/pkg/ext"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 )
@@ -18,6 +19,7 @@ func DecorateAndUpdateMatchableAttr(
 	resourceType admin.MatchableResource,
 	attributeDecorator sconfig.MatchableAttributeDecorator,
 	dryRun bool,
+	force bool,
 ) error {
 	if project == "" {
 		return fmt.Errorf("project is required")
@@ -28,11 +30,11 @@ func DecorateAndUpdateMatchableAttr(
 
 	switch {
 	case workflow != "":
-		return updateWorkflowMatchableAttributes(ctx, cmdCtx, project, domain, workflow, resourceType, attributeDecorator, dryRun)
+		return updateWorkflowMatchableAttributes(ctx, cmdCtx, project, domain, workflow, resourceType, attributeDecorator, dryRun, force)
 	case domain != "":
-		return updateProjectDomainMatchableAttributes(ctx, cmdCtx, project, domain, resourceType, attributeDecorator, dryRun)
+		return updateProjectDomainMatchableAttributes(ctx, cmdCtx, project, domain, resourceType, attributeDecorator, dryRun, force)
 	default:
-		return updateProjectMatchableAttributes(ctx, cmdCtx, project, resourceType, attributeDecorator, dryRun)
+		return updateProjectMatchableAttributes(ctx, cmdCtx, project, resourceType, attributeDecorator, dryRun, force)
 	}
 }
 
@@ -43,6 +45,7 @@ func updateProjectMatchableAttributes(
 	resourceType admin.MatchableResource,
 	attributeDecorator sconfig.MatchableAttributeDecorator,
 	dryRun bool,
+	force bool,
 ) error {
 	if project == "" {
 		panic("project is empty")
@@ -56,15 +59,26 @@ func updateProjectMatchableAttributes(
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
 	newMatchingAttributes := attributeDecorator.Decorate()
 
-	v, _ := json.MarshalIndent(oldMatchingAttributes, "", "    ")
-	fmt.Println(string(v))
+	patch, err := diffAsYaml(oldMatchingAttributes.Target, newMatchingAttributes.Target)
+	if err != nil {
+		panic(err)
+	}
+
+	if patch == "" {
+		fmt.Printf("No changes detected. Skipping the update.\n")
+		return nil
+	}
+
+	fmt.Printf("The following changes are to be applied.\n%s\n", patch)
 
 	if dryRun {
 		fmt.Printf("Skipping UpdateProjectAttributes request (dryRun)\n")
 		return nil
 	}
 
-	// TODO: kamal - ack/force
+	if !force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
+		return fmt.Errorf("update aborted")
+	}
 
 	if err := cmdCtx.AdminUpdaterExt().UpdateProjectAttributes(ctx, project, newMatchingAttributes); err != nil {
 		return err
@@ -81,6 +95,7 @@ func updateProjectDomainMatchableAttributes(
 	resourceType admin.MatchableResource,
 	attributeDecorator sconfig.MatchableAttributeDecorator,
 	dryRun bool,
+	force bool,
 ) error {
 	if project == "" {
 		panic("project is empty")
@@ -97,15 +112,26 @@ func updateProjectDomainMatchableAttributes(
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
 	newMatchingAttributes := attributeDecorator.Decorate()
 
-	v, _ := json.MarshalIndent(oldMatchingAttributes, "", "    ")
-	fmt.Println(string(v))
+	patch, err := diffAsYaml(oldMatchingAttributes.Target, newMatchingAttributes.Target)
+	if err != nil {
+		panic(err)
+	}
+
+	if patch == "" {
+		fmt.Printf("No changes detected. Skipping the update.\n")
+		return nil
+	}
+
+	fmt.Printf("The following changes are to be applied.\n%s\n", patch)
 
 	if dryRun {
 		fmt.Printf("Skipping UpdateProjectDomainAttributes request (dryRun)\n")
 		return nil
 	}
 
-	// TODO: kamal - ack/force
+	if !force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
+		return fmt.Errorf("update aborted")
+	}
 
 	if err := cmdCtx.AdminUpdaterExt().UpdateProjectDomainAttributes(ctx, project, domain, newMatchingAttributes); err != nil {
 		return err
@@ -122,6 +148,7 @@ func updateWorkflowMatchableAttributes(
 	resourceType admin.MatchableResource,
 	attributeDecorator sconfig.MatchableAttributeDecorator,
 	dryRun bool,
+	force bool,
 ) error {
 	if project == "" {
 		panic("project is empty")
@@ -141,15 +168,26 @@ func updateWorkflowMatchableAttributes(
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
 	newMatchingAttributes := attributeDecorator.Decorate()
 
-	v, _ := json.MarshalIndent(oldMatchingAttributes, "", "    ")
-	fmt.Println(string(v))
+	patch, err := diffAsYaml(oldMatchingAttributes.Target, newMatchingAttributes.Target)
+	if err != nil {
+		panic(err)
+	}
+
+	if patch == "" {
+		fmt.Printf("No changes detected. Skipping the update.\n")
+		return nil
+	}
+
+	fmt.Printf("The following changes are to be applied.\n%s\n", patch)
 
 	if dryRun {
 		fmt.Printf("Skipping UpdateWorkflowAttributes request (dryRun)\n")
 		return nil
 	}
 
-	// TODO: kamal - ack/force
+	if !force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
+		return fmt.Errorf("update aborted")
+	}
 
 	if err := cmdCtx.AdminUpdaterExt().UpdateWorkflowAttributes(ctx, project, domain, workflow, newMatchingAttributes); err != nil {
 		return err

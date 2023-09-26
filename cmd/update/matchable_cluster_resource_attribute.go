@@ -74,7 +74,8 @@ func updateClusterResourceAttributesFunc(ctx context.Context, args []string, cmd
 
 	// Updates the admin matchable attribute from taskResourceAttrFileConfig
 	if err := DecorateAndUpdateMatchableAttr(ctx, cmdCtx, project, domain, workflowName,
-		admin.MatchableResource_CLUSTER_RESOURCE, clustrResourceAttrFileConfig, updateConfig.DryRun); err != nil {
+		admin.MatchableResource_CLUSTER_RESOURCE, clustrResourceAttrFileConfig,
+		updateConfig.DryRun, updateConfig.Force); err != nil {
 		return err
 	}
 	return nil
