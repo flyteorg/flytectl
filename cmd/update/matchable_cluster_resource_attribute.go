@@ -7,6 +7,7 @@ import (
 	sconfig "github.com/flyteorg/flytectl/cmd/config/subcommand"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/clusterresourceattribute"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
 const (
@@ -72,8 +73,8 @@ func updateClusterResourceAttributesFunc(ctx context.Context, args []string, cmd
 	workflowName := clustrResourceAttrFileConfig.Workflow
 
 	// Updates the admin matchable attribute from taskResourceAttrFileConfig
-	if err := DecorateAndUpdateMatchableAttr(ctx, project, domain, workflowName, cmdCtx.AdminUpdaterExt(),
-		clustrResourceAttrFileConfig, updateConfig.DryRun); err != nil {
+	if err := DecorateAndUpdateMatchableAttr(ctx, cmdCtx, project, domain, workflowName,
+		admin.MatchableResource_CLUSTER_RESOURCE, clustrResourceAttrFileConfig, updateConfig.DryRun); err != nil {
 		return err
 	}
 	return nil

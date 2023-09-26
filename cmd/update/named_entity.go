@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/flyteorg/flytectl/clierrors"
@@ -25,37 +26,56 @@ type NamedEntityConfig struct {
 }
 
 func (cfg NamedEntityConfig) UpdateNamedEntity(ctx context.Context, name string, project string, domain string, rsType core.ResourceType, cmdCtx cmdCore.CommandContext) error {
-	archiveProject := cfg.Archive
-	activateProject := cfg.Activate
-	if activateProject == archiveProject && activateProject {
+	archive := cfg.Archive
+	activate := cfg.Activate
+	if activate == archive && activate {
 		return fmt.Errorf(clierrors.ErrInvalidStateUpdate)
 	}
-	var nameEntityState admin.NamedEntityState
-	if activateProject {
-		nameEntityState = admin.NamedEntityState_NAMED_ENTITY_ACTIVE
-	} else if archiveProject {
-		nameEntityState = admin.NamedEntityState_NAMED_ENTITY_ARCHIVED
+
+	var state admin.NamedEntityState
+	if activate {
+		state = admin.NamedEntityState_NAMED_ENTITY_ACTIVE
+	} else if archive {
+		state = admin.NamedEntityState_NAMED_ENTITY_ARCHIVED
 	}
+
+	namedEntity, err := cmdCtx.AdminClient().GetNamedEntity(ctx, &admin.NamedEntityGetRequest{
+		ResourceType: rsType,
+		Id: &admin.NamedEntityIdentifier{
+			Project: project,
+			Domain:  domain,
+			Name:    name,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	v, _ := json.MarshalIndent(namedEntity, "", "    ")
+	fmt.Println(string(v))
+
+	// TODO: kamal - ack/force
+
 	if cfg.DryRun {
 		logger.Infof(ctx, "skipping UpdateNamedEntity request (dryRun)")
-	} else {
-		// TODO: kamal - ack/force
-
-		_, err := cmdCtx.AdminClient().UpdateNamedEntity(ctx, &admin.NamedEntityUpdateRequest{
-			ResourceType: rsType,
-			Id: &admin.NamedEntityIdentifier{
-				Project: project,
-				Domain:  domain,
-				Name:    name,
-			},
-			Metadata: &admin.NamedEntityMetadata{
-				Description: cfg.Description,
-				State:       nameEntityState,
-			},
-		})
-		if err != nil {
-			return err
-		}
+		return nil
 	}
+
+	_, err = cmdCtx.AdminClient().UpdateNamedEntity(ctx, &admin.NamedEntityUpdateRequest{
+		ResourceType: rsType,
+		Id: &admin.NamedEntityIdentifier{
+			Project: project,
+			Domain:  domain,
+			Name:    name,
+		},
+		Metadata: &admin.NamedEntityMetadata{
+			Description: cfg.Description,
+			State:       state,
+		},
+	})
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

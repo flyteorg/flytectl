@@ -40,7 +40,6 @@ func getUpdateLPMetaFunc(namedEntityConfig *NamedEntityConfig) func(ctx context.
 			return fmt.Errorf(clierrors.ErrLPNotPassed)
 		}
 		name := args[0]
-		// TODO: kamal - ack/force
 		err := namedEntityConfig.UpdateNamedEntity(ctx, name, project, domain, core.ResourceType_LAUNCH_PLAN, cmdCtx)
 		if err != nil {
 			fmt.Printf(clierrors.ErrFailedLPUpdate, name, err)

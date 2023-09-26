@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/flyteorg/flytectl/clierrors"
@@ -54,8 +55,18 @@ func updateExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	if execution.UConfig.DryRun {
 		logger.Debugf(ctx, "skipping UpdateExecution request (DryRun)")
 	} else {
+		execution, err := cmdCtx.AdminFetcherExt().FetchExecution(ctx, executionName, project, domain)
+		if err != nil {
+			fmt.Printf(clierrors.ErrFailedExecutionUpdate, executionName, err)
+			return err
+		}
+
+		v, _ := json.MarshalIndent(execution, "", "    ")
+		fmt.Println(string(v))
+
 		// TODO: kamal - ack/force
-		_, err := cmdCtx.AdminClient().UpdateExecution(ctx, &admin.ExecutionUpdateRequest{
+
+		_, err = cmdCtx.AdminClient().UpdateExecution(ctx, &admin.ExecutionUpdateRequest{
 			Id: &core.WorkflowExecutionIdentifier{
 				Project: project,
 				Domain:  domain,

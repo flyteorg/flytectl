@@ -2,6 +2,7 @@ package update
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/flyteorg/flytectl/clierrors"
@@ -95,8 +96,24 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	if project.DefaultProjectConfig.DryRun {
 		logger.Infof(ctx, "skipping UpdateProject request (dryRun)")
 	} else {
+		proj, err := cmdCtx.AdminFetcherExt().GetProjectById(ctx, projectSpec.Id)
+		if err != nil {
+			fmt.Printf(clierrors.ErrFailedProjectUpdate, projectSpec.Id, err)
+			return err
+		}
+
+		// TODO: kamal - diff
+
 		// TODO: kamal - ack/force
-		_, err := cmdCtx.AdminClient().UpdateProject(ctx, projectSpec)
+
+		v, _ := json.MarshalIndent(proj, "", "    ")
+		fmt.Println(string(v))
+
+		if !project.DefaultProjectConfig.Force {
+			return fmt.Errorf(clierrors.ErrUpdateWithoutForceAttempted)
+		}
+
+		_, err = cmdCtx.AdminClient().UpdateProject(ctx, projectSpec)
 		if err != nil {
 			fmt.Printf(clierrors.ErrFailedProjectUpdate, projectSpec.Id, err)
 			return err

@@ -6,6 +6,7 @@ var (
 	ErrProjectNotPassed     = "project id wasn't passed\n" // #nosec
 	ErrProjectIDBothPassed  = "both project and id are passed\n"
 	ErrProjectNameNotPassed = "project name is a required flag"
+	ErrProjectDoesNotExist  = "project %s does not exist\n"
 	ErrFailedProjectUpdate  = "Project %v failed to update due to %v\n"
 
 	ErrLPNotPassed        = "launch plan name wasn't passed\n"
@@ -14,6 +15,7 @@ var (
 
 	ErrExecutionNotPassed    = "execution name wasn't passed\n"
 	ErrFailedExecutionUpdate = "execution %v failed to update due to %v\n"
+	ErrExecutionDoesNotExist = "execution %s does not exist\n"
 
 	ErrWorkflowNotPassed    = "workflow name wasn't passed\n"
 	ErrFailedWorkflowUpdate = "workflow %v failed to update to due to %v\n"
@@ -22,4 +24,6 @@ var (
 	ErrFailedTaskUpdate = "task %v failed to update to due to %v\n"
 
 	ErrSandboxExists = "sandbox already exists!\n"
+
+	ErrUpdateWithoutForceAttempted = "a --force flag is required in order to execute an update in a non-interactive session\n"
 )
