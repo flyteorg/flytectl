@@ -31,7 +31,7 @@ Incorrect usage when passing both archive and activate:
 
 ::
 
- flytectl update project -p flytesnacks --archiveProject --activate
+ flytectl update project -p flytesnacks --archive --activate
 
 Incorrect usage when passing unknown-project:
 
@@ -43,7 +43,7 @@ project ID is required flag
 
 ::
 
- flytectl update project unknown-project --archiveProject
+ flytectl update project unknown-project --archive
 
 Update projects.(project/projects can be used interchangeably in these commands)
 

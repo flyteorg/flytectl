@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/pkg/filters"
 
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
@@ -29,14 +28,14 @@ func (a *AdminFetcherExtClient) GetProjectById(ctx context.Context, projectId st
 
 	response, err := a.AdminServiceClient().ListProjects(ctx, &admin.ProjectListRequest{
 		Limit:   1,
-		Filters: fmt.Sprintf("eq(identifier,%s)", projectId), // TODO: kamal: escape
+		Filters: fmt.Sprintf("eq(identifier,%s)", filters.EscapeValue(projectId)),
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	if len(response.Projects) == 0 {
-		return nil, fmt.Errorf(clierrors.ErrProjectDoesNotExist, projectId) // TODO: kamal - use NotFoundError instead
+		return nil, NewNotFoundError("project %s", projectId)
 	}
 
 	return response.Projects[0], nil

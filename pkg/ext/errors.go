@@ -13,7 +13,8 @@ func (err *NotFoundError) Error() string {
 	return fmt.Sprintf("%s not found", err.Target)
 }
 
-func NewNotFoundError(target string) *NotFoundError {
+func NewNotFoundError(targetFormat string, formatArgs ...any) *NotFoundError {
+	target := fmt.Sprintf(targetFormat, formatArgs...)
 	return &NotFoundError{target}
 }
 
