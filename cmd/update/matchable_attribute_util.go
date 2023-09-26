@@ -11,6 +11,9 @@ import (
 func DecorateAndUpdateMatchableAttr(ctx context.Context, project, domain, workflowName string,
 	updater ext.AdminUpdaterExtInterface, mcDecorator sconfig.MatchableAttributeDecorator, dryRun bool) error {
 	matchingAttr := mcDecorator.Decorate()
+
+	// TODO: kamal - ack/force
+
 	if len(workflowName) > 0 {
 		// Update the workflow attribute using the admin.
 		if dryRun {

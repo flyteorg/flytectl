@@ -39,6 +39,8 @@ func (cfg NamedEntityConfig) UpdateNamedEntity(ctx context.Context, name string,
 	if cfg.DryRun {
 		logger.Infof(ctx, "skipping UpdateNamedEntity request (dryRun)")
 	} else {
+		// TODO: kamal - ack/force
+
 		_, err := cmdCtx.AdminClient().UpdateNamedEntity(ctx, &admin.NamedEntityUpdateRequest{
 			ResourceType: rsType,
 			Id: &admin.NamedEntityIdentifier{

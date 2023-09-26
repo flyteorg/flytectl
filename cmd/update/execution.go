@@ -54,6 +54,7 @@ func updateExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	if execution.UConfig.DryRun {
 		logger.Debugf(ctx, "skipping UpdateExecution request (DryRun)")
 	} else {
+		// TODO: kamal - ack/force
 		_, err := cmdCtx.AdminClient().UpdateExecution(ctx, &admin.ExecutionUpdateRequest{
 			Id: &core.WorkflowExecutionIdentifier{
 				Project: project,

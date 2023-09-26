@@ -57,6 +57,7 @@ func updateLPFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandCont
 	if launchplan.UConfig.DryRun {
 		logger.Debugf(ctx, "skipping CreateExecution request (DryRun)")
 	} else {
+		// TODO: kamal - ack/force
 		_, err := cmdCtx.AdminClient().UpdateLaunchPlan(ctx, &admin.LaunchPlanUpdateRequest{
 			Id: &core.Identifier{
 				Project: project,

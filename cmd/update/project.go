@@ -95,6 +95,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	if project.DefaultProjectConfig.DryRun {
 		logger.Infof(ctx, "skipping UpdateProject request (dryRun)")
 	} else {
+		// TODO: kamal - ack/force
 		_, err := cmdCtx.AdminClient().UpdateProject(ctx, projectSpec)
 		if err != nil {
 			fmt.Printf(clierrors.ErrFailedProjectUpdate, projectSpec.Id, err)
