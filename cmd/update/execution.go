@@ -54,8 +54,7 @@ func updateExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 
 	exec, err := cmdCtx.AdminFetcherExt().FetchExecution(ctx, executionName, project, domain)
 	if err != nil {
-		fmt.Printf(clierrors.ErrFailedExecutionUpdate, executionName, err)
-		return err
+		return fmt.Errorf("update execution: could not fetch execution %s: %w", executionName, err)
 	}
 	oldState := exec.GetClosure().GetStateChangeDetails().GetState()
 
@@ -80,7 +79,7 @@ func updateExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	}
 
 	if !execution.UConfig.Force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
-		return fmt.Errorf("update aborted")
+		return fmt.Errorf("update aborted by user")
 	}
 
 	_, err = cmdCtx.AdminClient().UpdateExecution(ctx, &admin.ExecutionUpdateRequest{

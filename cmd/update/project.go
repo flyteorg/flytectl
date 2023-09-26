@@ -95,8 +95,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 
 	oldProject, err := cmdCtx.AdminFetcherExt().GetProjectById(ctx, newProject.Id)
 	if err != nil {
-		fmt.Printf(clierrors.ErrFailedProjectUpdate, newProject.Id, err)
-		return err
+		return fmt.Errorf("update project %s: could not fetch project: %w", newProject.Id, err)
 	}
 
 	patch, err := diffAsYaml(oldProject, newProject)
@@ -117,13 +116,12 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	}
 
 	if !project.DefaultProjectConfig.Force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
-		return fmt.Errorf("update aborted")
+		return fmt.Errorf("update aborted by user")
 	}
 
 	_, err = cmdCtx.AdminClient().UpdateProject(ctx, newProject)
 	if err != nil {
-		fmt.Printf(clierrors.ErrFailedProjectUpdate, newProject.Id, err)
-		return err
+		return fmt.Errorf(clierrors.ErrFailedProjectUpdate, newProject.Id, err)
 	}
 
 	fmt.Printf("project %s updated\n", newProject.Id)

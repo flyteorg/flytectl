@@ -12,7 +12,6 @@ import (
 	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
-	"github.com/flyteorg/flytestdlib/logger"
 )
 
 const (
@@ -66,8 +65,7 @@ func updateLPFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandCont
 
 	launchPlan, err := cmdCtx.AdminClient().GetLaunchPlan(ctx, &admin.ObjectGetRequest{Id: id})
 	if err != nil {
-		fmt.Printf(clierrors.ErrFailedLPUpdate, name, err)
-		return err
+		return fmt.Errorf("update launch plan %s: could not fetch launch plan: %w", name, err)
 	}
 	oldState := launchPlan.Closure.GetState()
 
@@ -87,12 +85,12 @@ func updateLPFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandCont
 	fmt.Printf("The following changes are to be applied.\n%s\n", patch)
 
 	if launchplan.UConfig.DryRun {
-		logger.Debugf(ctx, "skipping LaunchPlanUpdate request (DryRun)")
+		fmt.Printf("skipping LaunchPlanUpdate request (DryRun)")
 		return nil
 	}
 
 	if !launchplan.UConfig.Force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
-		return fmt.Errorf("update aborted")
+		return fmt.Errorf("update aborted by user")
 	}
 
 	_, err = cmdCtx.AdminClient().UpdateLaunchPlan(ctx, &admin.LaunchPlanUpdateRequest{
@@ -100,11 +98,10 @@ func updateLPFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandCont
 		State: newState,
 	})
 	if err != nil {
-		fmt.Printf(clierrors.ErrFailedLPUpdate, name, err)
-		return err
+		return fmt.Errorf(clierrors.ErrFailedLPUpdate, name, err)
 	}
 
-	fmt.Printf("updated launchplan successfully on %s", name)
+	fmt.Printf("updated launch plan successfully on %s", name)
 
 	return nil
 }

@@ -53,7 +53,7 @@ func updateProjectMatchableAttributes(
 
 	response, err := cmdCtx.AdminFetcherExt().FetchProjectAttributes(ctx, project, resourceType)
 	if err != nil && !ext.IsNotFoundError(err) {
-		return err
+		return fmt.Errorf("update project %s matchable attributes: could not fetch attributes: %w", project, err)
 	}
 
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
@@ -77,11 +77,11 @@ func updateProjectMatchableAttributes(
 	}
 
 	if !force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
-		return fmt.Errorf("update aborted")
+		return fmt.Errorf("update aborted by user")
 	}
 
 	if err := cmdCtx.AdminUpdaterExt().UpdateProjectAttributes(ctx, project, newMatchingAttributes); err != nil {
-		return err
+		return fmt.Errorf("update project %s matchable attributes: update failed: %w", project, err)
 	}
 
 	fmt.Printf("Updated attributes from %s project\n", project)
@@ -106,7 +106,7 @@ func updateProjectDomainMatchableAttributes(
 
 	response, err := cmdCtx.AdminFetcherExt().FetchProjectDomainAttributes(ctx, project, domain, resourceType)
 	if err != nil && !ext.IsNotFoundError(err) {
-		return err
+		return fmt.Errorf("update project %s domain %s matchable attributes: could not fetch attributes: %w", project, domain, err)
 	}
 
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
@@ -130,11 +130,11 @@ func updateProjectDomainMatchableAttributes(
 	}
 
 	if !force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
-		return fmt.Errorf("update aborted")
+		return fmt.Errorf("update aborted by user")
 	}
 
 	if err := cmdCtx.AdminUpdaterExt().UpdateProjectDomainAttributes(ctx, project, domain, newMatchingAttributes); err != nil {
-		return err
+		return fmt.Errorf("update project %s domain %s matchable attributes: update failed: %w", project, domain, err)
 	}
 
 	fmt.Printf("Updated attributes from %s project and domain %s\n", project, domain)
@@ -162,7 +162,7 @@ func updateWorkflowMatchableAttributes(
 
 	response, err := cmdCtx.AdminFetcherExt().FetchWorkflowAttributes(ctx, project, domain, workflow, resourceType)
 	if err != nil && !ext.IsNotFoundError(err) {
-		return err
+		return fmt.Errorf("update project %s domain %s workflow %s matchable attributes: could not fetch attributes: %w", project, domain, workflow, err)
 	}
 
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
@@ -186,11 +186,11 @@ func updateWorkflowMatchableAttributes(
 	}
 
 	if !force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
-		return fmt.Errorf("update aborted")
+		return fmt.Errorf("update aborted by user")
 	}
 
 	if err := cmdCtx.AdminUpdaterExt().UpdateWorkflowAttributes(ctx, project, domain, workflow, newMatchingAttributes); err != nil {
-		return err
+		return fmt.Errorf("update project %s domain %s workflow %s matchable attributes: update failed: %w", project, domain, workflow, err)
 	}
 
 	fmt.Printf("Updated attributes from %s project and domain %s and workflow %s\n", project, domain, workflow)

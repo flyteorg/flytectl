@@ -65,7 +65,6 @@ func updateExecutionClusterLabelFunc(ctx context.Context, args []string, cmdCtx 
 	domain := executionClusterLabelFileConfig.Domain
 	workflowName := executionClusterLabelFileConfig.Workflow
 
-	// Updates the admin matchable attribute from executionClusterLabelFileConfig
 	if err := DecorateAndUpdateMatchableAttr(ctx, cmdCtx, project, domain, workflowName,
 		admin.MatchableResource_EXECUTION_CLUSTER_LABEL, executionClusterLabelFileConfig,
 		updateConfig.DryRun, updateConfig.Force); err != nil {

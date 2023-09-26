@@ -9,6 +9,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// diffAsYaml marshals both objects as YAML and returns differences
+// between marshalled values as a patch.
+//
+// Marshalling respects JSON field annotations.
 func diffAsYaml(object1, object2 any) (string, error) {
 	yaml1, err := marshalToYamlString(object1)
 	if err != nil {
@@ -31,6 +35,8 @@ func diffAsYaml(object1, object2 any) (string, error) {
 	return patch, nil
 }
 
+// marshalToYamlString marshals value to a YAML string, while respecting
+// JSON field annotations.
 func marshalToYamlString(value any) (string, error) {
 	jsonText, err := json.Marshal(value)
 	if err != nil {
@@ -50,6 +56,7 @@ func marshalToYamlString(value any) (string, error) {
 	return string(data), nil
 }
 
+// diffStrings returns differences between two strings as a patch.
 func diffStrings(s1, s2 string) string {
 	dmp := diffmatchpatch.New()
 

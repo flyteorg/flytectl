@@ -51,7 +51,7 @@ func (cfg NamedEntityConfig) UpdateNamedEntity(ctx context.Context, name string,
 		Id:           id,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("update metadata for %s: could not fetch metadata: %w", name, err)
 	}
 
 	oldMetadata := namedEntity.Metadata
@@ -78,7 +78,7 @@ func (cfg NamedEntityConfig) UpdateNamedEntity(ctx context.Context, name string,
 	}
 
 	if !cfg.Force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
-		return fmt.Errorf("update aborted")
+		return fmt.Errorf("update aborted by user")
 	}
 
 	_, err = cmdCtx.AdminClient().UpdateNamedEntity(ctx, &admin.NamedEntityUpdateRequest{
@@ -87,7 +87,7 @@ func (cfg NamedEntityConfig) UpdateNamedEntity(ctx context.Context, name string,
 		Metadata:     newMetadata,
 	})
 	if err != nil {
-		return err
+		return fmt.Errorf("update metadata for %s: update failed: %w", name, err)
 	}
 
 	return nil
