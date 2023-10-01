@@ -38,5 +38,9 @@ func (a *AdminFetcherExtClient) GetProjectById(ctx context.Context, projectId st
 		return nil, NewNotFoundError("project %s", projectId)
 	}
 
+	if len(response.Projects) > 1 {
+		panic(fmt.Sprintf("unexpected number of projects in ListProjects response: %d - 0 or 1 expected", len(response.Projects)))
+	}
+
 	return response.Projects[0], nil
 }
