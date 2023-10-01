@@ -59,7 +59,7 @@ func updateProjectMatchableAttributes(
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
 	newMatchingAttributes := attributeDecorator.Decorate()
 
-	patch, err := diffAsYaml(oldMatchingAttributes.Target, newMatchingAttributes.Target)
+	patch, err := diffAsYaml(oldMatchingAttributes.GetTarget(), newMatchingAttributes.GetTarget())
 	if err != nil {
 		panic(err)
 	}
@@ -112,7 +112,7 @@ func updateProjectDomainMatchableAttributes(
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
 	newMatchingAttributes := attributeDecorator.Decorate()
 
-	patch, err := diffAsYaml(oldMatchingAttributes.Target, newMatchingAttributes.Target)
+	patch, err := diffAsYaml(oldMatchingAttributes.GetTarget(), newMatchingAttributes.GetTarget())
 	if err != nil {
 		panic(err)
 	}
@@ -168,7 +168,7 @@ func updateWorkflowMatchableAttributes(
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
 	newMatchingAttributes := attributeDecorator.Decorate()
 
-	patch, err := diffAsYaml(oldMatchingAttributes.Target, newMatchingAttributes.Target)
+	patch, err := diffAsYaml(oldMatchingAttributes.GetTarget(), newMatchingAttributes.GetTarget())
 	if err != nil {
 		panic(err)
 	}

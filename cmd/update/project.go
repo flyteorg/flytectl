@@ -10,6 +10,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
 const (
@@ -84,25 +85,29 @@ Usage
 )
 
 func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
-	newProject, err := project.DefaultProjectConfig.GetProjectSpec(config.GetConfig())
+	edits, err := project.DefaultProjectConfig.GetProjectSpec(config.GetConfig())
 	if err != nil {
 		return err
 	}
 
-	if newProject.Id == "" {
+	if edits.Id == "" {
 		return fmt.Errorf(clierrors.ErrProjectNotPassed)
 	}
 
-	oldProject, err := cmdCtx.AdminFetcherExt().GetProjectById(ctx, newProject.Id)
+	currentProject, err := cmdCtx.AdminFetcherExt().GetProjectById(ctx, edits.Id)
 	if err != nil {
-		return fmt.Errorf("update project %s: could not fetch project: %w", newProject.Id, err)
+		return fmt.Errorf("update project %s: could not fetch project: %w", edits.Id, err)
 	}
 
-	patch, err := diffAsYaml(oldProject, newProject)
+	// We do not compare currentProject against edits directly, because edits does not
+	// have a complete set of project's fields - it will only contain fields that
+	// the update command allows updating. (For example, it won't have Domains field
+	// initialized.)
+	currentProjectWithEdits := copyProjectWithEdits(currentProject, edits)
+	patch, err := diffAsYaml(currentProject, currentProjectWithEdits)
 	if err != nil {
 		panic(err)
 	}
-
 	if patch == "" {
 		fmt.Printf("No changes detected. Skipping the update.\n")
 		return nil
@@ -119,11 +124,31 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 		return fmt.Errorf("update aborted by user")
 	}
 
-	_, err = cmdCtx.AdminClient().UpdateProject(ctx, newProject)
+	_, err = cmdCtx.AdminClient().UpdateProject(ctx, edits)
 	if err != nil {
-		return fmt.Errorf(clierrors.ErrFailedProjectUpdate, newProject.Id, err)
+		return fmt.Errorf(clierrors.ErrFailedProjectUpdate, edits.Id, err)
 	}
 
-	fmt.Printf("project %s updated\n", newProject.Id)
+	fmt.Printf("project %s updated\n", edits.Id)
 	return nil
+}
+
+// Makes a shallow copy of target and applies certain properties from edited to it.
+// The properties applied are only the ones supported by update command: state, name,
+// description, labels, etc.
+func copyProjectWithEdits(target *admin.Project, edited *admin.Project) *admin.Project {
+	copy := *target
+
+	copy.State = edited.State
+	if edited.Name != "" {
+		copy.Name = edited.Name
+	}
+	if edited.Description != "" {
+		copy.Description = edited.Description
+	}
+	if len(edited.GetLabels().GetValues()) != 0 {
+		copy.Labels = edited.Labels
+	}
+
+	return &copy
 }

@@ -10,9 +10,8 @@ import (
 )
 
 // diffAsYaml marshals both objects as YAML and returns differences
-// between marshalled values as a patch.
-//
-// Marshalling respects JSON field annotations.
+// between marshalled values as a patch. Marshalling respects JSON
+// field annotations.
 func diffAsYaml(object1, object2 any) (string, error) {
 	yaml1, err := marshalToYamlString(object1)
 	if err != nil {

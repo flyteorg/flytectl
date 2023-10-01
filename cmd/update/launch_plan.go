@@ -57,17 +57,18 @@ func updateLPFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandCont
 	}
 
 	id := &core.Identifier{
-		Project: project,
-		Domain:  domain,
-		Name:    name,
-		Version: version,
+		Project:      project,
+		Domain:       domain,
+		Name:         name,
+		Version:      version,
+		ResourceType: core.ResourceType_LAUNCH_PLAN,
 	}
 
 	launchPlan, err := cmdCtx.AdminClient().GetLaunchPlan(ctx, &admin.ObjectGetRequest{Id: id})
 	if err != nil {
 		return fmt.Errorf("update launch plan %s: could not fetch launch plan: %w", name, err)
 	}
-	oldState := launchPlan.Closure.GetState()
+	oldState := launchPlan.GetClosure().GetState()
 
 	type LaunchPlan struct {
 		State admin.LaunchPlanState `json:"state"`

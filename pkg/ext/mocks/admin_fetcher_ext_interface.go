@@ -750,6 +750,47 @@ func (_m *AdminFetcherExtInterface) FetchWorkflowVersion(ctx context.Context, na
 	return r0, r1
 }
 
+type AdminFetcherExtInterface_GetProjectById struct {
+	*mock.Call
+}
+
+func (_m AdminFetcherExtInterface_GetProjectById) Return(_a0 *admin.Project, _a1 error) *AdminFetcherExtInterface_GetProjectById {
+	return &AdminFetcherExtInterface_GetProjectById{Call: _m.Call.Return(_a0, _a1)}
+}
+
+func (_m *AdminFetcherExtInterface) OnGetProjectById(ctx context.Context, projectId string) *AdminFetcherExtInterface_GetProjectById {
+	c_call := _m.On("GetProjectById", ctx, projectId)
+	return &AdminFetcherExtInterface_GetProjectById{Call: c_call}
+}
+
+func (_m *AdminFetcherExtInterface) OnGetProjectByIdMatch(matchers ...interface{}) *AdminFetcherExtInterface_GetProjectById {
+	c_call := _m.On("GetProjectById", matchers...)
+	return &AdminFetcherExtInterface_GetProjectById{Call: c_call}
+}
+
+// GetProjectById provides a mock function with given fields: ctx, projectId
+func (_m *AdminFetcherExtInterface) GetProjectById(ctx context.Context, projectId string) (*admin.Project, error) {
+	ret := _m.Called(ctx, projectId)
+
+	var r0 *admin.Project
+	if rf, ok := ret.Get(0).(func(context.Context, string) *admin.Project); ok {
+		r0 = rf(ctx, projectId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*admin.Project)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, projectId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 type AdminFetcherExtInterface_ListExecution struct {
 	*mock.Call
 }

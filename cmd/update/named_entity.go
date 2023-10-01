@@ -27,17 +27,8 @@ type NamedEntityConfig struct {
 }
 
 func (cfg NamedEntityConfig) UpdateNamedEntity(ctx context.Context, name string, project string, domain string, rsType core.ResourceType, cmdCtx cmdCore.CommandContext) error {
-	archive := cfg.Archive
-	activate := cfg.Activate
-	if activate == archive && activate {
+	if cfg.Activate && cfg.Archive {
 		return fmt.Errorf(clierrors.ErrInvalidStateUpdate)
-	}
-
-	var state admin.NamedEntityState
-	if activate {
-		state = admin.NamedEntityState_NAMED_ENTITY_ACTIVE
-	} else if archive {
-		state = admin.NamedEntityState_NAMED_ENTITY_ARCHIVED
 	}
 
 	id := &admin.NamedEntityIdentifier{
@@ -54,17 +45,11 @@ func (cfg NamedEntityConfig) UpdateNamedEntity(ctx context.Context, name string,
 		return fmt.Errorf("update metadata for %s: could not fetch metadata: %w", name, err)
 	}
 
-	oldMetadata := namedEntity.Metadata
-	newMetadata := &admin.NamedEntityMetadata{
-		Description: cfg.Description,
-		State:       state,
-	}
-
+	oldMetadata, newMetadata := composeNamedMetadataEdits(cfg, namedEntity.Metadata)
 	patch, err := diffAsYaml(oldMetadata, newMetadata)
 	if err != nil {
 		panic(err)
 	}
-
 	if patch == "" {
 		fmt.Printf("No changes detected. Skipping the update.\n")
 		return nil
@@ -91,4 +76,27 @@ func (cfg NamedEntityConfig) UpdateNamedEntity(ctx context.Context, name string,
 	}
 
 	return nil
+}
+
+func composeNamedMetadataEdits(config NamedEntityConfig, current *admin.NamedEntityMetadata) (old *admin.NamedEntityMetadata, new *admin.NamedEntityMetadata) {
+	old = &admin.NamedEntityMetadata{}
+	new = &admin.NamedEntityMetadata{}
+
+	switch {
+	case config.Activate && config.Archive:
+		panic("cannot both activate and archive")
+	case config.Activate:
+		old.State = current.State
+		new.State = admin.NamedEntityState_NAMED_ENTITY_ACTIVE
+	case config.Archive:
+		old.State = current.State
+		new.State = admin.NamedEntityState_NAMED_ENTITY_ARCHIVED
+	}
+
+	if config.Description != "" {
+		old.Description = current.Description
+		new.Description = config.Description
+	}
+
+	return old, new
 }

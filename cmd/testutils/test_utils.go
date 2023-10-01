@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"regexp"
 	"strings"
@@ -14,10 +15,11 @@ import (
 
 	"github.com/flyteorg/flyteidl/clients/go/admin"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	extMocks "github.com/flyteorg/flytectl/pkg/ext/mocks"
-	"github.com/stretchr/testify/assert"
 )
 
 const projectValue = "dummyProject"
@@ -99,9 +101,25 @@ func SetupWithExt() (s TestStruct) {
 // TearDownAndVerify TODO: Change this to verify log lines from context
 func TearDownAndVerify(t *testing.T, reader io.Reader, expectedLog string) {
 	var buf bytes.Buffer
-	if _, err := io.Copy(&buf, reader); err == nil {
+	_, err := io.Copy(&buf, reader)
+	if err == nil {
 		assert.Equal(t, sanitizeString(expectedLog), sanitizeString(buf.String()))
 	}
+}
+
+// RandomName returns a string composed of random lowercase English letters of specified length.
+func RandomName(length int) string {
+	if length < 0 {
+		panic("length should be a non-negative number")
+	}
+
+	var b strings.Builder
+	for i := 0; i < length; i++ {
+		c := rune('a' + rand.Intn('z'-'a'))
+		b.WriteRune(c)
+	}
+
+	return b.String()
 }
 
 func sanitizeString(str string) string {
