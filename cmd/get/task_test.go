@@ -13,10 +13,11 @@ import (
 
 	"github.com/flyteorg/flytectl/pkg/filters"
 
+	"github.com/stretchr/testify/mock"
+
 	"github.com/flyteorg/flytectl/pkg/ext/mocks"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
-	"github.com/stretchr/testify/mock"
 
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -247,7 +248,7 @@ func TestGetTaskFunc(t *testing.T) {
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
 	s.FetcherExt.AssertCalled(t, "FetchAllVerOfTask", s.Ctx, "task1", "dummyProject", "dummyDomain", filters.Filters{})
-	tearDownAndVerify(t, s.Writer, `[
+	s.TearDownAndVerify(t, `[
 	{
 		"id": {
 			"name": "task1",
@@ -332,7 +333,7 @@ func TestGetTaskFuncWithTable(t *testing.T) {
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
 	s.FetcherExt.AssertCalled(t, "FetchAllVerOfTask", s.Ctx, "task1", "dummyProject", "dummyDomain", filters.Filters{})
-	tearDownAndVerify(t, s.Writer, `
+	s.TearDownAndVerify(t, `
 --------- ------- ------ --------------------------- --------- -------------- ------------------- ---------------------- 
 | VERSION | NAME  | TYPE | INPUTS                    | OUTPUTS | DISCOVERABLE | DISCOVERY VERSION | CREATED AT           | 
 --------- ------- ------ --------------------------- --------- -------------- ------------------- ---------------------- 
@@ -357,7 +358,7 @@ func TestGetTaskFuncLatest(t *testing.T) {
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
 	s.FetcherExt.AssertCalled(t, "FetchTaskLatestVersion", s.Ctx, "task1", "dummyProject", "dummyDomain", filters.Filters{})
-	tearDownAndVerify(t, s.Writer, `{
+	s.TearDownAndVerify(t, `{
 	"id": {
 		"name": "task1",
 		"version": "v2"
@@ -407,7 +408,7 @@ func TestGetTaskWithVersion(t *testing.T) {
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
 	s.FetcherExt.AssertCalled(t, "FetchTaskVersion", s.Ctx, "task1", "v2", "dummyProject", "dummyDomain")
-	tearDownAndVerify(t, s.Writer, `{
+	s.TearDownAndVerify(t, `{
 	"id": {
 		"name": "task1",
 		"version": "v2"
@@ -454,7 +455,7 @@ func TestGetTasks(t *testing.T) {
 
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
-	tearDownAndVerify(t, s.Writer, `[{"id": {"name": "task1","version": "v2"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:01Z"}},{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:00Z"}}]`)
+	s.TearDownAndVerify(t, `[{"id": {"name": "task1","version": "v2"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:01Z"}},{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:00Z"}}]`)
 }
 
 func TestGetTasksFilters(t *testing.T) {
@@ -469,7 +470,7 @@ func TestGetTasksFilters(t *testing.T) {
 	}).Return(taskListResponse.Tasks, nil)
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
 	assert.Nil(t, err)
-	tearDownAndVerify(t, s.Writer, `{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:00Z"}}`)
+	s.TearDownAndVerify(t, `{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:00Z"}}`)
 }
 
 func TestGetTaskWithExecFile(t *testing.T) {
@@ -485,7 +486,7 @@ func TestGetTaskWithExecFile(t *testing.T) {
 	os.Remove(taskConfig.DefaultConfig.ExecFile)
 	assert.Nil(t, err)
 	s.FetcherExt.AssertCalled(t, "FetchTaskVersion", s.Ctx, "task1", "v2", "dummyProject", "dummyDomain")
-	tearDownAndVerify(t, s.Writer, `{
+	s.TearDownAndVerify(t, `{
 	"id": {
 		"name": "task1",
 		"version": "v2"
