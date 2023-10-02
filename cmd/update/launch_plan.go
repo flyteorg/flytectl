@@ -73,7 +73,7 @@ func updateLPFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandCont
 	type LaunchPlan struct {
 		State admin.LaunchPlanState `json:"state"`
 	}
-	patch, err := diffAsYaml(LaunchPlan{oldState}, LaunchPlan{newState})
+	patch, err := DiffAsYaml("before", "after", LaunchPlan{oldState}, LaunchPlan{newState})
 	if err != nil {
 		panic(err)
 	}

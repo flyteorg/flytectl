@@ -61,7 +61,7 @@ func updateExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comm
 	type Execution struct {
 		State admin.ExecutionState `json:"state"`
 	}
-	patch, err := diffAsYaml(Execution{oldState}, Execution{newState})
+	patch, err := DiffAsYaml("before", "after", Execution{oldState}, Execution{newState})
 	if err != nil {
 		panic(err)
 	}

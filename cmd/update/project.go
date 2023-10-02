@@ -104,7 +104,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 	// the update command allows updating. (For example, it won't have Domains field
 	// initialized.)
 	currentProjectWithEdits := copyProjectWithEdits(currentProject, edits)
-	patch, err := diffAsYaml(currentProject, currentProjectWithEdits)
+	patch, err := DiffAsYaml("before", "after", currentProject, currentProjectWithEdits)
 	if err != nil {
 		panic(err)
 	}

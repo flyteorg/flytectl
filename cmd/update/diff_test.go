@@ -24,10 +24,9 @@ func TestDiffStringsReturnsAUnifiedDiff(t *testing.T) {
 	s1 := "abc\ndef\nghi"
 	s2 := "aaa\ndef\nghi"
 
-	patch := diffStrings(s1, s2)
+	patch := diffStrings("before", "after", s1, s2)
 
-	// TODO: Not a unified diff, really - an approximation using diff-match-patch. Need an actual unified diff implementation.
-	assert.Equal(t, "@@ -1,8 +1,8 @@\n-abc\n\n+aaa\n\n def\n\n", patch)
+	assert.Equal(t, "--- before\n+++ after\n@@ -1,3 +1,3 @@\n-abc\n+aaa\n def\n ghi\n", patch)
 }
 
 func TestDiffAsYamlReturnsAUnifiedDiffOfObjectsMarshalledAsYAML(t *testing.T) {
@@ -39,9 +38,8 @@ func TestDiffAsYamlReturnsAUnifiedDiffOfObjectsMarshalledAsYAML(t *testing.T) {
 	object1 := T{F1: 5, F2: "apple"}
 	object2 := T{F1: 10, F2: "apple", F3: "banana"}
 
-	patch, err := diffAsYaml(object1, object2)
+	patch, err := DiffAsYaml("before", "after", object1, object2)
 
 	assert.Nil(t, err)
-	// TODO: Not a unified diff, really - an approximation using diff-match-patch. Need an actual unified diff implementation.
-	assert.Equal(t, "@@ -1,10 +1,11 @@\n-f1: 5\n\n+f1: 10\n\n f2: \n@@ -10,8 +10,19 @@\n : apple\n\n+f3: banana\n\n", patch)
+	assert.Equal(t, "--- before\n+++ after\n@@ -1,3 +1,4 @@\n-f1: 5\n+f1: 10\n f2: apple\n+f3: banana\n \n", patch)
 }

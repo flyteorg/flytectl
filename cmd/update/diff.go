@@ -3,16 +3,16 @@ package update
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
-	"github.com/sergi/go-diff/diffmatchpatch"
+	"github.com/hexops/gotextdiff"
+	"github.com/hexops/gotextdiff/myers"
 	"gopkg.in/yaml.v3"
 )
 
-// diffAsYaml marshals both objects as YAML and returns differences
-// between marshalled values as a patch. Marshalling respects JSON
-// field annotations.
-func diffAsYaml(object1, object2 any) (string, error) {
+// DiffAsYaml marshals both objects as YAML and returns differences
+// between marshalled values in unified format. Marshalling respects
+// JSON field annotations.
+func DiffAsYaml(path1, path2 string, object1, object2 any) (string, error) {
 	yaml1, err := marshalToYamlString(object1)
 	if err != nil {
 		return "", fmt.Errorf("diff as yaml: %w", err)
@@ -23,14 +23,7 @@ func diffAsYaml(object1, object2 any) (string, error) {
 		return "", fmt.Errorf("diff as yaml: %w", err)
 	}
 
-	// TODO: kamal - remove
-	fmt.Println("---")
-	fmt.Println(yaml1)
-	fmt.Println("---")
-	fmt.Println(yaml2)
-	fmt.Println("---")
-
-	patch := diffStrings(yaml1, yaml2)
+	patch := diffStrings(path1, path2, yaml1, yaml2)
 	return patch, nil
 }
 
@@ -55,40 +48,16 @@ func marshalToYamlString(value any) (string, error) {
 	return string(data), nil
 }
 
-// diffStrings returns differences between two strings as a patch.
-func diffStrings(s1, s2 string) string {
-	dmp := diffmatchpatch.New()
+// diffStrings returns differences between two strings in unified format.
+// An empty string will be returned if both strings are equal.
+func diffStrings(path1, path2, s1, s2 string) string {
+	// We add new lines at the end of each string to avoid
+	// "\ No newline at end of file" appended to each diff.
+	s1 += "\n"
+	s2 += "\n"
 
-	lines1, lines2, lineIndex := dmp.DiffLinesToRunes(s1, s2)
+	edits := myers.ComputeEdits("", s1, s2)
+	diff := fmt.Sprint(gotextdiff.ToUnified(path1, path2, s1, edits))
 
-	// checklines: Speedup flag. If false, then don't run a line-level
-	// diff first to identify the changed areas. If true, then run a
-	// faster slightly less optimal diff.
-	// (Remove this comment once the documentation has this integrated:
-	//  https://github.com/sergi/go-diff/issues/95)
-	diffs := dmp.DiffMainRunes(lines1, lines2, false /* checklines */)
-	equal := len(diffs) == 0 ||
-		len(diffs) == 1 && diffs[0].Type == diffmatchpatch.DiffEqual
-	if equal {
-		return ""
-	}
-
-	diffs = dmp.DiffCharsToLines(diffs, lineIndex)
-
-	patches := dmp.PatchMake(s1, diffs)
-	patchesText := dmp.PatchToText(patches)
-
-	// There is weird behavior (seemingly a bug) which nobody knows
-	// the reason for: original DMP implementation URL-escapes characters,
-	// and then unescapes only some of them. LF is one of the characters
-	// that gets left escaped as '%0A', yet unescaped LF also ends up in
-	// the output string. Thus, we strip the '%0A'.
-	//
-	// https://github.com/sergi/go-diff/issues/87
-	// https://github.com/google/diff-match-patch/issues/4
-	patchesText = strings.ReplaceAll(patchesText, "%0A", "\n")
-
-	// TODO: kamal - there are other unescaped characters
-
-	return patchesText
+	return diff
 }
