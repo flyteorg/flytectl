@@ -465,10 +465,18 @@ func TestGetTasksFilters(t *testing.T) {
 		FieldSelector: "task.name=task1,task.version=v1",
 	}
 	s.MockAdminClient.OnListTasksMatch(s.Ctx, resourceListFilterRequestTask).Return(taskListFilterResponse, nil)
+	filteredTasks := []*admin.Task{}
+	for _, task := range taskListResponse.Tasks {
+		if task.Id.Name == "task1" && task.Id.Version == "v1" {
+			filteredTasks = append(filteredTasks, task)
+		}
+	}
 	s.FetcherExt.OnFetchAllVerOfTask(s.Ctx, "task1", "dummyProject", "dummyDomain", filters.Filters{
 		FieldSelector: "task.name=task1,task.version=v1",
-	}).Return(taskListResponse.Tasks, nil)
+	}).Return(filteredTasks, nil)
+
 	err := getTaskFunc(s.Ctx, argsTask, s.CmdCtx)
+
 	assert.Nil(t, err)
 	s.TearDownAndVerify(t, `{"id": {"name": "task1","version": "v1"},"closure": {"compiledTask": {"template": {"interface": {"inputs": {"variables": {"sorted_list1": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"},"sorted_list2": {"type": {"collectionType": {"simple": "INTEGER"}},"description": "var description"}}}}}},"createdAt": "1970-01-01T00:00:00Z"}}`)
 }
