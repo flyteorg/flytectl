@@ -17,7 +17,9 @@ func TestMarshalToYamlStringRespectsJsonFieldAnnotations(t *testing.T) {
 	result, err := marshalToYamlString(value)
 
 	assert.Nil(t, err)
-	assert.Equal(t, "fieldIncluded1: 0\nfieldIncluded2: \"\"\n", result)
+	assert.Equal(t, `fieldIncluded1: 0
+fieldIncluded2: ""
+`, result)
 }
 
 func TestDiffStringsReturnsAUnifiedDiff(t *testing.T) {
@@ -26,7 +28,14 @@ func TestDiffStringsReturnsAUnifiedDiff(t *testing.T) {
 
 	patch := diffStrings("before", "after", s1, s2)
 
-	assert.Equal(t, "--- before\n+++ after\n@@ -1,3 +1,3 @@\n-abc\n+aaa\n def\n ghi\n", patch)
+	assert.Equal(t, `--- before
++++ after
+@@ -1,3 +1,3 @@
+-abc
++aaa
+ def
+ ghi
+`, patch)
 }
 
 func TestDiffAsYamlReturnsAUnifiedDiffOfObjectsMarshalledAsYAML(t *testing.T) {
@@ -41,5 +50,13 @@ func TestDiffAsYamlReturnsAUnifiedDiffOfObjectsMarshalledAsYAML(t *testing.T) {
 	patch, err := DiffAsYaml("before", "after", object1, object2)
 
 	assert.Nil(t, err)
-	assert.Equal(t, "--- before\n+++ after\n@@ -1,3 +1,4 @@\n-f1: 5\n+f1: 10\n f2: apple\n+f3: banana\n \n", patch)
+	assert.Equal(t, `--- before
++++ after
+@@ -1,3 +1,4 @@
+-f1: 5
++f1: 10
+ f2: apple
++f3: banana
+ 
+`, patch)
 }

@@ -11,15 +11,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
-
-	"github.com/flyteorg/flyteidl/clients/go/admin"
-
 	"github.com/stretchr/testify/assert"
 
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	extMocks "github.com/flyteorg/flytectl/pkg/ext/mocks"
+	"github.com/flyteorg/flyteidl/clients/go/admin"
+	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
 )
 
 const projectValue = "dummyProject"
@@ -101,8 +99,7 @@ func SetupWithExt() (s TestStruct) {
 // TearDownAndVerify TODO: Change this to verify log lines from context
 func TearDownAndVerify(t *testing.T, reader io.Reader, expectedLog string) {
 	var buf bytes.Buffer
-	_, err := io.Copy(&buf, reader)
-	if err == nil {
+	if _, err := io.Copy(&buf, reader); err == nil {
 		assert.Equal(t, sanitizeString(expectedLog), sanitizeString(buf.String()))
 	}
 }

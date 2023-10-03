@@ -9,6 +9,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	diffPathBefore = "before"
+	diffPathAfter  = "after"
+)
+
 // DiffAsYaml marshals both objects as YAML and returns differences
 // between marshalled values in unified format. Marshalling respects
 // JSON field annotations.

@@ -59,25 +59,8 @@ func updateProjectMatchableAttributes(
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
 	newMatchingAttributes := attributeDecorator.Decorate()
 
-	patch, err := DiffAsYaml("before", "after", oldMatchingAttributes.GetTarget(), newMatchingAttributes.GetTarget())
-	if err != nil {
-		panic(err)
-	}
-
-	if patch == "" {
-		fmt.Printf("No changes detected. Skipping the update.\n")
-		return nil
-	}
-
-	fmt.Printf("The following changes are to be applied.\n%s\n", patch)
-
-	if dryRun {
-		fmt.Printf("Skipping UpdateProjectAttributes request (dryRun)\n")
-		return nil
-	}
-
-	if !force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
-		return fmt.Errorf("update aborted by user")
+	if confirmed, err := confirmMatchableAttributeUpdate(oldMatchingAttributes, newMatchingAttributes, dryRun, force); err != nil || !confirmed {
+		return err
 	}
 
 	if err := cmdCtx.AdminUpdaterExt().UpdateProjectAttributes(ctx, project, newMatchingAttributes); err != nil {
@@ -112,25 +95,8 @@ func updateProjectDomainMatchableAttributes(
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
 	newMatchingAttributes := attributeDecorator.Decorate()
 
-	patch, err := DiffAsYaml("before", "after", oldMatchingAttributes.GetTarget(), newMatchingAttributes.GetTarget())
-	if err != nil {
-		panic(err)
-	}
-
-	if patch == "" {
-		fmt.Printf("No changes detected. Skipping the update.\n")
-		return nil
-	}
-
-	fmt.Printf("The following changes are to be applied.\n%s\n", patch)
-
-	if dryRun {
-		fmt.Printf("Skipping UpdateProjectDomainAttributes request (dryRun)\n")
-		return nil
-	}
-
-	if !force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
-		return fmt.Errorf("update aborted by user")
+	if confirmed, err := confirmMatchableAttributeUpdate(oldMatchingAttributes, newMatchingAttributes, dryRun, force); err != nil || !confirmed {
+		return err
 	}
 
 	if err := cmdCtx.AdminUpdaterExt().UpdateProjectDomainAttributes(ctx, project, domain, newMatchingAttributes); err != nil {
@@ -168,25 +134,8 @@ func updateWorkflowMatchableAttributes(
 	oldMatchingAttributes := response.GetAttributes().GetMatchingAttributes()
 	newMatchingAttributes := attributeDecorator.Decorate()
 
-	patch, err := DiffAsYaml("before", "after", oldMatchingAttributes.GetTarget(), newMatchingAttributes.GetTarget())
-	if err != nil {
-		panic(err)
-	}
-
-	if patch == "" {
-		fmt.Printf("No changes detected. Skipping the update.\n")
-		return nil
-	}
-
-	fmt.Printf("The following changes are to be applied.\n%s\n", patch)
-
-	if dryRun {
-		fmt.Printf("Skipping UpdateWorkflowAttributes request (dryRun)\n")
-		return nil
-	}
-
-	if !force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
-		return fmt.Errorf("update aborted by user")
+	if confirmed, err := confirmMatchableAttributeUpdate(oldMatchingAttributes, newMatchingAttributes, dryRun, force); err != nil || !confirmed {
+		return err
 	}
 
 	if err := cmdCtx.AdminUpdaterExt().UpdateWorkflowAttributes(ctx, project, domain, workflow, newMatchingAttributes); err != nil {
@@ -195,4 +144,29 @@ func updateWorkflowMatchableAttributes(
 
 	fmt.Printf("Updated attributes from %s project and domain %s and workflow %s\n", project, domain, workflow)
 	return nil
+}
+
+func confirmMatchableAttributeUpdate(old, new *admin.MatchingAttributes, dryRun, force bool) (bool, error) {
+	patch, err := DiffAsYaml(diffPathBefore, diffPathAfter, old.GetTarget(), new.GetTarget())
+	if err != nil {
+		panic(err)
+	}
+
+	if patch == "" {
+		fmt.Printf("No changes detected. Skipping the update.\n")
+		return false, nil
+	}
+
+	fmt.Printf("The following changes are to be applied.\n%s\n", patch)
+
+	if dryRun {
+		fmt.Printf("Skipping update request (dryRun)\n")
+		return false, nil
+	}
+
+	if !force && !cmdUtil.AskForConfirmation("Continue?", os.Stdin) {
+		return false, fmt.Errorf("update aborted by user")
+	}
+
+	return true, nil
 }

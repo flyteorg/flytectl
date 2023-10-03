@@ -46,7 +46,7 @@ func (cfg NamedEntityConfig) UpdateNamedEntity(ctx context.Context, name string,
 	}
 
 	oldMetadata, newMetadata := composeNamedMetadataEdits(cfg, namedEntity.Metadata)
-	patch, err := DiffAsYaml("before", "after", oldMetadata, newMetadata)
+	patch, err := DiffAsYaml(diffPathBefore, diffPathAfter, oldMetadata, newMetadata)
 	if err != nil {
 		panic(err)
 	}
