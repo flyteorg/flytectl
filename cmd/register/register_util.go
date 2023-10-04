@@ -17,6 +17,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+    "runtime"
 
 	errors2 "github.com/flyteorg/flytestdlib/errors"
 
@@ -515,8 +516,18 @@ func GetSerializeOutputFiles(ctx context.Context, args []string, archive bool) (
 		sort.Strings(finalList)
 		return finalList, "", nil
 	}
+    
+    os := runtime.GOOS
+    var tempDir string
+    var err error
+    if os == "windows" {
+        fmt.Println("Windows Operating System Detected")
+        tempDir, err = ioutil.TempDir("\\tmp", "register")
+    } else {
+        tempDir, err = ioutil.TempDir("/tmp", "register")
+    }
 
-	tempDir, err := ioutil.TempDir("/tmp", "register")
+	/*tempDir, err := ioutil.TempDir("/tmp", "register")*/
 
 	if err != nil {
 		return nil, tempDir, err

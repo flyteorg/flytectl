@@ -4,7 +4,8 @@ include boilerplate/flyte/precommit/Makefile
 
 GIT_VERSION := $(shell git describe --always --tags)
 GIT_HASH := $(shell git rev-parse --short HEAD)
-TIMESTAMP := $(shell date '+%Y-%m-%d')
+TIMESTAMP := $(shell date '+%Y-%m-%d') 
+#TIMESTAMP := $(shell date /t) #Use this when compiling on windows systems
 PACKAGE ?=github.com/flyteorg/flytestdlib
 
 LD_FLAGS="-s -w -X $(PACKAGE)/version.Version=$(GIT_VERSION) -X $(PACKAGE)/version.Build=$(GIT_HASH) -X $(PACKAGE)/version.BuildTime=$(TIMESTAMP)"
