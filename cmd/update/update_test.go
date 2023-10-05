@@ -5,16 +5,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/flyteorg/flytectl/cmd/testutils"
 )
 
 const (
 	testDataNonExistentFile = "testdata/non-existent-file"
 	testDataInvalidAttrFile = "testdata/invalid_attribute.yaml"
 )
-
-var tearDownAndVerify = testutils.TearDownAndVerify
 
 func TestUpdateCommand(t *testing.T) {
 	updateCommand := CreateUpdateCommand()

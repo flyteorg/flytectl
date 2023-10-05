@@ -64,7 +64,7 @@ func TestExecutionClusterLabelUpdateHappyPath(t *testing.T) {
 			/* assert */ func(s *testutils.TestStruct, err error) {
 				assert.Nil(t, err)
 				s.UpdaterExt.AssertCalled(t, "UpdateWorkflowAttributes", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything)
-				tearDownAndVerify(t, s.Writer, `Updated attributes from flytesnacks project and domain development`)
+				s.TearDownAndVerifyContains(t, `Updated attributes from flytesnacks project and domain development`)
 			})
 	})
 
@@ -77,7 +77,7 @@ func TestExecutionClusterLabelUpdateHappyPath(t *testing.T) {
 			/* assert */ func(s *testutils.TestStruct, err error) {
 				assert.Nil(t, err)
 				s.UpdaterExt.AssertCalled(t, "UpdateProjectDomainAttributes", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
-				tearDownAndVerify(t, s.Writer, `Updated attributes from flytesnacks project and domain development`)
+				s.TearDownAndVerifyContains(t, `Updated attributes from flytesnacks project and domain development`)
 			})
 	})
 
@@ -90,7 +90,7 @@ func TestExecutionClusterLabelUpdateHappyPath(t *testing.T) {
 			/* assert */ func(s *testutils.TestStruct, err error) {
 				assert.Nil(t, err)
 				s.UpdaterExt.AssertCalled(t, "UpdateProjectAttributes", mock.Anything, mock.Anything, mock.Anything)
-				tearDownAndVerify(t, s.Writer, `Updated attributes from flytesnacks project`)
+				s.TearDownAndVerifyContains(t, `Updated attributes from flytesnacks project`)
 			})
 	})
 }
@@ -269,7 +269,7 @@ func TestExecutionClusterLabelUpdateSucceedsWhenAttributesDoNotExist(t *testing.
 			/* assert */ func(s *testutils.TestStruct, err error) {
 				assert.Nil(t, err)
 				s.UpdaterExt.AssertCalled(t, "UpdateWorkflowAttributes", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything)
-				tearDownAndVerify(t, s.Writer, `Updated attributes from flytesnacks project and domain development`)
+				s.TearDownAndVerifyContains(t, `Updated attributes from flytesnacks project and domain development`)
 			})
 	})
 
@@ -290,7 +290,7 @@ func TestExecutionClusterLabelUpdateSucceedsWhenAttributesDoNotExist(t *testing.
 			/* assert */ func(s *testutils.TestStruct, err error) {
 				assert.Nil(t, err)
 				s.UpdaterExt.AssertCalled(t, "UpdateProjectDomainAttributes", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
-				tearDownAndVerify(t, s.Writer, `Updated attributes from flytesnacks project and domain development`)
+				s.TearDownAndVerifyContains(t, `Updated attributes from flytesnacks project and domain development`)
 			})
 	})
 
@@ -311,7 +311,7 @@ func TestExecutionClusterLabelUpdateSucceedsWhenAttributesDoNotExist(t *testing.
 			/* assert */ func(s *testutils.TestStruct, err error) {
 				assert.Nil(t, err)
 				s.UpdaterExt.AssertCalled(t, "UpdateProjectAttributes", mock.Anything, mock.Anything, mock.Anything)
-				tearDownAndVerify(t, s.Writer, `Updated attributes from flytesnacks project`)
+				s.TearDownAndVerifyContains(t, `Updated attributes from flytesnacks project`)
 			})
 	})
 }

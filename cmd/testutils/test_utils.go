@@ -3,6 +3,7 @@ package testutils
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -97,11 +98,30 @@ func SetupWithExt() (s TestStruct) {
 }
 
 // TearDownAndVerify TODO: Change this to verify log lines from context
-func TearDownAndVerify(t *testing.T, reader io.Reader, expectedLog string) {
-	var buf bytes.Buffer
-	if _, err := io.Copy(&buf, reader); err == nil {
-		assert.Equal(t, sanitizeString(expectedLog), sanitizeString(buf.String()))
+func (s *TestStruct) TearDownAndVerify(t *testing.T, expectedLog string) {
+	if err := s.Writer.Close(); err != nil {
+		panic(fmt.Errorf("could not close test context writer: %w", err))
 	}
+
+	var buf bytes.Buffer
+	if _, err := io.Copy(&buf, s.Reader); err != nil {
+		panic(fmt.Errorf("could not read from test context reader: %w", err))
+	}
+
+	assert.Equal(t, sanitizeString(expectedLog), sanitizeString(buf.String()))
+}
+
+func (s *TestStruct) TearDownAndVerifyContains(t *testing.T, expectedLog string) {
+	if err := s.Writer.Close(); err != nil {
+		panic(fmt.Errorf("could not close test context writer: %w", err))
+	}
+
+	var buf bytes.Buffer
+	if _, err := io.Copy(&buf, s.Reader); err != nil {
+		panic(fmt.Errorf("could not read from test context reader: %w", err))
+	}
+
+	assert.Contains(t, sanitizeString(buf.String()), sanitizeString(expectedLog))
 }
 
 // RandomName returns a string composed of random lowercase English letters of specified length.
@@ -120,7 +140,17 @@ func RandomName(length int) string {
 }
 
 func sanitizeString(str string) string {
-	// Not the most comprehensive ANSI pattern, but this should capture common color operations such as \x1b[107;0m and \x1b[0m. Expand if needed (insert regex 2 problems joke here).
+	// Not the most comprehensive ANSI pattern, but this should capture common color operations
+	// such as \x1b[107;0m and \x1b[0m. Expand if needed (insert regex 2 problems joke here).
 	ansiRegex := regexp.MustCompile("\u001B\\[[\\d+\\;]*\\d+m")
-	return ansiRegex.ReplaceAllString(strings.Trim(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(str, "\n", ""), "\t", ""), "", ""), " \t"), "")
+	replacer := strings.NewReplacer(
+		"\n", "",
+		"\t", "",
+	)
+
+	str = replacer.Replace(str)
+	str = ansiRegex.ReplaceAllString(str, "")
+	str = strings.Trim(str, " ")
+
+	return str
 }
