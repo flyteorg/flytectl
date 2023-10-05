@@ -13,8 +13,14 @@ import (
 	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
+const (
+	validWorkflowExecutionQueueMatchableAttributesFilePath     = "testdata/valid_workflow_execution_queue_attribute.yaml"
+	validProjectDomainExecutionQueueMatchableAttributeFilePath = "testdata/valid_project_domain_execution_queue_attribute.yaml"
+	validProjectExecutionQueueMatchableAttributeFilePath       = "testdata/valid_project_execution_queue_attribute.yaml"
+)
+
 func TestExecutionQueueAttributeUpdateRequiresAttributeFile(t *testing.T) {
-	testWorkflowExecutionQueueAttributeUpdate(t,
+	testWorkflowExecutionQueueAttributeUpdate(
 		/* setup */ nil,
 		/* assert */ func(s *testutils.TestStruct, err error) {
 			assert.ErrorContains(t, err, "attrFile is mandatory")
@@ -23,7 +29,7 @@ func TestExecutionQueueAttributeUpdateRequiresAttributeFile(t *testing.T) {
 }
 
 func TestExecutionQueueAttributeUpdateFailsWhenAttributeFileDoesNotExist(t *testing.T) {
-	testWorkflowExecutionQueueAttributeUpdate(t,
+	testWorkflowExecutionQueueAttributeUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.WorkflowAttributes) {
 			config.AttrFile = testDataNonExistentFile
 			config.Force = true
@@ -36,7 +42,7 @@ func TestExecutionQueueAttributeUpdateFailsWhenAttributeFileDoesNotExist(t *test
 }
 
 func TestExecutionQueueAttributeUpdateFailsWhenAttributeFileIsMalformed(t *testing.T) {
-	testWorkflowExecutionQueueAttributeUpdate(t,
+	testWorkflowExecutionQueueAttributeUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.WorkflowAttributes) {
 			config.AttrFile = testDataInvalidAttrFile
 			config.Force = true
@@ -50,9 +56,9 @@ func TestExecutionQueueAttributeUpdateFailsWhenAttributeFileIsMalformed(t *testi
 
 func TestExecutionQueueAttributeUpdateHappyPath(t *testing.T) {
 	t.Run("workflow", func(t *testing.T) {
-		testWorkflowExecutionQueueAttributeUpdate(t,
+		testWorkflowExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.WorkflowAttributes) {
-				config.AttrFile = "testdata/valid_workflow_execution_queue_attribute.yaml"
+				config.AttrFile = validWorkflowExecutionQueueMatchableAttributesFilePath
 				config.Force = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -63,9 +69,9 @@ func TestExecutionQueueAttributeUpdateHappyPath(t *testing.T) {
 	})
 
 	t.Run("domain", func(t *testing.T) {
-		testProjectDomainExecutionQueueAttributeUpdate(t,
+		testProjectDomainExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectDomainAttributes) {
-				config.AttrFile = "testdata/valid_project_domain_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectDomainExecutionQueueMatchableAttributeFilePath
 				config.Force = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -76,9 +82,9 @@ func TestExecutionQueueAttributeUpdateHappyPath(t *testing.T) {
 	})
 
 	t.Run("project", func(t *testing.T) {
-		testProjectExecutionQueueAttributeUpdate(t,
+		testProjectExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectAttributes) {
-				config.AttrFile = "testdata/valid_project_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectExecutionQueueMatchableAttributeFilePath
 				config.Force = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -91,9 +97,9 @@ func TestExecutionQueueAttributeUpdateHappyPath(t *testing.T) {
 
 func TestExecutionQueueAttributeUpdateFailsWithoutForceFlag(t *testing.T) {
 	t.Run("workflow", func(t *testing.T) {
-		testWorkflowExecutionQueueAttributeUpdate(t,
+		testWorkflowExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.WorkflowAttributes) {
-				config.AttrFile = "testdata/valid_workflow_execution_queue_attribute.yaml"
+				config.AttrFile = validWorkflowExecutionQueueMatchableAttributesFilePath
 				config.Force = false
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -103,9 +109,9 @@ func TestExecutionQueueAttributeUpdateFailsWithoutForceFlag(t *testing.T) {
 	})
 
 	t.Run("domain", func(t *testing.T) {
-		testProjectDomainExecutionQueueAttributeUpdate(t,
+		testProjectDomainExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectDomainAttributes) {
-				config.AttrFile = "testdata/valid_project_domain_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectDomainExecutionQueueMatchableAttributeFilePath
 				config.Force = false
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -115,9 +121,9 @@ func TestExecutionQueueAttributeUpdateFailsWithoutForceFlag(t *testing.T) {
 	})
 
 	t.Run("project", func(t *testing.T) {
-		testProjectExecutionQueueAttributeUpdate(t,
+		testProjectExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectAttributes) {
-				config.AttrFile = "testdata/valid_project_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectExecutionQueueMatchableAttributeFilePath
 				config.Force = false
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -129,9 +135,9 @@ func TestExecutionQueueAttributeUpdateFailsWithoutForceFlag(t *testing.T) {
 
 func TestExecutionQueueAttributeUpdateDoesNothingWithDryRunFlag(t *testing.T) {
 	t.Run("workflow", func(t *testing.T) {
-		testWorkflowExecutionQueueAttributeUpdate(t,
+		testWorkflowExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.WorkflowAttributes) {
-				config.AttrFile = "testdata/valid_workflow_execution_queue_attribute.yaml"
+				config.AttrFile = validWorkflowExecutionQueueMatchableAttributesFilePath
 				config.DryRun = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -141,9 +147,9 @@ func TestExecutionQueueAttributeUpdateDoesNothingWithDryRunFlag(t *testing.T) {
 	})
 
 	t.Run("domain", func(t *testing.T) {
-		testProjectDomainExecutionQueueAttributeUpdate(t,
+		testProjectDomainExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectDomainAttributes) {
-				config.AttrFile = "testdata/valid_project_domain_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectDomainExecutionQueueMatchableAttributeFilePath
 				config.DryRun = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -153,9 +159,9 @@ func TestExecutionQueueAttributeUpdateDoesNothingWithDryRunFlag(t *testing.T) {
 	})
 
 	t.Run("project", func(t *testing.T) {
-		testProjectExecutionQueueAttributeUpdate(t,
+		testProjectExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectAttributes) {
-				config.AttrFile = "testdata/valid_project_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectExecutionQueueMatchableAttributeFilePath
 				config.DryRun = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -167,9 +173,9 @@ func TestExecutionQueueAttributeUpdateDoesNothingWithDryRunFlag(t *testing.T) {
 
 func TestExecutionQueueAttributeUpdateIgnoresForceFlagWithDryRun(t *testing.T) {
 	t.Run("workflow without --force", func(t *testing.T) {
-		testWorkflowExecutionQueueAttributeUpdate(t,
+		testWorkflowExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.WorkflowAttributes) {
-				config.AttrFile = "testdata/valid_workflow_execution_queue_attribute.yaml"
+				config.AttrFile = validWorkflowExecutionQueueMatchableAttributesFilePath
 				config.Force = false
 				config.DryRun = true
 			},
@@ -180,9 +186,9 @@ func TestExecutionQueueAttributeUpdateIgnoresForceFlagWithDryRun(t *testing.T) {
 	})
 
 	t.Run("workflow with --force", func(t *testing.T) {
-		testWorkflowExecutionQueueAttributeUpdate(t,
+		testWorkflowExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.WorkflowAttributes) {
-				config.AttrFile = "testdata/valid_workflow_execution_queue_attribute.yaml"
+				config.AttrFile = validWorkflowExecutionQueueMatchableAttributesFilePath
 				config.Force = true
 				config.DryRun = true
 			},
@@ -193,9 +199,9 @@ func TestExecutionQueueAttributeUpdateIgnoresForceFlagWithDryRun(t *testing.T) {
 	})
 
 	t.Run("domain without --force", func(t *testing.T) {
-		testProjectDomainExecutionQueueAttributeUpdate(t,
+		testProjectDomainExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectDomainAttributes) {
-				config.AttrFile = "testdata/valid_project_domain_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectDomainExecutionQueueMatchableAttributeFilePath
 				config.Force = false
 				config.DryRun = true
 			},
@@ -206,9 +212,9 @@ func TestExecutionQueueAttributeUpdateIgnoresForceFlagWithDryRun(t *testing.T) {
 	})
 
 	t.Run("domain with --force", func(t *testing.T) {
-		testProjectDomainExecutionQueueAttributeUpdate(t,
+		testProjectDomainExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectDomainAttributes) {
-				config.AttrFile = "testdata/valid_project_domain_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectDomainExecutionQueueMatchableAttributeFilePath
 				config.Force = true
 				config.DryRun = true
 			},
@@ -219,9 +225,9 @@ func TestExecutionQueueAttributeUpdateIgnoresForceFlagWithDryRun(t *testing.T) {
 	})
 
 	t.Run("project without --force", func(t *testing.T) {
-		testProjectExecutionQueueAttributeUpdate(t,
+		testProjectExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectAttributes) {
-				config.AttrFile = "testdata/valid_project_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectExecutionQueueMatchableAttributeFilePath
 				config.Force = false
 				config.DryRun = true
 			},
@@ -232,9 +238,9 @@ func TestExecutionQueueAttributeUpdateIgnoresForceFlagWithDryRun(t *testing.T) {
 	})
 
 	t.Run("project with --force", func(t *testing.T) {
-		testProjectExecutionQueueAttributeUpdate(t,
+		testProjectExecutionQueueAttributeUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectAttributes) {
-				config.AttrFile = "testdata/valid_project_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectExecutionQueueMatchableAttributeFilePath
 				config.Force = true
 				config.DryRun = true
 			},
@@ -247,7 +253,7 @@ func TestExecutionQueueAttributeUpdateIgnoresForceFlagWithDryRun(t *testing.T) {
 
 func TestExecutionQueueAttributeUpdateSucceedsWhenAttributesDoNotExist(t *testing.T) {
 	t.Run("workflow", func(t *testing.T) {
-		testWorkflowExecutionQueueAttributeUpdateWithMockSetup(t,
+		testWorkflowExecutionQueueAttributeUpdateWithMockSetup(
 			/* mockSetup */ func(s *testutils.TestStruct, target *admin.WorkflowAttributes) {
 				s.FetcherExt.
 					OnFetchWorkflowAttributesMatch(s.Ctx, target.Project, target.Domain, target.Workflow, admin.MatchableResource_EXECUTION_QUEUE).
@@ -257,7 +263,7 @@ func TestExecutionQueueAttributeUpdateSucceedsWhenAttributesDoNotExist(t *testin
 					Return(nil)
 			},
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.WorkflowAttributes) {
-				config.AttrFile = "testdata/valid_workflow_execution_queue_attribute.yaml"
+				config.AttrFile = validWorkflowExecutionQueueMatchableAttributesFilePath
 				config.Force = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -268,7 +274,7 @@ func TestExecutionQueueAttributeUpdateSucceedsWhenAttributesDoNotExist(t *testin
 	})
 
 	t.Run("domain", func(t *testing.T) {
-		testProjectDomainExecutionQueueAttributeUpdateWithMockSetup(t,
+		testProjectDomainExecutionQueueAttributeUpdateWithMockSetup(
 			/* mockSetup */ func(s *testutils.TestStruct, target *admin.ProjectDomainAttributes) {
 				s.FetcherExt.
 					OnFetchProjectDomainAttributesMatch(s.Ctx, target.Project, target.Domain, admin.MatchableResource_EXECUTION_QUEUE).
@@ -278,7 +284,7 @@ func TestExecutionQueueAttributeUpdateSucceedsWhenAttributesDoNotExist(t *testin
 					Return(nil)
 			},
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectDomainAttributes) {
-				config.AttrFile = "testdata/valid_project_domain_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectDomainExecutionQueueMatchableAttributeFilePath
 				config.Force = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -289,7 +295,7 @@ func TestExecutionQueueAttributeUpdateSucceedsWhenAttributesDoNotExist(t *testin
 	})
 
 	t.Run("project", func(t *testing.T) {
-		testProjectExecutionQueueAttributeUpdateWithMockSetup(t,
+		testProjectExecutionQueueAttributeUpdateWithMockSetup(
 			/* mockSetup */ func(s *testutils.TestStruct, target *admin.ProjectAttributes) {
 				s.FetcherExt.
 					OnFetchProjectAttributesMatch(s.Ctx, target.Project, admin.MatchableResource_EXECUTION_QUEUE).
@@ -299,7 +305,7 @@ func TestExecutionQueueAttributeUpdateSucceedsWhenAttributesDoNotExist(t *testin
 					Return(nil)
 			},
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectAttributes) {
-				config.AttrFile = "testdata/valid_project_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectExecutionQueueMatchableAttributeFilePath
 				config.Force = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -312,7 +318,7 @@ func TestExecutionQueueAttributeUpdateSucceedsWhenAttributesDoNotExist(t *testin
 
 func TestExecutionQueueAttributeUpdateFailsWhenAdminClientFails(t *testing.T) {
 	t.Run("workflow", func(t *testing.T) {
-		testWorkflowExecutionQueueAttributeUpdateWithMockSetup(t,
+		testWorkflowExecutionQueueAttributeUpdateWithMockSetup(
 			/* mockSetup */ func(s *testutils.TestStruct, target *admin.WorkflowAttributes) {
 				s.FetcherExt.
 					OnFetchWorkflowAttributesMatch(s.Ctx, target.Project, target.Domain, target.Workflow, admin.MatchableResource_EXECUTION_QUEUE).
@@ -322,7 +328,7 @@ func TestExecutionQueueAttributeUpdateFailsWhenAdminClientFails(t *testing.T) {
 					Return(fmt.Errorf("network error"))
 			},
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.WorkflowAttributes) {
-				config.AttrFile = "testdata/valid_workflow_execution_queue_attribute.yaml"
+				config.AttrFile = validWorkflowExecutionQueueMatchableAttributesFilePath
 				config.Force = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -332,7 +338,7 @@ func TestExecutionQueueAttributeUpdateFailsWhenAdminClientFails(t *testing.T) {
 	})
 
 	t.Run("domain", func(t *testing.T) {
-		testProjectDomainExecutionQueueAttributeUpdateWithMockSetup(t,
+		testProjectDomainExecutionQueueAttributeUpdateWithMockSetup(
 			/* mockSetup */ func(s *testutils.TestStruct, target *admin.ProjectDomainAttributes) {
 				s.FetcherExt.
 					OnFetchProjectDomainAttributesMatch(s.Ctx, target.Project, target.Domain, admin.MatchableResource_EXECUTION_QUEUE).
@@ -342,7 +348,7 @@ func TestExecutionQueueAttributeUpdateFailsWhenAdminClientFails(t *testing.T) {
 					Return(fmt.Errorf("network error"))
 			},
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectDomainAttributes) {
-				config.AttrFile = "testdata/valid_project_domain_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectDomainExecutionQueueMatchableAttributeFilePath
 				config.Force = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -352,7 +358,7 @@ func TestExecutionQueueAttributeUpdateFailsWhenAdminClientFails(t *testing.T) {
 	})
 
 	t.Run("project", func(t *testing.T) {
-		testProjectExecutionQueueAttributeUpdateWithMockSetup(t,
+		testProjectExecutionQueueAttributeUpdateWithMockSetup(
 			/* mockSetup */ func(s *testutils.TestStruct, target *admin.ProjectAttributes) {
 				s.FetcherExt.
 					OnFetchProjectAttributesMatch(s.Ctx, target.Project, admin.MatchableResource_EXECUTION_QUEUE).
@@ -362,7 +368,7 @@ func TestExecutionQueueAttributeUpdateFailsWhenAdminClientFails(t *testing.T) {
 					Return(fmt.Errorf("network error"))
 			},
 			/* setup */ func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectAttributes) {
-				config.AttrFile = "testdata/valid_project_execution_queue_attribute.yaml"
+				config.AttrFile = validProjectExecutionQueueMatchableAttributeFilePath
 				config.Force = true
 			},
 			/* assert */ func(s *testutils.TestStruct, err error) {
@@ -373,12 +379,10 @@ func TestExecutionQueueAttributeUpdateFailsWhenAdminClientFails(t *testing.T) {
 }
 
 func testWorkflowExecutionQueueAttributeUpdate(
-	t *testing.T,
 	setup func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.WorkflowAttributes),
 	asserter func(s *testutils.TestStruct, err error),
 ) {
 	testWorkflowExecutionQueueAttributeUpdateWithMockSetup(
-		t,
 		/* mockSetup */ func(s *testutils.TestStruct, target *admin.WorkflowAttributes) {
 			s.FetcherExt.
 				OnFetchWorkflowAttributesMatch(s.Ctx, target.Project, target.Domain, target.Workflow, admin.MatchableResource_EXECUTION_QUEUE).
@@ -393,7 +397,6 @@ func testWorkflowExecutionQueueAttributeUpdate(
 }
 
 func testWorkflowExecutionQueueAttributeUpdateWithMockSetup(
-	t *testing.T,
 	mockSetup func(s *testutils.TestStruct, target *admin.WorkflowAttributes),
 	setup func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.WorkflowAttributes),
 	asserter func(s *testutils.TestStruct, err error),
@@ -441,12 +444,10 @@ func newTestWorkflowExecutionQueueAttribute() *admin.WorkflowAttributes {
 }
 
 func testProjectExecutionQueueAttributeUpdate(
-	t *testing.T,
 	setup func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectAttributes),
 	asserter func(s *testutils.TestStruct, err error),
 ) {
 	testProjectExecutionQueueAttributeUpdateWithMockSetup(
-		t,
 		/* mockSetup */ func(s *testutils.TestStruct, target *admin.ProjectAttributes) {
 			s.FetcherExt.
 				OnFetchProjectAttributesMatch(s.Ctx, target.Project, admin.MatchableResource_EXECUTION_QUEUE).
@@ -461,7 +462,6 @@ func testProjectExecutionQueueAttributeUpdate(
 }
 
 func testProjectExecutionQueueAttributeUpdateWithMockSetup(
-	t *testing.T,
 	mockSetup func(s *testutils.TestStruct, target *admin.ProjectAttributes),
 	setup func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectAttributes),
 	asserter func(s *testutils.TestStruct, err error),
@@ -507,12 +507,10 @@ func newTestProjectExecutionQueueAttribute() *admin.ProjectAttributes {
 }
 
 func testProjectDomainExecutionQueueAttributeUpdate(
-	t *testing.T,
 	setup func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectDomainAttributes),
 	asserter func(s *testutils.TestStruct, err error),
 ) {
 	testProjectDomainExecutionQueueAttributeUpdateWithMockSetup(
-		t,
 		/* mockSetup */ func(s *testutils.TestStruct, target *admin.ProjectDomainAttributes) {
 			s.FetcherExt.
 				OnFetchProjectDomainAttributesMatch(s.Ctx, target.Project, target.Domain, admin.MatchableResource_EXECUTION_QUEUE).
@@ -527,7 +525,6 @@ func testProjectDomainExecutionQueueAttributeUpdate(
 }
 
 func testProjectDomainExecutionQueueAttributeUpdateWithMockSetup(
-	t *testing.T,
 	mockSetup func(s *testutils.TestStruct, target *admin.ProjectDomainAttributes),
 	setup func(s *testutils.TestStruct, config *executionqueueattribute.AttrUpdateConfig, target *admin.ProjectDomainAttributes),
 	asserter func(s *testutils.TestStruct, err error),

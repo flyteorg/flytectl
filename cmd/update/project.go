@@ -94,7 +94,7 @@ func updateProjectsFunc(ctx context.Context, args []string, cmdCtx cmdCore.Comma
 		return fmt.Errorf(clierrors.ErrProjectNotPassed)
 	}
 
-	currentProject, err := cmdCtx.AdminFetcherExt().GetProjectById(ctx, edits.Id)
+	currentProject, err := cmdCtx.AdminFetcherExt().GetProjectByID(ctx, edits.Id)
 	if err != nil {
 		return fmt.Errorf("update project %s: could not fetch project: %w", edits.Id, err)
 	}

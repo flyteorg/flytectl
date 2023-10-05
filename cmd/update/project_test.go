@@ -16,7 +16,7 @@ import (
 )
 
 func TestProjectCanBeActivated(t *testing.T) {
-	testProjectUpdate(t,
+	testProjectUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *project.ConfigProject, project *admin.Project) {
 			project.State = admin.Project_ARCHIVED
 			config.Activate = true
@@ -34,7 +34,7 @@ func TestProjectCanBeActivated(t *testing.T) {
 }
 
 func TestProjectCanBeArchived(t *testing.T) {
-	testProjectUpdate(t,
+	testProjectUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *project.ConfigProject, project *admin.Project) {
 			project.State = admin.Project_ACTIVE
 			config.Archive = true
@@ -52,7 +52,7 @@ func TestProjectCanBeArchived(t *testing.T) {
 }
 
 func TestProjectCannotBeActivatedAndArchivedAtTheSameTime(t *testing.T) {
-	testProjectUpdate(t,
+	testProjectUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *project.ConfigProject, project *admin.Project) {
 			config.Activate = true
 			config.Archive = true
@@ -64,7 +64,7 @@ func TestProjectCannotBeActivatedAndArchivedAtTheSameTime(t *testing.T) {
 }
 
 func TestProjectUpdateDoesNothingWhenThereAreNoChanges(t *testing.T) {
-	testProjectUpdate(t,
+	testProjectUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *project.ConfigProject, project *admin.Project) {
 			project.State = admin.Project_ACTIVE
 			config.Activate = true
@@ -77,7 +77,7 @@ func TestProjectUpdateDoesNothingWhenThereAreNoChanges(t *testing.T) {
 }
 
 func TestProjectUpdateWithoutForceFlagFails(t *testing.T) {
-	testProjectUpdate(t,
+	testProjectUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *project.ConfigProject, project *admin.Project) {
 			project.State = admin.Project_ARCHIVED
 			config.Activate = true
@@ -90,7 +90,7 @@ func TestProjectUpdateWithoutForceFlagFails(t *testing.T) {
 }
 
 func TestProjectUpdateDoesNothingWithDryRunFlag(t *testing.T) {
-	testProjectUpdate(t,
+	testProjectUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *project.ConfigProject, project *admin.Project) {
 			project.State = admin.Project_ARCHIVED
 			config.Activate = true
@@ -104,7 +104,7 @@ func TestProjectUpdateDoesNothingWithDryRunFlag(t *testing.T) {
 
 func TestForceFlagIsIgnoredWithDryRunDuringProjectUpdate(t *testing.T) {
 	t.Run("without --force", func(t *testing.T) {
-		testProjectUpdate(t,
+		testProjectUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *project.ConfigProject, project *admin.Project) {
 				project.State = admin.Project_ARCHIVED
 				config.Activate = true
@@ -119,7 +119,7 @@ func TestForceFlagIsIgnoredWithDryRunDuringProjectUpdate(t *testing.T) {
 	})
 
 	t.Run("with --force", func(t *testing.T) {
-		testProjectUpdate(t,
+		testProjectUpdate(
 			/* setup */ func(s *testutils.TestStruct, config *project.ConfigProject, project *admin.Project) {
 				project.State = admin.Project_ARCHIVED
 				config.Activate = true
@@ -136,10 +136,9 @@ func TestForceFlagIsIgnoredWithDryRunDuringProjectUpdate(t *testing.T) {
 
 func TestProjectUpdateFailsWhenProjectDoesNotExist(t *testing.T) {
 	testProjectUpdateWithMockSetup(
-		t,
 		/* mockSetup */ func(s *testutils.TestStruct, project *admin.Project) {
 			s.FetcherExt.
-				OnGetProjectById(s.Ctx, project.Id).
+				OnGetProjectByID(s.Ctx, project.Id).
 				Return(nil, ext.NewNotFoundError("project not found"))
 			s.MockAdminClient.
 				OnUpdateProjectMatch(s.Ctx, mock.Anything).
@@ -155,10 +154,9 @@ func TestProjectUpdateFailsWhenProjectDoesNotExist(t *testing.T) {
 
 func TestProjectUpdateFailsWhenAdminClientFails(t *testing.T) {
 	testProjectUpdateWithMockSetup(
-		t,
 		/* mockSetup */ func(s *testutils.TestStruct, project *admin.Project) {
 			s.FetcherExt.
-				OnGetProjectById(s.Ctx, project.Id).
+				OnGetProjectByID(s.Ctx, project.Id).
 				Return(project, nil)
 			s.MockAdminClient.
 				OnUpdateProjectMatch(s.Ctx, mock.Anything).
@@ -177,7 +175,7 @@ func TestProjectUpdateFailsWhenAdminClientFails(t *testing.T) {
 }
 
 func TestProjectUpdateRequiresProjectId(t *testing.T) {
-	testProjectUpdate(t,
+	testProjectUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *project.ConfigProject, project *admin.Project) {
 			config.ID = ""
 		},
@@ -187,15 +185,13 @@ func TestProjectUpdateRequiresProjectId(t *testing.T) {
 }
 
 func testProjectUpdate(
-	t *testing.T,
 	setup func(s *testutils.TestStruct, config *project.ConfigProject, project *admin.Project),
 	asserter func(s *testutils.TestStruct, err error),
 ) {
 	testProjectUpdateWithMockSetup(
-		t,
 		/* mockSetup */ func(s *testutils.TestStruct, project *admin.Project) {
 			s.FetcherExt.
-				OnGetProjectById(s.Ctx, project.Id).
+				OnGetProjectByID(s.Ctx, project.Id).
 				Return(project, nil)
 			s.MockAdminClient.
 				OnUpdateProjectMatch(s.Ctx, mock.Anything).
@@ -207,7 +203,6 @@ func testProjectUpdate(
 }
 
 func testProjectUpdateWithMockSetup(
-	t *testing.T,
 	mockSetup func(s *testutils.TestStruct, project *admin.Project),
 	setup func(s *testutils.TestStruct, config *project.ConfigProject, project *admin.Project),
 	asserter func(s *testutils.TestStruct, err error),

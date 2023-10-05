@@ -149,7 +149,7 @@ func updateWorkflowMatchableAttributes(
 func confirmMatchableAttributeUpdate(old, new *admin.MatchingAttributes, dryRun, force bool) (bool, error) {
 	patch, err := DiffAsYaml(diffPathBefore, diffPathAfter, old.GetTarget(), new.GetTarget())
 	if err != nil {
-		panic(err)
+		return false, fmt.Errorf("update matchable attributes: %w", err)
 	}
 
 	if patch == "" {

@@ -21,21 +21,21 @@ func (a *AdminFetcherExtClient) ListProjects(ctx context.Context, filter filters
 	return e, nil
 }
 
-func (a *AdminFetcherExtClient) GetProjectById(ctx context.Context, projectId string) (*admin.Project, error) {
-	if projectId == "" {
-		return nil, fmt.Errorf("GetProjectById: projectId is empty")
+func (a *AdminFetcherExtClient) GetProjectByID(ctx context.Context, projectID string) (*admin.Project, error) {
+	if projectID == "" {
+		return nil, fmt.Errorf("GetProjectByID: projectId is empty")
 	}
 
 	response, err := a.AdminServiceClient().ListProjects(ctx, &admin.ProjectListRequest{
 		Limit:   1,
-		Filters: fmt.Sprintf("eq(identifier,%s)", filters.EscapeValue(projectId)),
+		Filters: fmt.Sprintf("eq(identifier,%s)", filters.EscapeValue(projectID)),
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	if len(response.Projects) == 0 {
-		return nil, NewNotFoundError("project %s", projectId)
+		return nil, NewNotFoundError("project %s", projectID)
 	}
 
 	if len(response.Projects) > 1 {

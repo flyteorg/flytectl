@@ -4,8 +4,9 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/flyteorg/flytectl/cmd/testutils"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/flyteorg/flytectl/cmd/testutils"
 )
 
 const (
@@ -13,7 +14,6 @@ const (
 	testDataInvalidAttrFile = "testdata/invalid_attribute.yaml"
 )
 
-var setup = testutils.Setup
 var tearDownAndVerify = testutils.TearDownAndVerify
 
 func TestUpdateCommand(t *testing.T) {

@@ -16,7 +16,7 @@ import (
 )
 
 func TestLaunchPlanMetadataCanBeActivated(t *testing.T) {
-	testNamedEntityUpdate(t, core.ResourceType_LAUNCH_PLAN,
+	testNamedEntityUpdate(core.ResourceType_LAUNCH_PLAN,
 		/* setup */ func(s *testutils.TestStruct, config *NamedEntityConfig, namedEntity *admin.NamedEntity) {
 			namedEntity.Metadata.State = admin.NamedEntityState_NAMED_ENTITY_ARCHIVED
 			config.Activate = true
@@ -34,7 +34,7 @@ func TestLaunchPlanMetadataCanBeActivated(t *testing.T) {
 }
 
 func TestLaunchPlanMetadataCanBeArchived(t *testing.T) {
-	testNamedEntityUpdate(t, core.ResourceType_LAUNCH_PLAN,
+	testNamedEntityUpdate(core.ResourceType_LAUNCH_PLAN,
 		/* setup */ func(s *testutils.TestStruct, config *NamedEntityConfig, namedEntity *admin.NamedEntity) {
 			namedEntity.Metadata.State = admin.NamedEntityState_NAMED_ENTITY_ACTIVE
 			config.Archive = true
@@ -52,7 +52,7 @@ func TestLaunchPlanMetadataCanBeArchived(t *testing.T) {
 }
 
 func TestLaunchPlanMetadataCannotBeActivatedAndArchivedAtTheSameTime(t *testing.T) {
-	testNamedEntityUpdate(t, core.ResourceType_LAUNCH_PLAN,
+	testNamedEntityUpdate(core.ResourceType_LAUNCH_PLAN,
 		/* setup */ func(s *testutils.TestStruct, config *NamedEntityConfig, namedEntity *admin.NamedEntity) {
 			config.Activate = true
 			config.Archive = true
@@ -64,7 +64,7 @@ func TestLaunchPlanMetadataCannotBeActivatedAndArchivedAtTheSameTime(t *testing.
 }
 
 func TestLaunchPlanMetadataUpdateDoesNothingWhenThereAreNoChanges(t *testing.T) {
-	testNamedEntityUpdate(t, core.ResourceType_LAUNCH_PLAN,
+	testNamedEntityUpdate(core.ResourceType_LAUNCH_PLAN,
 		/* setup */ func(s *testutils.TestStruct, config *NamedEntityConfig, namedEntity *admin.NamedEntity) {
 			namedEntity.Metadata.State = admin.NamedEntityState_NAMED_ENTITY_ACTIVE
 			config.Activate = true
@@ -77,7 +77,7 @@ func TestLaunchPlanMetadataUpdateDoesNothingWhenThereAreNoChanges(t *testing.T) 
 }
 
 func TestLaunchPlanMetadataUpdateWithoutForceFlagFails(t *testing.T) {
-	testNamedEntityUpdate(t, core.ResourceType_LAUNCH_PLAN,
+	testNamedEntityUpdate(core.ResourceType_LAUNCH_PLAN,
 		/* setup */ func(s *testutils.TestStruct, config *NamedEntityConfig, namedEntity *admin.NamedEntity) {
 			namedEntity.Metadata.State = admin.NamedEntityState_NAMED_ENTITY_ARCHIVED
 			config.Activate = true
@@ -90,7 +90,7 @@ func TestLaunchPlanMetadataUpdateWithoutForceFlagFails(t *testing.T) {
 }
 
 func TestLaunchPlanMetadataUpdateDoesNothingWithDryRunFlag(t *testing.T) {
-	testNamedEntityUpdate(t, core.ResourceType_LAUNCH_PLAN,
+	testNamedEntityUpdate(core.ResourceType_LAUNCH_PLAN,
 		/* setup */ func(s *testutils.TestStruct, config *NamedEntityConfig, namedEntity *admin.NamedEntity) {
 			namedEntity.Metadata.State = admin.NamedEntityState_NAMED_ENTITY_ARCHIVED
 			config.Activate = true
@@ -104,7 +104,7 @@ func TestLaunchPlanMetadataUpdateDoesNothingWithDryRunFlag(t *testing.T) {
 
 func TestForceFlagIsIgnoredWithDryRunDuringLaunchPlanMetadataUpdate(t *testing.T) {
 	t.Run("without --force", func(t *testing.T) {
-		testNamedEntityUpdate(t, core.ResourceType_LAUNCH_PLAN,
+		testNamedEntityUpdate(core.ResourceType_LAUNCH_PLAN,
 			/* setup */ func(s *testutils.TestStruct, config *NamedEntityConfig, namedEntity *admin.NamedEntity) {
 				namedEntity.Metadata.State = admin.NamedEntityState_NAMED_ENTITY_ARCHIVED
 				config.Activate = true
@@ -119,7 +119,7 @@ func TestForceFlagIsIgnoredWithDryRunDuringLaunchPlanMetadataUpdate(t *testing.T
 	})
 
 	t.Run("with --force", func(t *testing.T) {
-		testNamedEntityUpdate(t, core.ResourceType_LAUNCH_PLAN,
+		testNamedEntityUpdate(core.ResourceType_LAUNCH_PLAN,
 			/* setup */ func(s *testutils.TestStruct, config *NamedEntityConfig, namedEntity *admin.NamedEntity) {
 				namedEntity.Metadata.State = admin.NamedEntityState_NAMED_ENTITY_ARCHIVED
 				config.Activate = true
@@ -136,7 +136,7 @@ func TestForceFlagIsIgnoredWithDryRunDuringLaunchPlanMetadataUpdate(t *testing.T
 
 func TestLaunchPlanMetadataUpdateFailsWhenLaunchPlanDoesNotExist(t *testing.T) {
 	testNamedEntityUpdateWithMockSetup(
-		t, core.ResourceType_LAUNCH_PLAN,
+		core.ResourceType_LAUNCH_PLAN,
 		/* mockSetup */ func(s *testutils.TestStruct, namedEntity *admin.NamedEntity) {
 			s.MockAdminClient.
 				OnGetNamedEntityMatch(
@@ -160,7 +160,7 @@ func TestLaunchPlanMetadataUpdateFailsWhenLaunchPlanDoesNotExist(t *testing.T) {
 
 func TestLaunchPlanMetadataUpdateFailsWhenAdminClientFails(t *testing.T) {
 	testNamedEntityUpdateWithMockSetup(
-		t, core.ResourceType_LAUNCH_PLAN,
+		core.ResourceType_LAUNCH_PLAN,
 		/* mockSetup */ func(s *testutils.TestStruct, namedEntity *admin.NamedEntity) {
 			s.MockAdminClient.
 				OnGetNamedEntityMatch(

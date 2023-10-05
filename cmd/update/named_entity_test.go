@@ -3,7 +3,6 @@ package update
 import (
 	"context"
 	"fmt"
-	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/mock"
@@ -16,13 +15,11 @@ import (
 )
 
 func testNamedEntityUpdate(
-	t *testing.T,
 	resourceType core.ResourceType,
 	setup func(s *testutils.TestStruct, config *NamedEntityConfig, namedEntity *admin.NamedEntity),
 	asserter func(s *testutils.TestStruct, err error),
 ) {
 	testNamedEntityUpdateWithMockSetup(
-		t,
 		resourceType,
 		/* mockSetup */ func(s *testutils.TestStruct, namedEntity *admin.NamedEntity) {
 			s.MockAdminClient.
@@ -43,7 +40,6 @@ func testNamedEntityUpdate(
 }
 
 func testNamedEntityUpdateWithMockSetup(
-	t *testing.T,
 	resourceType core.ResourceType,
 	mockSetup func(s *testutils.TestStruct, namedEntity *admin.NamedEntity),
 	setup func(s *testutils.TestStruct, config *NamedEntityConfig, namedEntity *admin.NamedEntity),
