@@ -7,7 +7,7 @@ import (
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/core"
 )
 
 const (

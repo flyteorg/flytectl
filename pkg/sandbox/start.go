@@ -20,7 +20,7 @@ import (
 	"github.com/flyteorg/flytectl/pkg/github"
 	"github.com/flyteorg/flytectl/pkg/k8s"
 	"github.com/flyteorg/flytectl/pkg/util"
-	"github.com/flyteorg/flytestdlib/logger"
+	"github.com/flyteorg/flyte/flytestdlib/logger"
 	"github.com/kataras/tablewriter"
 	corev1api "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

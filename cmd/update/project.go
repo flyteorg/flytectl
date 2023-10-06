@@ -8,7 +8,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytestdlib/logger"
+	"github.com/flyteorg/flyte/flytestdlib/logger"
 )
 
 const (

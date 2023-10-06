@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/flyteorg/flytectl/pkg/visualize/mocks"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/core"
 
 	graphviz "github.com/awalterschulze/gographviz"
 	"github.com/golang/protobuf/jsonpb"

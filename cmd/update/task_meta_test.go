@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/flyteorg/flytectl/cmd/testutils"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

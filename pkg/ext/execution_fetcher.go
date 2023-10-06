@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/flyteorg/flytectl/pkg/filters"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/core"
 )
 
 func (a *AdminFetcherExtClient) FetchExecution(ctx context.Context, name, project, domain string) (*admin.Execution, error) {

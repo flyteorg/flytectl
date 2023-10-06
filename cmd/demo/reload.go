@@ -7,7 +7,7 @@ import (
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/docker"
 	"github.com/flyteorg/flytectl/pkg/k8s"
-	"github.com/flyteorg/flytestdlib/logger"
+	"github.com/flyteorg/flyte/flytestdlib/logger"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

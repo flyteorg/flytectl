@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/flyteorg/flytectl/cmd"
-	"github.com/flyteorg/flytestdlib/logger"
+	"github.com/flyteorg/flyte/flytestdlib/logger"
 )
 
 func main() {

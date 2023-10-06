@@ -8,8 +8,8 @@ import (
 	sconfig "github.com/flyteorg/flytectl/cmd/config/subcommand"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflowexecutionconfig"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/core"
+	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/core"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

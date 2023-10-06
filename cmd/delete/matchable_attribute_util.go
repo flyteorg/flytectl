@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/flyteorg/flytectl/pkg/ext"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
+	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
 func deleteMatchableAttr(ctx context.Context, project, domain, workflowName string,

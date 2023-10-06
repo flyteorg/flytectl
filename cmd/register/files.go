@@ -8,12 +8,12 @@ import (
 
 	"github.com/flyteorg/flytectl/cmd/config"
 
-	"github.com/flyteorg/flytestdlib/storage"
+	"github.com/flyteorg/flyte/flytestdlib/storage"
 
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
-	"github.com/flyteorg/flytestdlib/logger"
+	"github.com/flyteorg/flyte/flytestdlib/logger"
 )
 
 const (

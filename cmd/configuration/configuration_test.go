@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	admin2 "github.com/flyteorg/flyteidl/clients/go/admin"
+	admin2 "github.com/flyteorg/flyte/flyteidl/clients/go/admin"
 
 	"github.com/flyteorg/flytectl/pkg/configutil"
 

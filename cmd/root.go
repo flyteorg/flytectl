@@ -20,8 +20,8 @@ import (
 	"github.com/flyteorg/flytectl/cmd/version"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 	"github.com/flyteorg/flytectl/pkg/printer"
-	stdConfig "github.com/flyteorg/flytestdlib/config"
-	"github.com/flyteorg/flytestdlib/config/viper"
+	stdConfig "github.com/flyteorg/flyte/flytestdlib/config"
+	"github.com/flyteorg/flyte/flytestdlib/config/viper"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

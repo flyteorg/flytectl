@@ -15,7 +15,7 @@ import (
 	initConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/config"
 	cmdcore "github.com/flyteorg/flytectl/cmd/core"
 	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
-	"github.com/flyteorg/flytestdlib/config/viper"
+	"github.com/flyteorg/flyte/flytestdlib/config/viper"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/spf13/cobra"
 )

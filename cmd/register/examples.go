@@ -8,7 +8,7 @@ import (
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	g "github.com/flyteorg/flytectl/pkg/github"
-	"github.com/flyteorg/flytestdlib/logger"
+	"github.com/flyteorg/flyte/flytestdlib/logger"
 
 	"github.com/google/go-github/v42/github"
 )

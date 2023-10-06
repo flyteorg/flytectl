@@ -8,7 +8,7 @@ import (
 
 	"github.com/flyteorg/flytectl/pkg/github/mocks"
 	"github.com/flyteorg/flytectl/pkg/platformutil"
-	stdlibversion "github.com/flyteorg/flytestdlib/version"
+	stdlibversion "github.com/flyteorg/flyte/flytestdlib/version"
 	"github.com/google/go-github/v42/github"
 
 	"github.com/stretchr/testify/assert"
