@@ -155,10 +155,9 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 )
 
-replace github.com/flyteorg/flyte/flyteidl => github.com/flyteorg/flyte/flyteidl v1.9.12
-
-replace github.com/flyteorg/flyte/flytepropeller => github.com/flyteorg/flyte/flytepropeller v1.9.12
-
-replace github.com/flyteorg/flyte/flytestdlib => github.com/flyteorg/flyte/flytestdlib v1.9.12
-
-replace github.com/flyteorg/flyte/flyteplugins => github.com/flyteorg/flyte/flyteplugins v1.9.12
+replace (
+	github.com/flyteorg/flyte/flyteidl => github.com/flyteorg/flyte/flyteidl v1.9.12
+	github.com/flyteorg/flyte/flyteplugins => github.com/flyteorg/flyte/flyteplugins v1.9.12
+	github.com/flyteorg/flyte/flytepropeller => github.com/flyteorg/flyte/flytepropeller v1.9.12
+	github.com/flyteorg/flyte/flytestdlib => github.com/flyteorg/flyte/flytestdlib v1.9.12
+)
