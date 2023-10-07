@@ -229,8 +229,8 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 		sandboxEnv = append(sandboxEnv, "FLYTE_DEV=True")
 	}
 
-	if sandboxConfig.EnableAgent {
-		sandboxEnv = append(sandboxEnv, "FLYTE_COMPLETE_AGENT=True")
+	if sandboxConfig.DisableAgent {
+		sandboxEnv = append(sandboxEnv, "DISABLE_AGENT=True")
 	}
 
 	ID, err := docker.StartContainer(ctx, cli, volumes, exposedPorts, portBindings, docker.FlyteSandboxClusterName,

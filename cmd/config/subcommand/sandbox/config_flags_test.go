@@ -155,14 +155,14 @@ func TestConfig_SetFlags(t *testing.T) {
 			}
 		})
 	})
-	t.Run("Test_enable-agent", func(t *testing.T) {
+	t.Run("Test_disable-agent", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("enable-agent", testValue)
-			if vBool, err := cmdFlags.GetBool("enable-agent"); err == nil {
-				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.EnableAgent)
+			cmdFlags.Set("disable-agent", testValue)
+			if vBool, err := cmdFlags.GetBool("disable-agent"); err == nil {
+				testDecodeJson_Config(t, fmt.Sprintf("%v", vBool), &actual.DisableAgent)
 
 			} else {
 				assert.FailNow(t, err.Error())
