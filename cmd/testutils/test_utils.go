@@ -19,8 +19,6 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	extMocks "github.com/flyteorg/flytectl/pkg/ext/mocks"
-	"github.com/flyteorg/flyteidl/clients/go/admin"
-	"github.com/flyteorg/flyteidl/clients/go/admin/mocks"
 )
 
 const projectValue = "dummyProject"

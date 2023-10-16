@@ -8,7 +8,6 @@ import (
 	sconfig "github.com/flyteorg/flytectl/cmd/config/subcommand"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/executionclusterlabel"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
 const (
