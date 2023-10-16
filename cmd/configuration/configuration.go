@@ -12,10 +12,10 @@ import (
 
 	"github.com/flyteorg/flytectl/pkg/configutil"
 
+	"github.com/flyteorg/flyte/flytestdlib/config/viper"
 	initConfig "github.com/flyteorg/flytectl/cmd/config/subcommand/config"
 	cmdcore "github.com/flyteorg/flytectl/cmd/core"
 	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
-	"github.com/flyteorg/flyte/flytestdlib/config/viper"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/spf13/cobra"
 )
@@ -70,6 +70,8 @@ func CreateConfigCommand() *cobra.Command {
 			Long:  initCmdLong, PFlagProvider: initConfig.DefaultConfig},
 	}
 
+	configCmd.Flags().BoolVar(&initConfig.DefaultConfig.Force, "force", false, "Force to overwrite the default config file without confirmation")
+
 	cmdcore.AddCommands(configCmd, getResourcesFuncs)
 	return configCmd
 }
@@ -109,7 +111,7 @@ func initFlytectlConfig(reader io.Reader) error {
 	if _, err := os.Stat(configutil.ConfigFile); os.IsNotExist(err) {
 		_err = configutil.SetupConfig(configutil.ConfigFile, templateStr, templateValues)
 	} else {
-		if cmdUtil.AskForConfirmation(fmt.Sprintf("This action will overwrite an existing config file at [%s]. Do you want to continue?", configutil.ConfigFile), reader) {
+		if initConfig.DefaultConfig.Force || cmdUtil.AskForConfirmation(fmt.Sprintf("This action will overwrite an existing config file at [%s]. Do you want to continue?", configutil.ConfigFile), reader) {
 			if err := os.Remove(configutil.ConfigFile); err != nil {
 				return err
 			}

@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
-	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
 
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyte/flytestdlib/logger"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 )
 
 const (

@@ -29,14 +29,14 @@ import (
 	"github.com/flyteorg/flyte/flytestdlib/promutils/labeled"
 	"github.com/flyteorg/flyte/flytestdlib/utils"
 
-	"github.com/flyteorg/flytectl/cmd/config"
-	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/flyteorg/flyte/flytestdlib/logger"
 	"github.com/flyteorg/flyte/flytestdlib/storage"
+	"github.com/flyteorg/flytectl/cmd/config"
+	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/google/go-github/v42/github"
 
 	"github.com/golang/protobuf/jsonpb"

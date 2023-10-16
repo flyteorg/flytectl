@@ -10,10 +10,10 @@ import (
 
 	"github.com/flyteorg/flyte/flytestdlib/storage"
 
+	"github.com/flyteorg/flyte/flytestdlib/logger"
 	rconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/register"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
-	"github.com/flyteorg/flyte/flytestdlib/logger"
 )
 
 const (

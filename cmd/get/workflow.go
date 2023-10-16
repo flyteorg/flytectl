@@ -3,9 +3,9 @@ package get
 import (
 	"context"
 
+	"github.com/flyteorg/flyte/flytestdlib/logger"
 	workflowconfig "github.com/flyteorg/flytectl/cmd/config/subcommand/workflow"
 	"github.com/flyteorg/flytectl/pkg/ext"
-	"github.com/flyteorg/flyte/flytestdlib/logger"
 	"github.com/golang/protobuf/proto"
 
 	"github.com/flyteorg/flytectl/cmd/config"

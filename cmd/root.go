@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	stdConfig "github.com/flyteorg/flyte/flytestdlib/config"
+	"github.com/flyteorg/flyte/flytestdlib/config/viper"
 	"github.com/flyteorg/flytectl/cmd/compile"
 	"github.com/flyteorg/flytectl/cmd/config"
 	configuration "github.com/flyteorg/flytectl/cmd/configuration"
@@ -20,8 +22,6 @@ import (
 	"github.com/flyteorg/flytectl/cmd/version"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 	"github.com/flyteorg/flytectl/pkg/printer"
-	stdConfig "github.com/flyteorg/flyte/flytestdlib/config"
-	"github.com/flyteorg/flyte/flytestdlib/config/viper"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -77,6 +77,29 @@ func newRootCmd() *cobra.Command {
 	cmdCore.AddCommands(rootCmd, upgradeCmd)
 
 	config.GetConfig()
+
+	// hide global flags
+	rootCmd.SetUsageTemplate(`Usage:{{if .Runnable}}
+  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+Aliases:
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+Examples:
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+
+Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`)
 
 	return rootCmd
 }

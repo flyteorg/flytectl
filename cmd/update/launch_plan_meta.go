@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/core"
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/cmd/config"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
-	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/core"
 )
 
 const (
@@ -42,8 +42,7 @@ func getUpdateLPMetaFunc(namedEntityConfig *NamedEntityConfig) func(ctx context.
 		name := args[0]
 		err := namedEntityConfig.UpdateNamedEntity(ctx, name, project, domain, core.ResourceType_LAUNCH_PLAN, cmdCtx)
 		if err != nil {
-			fmt.Printf(clierrors.ErrFailedLPUpdate, name, err)
-			return err
+			return fmt.Errorf(clierrors.ErrFailedLPUpdate, name, err)
 		}
 		fmt.Printf("updated metadata successfully on %v", name)
 		return nil

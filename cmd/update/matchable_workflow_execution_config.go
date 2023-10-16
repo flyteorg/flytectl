@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/workflowexecutionconfig"
 
 	sconfig "github.com/flyteorg/flytectl/cmd/config/subcommand"
@@ -74,9 +75,9 @@ func updateWorkflowExecutionConfigFunc(ctx context.Context, args []string, cmdCt
 	domain := workflowExecutionConfigFileConfig.Domain
 	workflowName := workflowExecutionConfigFileConfig.Workflow
 
-	// Updates the admin matchable attribute from workflowExecutionConfigFileConfig
-	if err := DecorateAndUpdateMatchableAttr(ctx, project, domain, workflowName, cmdCtx.AdminUpdaterExt(),
-		workflowExecutionConfigFileConfig, updateConfig.DryRun); err != nil {
+	if err := DecorateAndUpdateMatchableAttr(ctx, cmdCtx, project, domain, workflowName,
+		admin.MatchableResource_WORKFLOW_EXECUTION_CONFIG, workflowExecutionConfigFileConfig,
+		updateConfig.DryRun, updateConfig.Force); err != nil {
 		return err
 	}
 	return nil

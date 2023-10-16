@@ -14,10 +14,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flyte/flyteidl/clients/go/admin/mocks"
 	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
 	stdlibversion "github.com/flyteorg/flyte/flytestdlib/version"
+	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/stretchr/testify/assert"
 )
 
