@@ -10,6 +10,7 @@ import (
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	cmdUtil "github.com/flyteorg/flytectl/pkg/commandutils"
 	"github.com/flyteorg/flytectl/pkg/ext"
+	"github.com/flyteorg/flyteidl/gen/pb-go/flyteidl/admin"
 )
 
 func DecorateAndUpdateMatchableAttr(
