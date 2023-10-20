@@ -92,6 +92,8 @@ var projectColumns = []printer.Column{
 	{Header: "Additional Info", JSONPath: "$.Info"},
 }
 
+// Regex to match file name like xxx_1.pb, xxx_2.pb, or xxx_3.pb, and the subgroup catches the number 1, 2 or 3
+// This is used to match proto files created by pyflyte, where xxx_1.pb is a task spec, xxx_2.pb is a workflow spec, and xxx_3.pb is launch plan
 var fnameRegex = regexp.MustCompile(`^.*_(?P<index>[1-3])\.pb$`)
 
 type unMarshalFunc = func(ctx context.Context, fileContents []byte, fname string, errCollection errors2.ErrorCollection) (proto.Message, error)
