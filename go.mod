@@ -140,9 +140,9 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
-	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e // indirect
+	golang.org/x/exp v0.0.0-20231005195138-3e424a577f31 // indirect
 	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/term v0.7.0 // indirect
 	golang.org/x/time v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
@@ -160,8 +160,8 @@ require (
 )
 
 replace (
-	github.com/flyteorg/flyte/flyteidl => github.com/flyteorg/flyte/flyteidl v1.9.12
-	github.com/flyteorg/flyte/flyteplugins => github.com/flyteorg/flyte/flyteplugins v1.9.12
-	github.com/flyteorg/flyte/flytepropeller => github.com/flyteorg/flyte/flytepropeller v1.9.12
-	github.com/flyteorg/flyte/flytestdlib => github.com/flyteorg/flyte/flytestdlib v1.9.12
+	github.com/flyteorg/flyte/flyteidl => github.com/flyteorg/flyte/flyteidl v1.10.0
+	github.com/flyteorg/flyte/flyteplugins => github.com/flyteorg/flyte/flyteplugins v1.10.0
+	github.com/flyteorg/flyte/flytepropeller => github.com/flyteorg/flyte/flytepropeller v1.10.0
+	github.com/flyteorg/flyte/flytestdlib => github.com/flyteorg/flyte/flytestdlib v1.10.0
 )
