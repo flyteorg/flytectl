@@ -11,21 +11,32 @@ const (
 	AdminConfigTemplate = `admin:
   # For GRPC endpoints you might want to use dns:///flyte.myexample.com
   endpoint: {{.Host}}
-  authType: Pkce
   insecure: {{.Insecure}}
 {{- if .Console}}
 console:
   endpoint: {{.Console}}
 {{- end}}
-logger:
-  show-source: true
-  level: 0`
+{{- if .DataConfig}}
+storage:
+  connection:
+    endpoint: {{.DataConfig.Endpoint}}
+    access-key: {{.DataConfig.AccessKey}}
+    secret-key: {{.DataConfig.SecretKey}}
+{{- end}}
+`
 )
 
+type DataConfig struct {
+	Endpoint  string
+	AccessKey string
+	SecretKey string
+}
+
 type ConfigTemplateSpec struct {
-	Host     string
-	Insecure bool
-	Console  string
+	Host       string
+	Insecure   bool
+	Console    string
+	DataConfig *DataConfig
 }
 
 var (
