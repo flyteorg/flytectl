@@ -174,8 +174,8 @@ func startSandbox(ctx context.Context, cli docker.Docker, g github.GHRepoService
 		Insecure: true,
 		DataConfig: &configutil.DataConfig{
 			Endpoint:  "http://localhost:30002",
-			AccessKey: "miniostorage",
-			SecretKey: "minio",
+			AccessKey: "minio",
+			SecretKey: "miniostorage",
 		},
 	}
 	if err := configutil.SetupConfig(configutil.FlytectlConfig, configutil.GetTemplate(), templateValues); err != nil {
