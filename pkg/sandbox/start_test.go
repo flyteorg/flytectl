@@ -70,8 +70,17 @@ var fakeNode = &corev1.Node{
 
 var fakePod = corev1.Pod{
 	Status: corev1.PodStatus{
-		Phase:      corev1.PodRunning,
-		Conditions: []corev1.PodCondition{},
+		Phase: corev1.PodRunning,
+		Conditions: []corev1.PodCondition{
+			{
+				Type:   corev1.PodReady,
+				Status: corev1.ConditionTrue,
+			},
+			{
+				Type:   corev1.ContainersReady,
+				Status: corev1.ConditionTrue,
+			},
+		},
 	},
 }
 
