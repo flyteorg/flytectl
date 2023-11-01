@@ -18,7 +18,7 @@ console:
 {{- end}}
 {{- if .DataConfig}}
 # This is not a needed configuration, only useful if you want to explore the data in sandbox. For non sandbox, please
-# do not use this configuration, instead prefer to use aws, gcs, azure sessions. Flytekit, should use fsspec to 
+# do not use this configuration, instead prefer to use aws, gcs, azure sessions. Flytekit, should use fsspec to
 # auto select the right backend to pull data as long as the sessions are configured. For Sandbox, this is special, as
 # minio is s3 compatible and we ship with minio in sandbox.
 storage:
