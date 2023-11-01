@@ -78,7 +78,7 @@ jobs:
       - name: Build Flytectl binary
         run: make compile
       - name: Create a sandbox cluster
-        run: bin/flytectl sandbox start
+        run: bin/flytectl demo start
       - name: Setup flytectl config
         run: bin/flytectl config init
       - name: Register cookbook
