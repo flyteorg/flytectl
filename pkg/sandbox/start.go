@@ -28,6 +28,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/kubernetes/pkg/api/v1/pod"
 )
 
 const (
@@ -61,13 +62,6 @@ func isNodeTainted(ctx context.Context, client corev1.CoreV1Interface) (bool, er
 		return true, nil
 	}
 	return false, nil
-}
-
-func isPodReady(v corev1api.Pod) bool {
-	if (v.Status.Phase == corev1api.PodRunning) || (v.Status.Phase == corev1api.PodSucceeded) {
-		return true
-	}
-	return false
 }
 
 func getFlyteDeployment(ctx context.Context, client corev1.CoreV1Interface) (*corev1api.PodList, error) {
@@ -109,7 +103,10 @@ func WatchFlyteDeployment(ctx context.Context, appsClient corev1.CoreV1Interface
 		ready = 0
 		if total != 0 {
 			for _, v := range pods.Items {
-				if isPodReady(v) {
+				// TODO (jeev): We should really be using
+				// `IsContainersReadyConditionTrue`, but that is not available until
+				// version v1.22.11. We are on v1.13.0 for some reason.
+				if pod.IsPodReadyConditionTrue(v.Status) {
 					ready++
 				}
 				if len(v.Status.Conditions) > 0 {
