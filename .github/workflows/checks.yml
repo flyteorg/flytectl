@@ -63,6 +63,7 @@ jobs:
     name: Test Getting started
     runs-on: ubuntu-latest
     steps:
+      - uses: insightsengineering/disk-space-reclaimer@v1
       - name: Checkout
         uses: actions/checkout@v2
       - uses: actions/cache@v2
