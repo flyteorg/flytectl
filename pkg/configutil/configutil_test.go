@@ -25,11 +25,8 @@ func TestSetupConfig(t *testing.T) {
 	expected := `admin:
   # For GRPC endpoints you might want to use dns:///flyte.myexample.com
   endpoint: dns:///localhost:30081
-  authType: Pkce
   insecure: true
-logger:
-  show-source: true
-  level: 0`
+`
 	assert.Equal(t, expected, string(configBytes))
 
 	file, err = os.Create(file.Name())
@@ -46,13 +43,10 @@ logger:
 	expected = `admin:
   # For GRPC endpoints you might want to use dns:///flyte.myexample.com
   endpoint: dns:///admin.example.com
-  authType: Pkce
   insecure: true
 console:
   endpoint: https://console.example.com
-logger:
-  show-source: true
-  level: 0`
+`
 	assert.Equal(t, expected, string(configBytes))
 
 	// Cleanup
