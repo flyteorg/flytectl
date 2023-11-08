@@ -8,7 +8,7 @@ Here are the instructions that will guide you through contributing, fixing, and 
 📝 Contribute to Documentation
 ==============================
 
-Docs are generated using Sphinx and are available at [flytectl.rtfd.io](https://flytectl.rtfd.io).
+Docs are generated using Sphinx and are available at `flytectl.rtfd.io <https://flytectl.rtfd.io>`__.
 
 To update the documentation, follow these steps:
 
