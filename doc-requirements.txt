@@ -13,7 +13,7 @@ beautifulsoup4==4.10.0
     #   furo
     #   sphinx-code-include
     #   sphinx-material
-certifi==2021.10.8
+certifi==2022.12.7
     # via requests
 charset-normalizer==2.0.10
     # via requests
@@ -39,6 +39,7 @@ packaging==21.3
     # via sphinx
 pygments==2.11.2
     # via
+    #   furo
     #   sphinx
     #   sphinx-prompt
 pyparsing==3.0.6
@@ -59,6 +60,7 @@ sphinx==4.3.2
     # via
     #   -r doc-requirements.in
     #   furo
+    #   sphinx-basic-ng
     #   sphinx-code-include
     #   sphinx-copybutton
     #   sphinx-fontawesome
@@ -66,6 +68,8 @@ sphinx==4.3.2
     #   sphinx-panels
     #   sphinx-prompt
     #   sphinxcontrib-yt
+sphinx-basic-ng==1.0.0b1
+    # via furo
 sphinx-code-include==1.1.1
     # via -r doc-requirements.in
 sphinx-copybutton==0.4.0
