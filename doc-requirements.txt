@@ -47,7 +47,7 @@ python-slugify[unidecode]==5.0.2
     # via sphinx-material
 pytz==2021.3
     # via babel
-requests==2.27.1
+requests==2.31.0
     # via sphinx
 six==1.16.0
     # via sphinx-code-include
