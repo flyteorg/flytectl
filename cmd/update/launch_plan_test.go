@@ -35,11 +35,11 @@ func TestLaunchPlanCanBeActivated(t *testing.T) {
 		})
 }
 
-func TestLaunchPlanCanBeArchived(t *testing.T) {
+func TestLaunchPlanCanBeDeactivated(t *testing.T) {
 	testLaunchPlanUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *launchplan.UpdateConfig, launchplan *admin.LaunchPlan) {
 			launchplan.Closure.State = admin.LaunchPlanState_ACTIVE
-			config.Archive = true
+			config.Deactivate = true
 			config.Force = true
 		},
 		/* assert */ func(s *testutils.TestStruct, err error) {
@@ -53,14 +53,14 @@ func TestLaunchPlanCanBeArchived(t *testing.T) {
 		})
 }
 
-func TestLaunchPlanCannotBeActivatedAndArchivedAtTheSameTime(t *testing.T) {
+func TestLaunchPlanCannotBeActivatedAndDeactivatedAtTheSameTime(t *testing.T) {
 	testLaunchPlanUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *launchplan.UpdateConfig, launchplan *admin.LaunchPlan) {
 			config.Activate = true
-			config.Archive = true
+			config.Deactivate = true
 		},
 		/* assert */ func(s *testutils.TestStruct, err error) {
-			assert.ErrorContains(t, err, "Specify either activate or archive")
+			assert.ErrorContains(t, err, "Specify either activate or deactivate")
 			s.MockAdminClient.AssertNotCalled(t, "UpdateLaunchPlan", mock.Anything, mock.Anything)
 		})
 }

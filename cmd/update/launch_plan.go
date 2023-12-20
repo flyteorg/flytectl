@@ -22,10 +22,10 @@ Activates a ` + "`launch plan <https://docs.flyte.org/projects/cookbook/en/lates
 
  flytectl update launchplan -p flytesnacks -d development core.control_flow.merge_sort.merge_sort --version v1 --activate
 
-Archives ` + "`(deactivates) <https://docs.flyte.org/projects/cookbook/en/latest/auto/core/scheduled_workflows/lp_schedules.html#deactivating-a-schedule>`__" + ` a launch plan which deschedules any scheduled job associated with it:
+Deactivates a ` + "`launch plan <https://docs.flyte.org/projects/cookbook/en/latest/auto/core/scheduled_workflows/lp_schedules.html#deactivating-a-schedule>`__" + ` which deschedules any scheduled job associated with it:
 ::
 
- flytectl update launchplan -p flytesnacks -d development core.control_flow.merge_sort.merge_sort --version v1 --archive
+ flytectl update launchplan -p flytesnacks -d development core.control_flow.merge_sort.merge_sort --version v1 --deactivate
 
 Usage
 `
@@ -44,15 +44,15 @@ func updateLPFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandCont
 	}
 
 	activate := launchplan.UConfig.Activate
-	archive := launchplan.UConfig.Archive
-	if activate == archive && archive {
-		return fmt.Errorf(clierrors.ErrInvalidStateUpdate)
+	deactivate := launchplan.UConfig.Deactivate
+	if activate == deactivate && deactivate {
+		return fmt.Errorf(clierrors.ErrInvalidBothStateUpdate)
 	}
 
 	var newState admin.LaunchPlanState
 	if activate {
 		newState = admin.LaunchPlanState_ACTIVE
-	} else if archive {
+	} else if deactivate {
 		newState = admin.LaunchPlanState_INACTIVE
 	}
 

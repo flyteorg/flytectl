@@ -99,14 +99,14 @@ func TestUpdateConfig_SetFlags(t *testing.T) {
 	cmdFlags := actual.GetPFlagSet("")
 	assert.True(t, cmdFlags.HasFlags())
 
-	t.Run("Test_archive", func(t *testing.T) {
+	t.Run("Test_deactivate", func(t *testing.T) {
 
 		t.Run("Override", func(t *testing.T) {
 			testValue := "1"
 
-			cmdFlags.Set("archive", testValue)
-			if vBool, err := cmdFlags.GetBool("archive"); err == nil {
-				testDecodeJson_UpdateConfig(t, fmt.Sprintf("%v", vBool), &actual.Archive)
+			cmdFlags.Set("deactivate", testValue)
+			if vBool, err := cmdFlags.GetBool("deactivate"); err == nil {
+				testDecodeJson_UpdateConfig(t, fmt.Sprintf("%v", vBool), &actual.Deactivate)
 
 			} else {
 				assert.FailNow(t, err.Error())
