@@ -108,12 +108,15 @@ func WatchFlyteDeployment(ctx context.Context, appsClient corev1.CoreV1Interface
 				// version v1.22.11. We are on v1.13.0 for some reason.
 				if pod.IsPodReadyConditionTrue(v.Status) {
 					ready++
+				} else {
+					fmt.Printf("Pod %s is not ready\n", v.GetName())
 				}
 				if len(v.Status.Conditions) > 0 {
 					table.Append([]string{v.GetName(), string(v.Status.Phase), v.GetNamespace()})
 				}
 			}
 			table.Render()
+			fmt.Printf("%d/%d ready\n", ready, total)
 			if total == ready {
 				done = true
 			}
