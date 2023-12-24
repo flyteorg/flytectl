@@ -35,6 +35,24 @@ func TestLaunchPlanCanBeActivated(t *testing.T) {
 		})
 }
 
+func TestLaunchPlanCanBeArchived(t *testing.T) {
+	testLaunchPlanUpdate(
+		/* setup */ func(s *testutils.TestStruct, config *launchplan.UpdateConfig, launchplan *admin.LaunchPlan) {
+			launchplan.Closure.State = admin.LaunchPlanState_ACTIVE
+			config.Archive = true
+			config.Force = true
+		},
+		/* assert */ func(s *testutils.TestStruct, err error) {
+			assert.Nil(t, err)
+			s.MockAdminClient.AssertCalled(
+				t, "UpdateLaunchPlan", s.Ctx,
+				mock.MatchedBy(
+					func(r *admin.LaunchPlanUpdateRequest) bool {
+						return r.State == admin.LaunchPlanState_INACTIVE
+					}))
+		})
+}
+
 func TestLaunchPlanCanBeDeactivated(t *testing.T) {
 	testLaunchPlanUpdate(
 		/* setup */ func(s *testutils.TestStruct, config *launchplan.UpdateConfig, launchplan *admin.LaunchPlan) {

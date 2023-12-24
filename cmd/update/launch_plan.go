@@ -7,6 +7,7 @@ import (
 
 	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/core"
+	"github.com/flyteorg/flyte/flytestdlib/logger"
 	"github.com/flyteorg/flytectl/clierrors"
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/launchplan"
@@ -44,7 +45,15 @@ func updateLPFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandCont
 	}
 
 	activate := launchplan.UConfig.Activate
-	deactivate := launchplan.UConfig.Deactivate
+	archive := launchplan.UConfig.Archive
+
+	var deactivate bool
+	if archive {
+		deprecatedCommandWarning(ctx, "archive", "deactivate")
+		deactivate = true
+	} else {
+		deactivate = launchplan.UConfig.Deactivate
+	}
 	if activate == deactivate && deactivate {
 		return fmt.Errorf(clierrors.ErrInvalidBothStateUpdate)
 	}
@@ -105,4 +114,8 @@ func updateLPFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandCont
 	fmt.Printf("updated launch plan successfully on %s", name)
 
 	return nil
+}
+
+func deprecatedCommandWarning(ctx context.Context, oldCommand string, newCommand string) {
+	logger.Warningf(ctx, "--%v is deprecated, Please use --%v", oldCommand, newCommand)
 }
