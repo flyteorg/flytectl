@@ -102,9 +102,6 @@ func WatchFlyteDeployment(ctx context.Context, appsClient corev1.CoreV1Interface
 		ready = 0
 		if total != 0 {
 			for _, v := range pods.Items {
-				// TODO (jeev): We should really be using
-				// `IsContainersReadyConditionTrue`, but that is not available until
-				// version v1.22.11. We are on v1.13.0 for some reason.
 				for _, condition := range v.Status.Conditions {
 					if condition.Type == corev1api.PodReady {
 						ready++
