@@ -103,7 +103,7 @@ func WatchFlyteDeployment(ctx context.Context, appsClient corev1.CoreV1Interface
 		if total != 0 {
 			for _, v := range pods.Items {
 				for _, condition := range v.Status.Conditions {
-					if fmt.Sprintf("%s", condition.Type) == fmt.Sprintf("%s", corev1api.PodReady) && condition.Status == corev1api.ConditionTrue {
+					if string(condition.Type) == string(corev1api.PodReady) && condition.Status == corev1api.ConditionTrue {
 						ready++
 						break
 					}
