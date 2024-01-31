@@ -13,19 +13,19 @@ Synopsis
 Allows you to update the characteristics of a project, including its name, labels and description.
 Also allows you to archive or activate (unarchive) a project.
 
-To archive a project, specify its ID with the *-p* flag and add the *----archive* flag:
+To archive a project, specify its ID with the *p* flag and add the *archive* flag:
 
 ::
 
     flytectl update project -p my-project-id --archive
 
-To activate (unarchive) an archived project, specify its ID with the *-p* flag and add the *---activate* flag:
+To activate (unarchive) an archived project, specify its ID with the *p* flag and add the *activate* flag:
 
 ::
 
 	flytectl update project -p my-project-id --activate
 
-To update the characteristics of a project using flags, specify the project ID with the *-p* flag and the flags corresponding to the characteristics you want to update:
+To update the characteristics of a project using flags, specify the project ID with the *p* flag and the flags corresponding to the characteristics you want to update:
 
 ::
 
@@ -45,7 +45,7 @@ To update the characteristics of a project using a *yaml* file, define the file 
 
 (Note: The name parameter must not contain whitespace)
 
-Then, pass it in using the *---file* flag:
+Then, pass it in using the *file* flag:
 
 ::
 
@@ -53,10 +53,9 @@ Then, pass it in using the *---file* flag:
 
 To archive or activate (unarchive) a project using a *yaml* file:
 
-* Add a state field, with a value of *0* for activated (unarchived)
-or *1* for archived, at the top level of the the *yaml* file.
+* Add a state field, with a value of *0* for activated (unarchived) or *1* for archived, at the top level of the the *yaml* file.
 
-* Add the *---archive* flag to the command.
+* Add the *archive* flag to the command.
 
 For example, to archive a project:
 
@@ -82,11 +81,9 @@ And to activate (unarchive) the same project:
 
     $ uctl update project --file update.yaml --archive
 
-Note that
-
-* The *state* field only takes effect if the *---archive* flag is present in the command.
-* The *---activate** flag is not used when updating a project using a *yaml* file.
-  Instead, a *state* field value of *0* in conjunction with the *---archive* flag is used.
+Note that when using a *yaml* file, the *activate* flag is not used.
+Instead, the *archive* flag is used for *both* archiving and activating (unarchiving) with the difference being in the *state* field of the *yaml* file.
+Furthermore, the *state* field only takes effect if the *archive* flag is present in the command.
 
 Usage
 
