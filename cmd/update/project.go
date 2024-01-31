@@ -89,11 +89,10 @@ And to activate (unarchive) the same project:
 
     $ uctl update project --file update.yaml --archive
 
-Note that
+The *state* field only takes effect if the *archive* flag is present in the command.
 
-* The *state* field only takes effect if the *archive* flag is present in the command.
-* The *activate** flag is not used when updating a project using a *yaml* file.
-  Instead, a *state* field value of *0* in conjunction with the *archive* flag is used.
+The *activate** flag is not used when updating a project using a *yaml* file.
+Instead, a *state* field value of *0* in conjunction with the *archive* flag is used.
 
 Usage
 `
