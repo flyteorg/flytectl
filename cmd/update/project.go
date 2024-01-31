@@ -60,8 +60,7 @@ Then, pass it in using the *file* flag:
 
 To archive or activate (unarchive) a project using a *yaml* file:
 
-* Add a state field, with a value of *0* for activated (unarchived)
-or *1* for archived, at the top level of the the *yaml* file.
+* Add a state field, with a value of *0* for activated (unarchived) or *1* for archived, at the top level of the the *yaml* file.
 
 * Add the *archive* flag to the command.
 
@@ -89,10 +88,9 @@ And to activate (unarchive) the same project:
 
     $ uctl update project --file update.yaml --archive
 
-The *state* field only takes effect if the *archive* flag is present in the command.
-
-The *activate** flag is not used when updating a project using a *yaml* file.
-Instead, a *state* field value of *0* in conjunction with the *archive* flag is used.
+Note that when using a *yaml* file, the *activate* flag is not used.
+Instead, the *archive* flag is used for *both* archiving and activating (unarchiving) with the difference being in the *state* field of the *yaml* file.
+Furthermore, the *state* field only takes effect if the *archive* flag is present in the command.
 
 Usage
 `
