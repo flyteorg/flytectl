@@ -112,8 +112,8 @@ func ExecutionToProtoMessages(l []*admin.Execution) []proto.Message {
 
 // Combines the exeuction along with details
 type executionWithDetails struct {
-	Executions *admin.Execution
-	Details    []*NodeExecutionClosure
+	Execution *admin.Execution
+	Details   []*NodeExecutionClosure
 }
 
 func (e *executionWithDetails) Reset() {
@@ -179,8 +179,8 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 				return err
 			}
 			allExecutionWithDetails = append(allExecutionWithDetails, &executionWithDetails{
-				Executions: exec,
-				Details:    nExecDetailsForView,
+				Execution: exec,
+				Details:   nExecDetailsForView,
 			})
 		}
 		logger.Infof(ctx, "Retrieved %v executions", len(allExecutionWithDetails))
