@@ -9,6 +9,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/execution"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
 	"github.com/flyteorg/flytectl/pkg/printer"
+	"sync"
 
 	"github.com/golang/protobuf/proto"
 )
@@ -172,21 +173,55 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 
 	var allExecutionWithDetails []*executionWithDetails
 	if execution.DefaultConfig.Details {
-		allExecutionWithDetails = make([]*executionWithDetails, 0, len(executionList.Executions))
-		for _, exec := range executionList.Executions {
-			nExecDetailsForView, err := getExecutionDetails(ctx, config.GetConfig().Project, config.GetConfig().Domain, exec.GetId().GetName(), "", cmdCtx)
-			if err != nil {
-				return err
-			}
-			allExecutionWithDetails = append(allExecutionWithDetails, &executionWithDetails{
-				Execution: exec,
-				Details:   nExecDetailsForView,
-			})
+		allExecutionWithDetails, err = fetchAllExecutionDetails(ctx, config.GetConfig(), cmdCtx, executionList)
+		if err != nil {
+			return err
 		}
 		logger.Infof(ctx, "Retrieved %v executions", len(allExecutionWithDetails))
+		if config.GetConfig().MustOutputFormat() == printer.OutputFormatTABLE {
+			// Change it to json to be the default format for the details view
+			config.GetConfig().Output = printer.OutputFormatJSON.String()
+		}
 		return adminPrinter.PrintInterface(config.GetConfig().MustOutputFormat(), nodeExecutionColumns, allExecutionWithDetails)
 	}
 	logger.Infof(ctx, "Retrieved %v executions", len(executionList.Executions))
 	return adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns,
 		ExecutionToProtoMessages(executionList.Executions)...)
+}
+func fetchExecutionDetails(ctx context.Context, wg *sync.WaitGroup, config *config.Config, exec *admin.Execution, cmdCtx cmdCore.CommandContext, ch chan<- *executionWithDetails) {
+	defer wg.Done()
+
+	execID := exec.GetId().GetName() // Extracting the execution ID from the exec object
+	nExecDetailsForView, err := getExecutionDetails(ctx, config.Project, config.Domain, execID, "", cmdCtx)
+	if err != nil {
+		// Handle the error as needed
+		return
+	}
+
+	ch <- &executionWithDetails{
+		Execution: exec, // Assigning the exec object
+		Details:   nExecDetailsForView,
+	}
+}
+
+func fetchAllExecutionDetails(ctx context.Context, config *config.Config, cmdCtx cmdCore.CommandContext, executionList *admin.ExecutionList) ([]*executionWithDetails, error) {
+	var wg sync.WaitGroup
+	ch := make(chan *executionWithDetails)
+
+	for _, exec := range executionList.Executions {
+		wg.Add(1)
+		go fetchExecutionDetails(ctx, &wg, config, exec, cmdCtx, ch)
+	}
+
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+
+	var allExecutionWithDetails []*executionWithDetails
+	for execWithDetails := range ch {
+		allExecutionWithDetails = append(allExecutionWithDetails, execWithDetails)
+	}
+
+	return allExecutionWithDetails, nil
 }
