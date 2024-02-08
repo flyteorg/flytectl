@@ -3,7 +3,6 @@ package get
 import (
 	"context"
 	"fmt"
-
 	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyte/flytestdlib/logger"
 	"github.com/flyteorg/flytectl/cmd/config"
@@ -111,6 +110,31 @@ func ExecutionToProtoMessages(l []*admin.Execution) []proto.Message {
 	return messages
 }
 
+// Combines the exeuction along with details
+type executionWithDetails struct {
+	Executions *admin.Execution
+	Details    []*NodeExecutionClosure
+}
+
+func (e *executionWithDetails) Reset() {
+	*e = executionWithDetails{}
+}
+
+func (e *executionWithDetails) String() string {
+	return proto.CompactTextString(e)
+}
+
+func (e *executionWithDetails) ProtoMessage() {
+}
+
+func ExecutionWithDetailsToProtoMessages(l []*executionWithDetails) []proto.Message {
+	messages := make([]proto.Message, 0, len(l))
+	for _, m := range l {
+		messages = append(messages, m)
+	}
+	return messages
+}
+
 func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	adminPrinter := printer.Printer{}
 	var executions []*admin.Execution
@@ -144,6 +168,23 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 	executionList, err := cmdCtx.AdminFetcherExt().ListExecution(ctx, config.GetConfig().Project, config.GetConfig().Domain, execution.DefaultConfig.Filter)
 	if err != nil {
 		return err
+	}
+
+	var allExecutionWithDetails []*executionWithDetails
+	if execution.DefaultConfig.Details {
+		allExecutionWithDetails = make([]*executionWithDetails, 0, len(executionList.Executions))
+		for _, exec := range executionList.Executions {
+			nExecDetailsForView, err := getExecutionDetails(ctx, config.GetConfig().Project, config.GetConfig().Domain, exec.GetId().GetName(), "", cmdCtx)
+			if err != nil {
+				return err
+			}
+			allExecutionWithDetails = append(allExecutionWithDetails, &executionWithDetails{
+				Executions: exec,
+				Details:    nExecDetailsForView,
+			})
+		}
+		logger.Infof(ctx, "Retrieved %v executions", len(allExecutionWithDetails))
+		return adminPrinter.PrintInterface(config.GetConfig().MustOutputFormat(), nodeExecutionColumns, allExecutionWithDetails)
 	}
 	logger.Infof(ctx, "Retrieved %v executions", len(executionList.Executions))
 	return adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns,
