@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/docker/docker/client"
@@ -59,6 +61,18 @@ var (
 	StartingBufLen     = 32*1024 + StdWriterPrefixLen + 1
 	ExtraHosts         = []string{"host.docker.internal:host-gateway"}
 )
+
+// GetExtraHosts will return extra hosts for the container
+func GetExtraHosts() []string {
+	// Linux machine with native docker engine does not have host.docker.internal and needs to add the hostname mapping manually.
+	if runtime.GOOS == "linux" {
+		// Here assume that if /var/run/docker.sock exists and is a socket file and is not symbolic link, then the docker engine is native
+		if fileInfo, err := os.Lstat("/var/run/docker.sock"); err == nil && fileInfo.Mode().Type() == fs.ModeSocket {
+			return ExtraHosts
+		}
+	}
+	return []string{}
+}
 
 // GetDockerClient will returns the docker client
 func GetDockerClient() (Docker, error) {
@@ -266,7 +280,7 @@ func StartContainer(ctx context.Context, cli Docker, volumes []mount.Mount, expo
 		Mounts:       volumes,
 		PortBindings: portBindings,
 		Privileged:   true,
-		ExtraHosts:   ExtraHosts, // add it because linux machine doesn't have this host name by default
+		ExtraHosts:   GetExtraHosts(),
 	}, nil,
 		nil, name)
 
