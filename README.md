@@ -44,7 +44,7 @@ Flytectl was designed as a portable and lightweight command-line interface to wo
 
 3. Start Sandbox using Flytectl.
     ```bash
-    $ flytectl sandbox start 
+    $ flytectl demo start 
     ```
 
 4. Register examples.
