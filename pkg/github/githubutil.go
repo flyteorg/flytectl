@@ -232,6 +232,7 @@ func GetGHRepoService() GHRepoService {
 				&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
 			)))
 			if _, err := ListReleases(flyte, gh.Repositories); err != nil {
+				logger.Warnf(context.Background(), "GITHUB_TOKEN exists failed to fetch releases, using empty http.Client: %s.", err)
 				gh = nil
 			}
 		}
