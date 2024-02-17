@@ -231,7 +231,11 @@ func GetGHRepoService() GHRepoService {
 			gh = github.NewClient(oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(
 				&oauth2.Token{AccessToken: os.Getenv("GITHUB_TOKEN")},
 			)))
-		} else {
+			if _, err := ListReleases(flyte, gh.Repositories); err != nil {
+				gh = nil
+			}
+		}
+		if gh == nil {
 			gh = github.NewClient(&http.Client{})
 		}
 		return gh.Repositories
