@@ -91,7 +91,7 @@ jobs:
       - name: Register cookbook
         run: bin/flytectl register examples -d development  -p flytesnacks
       - name: Teardown Sandbox cluster
-        run: bin/flytectl sandbox teardown
+        run: bin/flytectl demo teardown
 
   bump_version:
     name: Bump Version
