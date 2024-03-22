@@ -2,6 +2,8 @@ package get
 
 import (
 	"context"
+	"fmt"
+	"os"
 
 	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/admin"
 	"github.com/flyteorg/flyte/flytestdlib/logger"
@@ -11,7 +13,29 @@ import (
 	"github.com/flyteorg/flytectl/pkg/ext"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/golang/protobuf/proto"
+
+	"github.com/charmbracelet/bubbles/table"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
+
+type model struct {
+	table table.Model
+}
+
+func (m model) Init() tea.Cmd { return nil }
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	return m, tea.Quit
+}
+
+func (m model) View() string {
+	return baseStyle.Render(m.table.View()) + "\n"
+}
+
+var baseStyle = lipgloss.NewStyle().
+	BorderStyle(lipgloss.NormalBorder()).
+	BorderForeground(lipgloss.Color("240"))
 
 const (
 	taskShort = "Gets task resources"
@@ -142,6 +166,67 @@ func TaskToTableProtoMessages(l []*admin.Task) []proto.Message {
 	return messages
 }
 
+// TODO, the width need to be calculated based on the text width
+func printBubbleTeaTable(tasks []*admin.Task) error {
+	columns := []table.Column{
+		{Title: "Version", Width: 10},
+		{Title: "Name", Width: 20},
+		{Title: "Type", Width: 15},
+		// {Title: "Inputs", Width: 30},
+		// {Title: "Outputs", Width: 30},
+		// {Title: "Discoverable", Width: 15},
+		// {Title: "Discovery Version", Width: 20},
+		// {Title: "Created At", Width: 25},
+	}
+
+	var rows []table.Row
+	for _, task := range tasks {
+		row := table.Row{
+			task.Id.Version,
+			task.Id.Name,
+			task.Closure.CompiledTask.Template.Type,
+			// task.Closure.CompiledTask.Template.Interface.Inputs.Variables._formatted_descriptions.Description,
+
+			// task.closure.compiledTask.template.type,
+
+			// task.Id.Type,
+			// task.Closure.CompiledTask.Template.Type,
+			// task.Closure.CompiledTask.Template.Interface.Inputs.Variables,
+			// task.Closure.CompiledTask.Template.Interface.Outputs.Variables,
+			// task.Closure.CompiledTask.Template.Metadata.Discoverable,
+			// task.Closure.CompiledTask.Template.Metadata.DiscoveryVersion,
+			// task.Closure.CreatedAt,
+		}
+		rows = append(rows, row)
+	}
+
+	t := table.New(
+		table.WithColumns(columns),
+		table.WithRows(rows),
+		table.WithFocused(true),
+		table.WithHeight(7),
+	)
+	s := table.DefaultStyles()
+	s.Header = s.Header.
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		BorderBottom(true).
+		Bold(false)
+	s.Selected = s.Selected.
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("57")).
+		Bold(false)
+	t.SetStyles(s)
+
+	m := model{t}
+	if _, err := tea.NewProgram(m).Run(); err != nil {
+		fmt.Println("Error running program:", err)
+		os.Exit(1)
+	}
+
+	return nil
+}
+
 func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandContext) error {
 	taskPrinter := printer.Printer{}
 	var tasks []*admin.Task
@@ -161,6 +246,9 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 
 	}
 	tasks, err = cmdCtx.AdminFetcherExt().FetchAllVerOfTask(ctx, "", config.GetConfig().Project, config.GetConfig().Domain, taskConfig.DefaultConfig.Filter)
+	// fmt.Println("@@@", tasks)
+	return printBubbleTeaTable(tasks)
+
 	if err != nil {
 		return err
 	}
@@ -168,6 +256,7 @@ func getTaskFunc(ctx context.Context, args []string, cmdCtx cmdCore.CommandConte
 	if config.GetConfig().MustOutputFormat() == printer.OutputFormatTABLE {
 		return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToTableProtoMessages(tasks)...)
 	}
+
 	return taskPrinter.Print(config.GetConfig().MustOutputFormat(), taskColumns, TaskToProtoMessages(tasks)...)
 }
 
