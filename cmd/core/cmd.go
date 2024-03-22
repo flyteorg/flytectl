@@ -73,8 +73,7 @@ func generateCommandFunc(cmdEntry CommandEntry) func(cmd *cobra.Command, args []
 		if len(os.Getenv("FLTYE_ADMIN_ENDPOINT")) > 0 {
 			envEndpoint, err := url.Parse(os.Getenv("FLTYE_ADMIN_ENDPOINT"))
 			if err != nil {
-				fmt.Println("Error parsing URL:", err)
-				return err
+				return fmt.Errorf("error parsing url: %v", err)
 			}
 			adminCfg.Endpoint = stdConfig.URL{
 				URL: *envEndpoint,
