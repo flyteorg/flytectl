@@ -1,8 +1,12 @@
 package config
 
 import (
+	"context"
+	"net/url"
+	"os"
 	"testing"
 
+	"github.com/flyteorg/flyte/flyteidl/clients/go/admin"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,5 +32,20 @@ func TestInvalidOutputFormat(t *testing.T) {
 		}
 	}()
 	result = c.MustOutputFormat()
+}
 
+func TestUpdateConfigWithEnvVar(t *testing.T) {
+	originalValue := os.Getenv("FLYTE_ADMIN_ENDPOINT")
+	defer os.Setenv("FLYTE_ADMIN_ENDPOINT", originalValue)
+
+	dummyUrl := "dns://dummyHost"
+	os.Setenv("FLYTE_ADMIN_ENDPOINT", dummyUrl)
+
+	parsedDummyUrl, _ := url.Parse(dummyUrl)
+
+	adminCfg := admin.GetConfig(context.Background())
+
+	assert.NotEqual(t, adminCfg.Endpoint.URL, *parsedDummyUrl)
+	UpdateConfigWithEnvVar()
+	assert.Equal(t, adminCfg.Endpoint.URL, *parsedDummyUrl)
 }

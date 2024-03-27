@@ -3,15 +3,12 @@ package cmdcore
 import (
 	"context"
 	"fmt"
-	"net/url"
-	"os"
 
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/flyteorg/flyte/flyteidl/clients/go/admin"
-	stdConfig "github.com/flyteorg/flyte/flytestdlib/config"
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/pkg/pkce"
 
@@ -69,17 +66,6 @@ func generateCommandFunc(cmdEntry CommandEntry) func(cmd *cobra.Command, args []
 		}
 
 		adminCfg := admin.GetConfig(ctx)
-
-		if len(os.Getenv("FLTYE_ADMIN_ENDPOINT")) > 0 {
-			envEndpoint, err := url.Parse(os.Getenv("FLTYE_ADMIN_ENDPOINT"))
-			if err != nil {
-				return fmt.Errorf("error parsing url: %v", err)
-			}
-			adminCfg.Endpoint = stdConfig.URL{
-				URL: *envEndpoint,
-			}
-		}
-
 		if len(adminCfg.Endpoint.String()) == 0 {
 			return cmdEntry.CmdFunc(ctx, args, CommandContext{})
 		}
