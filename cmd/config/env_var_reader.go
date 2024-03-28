@@ -10,14 +10,11 @@ import (
 	"github.com/flyteorg/flyte/flytestdlib/config"
 )
 
+const flyteAdminEndpoint = "FLYTE_ADMIN_ENDPOINT"
+
 type FuncType func() error
 
-var funcMap = map[string]FuncType{}
-
-func init() {
-	funcMap["FLYTE_ADMIN_ENDPOINT"] = getAdminEndpoint
-	// TODO add more env vars if needed
-}
+var funcMap = map[string]FuncType{flyteAdminEndpoint: updateAdminEndpoint}
 
 func UpdateConfigWithEnvVar() error {
 	for envVar, f := range funcMap {
@@ -30,16 +27,19 @@ func UpdateConfigWithEnvVar() error {
 	return nil
 }
 
-func getAdminEndpoint() error {
+func updateAdminEndpoint() error {
 	ctx := context.Background()
 	cfg := admin.GetConfig(ctx)
-	if len(os.Getenv("FLYTE_ADMIN_ENDPOINT")) > 0 {
-		envEndpoint, err := url.Parse(os.Getenv("FLYTE_ADMIN_ENDPOINT"))
+
+	if len(os.Getenv(flyteAdminEndpoint)) > 0 {
+		envEndpoint, err := url.Parse(os.Getenv(flyteAdminEndpoint))
 		if err != nil {
-			return fmt.Errorf("error parsing env var flyte_admin_endpoint: %v", err)
+			return fmt.Errorf("error parsing env var %v: %v", flyteAdminEndpoint, err)
 		}
 		cfg.Endpoint = config.URL{URL: *envEndpoint}
-		admin.SetConfig(cfg)
+		if err := admin.SetConfig(cfg); err != nil {
+			return err
+		}
 	}
 	return nil
 }
