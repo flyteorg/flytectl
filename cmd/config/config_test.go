@@ -38,14 +38,15 @@ func TestUpdateConfigWithEnvVar(t *testing.T) {
 	originalValue := os.Getenv("FLYTE_ADMIN_ENDPOINT")
 	defer os.Setenv("FLYTE_ADMIN_ENDPOINT", originalValue)
 
-	dummyUrl := "dns://dummyHost"
-	os.Setenv("FLYTE_ADMIN_ENDPOINT", dummyUrl)
+	dummyURL := "dns://dummyHost"
+	os.Setenv("FLYTE_ADMIN_ENDPOINT", dummyURL)
 
-	parsedDummyUrl, _ := url.Parse(dummyUrl)
+	parsedDummyURL, _ := url.Parse(dummyURL)
 
 	adminCfg := admin.GetConfig(context.Background())
 
-	assert.NotEqual(t, adminCfg.Endpoint.URL, *parsedDummyUrl)
-	UpdateConfigWithEnvVar()
-	assert.Equal(t, adminCfg.Endpoint.URL, *parsedDummyUrl)
+	assert.NotEqual(t, adminCfg.Endpoint.URL, *parsedDummyURL)
+	err := UpdateConfigWithEnvVar()
+	assert.Nil(t, err)
+	assert.Equal(t, adminCfg.Endpoint.URL, *parsedDummyURL)
 }
