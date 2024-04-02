@@ -12,14 +12,16 @@ import (
 
 const flyteAdminEndpoint = "FLYTE_ADMIN_ENDPOINT"
 
-type FuncType func() error
+type UpdateFunc func(context.Context) error
 
-var funcMap = map[string]FuncType{flyteAdminEndpoint: updateAdminEndpoint}
+var envToUpdateFunc = map[string]UpdateFunc{flyteAdminEndpoint: updateAdminEndpoint}
 
 func UpdateConfigWithEnvVar() error {
-	for envVar, f := range funcMap {
+	ctx := context.Background()
+
+	for envVar, updateFunc := range envToUpdateFunc {
 		if os.Getenv(envVar) != "" {
-			if err := f(); err != nil {
+			if err := updateFunc(ctx); err != nil {
 				return fmt.Errorf("error update config with env var: %v", err)
 			}
 		}
@@ -27,8 +29,7 @@ func UpdateConfigWithEnvVar() error {
 	return nil
 }
 
-func updateAdminEndpoint() error {
-	ctx := context.Background()
+func updateAdminEndpoint(ctx context.Context) error {
 	cfg := admin.GetConfig(ctx)
 
 	if len(os.Getenv(flyteAdminEndpoint)) > 0 {
