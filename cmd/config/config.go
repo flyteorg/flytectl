@@ -22,6 +22,7 @@ type Config struct {
 	Project string `json:"project" pflag:",Specifies the project to work on."`
 	Domain  string `json:"domain" pflag:",Specifies the domain to work on."`
 	Output  string `json:"output" pflag:",Specifies the output type."`
+	Format  string `json:"format" pflag:",Specifies the CLI format"` // Format is just used as a placeholder to notify user we have this flag in --help
 }
 
 // OutputFormat will return output formate

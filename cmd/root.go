@@ -57,6 +57,7 @@ func newRootCmd() *cobra.Command {
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Project), "project", "p", "", "Specifies the Flyte project.")
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Domain), "domain", "d", "", "Specifies the Flyte project's domain.")
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Output), "output", "o", printer.OutputFormatTABLE.String(), fmt.Sprintf("Specifies the output type - supported formats %s. NOTE: dot, doturl are only supported for Workflow", printer.OutputFormats()))
+	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Format), "format", "f", "", "Set this flag to 'bubbletea' to use a more interactive CLI")
 
 	rootCmd.AddCommand(get.CreateGetCommand())
 	compileCmd := compile.CreateCompileCommand()
@@ -101,7 +102,7 @@ Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
 
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
 `)
-
+	// rootCmd.SetArgs([]string{"get", "execution", "-p", "flytesnacks", "-d", "developement"})
 	bubbletea.Bubbletea(rootCmd)
 
 	return rootCmd
