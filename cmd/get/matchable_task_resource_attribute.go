@@ -37,27 +37,6 @@ Example: output from the command:
 
  {"project":"flytesnacks","domain":"development","workflow":"core.control_flow.merge_sort.merge_sort","defaults":{"cpu":"1","memory":"150Mi"},"limits":{"cpu":"2","memory":"450Mi"}}
 
-
-Write the task resource attributes to a file. If there are no task resource attributes, a file would be populated with the basic data.
-The config file is written to tra.yaml file.
-Example: content of tra.yaml:
-
-::
-
- flytectl get task-resource-attribute --attrFile tra.yaml
-
-
-.. code-block:: yaml
-
-    domain: development
-    project: flytesnacks
-    defaults:
-      cpu: "1"
-      memory: "150Mi"
-    limits:
-      cpu: "2"
-      memory: "450Mi"
-
 Usage
 `
 )
