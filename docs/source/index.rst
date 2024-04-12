@@ -33,6 +33,12 @@ Flytectl is a Golang binary that can be installed on any platform supported by G
 
       flytectl upgrade
 
+.. tabbed:: Go
+
+  .. prompt:: bash $
+
+      go install github.com/flyteorg/flytectl@latest
+
 .. tabbed:: Other Operating systems
 
   .. prompt:: bash $
