@@ -1,7 +1,16 @@
 package bubbletea
 
 import (
+	"context"
+	"fmt"
+	"os"
+	"strings"
+
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/flyteorg/flyte/flyteidl/clients/go/admin"
+	"github.com/flyteorg/flytectl/cmd/config/subcommand/project"
+	cmdcore "github.com/flyteorg/flytectl/cmd/core"
+	"github.com/flyteorg/flytectl/pkg/pkce"
 	"github.com/spf13/cobra"
 )
 
@@ -12,24 +21,184 @@ type Command struct {
 }
 
 var (
+	rootCmd *cobra.Command
+	newArgs []string
+	flags   []string
+)
+var (
+	DOMAIN_NAME   = [3]string{"development", "staging", "production"}
+	isCommand     = true
 	nameToCommand = map[string]Command{}
-	rootCmd       *cobra.Command
-	targetArgs    []string
 )
 
+// Check if -f bubbletea is in args
+func ifRunBubbleTea(_rootCmd cobra.Command) (*cobra.Command, bool, error) {
+	cmd, flags, err := _rootCmd.Find(os.Args[1:])
+	if err != nil {
+		return cmd, false, err
+	}
+
+	err = _rootCmd.ParseFlags(flags)
+	if err != nil {
+		return nil, false, err
+	}
+
+	format, err := _rootCmd.Flags().GetString("format")
+	if format != "bubbletea" || err != nil {
+		return nil, false, err
+	} else {
+		return cmd, true, err
+	}
+}
+
+// Generate a []list.Item of cmd's subcommands
 func generateSubCmdItems(cmd *cobra.Command) []list.Item {
 	items := []list.Item{}
 
 	for _, subcmd := range cmd.Commands() {
-		nameToCommand[subcmd.Use] = Command{
+		subCmdName := strings.Fields(subcmd.Use)[0]
+		nameToCommand[subCmdName] = Command{
 			Cmd:   subcmd,
-			Name:  subcmd.Use,
+			Name:  subCmdName,
 			Short: subcmd.Short,
 		}
-		items = append(items, item(subcmd.Use))
+		items = append(items, item(subCmdName))
 	}
 
 	return items
+}
+
+// Generate list.Model for domain names
+func genDomainListModel(m model) (model, error) {
+	items := []list.Item{}
+	for _, domain := range DOMAIN_NAME {
+		items = append(items, item(domain))
+	}
+
+	m.list = genList(items, "Please choose one of the domains")
+	return m, nil
+}
+
+// Get the "get" "project" cobra.Command item
+func extractGetProjectCmd() *cobra.Command {
+	var getProjectCmd *cobra.Command
+
+	for _, cmd := range rootCmd.Commands() {
+		if cmd.Use == "get" {
+			getProjectCmd = cmd
+			break
+		}
+	}
+	for _, cmd := range getProjectCmd.Commands() {
+		if cmd.Use == "project" {
+			getProjectCmd = cmd
+			break
+		}
+	}
+	return getProjectCmd
+}
+
+// Get all the project names from the configured endpoint
+func getProjects(getProjectCmd *cobra.Command) ([]string, error) {
+	ctx := context.Background()
+	rootCmd.PersistentPreRunE(rootCmd, []string{})
+	adminCfg := admin.GetConfig(ctx)
+
+	clientSet, err := admin.ClientSetBuilder().WithConfig(admin.GetConfig(ctx)).
+		WithTokenCache(pkce.TokenCacheKeyringProvider{
+			ServiceUser: fmt.Sprintf("%s:%s", adminCfg.Endpoint.String(), pkce.KeyRingServiceUser),
+			ServiceName: pkce.KeyRingServiceName,
+		}).Build(ctx)
+	if err != nil {
+		return nil, err
+	}
+	cmdCtx := cmdcore.NewCommandContext(clientSet, getProjectCmd.OutOrStdout())
+
+	projects, err := cmdCtx.AdminFetcherExt().ListProjects(ctx, project.DefaultConfig.Filter)
+	if err != nil {
+		return nil, err
+	}
+
+	projectNames := []string{}
+	for _, p := range projects.Projects {
+		projectNames = append(projectNames, p.Id)
+	}
+
+	return projectNames, nil
+}
+
+// Generate list.Model for project names from the configured endpoint
+func genProjectListModel(m model) (model, error) {
+	getProjectCmd := extractGetProjectCmd()
+	projects, err := getProjects(getProjectCmd)
+	if err != nil {
+		return m, err
+	}
+
+	items := []list.Item{}
+	for _, project := range projects {
+		items = append(items, item(project))
+	}
+
+	m.list = genList(items, "Please choose one of the projects")
+
+	return m, nil
+}
+
+// Generate list.Model of options for different flags
+func genFlagListModel(m model, f string) (model, error) {
+	var err error
+
+	switch f {
+	case "-p":
+		m, err = genProjectListModel(m)
+	case "-d":
+		m, err = genDomainListModel(m)
+	}
+
+	return m, err
+}
+
+// Generate list.Model of subcommands from a given command
+func genCmdListModel(m model, c string) model {
+	if len(nameToCommand[c].Cmd.Commands()) == 0 {
+		return m
+	}
+
+	items := generateSubCmdItems(nameToCommand[c].Cmd)
+	l := genList(items, "")
+	m.list = l
+
+	return m
+}
+
+// Generate list.Model after user chose one of the item
+func genListModel(m model, item string) (model, error) {
+	newArgs = append(newArgs, item)
+
+	if isCommand {
+		m = genCmdListModel(m, item)
+		var ok bool
+		if flags, ok = commandFlagMap[sliceToString(newArgs)]; ok { // If found in commandFlagMap means last command
+			isCommand = false
+		} else {
+			return m, nil
+		}
+	}
+	if len(flags) > 0 {
+		nextFlag := flags[0]
+		flags = flags[1:]
+		newArgs = append(newArgs, nextFlag)
+		var err error
+		m, err = genFlagListModel(m, nextFlag)
+		if err != nil {
+			return m, err
+		}
+	} else {
+		m.quitting = true
+		return m, nil
+	}
+	return m, nil
 }
 
 // func isValidCommand(curArg string, cmd *cobra.Command) (*cobra.Command, bool) {
@@ -54,17 +223,3 @@ func generateSubCmdItems(cmd *cobra.Command) []list.Item {
 
 // 	return findSubCmdItems(subCmd, inputArgs[1:])
 // }
-
-func newList(i string) (list.Model, bool) {
-
-	items := []list.Item{}
-
-	if len(nameToCommand[i].Cmd.Commands()) == 0 {
-		return list.New(items, itemDelegate{}, defaultWidth, listHeight), true
-	}
-
-	items = generateSubCmdItems(nameToCommand[i].Cmd)
-	l := genList(items)
-
-	return l, false
-}

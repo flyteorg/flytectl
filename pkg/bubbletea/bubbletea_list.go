@@ -13,12 +13,12 @@ import (
 )
 
 const (
-	listHeight   = 14
-	defaultWidth = 20
+	listHeight   = 17
+	defaultWidth = 40
 )
 
 var (
-	// titleStyle        = lipgloss.NewStyle().MarginLeft(2)
+	titleStyle        = lipgloss.NewStyle().MarginLeft(2)
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
 	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
 	paginationStyle   = list.DefaultStyles().PaginationStyle.PaddingLeft(4)
@@ -76,17 +76,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		case "enter":
-			i, _ := m.list.SelectedItem().(item)
-			targetArgs = append(targetArgs, string(i))
-
-			var isLeaf bool
-			m.list, isLeaf = newList(string(i))
-			if isLeaf {
-				m.quitting = true
-				rootCmd.SetArgs(targetArgs)
+			item, _ := m.list.SelectedItem().(item)
+			m, err := genListModel(m, string(item))
+			if err != nil || m.quitting {
 				return m, tea.Quit
 			}
-
 			return m, nil
 		}
 	}
@@ -103,42 +97,24 @@ func (m model) View() string {
 	return "\n" + m.list.View()
 }
 
-func genList(items []list.Item) list.Model {
+func genList(items []list.Item, title string) list.Model {
 	l := list.New(items, itemDelegate{}, defaultWidth, listHeight)
-	// l.Title = "Choose one of the commands"
-	l.SetShowStatusBar(false)
 	l.SetShowTitle(false)
+	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
-	// l.Styles.Title = titleStyle
+	if title != "" {
+		l.Title = title
+		l.SetShowTitle(true)
+		l.Styles.Title = titleStyle
+	}
 	l.Styles.PaginationStyle = paginationStyle
 	l.Styles.HelpStyle = helpStyle
 
 	return l
 }
 
-func ifRunBubbleTea(_rootCmd cobra.Command) (*cobra.Command, bool, error) {
-	cmd, flags, err := _rootCmd.Find(os.Args[1:])
-	if err != nil {
-		return cmd, false, err
-	}
-
-	err = _rootCmd.ParseFlags(flags)
-	if err != nil {
-		return nil, false, err
-	}
-
-	format, err := _rootCmd.Flags().GetString("format")
-	if format != "bubbletea" || err != nil {
-		return nil, false, err
-	} else {
-		return cmd, true, err
-	}
-}
-
 func Bubbletea(_rootCmd *cobra.Command) error {
-
 	rootCmd = _rootCmd
-	targetArgs = os.Args[1:]
 
 	currentCmd, run, err := ifRunBubbleTea(*rootCmd)
 	if err != nil {
@@ -147,15 +123,19 @@ func Bubbletea(_rootCmd *cobra.Command) error {
 		return nil
 	}
 
+	InitCommandFlagMap()
+
 	items := generateSubCmdItems(currentCmd)
 
-	l := genList(items)
+	l := genList(items, "")
 	m := model{list: l}
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
+
+	rootCmd.SetArgs(append(os.Args[1:], newArgs...))
 
 	return nil
 }
