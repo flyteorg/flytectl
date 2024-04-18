@@ -103,7 +103,7 @@ Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
 `)
 	// rootCmd.SetArgs([]string{"get", "execution", "-p", "flytesnacks", "-d", "developement"})
-	bubbletea.Bubbletea(rootCmd)
+	bubbletea.BubbleteaCmdList(rootCmd)
 
 	return rootCmd
 }

@@ -54,16 +54,16 @@ func (d itemDelegate) Render(w io.Writer, m list.Model, index int, listItem list
 	fmt.Fprint(w, fn(str))
 }
 
-type model struct {
+type listModel struct {
 	list     list.Model
 	quitting bool
 }
 
-func (m model) Init() tea.Cmd {
+func (m listModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m listModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.list.SetWidth(msg.Width)
@@ -90,7 +90,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) View() string {
+func (m listModel) View() string {
 	if m.quitting {
 		return quitTextStyle.Render("")
 	}
@@ -113,13 +113,14 @@ func genList(items []list.Item, title string) list.Model {
 	return l
 }
 
-func Bubbletea(_rootCmd *cobra.Command) error {
+func BubbleteaCmdList(_rootCmd *cobra.Command) error {
 	rootCmd = _rootCmd
 
 	currentCmd, run, err := ifRunBubbleTea(*rootCmd)
 	if err != nil {
 		return err
-	} else if !run {
+	}
+	if !run {
 		return nil
 	}
 
@@ -128,14 +129,14 @@ func Bubbletea(_rootCmd *cobra.Command) error {
 	items := generateSubCmdItems(currentCmd)
 
 	l := genList(items, "")
-	m := model{list: l}
+	m := listModel{list: l}
 
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}
 
-	rootCmd.SetArgs(append(os.Args[1:], newArgs...))
+	rootCmd.SetArgs(newArgs)
 
 	return nil
 }

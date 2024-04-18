@@ -3,7 +3,6 @@ package bubbletea
 import (
 	"context"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -31,26 +30,6 @@ var (
 	nameToCommand = map[string]Command{}
 )
 
-// Check if -f bubbletea is in args
-func ifRunBubbleTea(_rootCmd cobra.Command) (*cobra.Command, bool, error) {
-	cmd, flags, err := _rootCmd.Find(os.Args[1:])
-	if err != nil {
-		return cmd, false, err
-	}
-
-	err = _rootCmd.ParseFlags(flags)
-	if err != nil {
-		return nil, false, err
-	}
-
-	format, err := _rootCmd.Flags().GetString("format")
-	if format != "bubbletea" || err != nil {
-		return nil, false, err
-	} else {
-		return cmd, true, err
-	}
-}
-
 // Generate a []list.Item of cmd's subcommands
 func generateSubCmdItems(cmd *cobra.Command) []list.Item {
 	items := []list.Item{}
@@ -69,7 +48,7 @@ func generateSubCmdItems(cmd *cobra.Command) []list.Item {
 }
 
 // Generate list.Model for domain names
-func genDomainListModel(m model) (model, error) {
+func genDomainListModel(m listModel) (listModel, error) {
 	items := []list.Item{}
 	for _, domain := range DOMAIN_NAME {
 		items = append(items, item(domain))
@@ -128,7 +107,7 @@ func getProjects(getProjectCmd *cobra.Command) ([]string, error) {
 }
 
 // Generate list.Model for project names from the configured endpoint
-func genProjectListModel(m model) (model, error) {
+func genProjectListModel(m listModel) (listModel, error) {
 	getProjectCmd := extractGetProjectCmd()
 	projects, err := getProjects(getProjectCmd)
 	if err != nil {
@@ -146,7 +125,7 @@ func genProjectListModel(m model) (model, error) {
 }
 
 // Generate list.Model of options for different flags
-func genFlagListModel(m model, f string) (model, error) {
+func genFlagListModel(m listModel, f string) (listModel, error) {
 	var err error
 
 	switch f {
@@ -160,7 +139,7 @@ func genFlagListModel(m model, f string) (model, error) {
 }
 
 // Generate list.Model of subcommands from a given command
-func genCmdListModel(m model, c string) model {
+func genCmdListModel(m listModel, c string) listModel {
 	if len(nameToCommand[c].Cmd.Commands()) == 0 {
 		return m
 	}
@@ -173,7 +152,7 @@ func genCmdListModel(m model, c string) model {
 }
 
 // Generate list.Model after user chose one of the item
-func genListModel(m model, item string) (model, error) {
+func genListModel(m listModel, item string) (listModel, error) {
 	newArgs = append(newArgs, item)
 
 	if isCommand {
