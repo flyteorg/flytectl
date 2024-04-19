@@ -9,6 +9,8 @@ import (
 	"github.com/flyteorg/flytectl/cmd/config"
 	"github.com/flyteorg/flytectl/cmd/config/subcommand/execution"
 	cmdCore "github.com/flyteorg/flytectl/cmd/core"
+
+	"github.com/flyteorg/flytectl/pkg/bubbletea"
 	"github.com/flyteorg/flytectl/pkg/printer"
 
 	"github.com/golang/protobuf/proto"
@@ -146,6 +148,9 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 		return err
 	}
 	logger.Infof(ctx, "Retrieved %v executions", len(executionList.Executions))
-	return adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns,
-		ExecutionToProtoMessages(executionList.Executions)...)
+
+	bubbletea.BubbleteaPaginator(executionColumns, ExecutionToProtoMessages(executionList.Executions)...)
+	return nil
+	// return adminPrinter.Print(config.GetConfig().MustOutputFormat(), executionColumns,
+	// 	ExecutionToProtoMessages(executionList.Executions)...)
 }
