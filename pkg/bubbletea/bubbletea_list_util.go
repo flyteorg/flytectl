@@ -164,6 +164,7 @@ func genListModel(m listModel, item string) (listModel, error) {
 			return m, nil
 		}
 	}
+	// TODO check if some flags are already input as arguments by user
 	if len(flags) > 0 {
 		nextFlag := flags[0]
 		flags = flags[1:]
