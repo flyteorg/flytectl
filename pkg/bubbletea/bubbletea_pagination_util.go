@@ -8,11 +8,9 @@ import (
 
 	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
+
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	"github.com/kataras/tablewriter"
-	"github.com/landoop/tableprinter"
-	"github.com/yalp/jsonpath"
 )
 
 type DataCallback func(filter filters.Filters) []proto.Message
@@ -49,37 +47,6 @@ func (p PrintableProto) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func extractRow(data interface{}, columns []printer.Column) []string {
-	if columns == nil || data == nil {
-		return nil
-	}
-
-	tableData := make([]string, 0, len(columns))
-	for _, c := range columns {
-		out, err := jsonpath.Read(data, c.JSONPath)
-		if err != nil || out == nil {
-			out = ""
-		}
-		s := fmt.Sprintf("%s", out)
-		if c.TruncateTo != nil {
-			t := *c.TruncateTo
-			if len(s) > t {
-				s = s[:t]
-			}
-		}
-		tableData = append(tableData, s)
-	}
-	return tableData
-}
-
-func projectColumns(rows []interface{}, column []printer.Column) [][]string {
-	responses := make([][]string, 0, len(rows))
-	for _, row := range rows {
-		responses = append(responses, extractRow(row, column))
-	}
-	return responses
-}
-
 func printTable(m *pageModel, start int, end int) (string, error) {
 	curShowMessage := m.items[start:end]
 	printableMessages := make([]*PrintableProto, 0, len(curShowMessage))
@@ -92,34 +59,10 @@ func printTable(m *pageModel, start int, end int) (string, error) {
 		return "", fmt.Errorf("failed to marshal proto messages")
 	}
 
-	var rawRows []interface{}
-	if err := json.Unmarshal(jsonRows, &rawRows); err != nil {
-		return "", fmt.Errorf("failed to unmarshal into []interface{} from json")
-	}
-	if rawRows == nil {
-		return "", fmt.Errorf("expected one row or empty rows, received nil")
-	}
-	rows := projectColumns(rawRows, listHeader)
-
 	var buf strings.Builder
-	printer := tableprinter.New(&buf)
-	printer.AutoWrapText = false
-	printer.BorderLeft = true
-	printer.BorderRight = true
-	printer.BorderBottom = true
-	printer.BorderTop = true
-	printer.RowLine = true
-	printer.ColumnSeparator = "|"
-	printer.HeaderBgColor = tablewriter.BgHiWhiteColor
-	headers := make([]string, 0, len(listHeader))
-	positions := make([]int, 0, len(listHeader))
-	for _, c := range listHeader {
-		headers = append(headers, c.Header)
-		positions = append(positions, 30)
-	}
-
-	if r := printer.Render(headers, rows, positions, true); r == -1 {
-		return "", fmt.Errorf("failed to render table")
+	p := printer.Printer{}
+	if err := p.JSONToTable(&buf, jsonRows, listHeader); err != nil {
+		return "", err
 	}
 
 	return buf.String(), nil
