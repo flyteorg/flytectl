@@ -14,33 +14,23 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func newModel() pageModel {
-	// var items []string
-	// for _, row := range content {
-	// 	items = append(items, row[0])
-	// }
-
-	// for i := 1; i < 101; i++ {
-	// 	text := fmt.Sprintf("Item %d", i)
-	// 	items = append(items, text)
-	// }
-
-	p := paginator.New()
-	p.Type = paginator.Dots
-	p.PerPage = 10
-	p.ActiveDot = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "235", Dark: "252"}).Render("•")
-	p.InactiveDot = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "250", Dark: "238"}).Render("•")
-	p.SetTotalPages(len(messages))
-
-	return pageModel{
-		paginator: p,
-		items:     messages,
-	}
-}
-
 type pageModel struct {
 	items     []proto.Message
 	paginator paginator.Model
+}
+
+func newModel(initMsg []proto.Message) pageModel {
+	p := paginator.New()
+	p.Type = paginator.Dots
+	p.PerPage = defaultMsgPerPage
+	p.ActiveDot = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "235", Dark: "252"}).Render("•")
+	p.InactiveDot = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "250", Dark: "238"}).Render("•")
+	p.SetTotalPages(len(initMsg))
+
+	return pageModel{
+		paginator: p,
+		items:     initMsg,
+	}
 }
 
 func (m pageModel) Init() tea.Cmd {
@@ -57,28 +47,25 @@ func (m pageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 	m.paginator, cmd = m.paginator.Update(msg)
+	preFetchPage(&m)
 	return m, cmd
 }
 
 func (m pageModel) View() string {
 	var b strings.Builder
-	// b.WriteString("\n  Paginator Example\n\n")
 	start, end := m.paginator.GetSliceBounds(len(m.items))
-	table, err := printTable(start, end)
+	table, err := printTable(&m, start, end)
 	if err != nil {
 		return ""
 	}
 	b.WriteString(table)
-	// for _, item := range m.items[start:end] {
-	// 	b.WriteString("  • " + item + "\n\n")
-	// }
 	b.WriteString("  " + m.paginator.View())
 	b.WriteString("\n\n  h/l ←/→ page • q: quit\n")
 	return b.String()
 }
 
-func showPagination() {
-	p := tea.NewProgram(newModel())
+func showPagination(initMsg []proto.Message) {
+	p := tea.NewProgram(newModel(initMsg))
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}

@@ -4,36 +4,40 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"os"
 	"strings"
 
-	"github.com/flyteorg/flytectl/cmd/config"
+	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
-	"github.com/kataras/tablewriter"
-	"github.com/landoop/tableprinter"
-
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
+	"github.com/kataras/tablewriter"
+	"github.com/landoop/tableprinter"
 	"github.com/yalp/jsonpath"
 )
 
-var (
-	messages []proto.Message
-	columns  []printer.Column
-)
+type DataCallback func(filter filters.Filters) []proto.Message
+
+type PrintableProto struct{ proto.Message }
 
 const (
-	tab = "\t"
+	defaultLimit      = 100
+	defaultMsgPerPage = 10
 )
 
-type PrintableProto struct {
-	proto.Message
-}
+var (
+	firstBatchIndex int32 = 1
+	lastBatchIndex  int32 = 10
+	batchLen              = make(map[int32]int)
 
-var marshaller = jsonpb.Marshaler{
-	Indent: tab,
-}
+	// Callback function from the module that called bubbleteapagination, which is used to fetch data
+	callback DataCallback
+	// The header of the table
+	listHeader []printer.Column
+
+	marshaller = jsonpb.Marshaler{
+		Indent: "\t",
+	}
+)
 
 func (p PrintableProto) MarshalJSON() ([]byte, error) {
 	buf := new(bytes.Buffer)
@@ -48,8 +52,8 @@ func extractRow(data interface{}, columns []printer.Column) []string {
 	if columns == nil || data == nil {
 		return nil
 	}
-	tableData := make([]string, 0, len(columns))
 
+	tableData := make([]string, 0, len(columns))
 	for _, c := range columns {
 		out, err := jsonpath.Read(data, c.JSONPath)
 		if err != nil || out == nil {
@@ -75,63 +79,8 @@ func projectColumns(rows []interface{}, column []printer.Column) [][]string {
 	return responses
 }
 
-func BubbleteaPaginator(_columns []printer.Column, _messages ...proto.Message) {
-	if config.GetConfig().Format != "bubbletea" {
-		return
-	}
-	columns = _columns
-	messages = _messages
-
-	showPagination()
-}
-
-// func capture() func() (string, error) {
-// 	r, w, err := os.Pipe()
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	done := make(chan error, 1)
-
-// 	save := os.Stdout
-// 	os.Stdout = w
-
-// 	var buf strings.Builder
-
-// 	go func() {
-// 		_, err := io.Copy(&buf, r)
-// 		r.Close()
-// 		done <- err
-// 	}()
-
-// 	return func() (string, error) {
-// 		os.Stdout = save
-// 		w.Close()
-// 		err := <-done
-// 		return buf.String(), err
-// 	}
-// }
-
-func printTable(start int, end int) (string, error) {
-	r, w, err := os.Pipe()
-	if err != nil {
-		panic(err)
-	}
-
-	done := make(chan error, 1)
-
-	save := os.Stdout
-	os.Stdout = w
-
-	var buf strings.Builder
-
-	go func() {
-		_, err := io.Copy(&buf, r)
-		r.Close()
-		done <- err
-	}()
-
-	curShowMessage := messages[start:end]
+func printTable(m *pageModel, start int, end int) (string, error) {
+	curShowMessage := m.items[start:end]
 	printableMessages := make([]*PrintableProto, 0, len(curShowMessage))
 	for _, m := range curShowMessage {
 		printableMessages = append(printableMessages, &PrintableProto{Message: m})
@@ -149,10 +98,10 @@ func printTable(start int, end int) (string, error) {
 	if rawRows == nil {
 		return "", fmt.Errorf("expected one row or empty rows, received nil")
 	}
-	rows := projectColumns(rawRows, columns)
+	rows := projectColumns(rawRows, listHeader)
 
-	printer := tableprinter.New(os.Stdout)
-	// TODO make this configurable
+	var buf strings.Builder
+	printer := tableprinter.New(&buf)
 	printer.AutoWrapText = false
 	printer.BorderLeft = true
 	printer.BorderRight = true
@@ -161,26 +110,64 @@ func printTable(start int, end int) (string, error) {
 	printer.RowLine = true
 	printer.ColumnSeparator = "|"
 	printer.HeaderBgColor = tablewriter.BgHiWhiteColor
-	headers := make([]string, 0, len(columns))
-	positions := make([]int, 0, len(columns))
-	for _, c := range columns {
+	headers := make([]string, 0, len(listHeader))
+	positions := make([]int, 0, len(listHeader))
+	for _, c := range listHeader {
 		headers = append(headers, c.Header)
 		positions = append(positions, 30)
 	}
 
-	// done := capture()
 	if r := printer.Render(headers, rows, positions, true); r == -1 {
 		return "", fmt.Errorf("failed to render table")
 	}
 
-	os.Stdout = save
-	w.Close()
-	err = <-done
+	return buf.String(), nil
+}
 
-	// out, err := done()
-	if err != nil {
-		return "", err
+func getMessageList(batchPage int32) []proto.Message {
+	msg := callback(filters.Filters{
+		Limit:  defaultLimit,
+		Page:   batchPage,
+		SortBy: "created_at",
+		Asc:    false,
+	})
+	batchLen[batchPage] = len(msg)
+
+	return msg
+}
+
+func BubbleteaPaginator(_listHeader []printer.Column, _callback DataCallback) {
+	listHeader = _listHeader
+	callback = _callback
+
+	msg := []proto.Message{}
+	for i := firstBatchIndex; i < lastBatchIndex+1; i++ {
+		msg = append(msg, getMessageList(int32(i))...)
 	}
 
-	return buf.String(), nil
+	showPagination(msg)
+}
+
+func preFetchPage(m *pageModel) {
+	// Triggers when user is at the last page
+	if len(m.items)/defaultMsgPerPage == m.paginator.Page+1 {
+		newMessages := getMessageList(lastBatchIndex + 1)
+		if len(newMessages) != 0 {
+			lastBatchIndex += 1
+			m.items = append(m.items, newMessages...)
+			m.items = m.items[batchLen[firstBatchIndex]:] // delete the msgs in the "firstBatchIndex" batch
+			m.paginator.Page -= batchLen[firstBatchIndex] / defaultMsgPerPage
+			firstBatchIndex += 1
+		}
+	}
+	// Triggers when user is at the first page
+	if m.paginator.Page == 0 && firstBatchIndex > 1 {
+		newMessages := getMessageList(firstBatchIndex - 1)
+		firstBatchIndex -= 1
+		m.items = append(m.items, newMessages...)
+		m.items = m.items[:len(m.items)-batchLen[lastBatchIndex]] // delete the msgs in the "lastBatchIndex" batch
+		m.paginator.Page += batchLen[firstBatchIndex] / defaultMsgPerPage
+		lastBatchIndex -= 1
+	}
+	m.paginator.SetTotalPages(len(m.items))
 }

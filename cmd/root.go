@@ -56,7 +56,7 @@ func newRootCmd() *cobra.Command {
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Project), "project", "p", "", "Specifies the Flyte project.")
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Domain), "domain", "d", "", "Specifies the Flyte project's domain.")
 	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Output), "output", "o", printer.OutputFormatTABLE.String(), fmt.Sprintf("Specifies the output type - supported formats %s. NOTE: dot, doturl are only supported for Workflow", printer.OutputFormats()))
-	rootCmd.PersistentFlags().StringVarP(&(config.GetConfig().Format), "format", "f", "", "Set this flag to 'bubbletea' to use a more interactive CLI")
+	rootCmd.PersistentFlags().BoolVarP(&(config.GetConfig().Interactive), "interactive", "i", false, "Set this flag to use an interactive CLI")
 
 	rootCmd.AddCommand(get.CreateGetCommand())
 	compileCmd := compile.CreateCompileCommand()
