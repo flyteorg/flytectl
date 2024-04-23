@@ -142,6 +142,9 @@ func (p Printer) JSONToTable(w io.Writer, jsonRows []byte, columns []Column) err
 	if r := printer.Render(headers, rows, positions, true); r == -1 {
 		return fmt.Errorf("failed to render table")
 	}
+	if w == os.Stdout {
+		fmt.Printf("%d rows\n", len(rows))
+	}
 	return nil
 }
 
