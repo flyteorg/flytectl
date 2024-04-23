@@ -1,14 +1,11 @@
 package bubbletea
 
-// A simple program demonstrating the paginator component from the Bubbles
-// component library.
-
 import (
+	"fmt"
 	"log"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/paginator"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/golang/protobuf/proto"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -21,10 +18,7 @@ type pageModel struct {
 
 func newModel(initMsg []proto.Message) pageModel {
 	p := paginator.New()
-	p.Type = paginator.Dots
 	p.PerPage = defaultMsgPerPage
-	p.ActiveDot = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "235", Dark: "252"}).Render("•")
-	p.InactiveDot = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "250", Dark: "238"}).Render("•")
 	p.SetTotalPages(len(initMsg))
 
 	return pageModel{
@@ -59,7 +53,8 @@ func (m pageModel) View() string {
 		return ""
 	}
 	b.WriteString(table)
-	b.WriteString("  " + m.paginator.View())
+	currentPage := int(firstBatchIndex-1)*pagePerBatch + m.paginator.Page + 1
+	b.WriteString(fmt.Sprintf("  PAGE - %d\n", currentPage))
 	b.WriteString("\n\n  h/l ←/→ page • q: quit\n")
 	return b.String()
 }

@@ -161,7 +161,7 @@ func getExecutionFunc(ctx context.Context, args []string, cmdCtx cmdCore.Command
 	logger.Infof(ctx, "Retrieved %v executions", len(executionList.Executions))
 
 	if config.GetConfig().Interactive {
-		bubbletea.BubbleteaPaginator(executionColumns, getCallBack(ctx, cmdCtx))
+		bubbletea.Paginator(executionColumns, getCallBack(ctx, cmdCtx))
 		return nil
 	}
 

@@ -20,8 +20,9 @@ type DataCallback func(filter filters.Filters) []proto.Message
 type PrintableProto struct{ proto.Message }
 
 const (
-	defaultLimit      = 100
-	defaultMsgPerPage = 10
+	defaultMsgPerBatch = 100
+	defaultMsgPerPage  = 10
+	pagePerBatch       = defaultMsgPerBatch / defaultMsgPerPage
 )
 
 var (
@@ -29,7 +30,7 @@ var (
 	lastBatchIndex  int32 = 10
 	batchLen              = make(map[int32]int)
 
-	// Callback function from the module that called bubbleteapagination, which is used to fetch data
+	// Callback function used to fetch data from the module that called bubbletea pagination.
 	callback DataCallback
 	// The header of the table
 	listHeader []printer.Column
@@ -124,25 +125,25 @@ func printTable(m *pageModel, start int, end int) (string, error) {
 	return buf.String(), nil
 }
 
-func getMessageList(batchPage int32) []proto.Message {
+func getMessageList(batchIndex int32) []proto.Message {
 	msg := callback(filters.Filters{
-		Limit:  defaultLimit,
-		Page:   batchPage,
+		Limit:  defaultMsgPerBatch,
+		Page:   batchIndex,
 		SortBy: "created_at",
 		Asc:    false,
 	})
-	batchLen[batchPage] = len(msg)
+	batchLen[batchIndex] = len(msg)
 
 	return msg
 }
 
-func BubbleteaPaginator(_listHeader []printer.Column, _callback DataCallback) {
+func Paginator(_listHeader []printer.Column, _callback DataCallback) {
 	listHeader = _listHeader
 	callback = _callback
 
 	msg := []proto.Message{}
 	for i := firstBatchIndex; i < lastBatchIndex+1; i++ {
-		msg = append(msg, getMessageList(int32(i))...)
+		msg = append(msg, getMessageList(i)...)
 	}
 
 	showPagination(msg)
@@ -153,21 +154,21 @@ func preFetchPage(m *pageModel) {
 	if len(m.items)/defaultMsgPerPage == m.paginator.Page+1 {
 		newMessages := getMessageList(lastBatchIndex + 1)
 		if len(newMessages) != 0 {
-			lastBatchIndex += 1
+			lastBatchIndex++
 			m.items = append(m.items, newMessages...)
 			m.items = m.items[batchLen[firstBatchIndex]:] // delete the msgs in the "firstBatchIndex" batch
 			m.paginator.Page -= batchLen[firstBatchIndex] / defaultMsgPerPage
-			firstBatchIndex += 1
+			firstBatchIndex++
 		}
 	}
 	// Triggers when user is at the first page
 	if m.paginator.Page == 0 && firstBatchIndex > 1 {
 		newMessages := getMessageList(firstBatchIndex - 1)
-		firstBatchIndex -= 1
+		firstBatchIndex--
 		m.items = append(m.items, newMessages...)
 		m.items = m.items[:len(m.items)-batchLen[lastBatchIndex]] // delete the msgs in the "lastBatchIndex" batch
 		m.paginator.Page += batchLen[firstBatchIndex] / defaultMsgPerPage
-		lastBatchIndex -= 1
+		lastBatchIndex--
 	}
 	m.paginator.SetTotalPages(len(m.items))
 }
