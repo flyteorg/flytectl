@@ -84,7 +84,7 @@ func Paginator(_listHeader []printer.Column, _callback DataCallback) {
 	listHeader = _listHeader
 	callback = _callback
 
-	msg := []proto.Message{}
+	var msg []proto.Message
 	for i := firstBatchIndex; i < lastBatchIndex+1; i++ {
 		msg = append(msg, getMessageList(i)...)
 	}
