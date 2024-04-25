@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/paginator"
+	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/golang/protobuf/proto"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -18,7 +19,7 @@ type pageModel struct {
 
 func newModel(initMsg []proto.Message) pageModel {
 	p := paginator.New()
-	p.PerPage = defaultMsgPerPage
+	p.PerPage = msgPerPage
 	p.SetTotalPages(len(initMsg))
 
 	return pageModel{
@@ -41,26 +42,32 @@ func (m pageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 	m.paginator, cmd = m.paginator.Update(msg)
-	preFetchPage(&m)
+	preFetchBatch(&m)
 	return m, cmd
 }
 
 func (m pageModel) View() string {
 	var b strings.Builder
-	start, end := m.paginator.GetSliceBounds(len(m.items))
-	table, err := printTable(&m, start, end)
+	table, err := getTable(&m)
 	if err != nil {
 		return ""
 	}
 	b.WriteString(table)
-	currentPage := int(firstBatchIndex-1)*pagePerBatch + m.paginator.Page + 1
-	b.WriteString(fmt.Sprintf("  PAGE - %d\n", currentPage))
+	b.WriteString(fmt.Sprintf("  PAGE - %d\n", m.paginator.Page+1))
 	b.WriteString("\n\n  h/l ←/→ page • q: quit\n")
 	return b.String()
 }
 
-func showPagination(initMsg []proto.Message) {
-	p := tea.NewProgram(newModel(initMsg))
+func Paginator(_listHeader []printer.Column, _callback DataCallback) {
+	listHeader = _listHeader
+	callback = _callback
+
+	var msg []proto.Message
+	for i := firstBatchIndex; i < lastBatchIndex+1; i++ {
+		msg = append(msg, getMessageList(i)...)
+	}
+
+	p := tea.NewProgram(newModel(msg))
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
