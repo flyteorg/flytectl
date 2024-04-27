@@ -8,16 +8,26 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	KeyRingServiceUser = "flytectl-user"
+	KeyRingServiceName = "flytectl"
+)
+
 // TokenCacheKeyringProvider wraps the logic to save and retrieve tokens from the OS's keyring implementation.
 type TokenCacheKeyringProvider struct {
 	ServiceName string
 	ServiceUser string
 }
 
-const (
-	KeyRingServiceUser = "flytectl-user"
-	KeyRingServiceName = "flytectl"
-)
+func (t TokenCacheKeyringProvider) Purge() {
+	_ = keyring.Delete(t.ServiceName, t.ServiceUser)
+}
+
+func (t TokenCacheKeyringProvider) Lock() {
+}
+
+func (t TokenCacheKeyringProvider) Unlock() {
+}
 
 func (t TokenCacheKeyringProvider) SaveToken(token *oauth2.Token) error {
 	var tokenBytes []byte
