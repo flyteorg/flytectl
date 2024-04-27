@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
+	"sync"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
 
@@ -14,16 +15,16 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-type DataCallback func(filter filters.Filters) []proto.Message
+type dataCallback func(filter filters.Filters) []proto.Message
 
-type PrintableProto struct{ proto.Message }
+type printTableProto struct{ proto.Message }
 
 const (
 	msgPerBatch       = 100 // Please set msgPerBatch as a multiple of msgPerPage
 	msgPerPage        = 10
 	pagePerBatch      = msgPerBatch / msgPerPage
 	prefetchThreshold = pagePerBatch - 1
-	localBatchLimit   = 2 // Please set localBatchLimit >= 2
+	localBatchLimit   = 10 // Please set localBatchLimit at least 2
 )
 
 var (
@@ -32,12 +33,14 @@ var (
 	lastBatchIndex  = 0
 	batchLen        = make(map[int]int)
 	// Callback function used to fetch data from the module that called bubbletea pagination.
-	callback DataCallback
+	callback dataCallback
 	// The header of the table
 	listHeader []printer.Column
+	// Avoid fetching back and forward at the same time
+	mutex sync.Mutex
 )
 
-func (p PrintableProto) MarshalJSON() ([]byte, error) {
+func (p printTableProto) MarshalJSON() ([]byte, error) {
 	marshaller := jsonpb.Marshaler{Indent: "\t"}
 	buf := new(bytes.Buffer)
 	err := marshaller.Marshal(buf, p.Message)
@@ -54,30 +57,21 @@ func _min(a, b int) int {
 	return b
 }
 
-func _max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func getSliceBounds(curPage int, length int) (start int, end int) {
-	start = (curPage - firstBatchIndex*pagePerBatch) * msgPerPage
-	end = _min(start+msgPerPage, length)
+func getSliceBounds(m *pageModel) (start int, end int) {
+	start = (m.paginator.Page - firstBatchIndex*pagePerBatch) * msgPerPage
+	end = _min(start+msgPerPage, len(*m.items))
 	return start, end
 }
 
 func getTable(m *pageModel) (string, error) {
-	start, end := getSliceBounds(m.paginator.Page, len(*m.items))
-	// fmt.Println(start, end)
-	// fmt.Println()
+	start, end := getSliceBounds(m)
 	curShowMessage := (*m.items)[start:end]
-	printableMessages := make([]*PrintableProto, 0, len(curShowMessage))
+	printTableMessages := make([]*printTableProto, 0, len(curShowMessage))
 	for _, m := range curShowMessage {
-		printableMessages = append(printableMessages, &PrintableProto{Message: m})
+		printTableMessages = append(printTableMessages, &printTableProto{Message: m})
 	}
 
-	jsonRows, err := json.Marshal(printableMessages)
+	jsonRows, err := json.Marshal(printTableMessages)
 	if err != nil {
 		return "", fmt.Errorf("failed to marshal proto messages")
 	}
@@ -92,7 +86,6 @@ func getTable(m *pageModel) (string, error) {
 }
 
 func getMessageList(batchIndex int) []proto.Message {
-
 	mutex.Lock()
 	spin = true
 	defer func() {
@@ -100,16 +93,38 @@ func getMessageList(batchIndex int) []proto.Message {
 		mutex.Unlock()
 	}()
 
-	time.Sleep(2 * time.Second)
 	msg := callback(filters.Filters{
 		Limit:  msgPerBatch,
 		Page:   int32(batchIndex + 1),
 		SortBy: "created_at",
 		Asc:    false,
 	})
+
 	batchLen[batchIndex] = len(msg)
 
 	return msg
+}
+
+const (
+	forward int = iota
+	backward
+)
+
+type newDataMsg struct {
+	newItems       []proto.Message
+	batchIndex     int
+	fetchDirection int
+}
+
+func fetchDataCmd(batchIndex int, fetchDirection int) tea.Cmd {
+	return func() tea.Msg {
+		msg := newDataMsg{
+			newItems:       getMessageList(batchIndex),
+			batchIndex:     batchIndex,
+			fetchDirection: fetchDirection,
+		}
+		return msg
+	}
 }
 
 func countTotalPages() int {
