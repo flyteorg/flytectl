@@ -92,8 +92,14 @@ func getTable(m *pageModel) (string, error) {
 }
 
 func getMessageList(batchIndex int) []proto.Message {
+
 	mutex.Lock()
-	defer mutex.Unlock()
+	spin = true
+	defer func() {
+		spin = false
+		mutex.Unlock()
+	}()
+
 	time.Sleep(2 * time.Second)
 	msg := callback(filters.Filters{
 		Limit:  msgPerBatch,
