@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
@@ -18,29 +19,26 @@ type DataCallback func(filter filters.Filters) []proto.Message
 type PrintableProto struct{ proto.Message }
 
 const (
-	msgPerBatch  = 100 // Please set msgPerBatch as a multiple of msgPerPage
-	msgPerPage   = 10
-	pagePerBatch = msgPerBatch / msgPerPage
+	msgPerBatch       = 100 // Please set msgPerBatch as a multiple of msgPerPage
+	msgPerPage        = 10
+	pagePerBatch      = msgPerBatch / msgPerPage
+	prefetchThreshold = pagePerBatch - 1
+	localBatchLimit   = 2 // Please set localBatchLimit >= 2
 )
 
 var (
-	// Used for indexing local stored rows
-	localPageIndex int
-	// Recording batch index fetched from admin
-	firstBatchIndex int32 = 1
-	lastBatchIndex  int32 = 10
-	batchLen              = make(map[int32]int)
+	// Record the index of the first and last batch that is in cache
+	firstBatchIndex = 0
+	lastBatchIndex  = 0
+	batchLen        = make(map[int]int)
 	// Callback function used to fetch data from the module that called bubbletea pagination.
 	callback DataCallback
 	// The header of the table
 	listHeader []printer.Column
-
-	marshaller = jsonpb.Marshaler{
-		Indent: "\t",
-	}
 )
 
 func (p PrintableProto) MarshalJSON() ([]byte, error) {
+	marshaller := jsonpb.Marshaler{Indent: "\t"}
 	buf := new(bytes.Buffer)
 	err := marshaller.Marshal(buf, p.Message)
 	if err != nil {
@@ -49,22 +47,31 @@ func (p PrintableProto) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func min(a, b int) int {
+func _min(a, b int) int {
 	if a < b {
 		return a
 	}
 	return b
 }
 
-func getSliceBounds(idx int, length int) (start int, end int) {
-	start = idx * msgPerPage
-	end = min(idx*msgPerPage+msgPerPage, length)
+func _max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func getSliceBounds(curPage int, length int) (start int, end int) {
+	start = (curPage - firstBatchIndex*pagePerBatch) * msgPerPage
+	end = _min(start+msgPerPage, length)
 	return start, end
 }
 
 func getTable(m *pageModel) (string, error) {
-	start, end := getSliceBounds(localPageIndex, len(m.items))
-	curShowMessage := m.items[start:end]
+	start, end := getSliceBounds(m.paginator.Page, len(*m.items))
+	// fmt.Println(start, end)
+	// fmt.Println()
+	curShowMessage := (*m.items)[start:end]
 	printableMessages := make([]*PrintableProto, 0, len(curShowMessage))
 	for _, m := range curShowMessage {
 		printableMessages = append(printableMessages, &PrintableProto{Message: m})
@@ -84,10 +91,13 @@ func getTable(m *pageModel) (string, error) {
 	return buf.String(), nil
 }
 
-func getMessageList(batchIndex int32) []proto.Message {
+func getMessageList(batchIndex int) []proto.Message {
+	mutex.Lock()
+	defer mutex.Unlock()
+	time.Sleep(2 * time.Second)
 	msg := callback(filters.Filters{
 		Limit:  msgPerBatch,
-		Page:   batchIndex,
+		Page:   int32(batchIndex + 1),
 		SortBy: "created_at",
 		Asc:    false,
 	})
@@ -98,39 +108,8 @@ func getMessageList(batchIndex int32) []proto.Message {
 
 func countTotalPages() int {
 	sum := 0
-	for _, l := range batchLen {
-		sum += l
+	for i := 0; i < lastBatchIndex+1; i++ {
+		sum += batchLen[i]
 	}
 	return sum
-}
-
-// Only (lastBatchIndex-firstBatchIndex)*msgPerBatch of rows are stored in local memory.
-// When user tries to get rows out of this range, this function will be triggered.
-func preFetchBatch(m *pageModel) {
-	localPageIndex = m.paginator.Page - int(firstBatchIndex-1)*pagePerBatch
-
-	// Triggers when user is at the last local page
-	if localPageIndex+1 == len(m.items)/msgPerPage {
-		newMessages := getMessageList(lastBatchIndex + 1)
-		m.paginator.SetTotalPages(countTotalPages())
-		if len(newMessages) != 0 {
-			lastBatchIndex++
-			m.items = append(m.items, newMessages...)
-			m.items = m.items[batchLen[firstBatchIndex]:] // delete the msgs in the "firstBatchIndex" batch
-			localPageIndex -= batchLen[firstBatchIndex] / msgPerPage
-			firstBatchIndex++
-		}
-		return
-	}
-	// Triggers when user is at the first local page
-	if localPageIndex == 0 && firstBatchIndex > 1 {
-		newMessages := getMessageList(firstBatchIndex - 1)
-		m.paginator.SetTotalPages(countTotalPages())
-		firstBatchIndex--
-		m.items = append(newMessages, m.items...)
-		m.items = m.items[:len(m.items)-batchLen[lastBatchIndex]] // delete the msgs in the "lastBatchIndex" batch
-		localPageIndex += batchLen[firstBatchIndex] / msgPerPage
-		lastBatchIndex--
-		return
-	}
 }
