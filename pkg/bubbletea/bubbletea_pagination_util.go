@@ -15,7 +15,7 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
-type dataCallback func(filter filters.Filters) []proto.Message
+type DataCallback func(filter filters.Filters) []proto.Message
 
 type printTableProto struct{ proto.Message }
 
@@ -33,7 +33,7 @@ var (
 	lastBatchIndex  = 0
 	batchLen        = make(map[int]int)
 	// Callback function used to fetch data from the module that called bubbletea pagination.
-	callback dataCallback
+	callback DataCallback
 	// The header of the table
 	listHeader []printer.Column
 	// Avoid fetching back and forward at the same time

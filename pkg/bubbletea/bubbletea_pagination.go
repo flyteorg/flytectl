@@ -129,7 +129,7 @@ func (m pageModel) View() string {
 	return b.String()
 }
 
-func Paginator(_listHeader []printer.Column, _callback dataCallback) {
+func Paginator(_listHeader []printer.Column, _callback DataCallback) {
 	listHeader = _listHeader
 	callback = _callback
 
