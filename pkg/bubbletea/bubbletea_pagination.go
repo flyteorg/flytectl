@@ -17,10 +17,12 @@ import (
 )
 
 var (
-	spin            = false
-	fetchingBack    = false
-	fetchingForward = false
-	mutex           sync.Mutex
+	spin = false
+	// Avoid fetching multiple times while still fetching
+	fetchingBackward = false
+	fetchingForward  = false
+	// Avoid fetching back and forward at the same time
+	mutex sync.Mutex
 )
 
 type pageModel struct {
@@ -57,13 +59,12 @@ func (m pageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "esc", "ctrl+c":
 			return m, tea.Quit
 		}
-		// TODO 來回toggle太快會壞掉記得測！
 		switch {
 		case key.Matches(msg, m.paginator.KeyMap.NextPage):
-			// If already tried to fetch data and there is no more data to fetch, don't fetch again (won't show spinner)
+			// If already tried to fetch data and there is no more data to fetch (real last batch), don't fetch again (won't show spinner)
 			value, ok := batchLen[lastBatchIndex+1]
 			if !ok || value != 0 {
-				if m.paginator.Page == (lastBatchIndex+1)*pagePerBatch-prefetchThreshold && !fetchingForward {
+				if (m.paginator.Page >= (lastBatchIndex+1)*pagePerBatch-prefetchThreshold) && m.paginator.Page/pagePerBatch == lastBatchIndex && !fetchingForward {
 					// if fetchingBack {
 					// 	mutex.Lock()
 					// }
@@ -75,12 +76,12 @@ func (m pageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.paginator.Page-firstBatchIndex*pagePerBatch == 0 {
 				return m, cmd
 			}
-			if (m.paginator.Page == firstBatchIndex*pagePerBatch+prefetchThreshold) && (firstBatchIndex > 0) && !fetchingBack {
+			if (m.paginator.Page <= firstBatchIndex*pagePerBatch+prefetchThreshold) && m.paginator.Page/pagePerBatch == firstBatchIndex && (firstBatchIndex > 0) && !fetchingBackward {
 				// if fetchingForward {
 				// 	mutex.Lock()
 				// }
-				fetchingBack = true
-				cmd = fetchDataCmd(firstBatchIndex-1, back)
+				fetchingBackward = true
+				cmd = fetchDataCmd(firstBatchIndex-1, backward)
 			}
 		}
 
@@ -90,27 +91,30 @@ func (m pageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case dataMsg:
 		if len(msg.newItems) != 0 {
 			if msg.fetchDirection == forward {
-				*m.items = append(*m.items, msg.newItems...)
-				lastBatchIndex++
-				if lastBatchIndex-firstBatchIndex >= localBatchLimit {
-					// fmt.Println("delete back")
-					*m.items = (*m.items)[batchLen[firstBatchIndex]:]
-					//fmt.Println(len(*m.items), firstBatchIndex, batchLen[firstBatchIndex], "after forward")
-					//localPageIndex -= batchLen[firstBatchIndex] / msgPerPage
-					firstBatchIndex++
-
+				if m.paginator.Page/pagePerBatch >= lastBatchIndex {
+					*m.items = append(*m.items, msg.newItems...)
+					lastBatchIndex++
+					if lastBatchIndex-firstBatchIndex >= localBatchLimit {
+						fmt.Println("delete back")
+						*m.items = (*m.items)[batchLen[firstBatchIndex]:]
+						//fmt.Println(len(*m.items), firstBatchIndex, batchLen[firstBatchIndex], "after forward")
+						//localPageIndex -= batchLen[firstBatchIndex] / msgPerPage
+						firstBatchIndex++
+					}
 				}
 				fetchingForward = false
-			} else {
-				*m.items = append(msg.newItems, *m.items...)
-				firstBatchIndex--
-				if lastBatchIndex-firstBatchIndex >= localBatchLimit {
-					// fmt.Println("delete forward")
-					*m.items = (*m.items)[:len(*m.items)-batchLen[lastBatchIndex]]
-					// batchLen[lastBatchIndex] = 0
-					lastBatchIndex--
+			} else if msg.fetchDirection == backward {
+				if m.paginator.Page/pagePerBatch <= firstBatchIndex {
+					*m.items = append(msg.newItems, *m.items...)
+					firstBatchIndex--
+					if lastBatchIndex-firstBatchIndex >= localBatchLimit {
+						fmt.Println("delete forward")
+						*m.items = (*m.items)[:len(*m.items)-batchLen[lastBatchIndex]]
+						// batchLen[lastBatchIndex] = 0
+						lastBatchIndex--
+					}
 				}
-				fetchingBack = false
+				fetchingBackward = false
 			}
 			m.paginator.SetTotalPages(countTotalPages())
 		}
@@ -137,8 +141,8 @@ func (m pageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	m.paginator, _ = m.paginator.Update(msg)
 
-	// fmt.Println("after ", m.paginator.Page, firstBatchIndex, lastBatchIndex)
-	// fmt.Printf("after %v %d %d %d\n", batchLen, m.paginator.TotalPages, len(*m.items), m.paginator.Page)
+	fmt.Println("after ", m.paginator.Page, firstBatchIndex, lastBatchIndex)
+	fmt.Printf("after %v %d %d %d\n", batchLen, m.paginator.TotalPages, len(*m.items), m.paginator.Page)
 
 	return m, cmd
 }
@@ -147,7 +151,7 @@ type fetchDirection int
 
 const (
 	forward fetchDirection = iota
-	back
+	backward
 )
 
 type dataMsg struct {
@@ -174,16 +178,16 @@ func fetchDataCmd(batchIndex int, fetchDirection fetchDirection) tea.Cmd {
 
 func (m pageModel) View() string {
 	var b strings.Builder
-	table, err := getTable(&m)
+	_, err := getTable(&m)
 	if err != nil {
 		return "Error rendering table"
 	}
-	b.WriteString(table)
-	b.WriteString(fmt.Sprintf("  PAGE - %d   ", m.paginator.Page+1))
-	if spin {
-		b.WriteString(fmt.Sprintf("%s%s", m.spinner.View(), " Loading new pages..."))
-	}
-	b.WriteString("\n\n  h/l ←/→ page • q: quit\n")
+	// b.WriteString(table)
+	// b.WriteString(fmt.Sprintf("  PAGE - %d   ", m.paginator.Page+1))
+	// if spin {
+	// 	b.WriteString(fmt.Sprintf("%s%s", m.spinner.View(), " Loading new pages..."))
+	// }
+	// b.WriteString("\n\n  h/l ←/→ page • q: quit\n")
 
 	return b.String()
 }
