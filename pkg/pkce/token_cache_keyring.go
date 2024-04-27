@@ -3,6 +3,7 @@ package pkce
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/zalando/go-keyring"
 	"golang.org/x/oauth2"
@@ -17,19 +18,22 @@ const (
 type TokenCacheKeyringProvider struct {
 	ServiceName string
 	ServiceUser string
+	mu          *sync.Mutex
 }
 
-func (t TokenCacheKeyringProvider) Purge() {
+func (t *TokenCacheKeyringProvider) Purge() {
 	_ = keyring.Delete(t.ServiceName, t.ServiceUser)
 }
 
-func (t TokenCacheKeyringProvider) Lock() {
+func (t *TokenCacheKeyringProvider) Lock() {
+	t.mu.Lock()
 }
 
-func (t TokenCacheKeyringProvider) Unlock() {
+func (t *TokenCacheKeyringProvider) Unlock() {
+	t.mu.Unlock()
 }
 
-func (t TokenCacheKeyringProvider) SaveToken(token *oauth2.Token) error {
+func (t *TokenCacheKeyringProvider) SaveToken(token *oauth2.Token) error {
 	var tokenBytes []byte
 	if token.AccessToken == "" {
 		return fmt.Errorf("cannot save empty token with expiration %v", token.Expiry)
@@ -48,7 +52,7 @@ func (t TokenCacheKeyringProvider) SaveToken(token *oauth2.Token) error {
 	return nil
 }
 
-func (t TokenCacheKeyringProvider) GetToken() (*oauth2.Token, error) {
+func (t *TokenCacheKeyringProvider) GetToken() (*oauth2.Token, error) {
 	// get saved token
 	tokenJSON, err := keyring.Get(t.ServiceName, t.ServiceUser)
 	if len(tokenJSON) == 0 {
@@ -65,4 +69,12 @@ func (t TokenCacheKeyringProvider) GetToken() (*oauth2.Token, error) {
 	}
 
 	return &token, nil
+}
+
+func NewTokenCacheKeyringProvider(serviceName, serviceUser string) *TokenCacheKeyringProvider {
+	return &TokenCacheKeyringProvider{
+		mu:          &sync.Mutex{},
+		ServiceName: serviceName,
+		ServiceUser: serviceUser,
+	}
 }
