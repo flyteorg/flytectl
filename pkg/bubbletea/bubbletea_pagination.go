@@ -89,8 +89,9 @@ func (m pageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	// 	m.spinner, cmd = m.spinner.Update(msg)
 	// 	return m, cmd
 	case dataMsg:
-		if len(msg.newItems) != 0 {
-			if msg.fetchDirection == forward {
+		// TODO: Handle error
+		if msg.fetchDirection == forward {
+			if len(msg.newItems) != 0 {
 				if m.paginator.Page/pagePerBatch >= lastBatchIndex {
 					*m.items = append(*m.items, msg.newItems...)
 					lastBatchIndex++
@@ -102,8 +103,10 @@ func (m pageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						firstBatchIndex++
 					}
 				}
-				fetchingForward = false
-			} else if msg.fetchDirection == backward {
+			}
+			fetchingForward = false
+		} else if msg.fetchDirection == backward {
+			if len(msg.newItems) != 0 {
 				if m.paginator.Page/pagePerBatch <= firstBatchIndex {
 					*m.items = append(msg.newItems, *m.items...)
 					firstBatchIndex--
@@ -114,10 +117,11 @@ func (m pageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						lastBatchIndex--
 					}
 				}
-				fetchingBackward = false
+
 			}
-			m.paginator.SetTotalPages(countTotalPages())
+			fetchingBackward = false
 		}
+		m.paginator.SetTotalPages(countTotalPages())
 		m.paginator.Page = _min(_max(m.paginator.Page, firstBatchIndex*pagePerBatch), (lastBatchIndex+1)*pagePerBatch-1)
 		// localPageIndex = _max(m.paginator.Page-firstBatchIndex*pagePerBatch, 0)
 		return m, nil
