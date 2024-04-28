@@ -28,14 +28,14 @@ const (
 )
 
 var (
-	// Record the index of the first and last batch that is in cache
-	firstBatchIndex = 0
-	lastBatchIndex  = 0
-	batchLen        = make(map[int]int)
 	// Callback function used to fetch data from the module that called bubbletea pagination.
-	callback DataCallback
-	// The header of the table
+	callback   DataCallback
 	listHeader []printer.Column
+	filter     filters.Filters
+	// Record the index of the first and last batch that is in cache
+	firstBatchIndex int
+	lastBatchIndex  int
+	batchLen        = make(map[int]int)
 	// Avoid fetching back and forward at the same time
 	mutex sync.Mutex
 )
@@ -48,6 +48,13 @@ func (p printTableProto) MarshalJSON() ([]byte, error) {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+func _max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 func _min(a, b int) int {
@@ -96,8 +103,8 @@ func getMessageList(batchIndex int) []proto.Message {
 	msg := callback(filters.Filters{
 		Limit:  msgPerBatch,
 		Page:   int32(batchIndex + 1),
-		SortBy: "created_at",
-		Asc:    false,
+		SortBy: filter.SortBy,
+		Asc:    filter.Asc,
 	})
 
 	batchLen[batchIndex] = len(msg)
@@ -130,7 +137,12 @@ func fetchDataCmd(batchIndex int, fetchDirection int) tea.Cmd {
 func countTotalPages() int {
 	sum := 0
 	for i := 0; i < lastBatchIndex+1; i++ {
-		sum += batchLen[i]
+		length, ok := batchLen[i]
+		if ok {
+			sum += length
+		} else {
+			sum += msgPerBatch
+		}
 	}
 	return sum
 }

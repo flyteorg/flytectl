@@ -3,12 +3,14 @@ package bubbletea
 import (
 	"fmt"
 	"log"
+	"math"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/paginator"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/flyteorg/flytectl/pkg/filters"
 	"github.com/flyteorg/flytectl/pkg/printer"
 	"github.com/golang/protobuf/proto"
 
@@ -31,7 +33,8 @@ type pageModel struct {
 func newModel(initMsg []proto.Message) pageModel {
 	p := paginator.New()
 	p.PerPage = msgPerPage
-	p.SetTotalPages(len(initMsg))
+	p.Page = int(filter.Page) - 1
+	p.SetTotalPages(countTotalPages())
 
 	s := spinner.New()
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("56"))
@@ -129,13 +132,20 @@ func (m pageModel) View() string {
 	return b.String()
 }
 
-func Paginator(_listHeader []printer.Column, _callback DataCallback) {
+func Paginator(_listHeader []printer.Column, _callback DataCallback, _filter filters.Filters) error {
 	listHeader = _listHeader
 	callback = _callback
+	filter = _filter
+	filter.Page = int32(_max(int(filter.Page), 1))
+	firstBatchIndex = (int(filter.Page) - 1) / pagePerBatch
+	lastBatchIndex = firstBatchIndex
 
 	var msg []proto.Message
 	for i := firstBatchIndex; i < lastBatchIndex+1; i++ {
 		newMessages := getMessageList(i)
+		if len(newMessages) == 0 || (int(filter.Page))%pagePerBatch > int(math.Ceil(float64(len(newMessages))/msgPerPage)) {
+			return fmt.Errorf("the specified page has no data, please enter a valid page number")
+		}
 		msg = append(msg, newMessages...)
 	}
 
@@ -143,4 +153,6 @@ func Paginator(_listHeader []printer.Column, _callback DataCallback) {
 	if _, err := p.Run(); err != nil {
 		log.Fatal(err)
 	}
+
+	return nil
 }
