@@ -21,8 +21,22 @@ type TokenCacheKeyringProvider struct {
 	mu          *sync.Mutex
 }
 
-func (t *TokenCacheKeyringProvider) Purge() {
+func (t *TokenCacheKeyringProvider) PurgeIfEquals(existing *oauth2.Token) (bool, error) {
+	t.Lock()
+	defer t.Unlock()
+	tokenJSON, err := keyring.Get(t.ServiceName, t.ServiceUser)
+	if err != nil {
+		return false, fmt.Errorf("failed to read token. Error: %w", err)
+	}
+
+	if existingBytes, err := json.Marshal(existing); err != nil {
+		return false, fmt.Errorf("unable to marshal token to save in cache due to %w", err)
+	} else if tokenJSON != string(existingBytes) {
+		return false, nil
+	}
+
 	_ = keyring.Delete(t.ServiceName, t.ServiceUser)
+	return true, nil
 }
 
 func (t *TokenCacheKeyringProvider) Lock() {
