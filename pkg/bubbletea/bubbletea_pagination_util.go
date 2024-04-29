@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/flyteorg/flytectl/pkg/filters"
@@ -24,7 +25,7 @@ const (
 	msgPerPage        = 10
 	pagePerBatch      = msgPerBatch / msgPerPage
 	prefetchThreshold = pagePerBatch - 1
-	localBatchLimit   = 10 // Please set localBatchLimit at least 2
+	localBatchLimit   = 2 // Please set localBatchLimit at least 2
 )
 
 var (
@@ -99,7 +100,7 @@ func getMessageList(batchIndex int) []proto.Message {
 		spin = false
 		mutex.Unlock()
 	}()
-
+	time.Sleep(2 * time.Second)
 	msg := callback(filters.Filters{
 		Limit:  msgPerBatch,
 		Page:   int32(batchIndex + 1),
@@ -112,18 +113,20 @@ func getMessageList(batchIndex int) []proto.Message {
 	return msg
 }
 
+type direction int
+
 const (
-	forward int = iota
+	forward direction = iota
 	backward
 )
 
 type newDataMsg struct {
 	newItems       []proto.Message
 	batchIndex     int
-	fetchDirection int
+	fetchDirection direction
 }
 
-func fetchDataCmd(batchIndex int, fetchDirection int) tea.Cmd {
+func fetchDataCmd(batchIndex int, fetchDirection direction) tea.Cmd {
 	return func() tea.Msg {
 		msg := newDataMsg{
 			newItems:       getMessageList(batchIndex),
