@@ -53,27 +53,55 @@ func (m pageModel) Init() tea.Cmd {
 
 func (m pageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.paginator.KeyMap.PrevPage):
-			// If previous page will be out of the range of the first batch, don't update
-			if m.paginator.Page == firstBatchIndex*pagePerBatch {
-				return m, cmd
-			}
-		}
-	}
-
-	m.paginator, _ = m.paginator.Update(msg)
-
-	switch msg := msg.(type) {
-
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "esc", "ctrl+c":
 			return m, tea.Quit
 		}
+		switch {
+		case key.Matches(msg, m.paginator.KeyMap.PrevPage):
+			// If previous page will be out of the range of the first batch, don't update
+			if m.paginator.Page == firstBatchIndex*pagePerBatch {
+				return m, nil
+			}
+		}
+	case spinner.TickMsg:
+		m.spinner, cmd = m.spinner.Update(msg)
+		return m, cmd
+	case newDataMsg:
+		if msg.fetchDirection == forward {
+			// Update if current page is in the range of the last batch
+			// i.e. if user not in last batch when finished fetching, don't update
+			if m.paginator.Page/pagePerBatch >= lastBatchIndex {
+				*m.items = append(*m.items, msg.newItems...)
+				lastBatchIndex++
+				if lastBatchIndex-firstBatchIndex >= localBatchLimit {
+					*m.items = (*m.items)[batchLen[firstBatchIndex]:]
+					firstBatchIndex++
+				}
+			}
+			fetchingForward = false
+		} else {
+			// Update if current page is in the range of the first batch
+			// i.e. if user not in first batch when finished fetching, don't update
+			if m.paginator.Page/pagePerBatch <= firstBatchIndex {
+				*m.items = append(msg.newItems, *m.items...)
+				firstBatchIndex--
+				if lastBatchIndex-firstBatchIndex >= localBatchLimit {
+					*m.items = (*m.items)[:len(*m.items)-batchLen[lastBatchIndex]]
+					lastBatchIndex--
+				}
+			}
+			fetchingBackward = false
+		}
+		m.paginator.SetTotalPages(getLocalLastPage())
+		return m, nil
+	}
+
+	m.paginator, _ = m.paginator.Update(msg)
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.paginator.KeyMap.NextPage):
 			if (m.paginator.Page >= (lastBatchIndex+1)*pagePerBatch-prefetchThreshold) && !fetchingForward {
@@ -90,37 +118,6 @@ func (m pageModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				cmd = fetchDataCmd(firstBatchIndex-1, backward)
 			}
 		}
-	case newDataMsg:
-		if msg.fetchDirection == forward {
-			// Update if current page is in the range of the last batch
-			// e.g. user left last batch while still fetching, then don't update
-			if m.paginator.Page/pagePerBatch >= lastBatchIndex {
-				*m.items = append(*m.items, msg.newItems...)
-				lastBatchIndex++
-				if lastBatchIndex-firstBatchIndex >= localBatchLimit {
-					*m.items = (*m.items)[batchLen[firstBatchIndex]:]
-					firstBatchIndex++
-				}
-			}
-			fetchingForward = false
-		} else {
-			// Update if current page is in the range of the first batch
-			// e.g. user left first batch while still fetching, then don't update
-			if m.paginator.Page/pagePerBatch <= firstBatchIndex {
-				*m.items = append(msg.newItems, *m.items...)
-				firstBatchIndex--
-				if lastBatchIndex-firstBatchIndex >= localBatchLimit {
-					*m.items = (*m.items)[:len(*m.items)-batchLen[lastBatchIndex]]
-					lastBatchIndex--
-				}
-			}
-			fetchingBackward = false
-		}
-		m.paginator.SetTotalPages(getLocalLastPage())
-		return m, nil
-	case spinner.TickMsg:
-		m.spinner, cmd = m.spinner.Update(msg)
-		return m, cmd
 	}
 
 	return m, cmd
@@ -153,7 +150,6 @@ func Paginator(_listHeader []printer.Column, _callback DataCallback, _filter fil
 	var msg []proto.Message
 	for i := firstBatchIndex; i < lastBatchIndex+1; i++ {
 		newMessages := getMessageList(i)
-		fmt.Println("newMessages", len(newMessages))
 		if int(filter.Page)-(firstBatchIndex*pagePerBatch) > int(math.Ceil(float64(len(newMessages))/msgPerPage)) {
 			return fmt.Errorf("the specified page has no data, please enter a valid page number")
 		}
