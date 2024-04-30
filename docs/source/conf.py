@@ -46,6 +46,7 @@ extensions = [
     "sphinxcontrib.youtube",
     "sphinx_reredirects",
     "sphinx_panels",
+    "sphinx_design",
 ]
 
 # build the templated autosummary files
