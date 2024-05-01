@@ -59,6 +59,7 @@ Options
       --files.sourceUploadPath string                Deprecated: Update flyte admin to avoid having to configure storage access from flytectl.
       --files.version string                         Version of the entity to be registered with flyte which are un-versioned after serialization.
   -h, --help                                         help for flytectl
+  -i, --interactive                                  Set this flag to use an interactive CLI
       --logger.formatter.type string                 Sets logging format type. (default "json")
       --logger.level int                             Sets the minimum logging level. (default 3)
       --logger.mute                                  Mutes all logs regardless of severity. Intended for benchmarks/tests only.
