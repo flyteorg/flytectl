@@ -1,8 +1,10 @@
 package pkce
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/flyteorg/flyte/flytestdlib/logger"
 	"sync"
 
 	"github.com/flyteorg/flyte/flyteidl/clients/go/admin/cache"
@@ -50,17 +52,26 @@ func (t *TokenCacheKeyringProvider) Unlock() {
 
 // TryLock the cache.
 func (t *TokenCacheKeyringProvider) TryLock() bool {
-	return t.mu.TryLock()
+	if t.mu.TryLock() {
+		logger.Infof(context.Background(), "Locked the cache")
+		return true
+	}
+	logger.Infof(context.Background(), "Failed to lock the cache")
+	return false
 }
 
 // CondWait waits for the condition to be true.
 func (t *TokenCacheKeyringProvider) CondWait() {
+	logger.Infof(context.Background(), "Signaling the condition")
 	t.cond.Wait()
+	logger.Infof(context.Background(), "Coming out of waiting")
 }
 
 // CondSignal signals the condition.
 func (t *TokenCacheKeyringProvider) CondSignal() {
+	logger.Infof(context.Background(), "Signaling the condition")
 	t.cond.Signal()
+	logger.Infof(context.Background(), "Signaled the condition")
 }
 
 func (t *TokenCacheKeyringProvider) SaveToken(token *oauth2.Token) error {
