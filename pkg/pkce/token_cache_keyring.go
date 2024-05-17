@@ -67,11 +67,9 @@ func (t *TokenCacheKeyringProvider) CondWait() {
 	logger.Infof(context.Background(), "Coming out of waiting")
 }
 
-// CondSignal signals the condition.
-func (t *TokenCacheKeyringProvider) CondSignal() {
-	logger.Infof(context.Background(), "Signaling the condition")
-	t.cond.Signal()
-	logger.Infof(context.Background(), "Signaled the condition")
+// CondBroadcast broadcasts the condition.
+func (t *TokenCacheKeyringProvider) CondBroadcast() {
+	t.cond.Broadcast()
 }
 
 func (t *TokenCacheKeyringProvider) SaveToken(token *oauth2.Token) error {

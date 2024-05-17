@@ -180,7 +180,7 @@ require (
 )
 
 replace (
-	github.com/flyteorg/flyte/flyteidl => github.com/flyteorg/flyte/flyteidl v1.12.0-b0.0.20240503025718-07c0f238650c
+	github.com/flyteorg/flyte/flyteidl => github.com/flyteorg/flyte/flyteidl v1.12.0-b0.0.20240517165944-d066b2050575
 	github.com/flyteorg/flyte/flyteplugins => github.com/flyteorg/flyte/flyteplugins v1.12.0-b0.0.20240503025718-07c0f238650c
 	github.com/flyteorg/flyte/flytepropeller => github.com/flyteorg/flyte/flytepropeller v1.12.0-b0.0.20240503025718-07c0f238650c
 	github.com/flyteorg/flyte/flytestdlib => github.com/flyteorg/flyte/flytestdlib v1.12.0-b0.0.20240503025718-07c0f238650c
