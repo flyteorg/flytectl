@@ -20,6 +20,7 @@ import (
 	"github.com/flyteorg/flytectl/cmd/update"
 	"github.com/flyteorg/flytectl/cmd/upgrade"
 	"github.com/flyteorg/flytectl/cmd/version"
+	"github.com/flyteorg/flytectl/pkg/bubbletea"
 	f "github.com/flyteorg/flytectl/pkg/filesystemutils"
 	"github.com/flyteorg/flytectl/pkg/printer"
 
@@ -101,6 +102,8 @@ Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
 
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
 `)
+
+	bubbletea.ShowCmdList(rootCmd)
 
 	return rootCmd
 }
