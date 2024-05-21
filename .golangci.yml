@@ -28,3 +28,7 @@ linters:
     - unparam
     - unused
     - varcheck
+
+issues:
+  exclude:
+    - copylocks

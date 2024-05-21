@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/flyteorg/flyte/flyteidl/gen/pb-go/flyteidl/core"
+	"github.com/flyteorg/flyte/flytestdlib/utils"
 	"github.com/flyteorg/flytectl/pkg/visualize/mocks"
 
 	graphviz "github.com/awalterschulze/gographviz"
@@ -422,7 +423,7 @@ func TestConstructNode(t *testing.T) {
 		}
 		resultWorkflowNode, err := gb.constructNode("", "", mockGraph, flyteNode)
 		assert.NotNil(t, err)
-		assert.Equal(t, fmt.Errorf("subworkfow [project:\"dummyProject\" domain:\"dummyDomain\" name:\"dummyName\" version:\"dummyVersion\" ] not found"), err)
+		utils.AssertEqualWithSanitizedRegex(t, "subworkfow [project:\"dummyProject\" domain:\"dummyDomain\" name:\"dummyName\" version:\"dummyVersion\"] not found", err.Error())
 		assert.Nil(t, resultWorkflowNode)
 	})
 
@@ -441,8 +442,6 @@ func TestConstructNode(t *testing.T) {
 		}
 		sbwfNodes := []*core.Node{subwfNode}
 
-		gb.subWf["project:\"dummyProject\" domain:\"dummyDomain\" name:\"dummyName\" version:\"dummyVersion\" "] =
-			&core.CompiledWorkflow{Template: &core.WorkflowTemplate{Nodes: sbwfNodes}}
 		flyteNode := &core.Node{
 			Id: "id",
 			Metadata: &core.NodeMetadata{
@@ -461,6 +460,10 @@ func TestConstructNode(t *testing.T) {
 				},
 			},
 		}
+		// Since this code depends on the string representation of a protobuf message, we do not
+		// use a fix string to compare the error message.
+		gb.subWf[flyteNode.GetWorkflowNode().GetSubWorkflowRef().String()] =
+			&core.CompiledWorkflow{Template: &core.WorkflowTemplate{Nodes: sbwfNodes}}
 		resultWorkflowNode, err := gb.constructNode("", "", mockGraph, flyteNode)
 		assert.NotNil(t, err)
 		assert.Equal(t, fmt.Errorf("unable to add node"), err)
