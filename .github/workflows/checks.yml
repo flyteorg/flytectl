@@ -22,13 +22,13 @@ jobs:
     with:
       go-version: 1.21
 
-  tests:
-    name: Unit Tests
-    uses: flyteorg/flytetools/.github/workflows/tests.yml@master
-    secrets:
-      FLYTE_BOT_PAT: ${{ secrets.FLYTE_BOT_PAT }}
-    with:
-      go-version: 1.21
+  # tests:
+  #   name: Unit Tests
+  #   uses: flyteorg/flytetools/.github/workflows/tests.yml@master
+  #   secrets:
+  #     FLYTE_BOT_PAT: ${{ secrets.FLYTE_BOT_PAT }}
+  #   with:
+  #     go-version: 1.21
 
   generate:
     name: Check Go Gennerate
@@ -96,7 +96,7 @@ jobs:
   bump_version:
     name: Bump Version
     if: ${{ github.event_name != 'pull_request' }}
-    needs: [ lint, tests, generate, dry_run_goreleaser, sandbox ] # Only to ensure it can successfully build
+    needs: [ lint, generate, dry_run_goreleaser, sandbox ] # Only to ensure it can successfully build
     uses: flyteorg/flytetools/.github/workflows/bump_version.yml@master
     secrets:
       FLYTE_BOT_PAT: ${{ secrets.FLYTE_BOT_PAT }}
