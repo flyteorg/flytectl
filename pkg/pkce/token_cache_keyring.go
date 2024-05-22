@@ -102,7 +102,7 @@ func (t *TokenCacheKeyringProvider) GetToken() (*oauth2.Token, error) {
 func NewTokenCacheKeyringProvider(serviceName, serviceUser string) *TokenCacheKeyringProvider {
 	condMutex := &sync.Mutex{}
 	return &TokenCacheKeyringProvider{
-		mu:          &sync.Mutex{},
+		mu:          condMutex,
 		cond:        sync.NewCond(condMutex),
 		ServiceName: serviceName,
 		ServiceUser: serviceUser,
