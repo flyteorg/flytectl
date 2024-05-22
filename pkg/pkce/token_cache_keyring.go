@@ -28,7 +28,7 @@ func (t *TokenCacheKeyringProvider) PurgeIfEquals(existing *oauth2.Token) (bool,
 	if existingBytes, err := json.Marshal(existing); err != nil {
 		return false, fmt.Errorf("unable to marshal token to save in cache due to %w", err)
 	} else if tokenJSON, err := keyring.Get(t.ServiceName, t.ServiceUser); err != nil {
-		logger.Warnf(context.Background(), "unable to read token from cache but not failing the purge. Error: %v", err)
+		logger.Warnf(context.Background(), "unable to read token from cache but not failing the purge as the token might not have been saved at all. Error: %v", err)
 		return true, nil
 	} else if tokenJSON != string(existingBytes) {
 		return false, nil
@@ -48,19 +48,12 @@ func (t *TokenCacheKeyringProvider) Unlock() {
 
 // TryLock the cache.
 func (t *TokenCacheKeyringProvider) TryLock() bool {
-	if t.mu.TryLock() {
-		logger.Infof(context.Background(), "Locked the cache")
-		return true
-	}
-	logger.Infof(context.Background(), "Failed to lock the cache")
-	return false
+	return t.mu.TryLock()
 }
 
 // CondWait waits for the condition to be true.
 func (t *TokenCacheKeyringProvider) CondWait() {
-	logger.Infof(context.Background(), "Signaling the condition")
 	t.cond.Wait()
-	logger.Infof(context.Background(), "Coming out of waiting")
 }
 
 // CondBroadcast broadcasts the condition.
@@ -107,9 +100,10 @@ func (t *TokenCacheKeyringProvider) GetToken() (*oauth2.Token, error) {
 }
 
 func NewTokenCacheKeyringProvider(serviceName, serviceUser string) *TokenCacheKeyringProvider {
+	condMutex := &sync.Mutex{}
 	return &TokenCacheKeyringProvider{
 		mu:          &sync.Mutex{},
-		cond:        sync.NewCond(&sync.Mutex{}),
+		cond:        sync.NewCond(condMutex),
 		ServiceName: serviceName,
 		ServiceUser: serviceUser,
 	}
