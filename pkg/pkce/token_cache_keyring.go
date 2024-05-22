@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/flyteorg/flyte/flyteidl/clients/go/admin/cache"
 	"github.com/flyteorg/flyte/flytestdlib/logger"
 	"github.com/zalando/go-keyring"
 	"golang.org/x/oauth2"
@@ -29,11 +28,8 @@ func (t *TokenCacheKeyringProvider) PurgeIfEquals(existing *oauth2.Token) (bool,
 	if existingBytes, err := json.Marshal(existing); err != nil {
 		return false, fmt.Errorf("unable to marshal token to save in cache due to %w", err)
 	} else if tokenJSON, err := keyring.Get(t.ServiceName, t.ServiceUser); err != nil {
-		if err.Error() == "secret not found in keyring" {
-			return false, fmt.Errorf("unable to read token from cache. Error: %w", cache.ErrNotFound)
-		}
-
-		return false, fmt.Errorf("unable to read token from cache. Error: %w", err)
+		logger.Warnf(context.Background(), "unable to read token from cache but not failing the purge. Error: %v", err)
+		return true, nil
 	} else if tokenJSON != string(existingBytes) {
 		return false, nil
 	}
