@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/flyteorg/flyte/flyteidl/clients/go/admin/cache"
 	"github.com/flyteorg/flyte/flytestdlib/logger"
+
 	"github.com/zalando/go-keyring"
 	"golang.org/x/oauth2"
 )
@@ -21,6 +23,7 @@ type TokenCacheKeyringProvider struct {
 	ServiceName string
 	ServiceUser string
 	mu          *sync.Mutex
+	condLocker  *cache.NoopLocker
 	cond        *sync.Cond
 }
 
@@ -105,9 +108,11 @@ func (t *TokenCacheKeyringProvider) GetToken() (*oauth2.Token, error) {
 }
 
 func NewTokenCacheKeyringProvider(serviceName, serviceUser string) *TokenCacheKeyringProvider {
+	condLocker := &cache.NoopLocker{}
 	return &TokenCacheKeyringProvider{
 		mu:          &sync.Mutex{},
-		cond:        sync.NewCond(&sync.Mutex{}),
+		condLocker:  condLocker,
+		cond:        sync.NewCond(condLocker),
 		ServiceName: serviceName,
 		ServiceUser: serviceUser,
 	}
