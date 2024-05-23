@@ -51,9 +51,14 @@ func (t *TokenCacheKeyringProvider) TryLock() bool {
 	return t.mu.TryLock()
 }
 
-// CondWait waits for the condition to be true.
+// CondWait  adds the current go routine to the condition waitlist and waits for another go routine to notify using CondBroadcast
+// The current usage is that one who was able to acquire the lock using TryLock is the one who gets a valid token and notifies all the waitlist requesters so that they can use the new valid token.
+// It also locks the Locker in the condition variable as the semantics of Wait is that it unlocks the Locker after adding
+// the consumer to the waitlist and before blocking on notification.
 func (t *TokenCacheKeyringProvider) CondWait() {
+	t.cond.L.Lock()
 	t.cond.Wait()
+	t.cond.L.Unlock()
 }
 
 // CondBroadcast broadcasts the condition.
@@ -100,10 +105,9 @@ func (t *TokenCacheKeyringProvider) GetToken() (*oauth2.Token, error) {
 }
 
 func NewTokenCacheKeyringProvider(serviceName, serviceUser string) *TokenCacheKeyringProvider {
-	condMutex := &sync.Mutex{}
 	return &TokenCacheKeyringProvider{
-		mu:          condMutex,
-		cond:        sync.NewCond(condMutex),
+		mu:          &sync.Mutex{},
+		cond:        sync.NewCond(&sync.Mutex{}),
 		ServiceName: serviceName,
 		ServiceUser: serviceUser,
 	}
