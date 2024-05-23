@@ -156,7 +156,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.21.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8 // indirect
-	golang.org/x/net v0.22.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
@@ -178,8 +178,8 @@ require (
 )
 
 replace (
-	github.com/flyteorg/flyte/flyteidl => github.com/flyteorg/flyte/flyteidl v1.12.0-b0.0.20240517165944-d066b2050575
-	github.com/flyteorg/flyte/flyteplugins => github.com/flyteorg/flyte/flyteplugins v1.12.0-b0.0.20240503025718-07c0f238650c
-	github.com/flyteorg/flyte/flytepropeller => github.com/flyteorg/flyte/flytepropeller v1.12.0-b0.0.20240503025718-07c0f238650c
-	github.com/flyteorg/flyte/flytestdlib => github.com/flyteorg/flyte/flytestdlib v1.12.0-b0.0.20240503025718-07c0f238650c
+	github.com/flyteorg/flyte/flyteidl => github.com/flyteorg/flyte/flyteidl v1.12.1-0.20240523211648-f1200666f004
+	github.com/flyteorg/flyte/flyteplugins => github.com/flyteorg/flyte/flyteplugins v1.12.1-0.20240523211648-f1200666f004
+	github.com/flyteorg/flyte/flytepropeller => github.com/flyteorg/flyte/flytepropeller v1.12.1-0.20240523211648-f1200666f004
+	github.com/flyteorg/flyte/flytestdlib => github.com/flyteorg/flyte/flytestdlib v1.12.1-0.20240523211648-f1200666f004
 )
