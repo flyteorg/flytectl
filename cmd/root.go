@@ -135,6 +135,10 @@ func initConfig(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
+	if err := config.UpdateConfigWithEnvVar(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
